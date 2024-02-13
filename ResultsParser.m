@@ -21,6 +21,14 @@ classdef ResultsParser
         function error = getProcessedTraceError(obj)
             error = obj.results.xProcessedError;
         end
+
+        function location = getKinociliumLocation(obj)
+            location = obj.results.KinociliumLocation;
+        end
+
+        function fps = getFps(obj)
+            fps = obj.results.Fps;
+        end
     end
 
     methods (Static)
