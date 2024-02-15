@@ -38,8 +38,10 @@ classdef TrackingGui < handle
         function obj = TrackingGui(varargin)
             p = inputParser;
             addOptional(p, "Filepath", "");
+            addOptional(p, "EnableInsetZoom", true);
             parse(p, varargin{:});
             filepath = p.Results.Filepath;
+            enableInsetZoom = p.Results.EnableInsetZoom;
 
             fig = uifigure;
             fig.Name = "Hair-Bundle Tracking";
@@ -53,7 +55,10 @@ classdef TrackingGui < handle
             directorySelector.setDirectory(filepath);
             obj.directorySelector = directorySelector;
 
-            obj.bundleDisplay = BundleDisplay(gl);
+            obj.bundleDisplay = BundleDisplay( ...
+                gl, ...
+                "EnableInsetZoom", enableInsetZoom ...
+                );
             obj.rawImage = [];
 
             obj.trackingSelection = generateTrackingSelection(gl);

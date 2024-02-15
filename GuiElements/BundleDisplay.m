@@ -17,16 +17,20 @@ classdef BundleDisplay < handle
             }; % compatible extensions to save image as
     end
 
-
     properties (Access = private)
         im = []; %#ok<*PROP> % image object containing pixel data and drawn regions
         unprocessedColor = [0 0.4470 0.7410]; % default rectangle color
     end
 
     methods
-        function obj = BundleDisplay(gl)
+        function obj = BundleDisplay(gl, varargin)
+            p = inputParser;
+            addOptional(p, "EnableInsetZoom", true);
+            parse(p, varargin{:});
+            enableInsetZoom = p.Results.EnableInsetZoom;
+
             % Generates and stores uiaxes along with image object
-            ax = generateAxes(gl); % generate uiaxes
+            ax = generateAxes(gl, "EnableInsetZoom", enableInsetZoom);
             obj.axis = ax;
 
             % generate image object
@@ -91,27 +95,24 @@ end
 
 
 
-function ax = generateAxes(gl)
+function ax = generateAxes(gl, varargin)
+p = inputParser;
+addOptional(p, "EnableInsetZoom", true);
+parse(p, varargin{:});
+enableInsetZoom = p.Results.EnableInsetZoom;
+
 ax = uiaxes(gl);
-ax.Toolbar.Visible = "off";
 ax.Visible = "off";
+ax.Toolbar.Visible = "off";
+
+if enableInsetZoom
+    InsetZoom(ax, 2, 0.25);
+end
 end
 
 function im = generateImage(ax)
 fig = ancestor(ax, "figure");
 im = image(ax, gray2rgb([], fig)); % display RGB image
-setPointerOnHover(fig, im); % change cursor to cross on hover
-end
-
-function setPointerOnHover(fig, im)
-pb = struct( ...
-    "enterFcn", @(fig, point) set(fig, "Pointer", "cross"), ...
-    "exitFcn", [], ...
-    "traverseFcn", [] ...
-    );
-
-iptSetPointerBehavior(im, pb);
-iptPointerManager(fig);
 end
 
 function resizeAxis(ax, width, height)
