@@ -1,8 +1,11 @@
-classdef BundleDisplay < handle
-    % BundleDisplay Summary of class
-
-    properties
+classdef BundleDisplay < PanZoomer
+    properties (Access = private)
         axis; % uiaxes on which image is plotted
+
+        originalImage = [];
+        doZoom;
+        axisWidth = 0;
+        axisHeight = 0;
     end
 
     properties (Access = private, Constant)
@@ -24,19 +27,21 @@ classdef BundleDisplay < handle
 
     methods
         function obj = BundleDisplay(gl, varargin)
-            p = inputParser;
-            addOptional(p, "EnableInsetZoom", true);
-            parse(p, varargin{:});
-            enableInsetZoom = p.Results.EnableInsetZoom;
-
             % Generates and stores uiaxes along with image object
-            ax = generateAxes(gl, "EnableInsetZoom", enableInsetZoom);
+            ax = generateAxes(gl);
+            obj@PanZoomer(ax);
             obj.axis = ax;
 
             % generate image object
             im = generateImage(ax);
-            im.ButtonDownFcn = @obj.draw; % draw rectangles on image
+            im.ButtonDownFcn = @obj.buttonDownFcn; % draw rectangles on image
             obj.im = im;
+
+            p = inputParser;
+            addOptional(p, "EnableZoom", true);
+            parse(p, varargin{:});
+            enableZoom = p.Results.EnableZoom;
+            obj.doZoom = enableZoom;
         end
 
         function clearRegions(obj)
@@ -44,10 +49,9 @@ classdef BundleDisplay < handle
             regions = obj.getRegions();
             delete(regions);
         end
-
         function rects = getRegions(obj)
             % Retrieves currently drawn regions on image
-            ax =  obj.axis;
+            ax =  obj.getAxis();
             rects = getRegionsFromAxis(ax);
         end
 
@@ -56,19 +60,24 @@ classdef BundleDisplay < handle
             obj.show(im); % plot 2D matrix on stored axes
             obj.resize(); % resize axes to image size for proper aspect ratio
         end
-
         function save(obj, startDirectory)
             % Saves currently displayed bundle image and drawn regions
             extensions = BundleDisplay.imageExtensions;
-            ax = obj.axis;
+            ax = obj.getAxis();
             saveImageOnAxis(ax, extensions, startDirectory);
         end
     end
 
     methods (Access = private)
+        function buttonDownFcn(obj, source, event)
+            mouseButton = event.Button;
+            if mouseButton == 1 % left click
+                obj.draw(source, event);
+            end
+        end
         function draw(obj, ~, event)
             point = event.IntersectionPoint(1:2);
-            ax = obj.axis;
+            ax = obj.getAxis();
             color = obj.unprocessedColor;
             regions = obj.getRegions();
 
@@ -78,36 +87,64 @@ classdef BundleDisplay < handle
         end
 
         function show(obj, im)
-            ax = obj.axis;
+            ax = obj.getAxis();
             fig = ancestor(ax, "figure");
             imRgb = gray2rgb(im, fig);
             set(obj.im, "CData", imRgb);
         end
-
         function resize(obj)
+            ax = obj.getAxis();
+            [height, width] = obj.getImageSize();
+
+            if obj.isNewWidth(width) || obj.isNewHeight(height)
+                resizeAxis(ax, width, height);
+                if obj.doZoom
+                    obj.updateOriginalLims(); % update zoomer for new image
+                end
+
+                obj.axisWidth = width;
+                obj.axisHeight = height;
+            end
+        end
+    end
+
+    methods
+        function ax = getAxis(obj)
             ax = obj.axis;
+        end
+    end
+
+    methods (Access = private)
+        function width = getFullAxisWidth(obj)
+            width = obj.axisWidth;
+        end
+        function width = getFullAxisHeight(obj)
+            width = obj.axisHeight;
+        end
+        function [height, width] = getImageSize(obj)
+            im = obj.getImageCData();
+            [height, width, ~] = size(im);
+        end
+        function im = getImageCData(obj)
             im = obj.im.CData;
-            [width, height, ~] = size(im);
-            resizeAxis(ax, width, height);
+        end
+        function is = isNewWidth(obj, width)
+            fullWidth = obj.getFullAxisWidth();
+            is = fullWidth ~= width;
+        end
+        function is = isNewHeight(obj, height)
+            fullHeight = obj.getFullAxisHeight();
+            is = fullHeight ~= height;
         end
     end
 end
 
 
 
-function ax = generateAxes(gl, varargin)
-p = inputParser;
-addOptional(p, "EnableInsetZoom", true);
-parse(p, varargin{:});
-enableInsetZoom = p.Results.EnableInsetZoom;
-
+function ax = generateAxes(gl)
 ax = uiaxes(gl);
 ax.Visible = "off";
 ax.Toolbar.Visible = "off";
-
-if enableInsetZoom
-    InsetZoom(ax, 2, 0.25);
-end
 end
 
 function im = generateImage(ax)
@@ -117,9 +154,25 @@ end
 
 function resizeAxis(ax, width, height)
 if width > 0 && height > 0
-    xlim(ax, [0 height]);
-    ylim(ax, [0 width]);
-    pbaspect(ax, [height width 1]);
+    if width <= 2 * height && height <= 2 * width
+        set(ax, ...
+            "XLim", [0, width], ...
+            "YLim", [0, height] ...
+            );
+        pbaspect(ax, [width, height, 1]);
+    elseif width > 2 * height
+        set(ax, ...
+            "XLim", [0, width], ...
+            "YLim", width * [-0.5, 0.5] ...
+            );
+        pbaspect(ax, [1 1 1]);
+    elseif height > 2 * width
+        set(ax, ...
+            "XLim", height * [-0.5, 0.5], ...
+            "YLim", [0, height] ...
+            );
+        pbaspect(ax, [1 1 1]);
+    end
 end
 end
 
