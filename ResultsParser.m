@@ -27,16 +27,16 @@ classdef ResultsParser
         end
 
         function x = getRawTraceX(obj)
-            x = obj.results.xError;
-        end
-        function y = getRawTraceY(obj)
-            y = obj.results.yError;
-        end
-        function x = getRawTraceErrorX(obj)
             x = obj.results.x;
         end
-        function y = getRawTraceErrorY(obj)
+        function y = getRawTraceY(obj)
             y = obj.results.y;
+        end
+        function error = getRawTraceErrorX(obj)
+            error = obj.results.xError;
+        end
+        function error = getRawTraceErrorY(obj)
+            error = obj.results.yError;
         end
 
         function angle = getAngleRadians(obj)
