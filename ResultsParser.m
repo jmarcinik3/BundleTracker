@@ -13,21 +13,61 @@ classdef ResultsParser
         function time = getTime(obj)
             time = obj.results.t;
         end
-
         function trace = getProcessedTrace(obj)
             trace = obj.results.xProcessed;
         end
-
         function error = getProcessedTraceError(obj)
             error = obj.results.xProcessedError;
+        end
+        function trace = getProcessedTrace2(obj)
+            trace = obj.results.yProcessed;
+        end
+        function trace = getProcessedTraceError2(obj)
+            trace = obj.results.yProcessedError;
+        end
+
+        function x = getRawTraceX(obj)
+            x = obj.results.xError;
+        end
+        function y = getRawTraceY(obj)
+            y = obj.results.yError;
+        end
+        function x = getRawTraceErrorX(obj)
+            x = obj.results.x;
+        end
+        function y = getRawTraceErrorY(obj)
+            y = obj.results.y;
+        end
+
+        function angle = getAngleRadians(obj)
+            angle = obj.results.angle;
+        end
+        function angle = getAngleDegrees(obj)
+            angleRad = obj.getAngleRadians();
+            angle = rad2deg(angleRad);
+        end
+        function error = getAngleErrorRadians(obj)
+            error = obj.results.angleError;
+        end
+        function error = getAngleErrorDegrees(obj)
+            errorRad = obj.getAngleErrorRadians();
+            error = rad2deg(errorRad);
         end
 
         function location = getKinociliumLocation(obj)
             location = obj.results.KinociliumLocation;
         end
-
         function fps = getFps(obj)
             fps = obj.results.Fps;
+        end
+        function is = pixelsAreInverted(obj)
+            is = obj.results.IsInverted;
+        end
+        function intensities = getIntensityRange(obj)
+            intensities = obj.results.IntensityRange;
+        end
+        function bounds = getRegionBounds(obj)
+            bounds = obj.results.Bounds;
         end
     end
 
