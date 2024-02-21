@@ -1,5 +1,5 @@
 classdef Postprocessor < handle
-    properties
+    properties (Access = private)
         results; %#ok<*PROP>
     end
 
@@ -20,11 +20,6 @@ classdef Postprocessor < handle
             obj.results.xProcessedError = xError;
             obj.results.yProcessedError = yError;
         end
-
-        function results = getPostprocessedResults(obj)
-            results = obj.results;
-        end
-
         function process(obj)
             % shift first to reduce error and to rotate about mean
             obj.direct(); % set direction based on kinocilium location
@@ -32,7 +27,10 @@ classdef Postprocessor < handle
             obj.scale(); % scale traces nm/px and add time from FPS
             obj.rotate(); % rotate trace to direction of maximal movement
         end
-
+        function results = getPostprocessedResults(obj)
+            results = obj.results;
+        end
+        
         function direct(obj)
             results = obj.results;
             kinociliumLocation = results.KinociliumLocation;
@@ -59,7 +57,6 @@ classdef Postprocessor < handle
             postResults.yProcessed = y;
             obj.results = postResults;
         end
-
         function scale(obj)
             results = obj.results;
 
@@ -89,7 +86,6 @@ classdef Postprocessor < handle
             postResults.t = (1:numel(x)) / fps; % add time values
             obj.results = postResults;
         end
-
         function shift(obj)
             results = obj.results;
 
@@ -116,7 +112,6 @@ classdef Postprocessor < handle
             postResults.yProcessedError = yErrorTotal;
             obj.results = postResults;
         end
-
         function rotate(obj)
             results = obj.results;
 

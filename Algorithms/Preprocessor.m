@@ -1,45 +1,30 @@
 classdef Preprocessor
-    properties
-        thresholds;
-        invert;
+    properties (Access = private)
+        removeNoise;
+        invertImage
     end
 
     methods
         function obj = Preprocessor(thresholds, invert)
-            obj.thresholds = thresholds;
-            obj.invert = invert;
+            obj.removeNoise = generateNoiseRemover(thresholds);
+            obj.invertImage = generateImageInverter(invert);
         end
 
-        function im = get(obj, im)
+        function im = preprocess(obj, im)
             im = obj.removeNoise(im);
             im = obj.invertImage(im);
         end
-
-        function im = removeNoise(obj, im)
-            removeN = obj.getNoiseRemover();
-            im = removeN(im);
-        end
-
-        function im = invertImage(obj, im)
-            processInvert = obj.getInverter();
-            im = processInvert(im);
-        end
     end
+end
 
-    methods (Access = private)
-        function processor = getNoiseRemover(obj)
-            threshs = obj.thresholds;
-            minThresh = threshs(1);
-            maxThresh = threshs(2);
+function processor = generateNoiseRemover(thresholds)
+minThreshold = thresholds(1);
+maxThreshold = thresholds(2);
+noiseRemover = NoiseRemover(minThreshold, maxThreshold);
+processor = @noiseRemover.get;
+end
 
-            noiseRemover = NoiseRemover(minThresh, maxThresh);
-            processor = @noiseRemover.get;
-        end
-
-        function processor = getInverter(obj)
-            inv = obj.invert;
-            inverter = ImageInverter(inv, 1);
-            processor = @inverter.get;
-        end
-    end
+function processor = generateImageInverter(invert)
+imageInverter = ImageInverter(invert, 1);
+processor = @imageInverter.get;
 end

@@ -73,18 +73,11 @@ classdef TrackingGui < handle
             layoutElements(obj);
             obj.directorySelector.setDirectory(startingDirpath);
         end
-
-        function processor = getPreprocessor(obj)
-            thresholds = obj.getThresholds();
-            invert = obj.getInvert();
-            processor = Preprocessor(thresholds, invert);
-            processor = @processor.get;
-        end
     end
 
     %% Functions to retrieve state information
     methods (Access = private)
-        % ...for preprocessing and bundle display
+        % ...bundle display
         function dirpath = getDirectoryPath(obj)
             elem = obj.directorySelector;
             dirpath = elem.getDirectoryPath();
@@ -101,7 +94,14 @@ classdef TrackingGui < handle
         function count = getFilecount(obj)
             count = obj.directorySelector.getFilecount();
         end
-
+        
+        % ...for preprocessing
+        function processor = getPreprocessor(obj)
+            thresholds = obj.getThresholds();
+            invert = obj.getInvert();
+            processor = Preprocessor(thresholds, invert);
+            processor = @processor.preprocess;
+        end
         function vals = getThresholds(obj)
             vals = obj.intensityThresholds;
         end
