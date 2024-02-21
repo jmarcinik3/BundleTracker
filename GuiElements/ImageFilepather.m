@@ -61,7 +61,7 @@ function [file, count] = getFirstFile(directory, extension)
 pattern = fullfile(directory, sprintf("*%s", extension));
 files = dir(pattern);
 
-count = size(files, 1);
+count = numel(files);
 if count == 0
     file = nan;
 else
