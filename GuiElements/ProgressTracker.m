@@ -33,7 +33,6 @@ classdef ProgressTracker < handle
             previousTime = obj.previousUpdateTimeSeconds;
             deltaTime = obj.deltaUpdateTimeSeconds;
             is = timeSeconds - previousTime > deltaTime;
-            disp([timeSeconds - previousTime - deltaTime, previousTime, deltaTime, timeSeconds])
         end
         function update(obj, index)
             total = obj.fileCount;
