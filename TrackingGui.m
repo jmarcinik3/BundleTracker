@@ -174,24 +174,31 @@ classdef TrackingGui < handle
     %% Functions to update state of GUI
     methods (Access = private)
         function trackButtonPushed(obj, ~, ~)
+            if obj.regionExists()
+                regions = obj.getTrackingRegions();
+                set(regions, "Color", obj.queueColor);
+                obj.trackAndSaveRegions(regions);
+            end
+        end
+        function exists = regionExists(obj)
             regions = obj.getTrackingRegions();
             count = numel(regions);
-
-            if count == 0
+            exists = count >= 1;
+            if ~exists
                 obj.throwAlertMessage("No cells selected!", "Track");
             end
-
-            colorRegions(regions, obj.queueColor);
+        end
+        function trackAndSaveRegions(obj, regions)
             for index = 1:count
                 region = regions(index);
                 obj.trackAndSaveRegion(region);
             end
         end
         function trackAndSaveRegion(obj, region)
-            colorRegions(region, obj.workingColor); % color region as in-process
+            set(regions, "Color", obj.workingColor); % color region as in-process
             results = obj.trackRegion(region);
             obj.saveResults(results, region.Label);
-            colorRegions(region, obj.finishedColor); % color region as finished
+            set(regions, "Color", obj.finishedColor); % color region as finished
         end
         function results = trackRegion(obj, region)
             trackingMode = obj.getTrackingSelection();
@@ -222,12 +229,16 @@ classdef TrackingGui < handle
         end
         
         function saveImageButtonPushed(obj, ~, ~)
-            im = obj.rawImage;
-            if numel(im) == 0
-                obj.throwAlertMessage("No image imported!", "Save Image");
-            else
+            if obj.imageExists()
                 directoryPath = obj.getDirectoryPath();
                 obj.bundleDisplay.save(directoryPath);
+            end
+        end
+        function exists = imageExists(obj)
+            im = obj.rawImage;
+            exists = numel(im) >= 1;
+            if ~exists
+                obj.throwAlertMessage("No image imported!", "Save Image");
             end
         end
         function thresholdSliderChanging(obj, ~, event)
@@ -244,13 +255,16 @@ classdef TrackingGui < handle
             obj.updateBundleDisplay();
         end
         function imageFilepathChanged(obj)
-            count = obj.getFilecount();
-            directory = obj.getDirectoryPath();
-            
-            if count >= 1
+            if obj.directoryHasImage()
                 filepath = obj.getFirstFilepath();
                 obj.rawImage = imread(filepath);
-            elseif isfolder(directory)
+            end
+        end
+        function has = directoryHasImage(obj)
+            count = obj.getFilecount();
+            directory = obj.getDirectoryPath();
+            has = count >= 1 && isfolder(directory);
+            if ~has
                 obj.throwAlertMessage("No valid images found!", "Choose Directory");
                 obj.rawImage = [];
             end
@@ -260,7 +274,7 @@ classdef TrackingGui < handle
         end
         function updateBundleDisplay(obj, ~, ~)
             im = obj.getPreprocessedImage();
-            obj.bundleDisplay.update(im);
+            obj.bundleDisplay.updateImage(im);
         end
         function im = getPreprocessedImage(obj)
             im = obj.rawImage;
@@ -601,15 +615,6 @@ slider.MajorTickLabels = majorTickLabels;
 end
 
 %% Miscellaneous helper functions
-
-% Color |regions| by given |color|
-function colorRegions(regions, color)
-for index = 1:numel(regions)
-    region = regions(index);
-    region.Color = color;
-end
-end
-
 % Postprocess raw XY traces, i.e. |results|
 function results = postprocessResults(results)
 postprocessor = Postprocessor(results);

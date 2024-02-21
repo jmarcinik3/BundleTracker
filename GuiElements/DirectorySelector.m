@@ -89,24 +89,34 @@ classdef DirectorySelector < handle
     end
 
     methods (Access = private)
-        function chooseButtonPushed(obj, src, ev)
+        function chooseButtonPushed(obj, source, event)
             previousDirectoryPath = obj.getDirectoryPath();
             directoryPath = uigetdir(previousDirectoryPath);
-
-            if directoryPath ~= 0
-                obj.setDirectory(directoryPath, src, ev);
-                disp(src);
-                disp(ev);
+            obj.setDirectoryIfChosen(directoryPath, source, event);
+        end
+        function setDirectoryIfChosen(obj, directoryPath, source, event)
+            if directoryIsChosen(directoryPath)
+                obj.setDirectory(directoryPath, source, event);
             end
         end
+        
         function openButtonPushed(obj, ~, ~)
-            directoryPath = obj.getDirectoryPath();
-            if isfolder(directoryPath)
+            if obj.directoryIsValid()
+                directoryPath = obj.getDirectoryPath();
                 winopen(directoryPath);
-            else
-                fig = obj.getFigure();
-                uialert(fig, "Directory path is invalid!", "Open Directory")
             end
+        end
+        function directoryIsValid(obj)
+            directoryPath = obj.getDirectoryPath();
+            is = isfolder(directoryPath);
+            if ~is
+                obj.throwAlertMessage("Directory path is invalid!", "Open Directory");
+            end
+        end
+
+        function throwAlertMessage(obj, message, title)
+            fig = obj.getFigure();
+            uialert(fig, message, title);
         end
     end
 
@@ -121,8 +131,9 @@ classdef DirectorySelector < handle
             obj.setFilecount(count);
         end
         function setFilecount(obj, count)
-            lbl = obj.getFilecountDisplay();
-            lbl.Text = num2str(count);
+            elem = obj.getFilecountDisplay();
+            label = num2str(count);
+            set(elem, "Text", label);
         end
         
         function ta = getDirpathDisplay(obj)
@@ -139,4 +150,8 @@ classdef DirectorySelector < handle
             btn = obj.chooseButton;
         end
     end
+end
+
+function is = directoryIsChosen(directoryPath)
+is = directoryPath ~= 0;
 end
