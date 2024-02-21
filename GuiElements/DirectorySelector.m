@@ -106,7 +106,7 @@ classdef DirectorySelector < handle
                 winopen(directoryPath);
             end
         end
-        function directoryIsValid(obj)
+        function is = directoryIsValid(obj)
             directoryPath = obj.getDirectoryPath();
             is = isfolder(directoryPath);
             if ~is
