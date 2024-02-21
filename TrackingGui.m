@@ -6,9 +6,11 @@ classdef TrackingGui < handle
     end
 
     properties (Access = private)
+        %#ok<*PROP>
+        %#ok<*PROPLC>
+
         intensityThresholds;
         rawImage = [];
-        imageExtension = ".tif";
 
         % main window components
         figure; % uifigure containing GUI
@@ -28,19 +30,19 @@ classdef TrackingGui < handle
         scaleFactorInputElement;
         fpsInputElement;
 
+        % components to start tracking and save results
         trackButton;
         saveImageButton;
         saveFilestemElement;
-        filepather; % object to find ".tif" image filepaths
     end
 
     methods
         function obj = TrackingGui(varargin)
             p = inputParser;
-            addOptional(p, "Filepath", "");
+            addOptional(p, "StartingDirectory", "");
             addOptional(p, "EnableZoom", true);
             parse(p, varargin{:});
-            filepath = p.Results.Filepath;
+            startingDirpath = p.Results.StartingDirectory;
             enableZoom = p.Results.EnableZoom;
 
             fig = uifigure;
@@ -49,17 +51,12 @@ classdef TrackingGui < handle
             obj.figure = fig;
             obj.gridLayout = gl;
 
-            directorySelector = DirectorySelector(gl, fig);
-            directoryText = directorySelector.getFilepathDisplay();
-            directoryText.ValueChangedFcn = @(src, ev) obj.directoryUpdated();
-            directorySelector.setDirectory(filepath);
-            obj.directorySelector = directorySelector;
-
-            obj.bundleDisplay = BundleDisplay( ...
-                gl, ...
-                "EnableZoom", enableZoom ...
-                );
+            obj.bundleDisplay = BundleDisplay(gl, "EnableZoom", enableZoom);
             obj.rawImage = [];
+            obj.directorySelector = DirectorySelector( ...
+                gl, ...
+                "ValueChangedFcn", @obj.directoryValueChanged ...
+                );
 
             obj.trackingSelection = generateTrackingSelection(gl);
             obj.kinociliumLocation = KinociliumLocation(gl);
@@ -67,25 +64,14 @@ classdef TrackingGui < handle
             obj.fpsInputElement = generateFpsInputElement(gl);
             obj.saveFilestemElement = generateSaveFilestemElement(gl);
 
-            thresholdSlider = generateThresholdSlider(gl);
-            thresholdSlider.ValueChangingFcn = @(src, ev) obj.thresholdChanging(src, ev);
-            obj.intensityThresholds = thresholdSlider.Value;
-            obj.thresholdSlider = thresholdSlider;
+            obj.thresholdSlider = obj.generateThresholdSlider(gl);
+            obj.intensityThresholds = obj.thresholdSlider.Value;
+            obj.invertCheckbox = obj.generateInvertCheckbox(gl);
+            obj.trackButton = obj.generateTrackButton(gl);
+            obj.saveImageButton = obj.generateSaveImageButton(gl);
 
-            invertCheckbox = generateInvertCheckbox(gl);
-            invertCheckbox.ValueChangedFcn = @(src, ev) obj.updateBundleDisplay();
-            obj.invertCheckbox = invertCheckbox;
-
-            trackButton = generateTrackButton(gl);
-            trackButton.ButtonPushedFcn = @(src, ev) obj.startTracking();
-            obj.trackButton = trackButton;
-
-            saveImageButton = generateSaveImageButton(gl);
-            saveImageButton.ButtonPushedFcn = @(src, ev) obj.saveBundleDisplay();
-            obj.saveImageButton = saveImageButton;
-
-            obj.directoryUpdated();
             layoutElements(obj);
+            obj.directorySelector.setDirectory(startingDirpath);
         end
 
         function processor = getPreprocessor(obj)
@@ -97,12 +83,25 @@ classdef TrackingGui < handle
     end
 
     %% Functions to retrieve state information
-    methods
+    methods (Access = private)
         % ...for preprocessing and bundle display
-        function dir = getDirectory(obj)
+        function dirpath = getDirectoryPath(obj)
             elem = obj.directorySelector;
-            dir = elem.getDirectory();
+            dirpath = elem.getDirectoryPath();
         end
+        function filepath = getFirstFilepath(obj)
+            filepath = obj.directorySelector.getFirstFilepath();
+        end
+        function filepath = generateSaveFilepath(obj, suffix)
+            directoryPath = obj.getDirectoryPath();
+            filestem = obj.getSaveFilestem();
+            filename = sprintf("%s%s.mat", filestem, suffix);
+            filepath = fullfile(directoryPath, filename);
+        end
+        function count = getFilecount(obj)
+            count = obj.directorySelector.getFilecount();
+        end
+
         function vals = getThresholds(obj)
             vals = obj.intensityThresholds;
         end
@@ -115,7 +114,7 @@ classdef TrackingGui < handle
             regs = obj.bundleDisplay.getRegions();
         end
         function paths = getFilepaths(obj)
-            paths = obj.filepather.getFilepaths();
+            paths = obj.directorySelector.getFilepaths();
         end
         function val = getTrackingSelection(obj)
             val = obj.trackingSelection.Value;
@@ -148,13 +147,16 @@ classdef TrackingGui < handle
     end
 
     %% Functions to retrieve stored child components
-    methods
+    methods (Access = private)
         % complex class objects for visual components
+        function fig = getFigure(obj)
+            fig = obj.figure;
+        end
         function ax = getBundleDisplayAxis(obj)
             ax = obj.bundleDisplay.getAxis();
         end
         function elem = getDirectorySelectionElement(obj)
-            elem = obj.directorySelector.gridLayout;
+            elem = obj.directorySelector.getGridLayout();
         end
 
         % threshold slider and invert checkbox
@@ -193,12 +195,12 @@ classdef TrackingGui < handle
 
     %% Functions to update state of GUI
     methods (Access = private)
-        function startTracking(obj)
+        function trackButtonPushed(obj, ~, ~)
             regions = obj.getTrackingRegions();
             count = numel(regions);
 
             if count == 0
-                uialert(obj.figure, "No cells selected!", "Track")
+                obj.throwAlertMessage("No cells selected!", "Track");
             else
                 colorRegions(regions, obj.queueColor);
                 for index = 1:count
@@ -207,101 +209,118 @@ classdef TrackingGui < handle
                 end
             end
         end
-
         function trackAndSaveRegion(obj, region)
-            % retrieve relevant properties for tracking and processing
+            colorRegions(region, obj.workingColor); % color region as in-process
+            results = obj.trackRegion(region);
+            obj.saveResults(results, region.Label);
+            colorRegions(region, obj.finishedColor); % color region as finished
+        end
+        function results = trackRegion(obj, region)
             trackingMode = obj.getTrackingSelection();
             preprocessor = obj.getPreprocessor();
             filepaths = obj.getFilepaths();
-            thresholds = obj.getThresholds();
-            isInverted = obj.getInvert();
 
-            directoryPath = obj.getDirectory();
-            kinoLocation = obj.getKinociliumLocation();
-            scaleFactor = obj.getScaleFactor();
-            scaleFactorError = obj.getScaleFactorError();
-            fps = obj.getFps();
-
-            colorRegions(region, obj.workingColor); % color region as in-process
             results = TrackRegion( ...
                 region, filepaths, trackingMode, preprocessor ...
                 ); % preprocess and track
-
-            % add metadata to results
-            results.DirectoryPath = directoryPath;
+            
             results.Bounds = region.Position;
-            results.IsInverted = isInverted;
-            results.IntensityRange = thresholds;
             results.TrackingMode = trackingMode;
-            results.KinociliumLocation = kinoLocation;
-            results.ScaleFactor = scaleFactor;
-            results.ScaleFactorError = scaleFactorError;
-            results.Fps = fps;
-
-            % postprocess signal
-            postprocessor = Postprocessor(results);
-            postprocessor.process();
-            results = postprocessor.getPostprocessedResults();
-
-            colorRegions(region, obj.finishedColor); % color region as finished
-
-            filestem = obj.getSaveFilestem();
-            filename = sprintf("%s%s.mat", filestem, region.Label);
-            filepath = fullfile(directoryPath, filename);
+            results = obj.appendMetadata(results);
+            results = postprocessResults(results);
+        end
+        function results = appendMetadata(obj, results)
+            results.DirectoryPath = obj.getDirectoryPath();
+            results.IsInverted = obj.getInvert();
+            results.IntensityRange = obj.getThresholds();
+            results.KinociliumLocation = obj.getKinociliumLocation();
+            results.ScaleFactor = obj.getScaleFactor();
+            results.ScaleFactorError = obj.getScaleFactorError();
+            results.Fps = obj.getFps();
+        end
+        function saveResults(obj, results, label)
+            filepath = obj.generateSaveFilepath(label);
             save(filepath, "results");
         end
-
-        function saveBundleDisplay(obj)
+        
+        function saveImageButtonPushed(obj, ~, ~)
             im = obj.rawImage;
             if numel(im) > 0
-                directoryPath = obj.getDirectory();
+                directoryPath = obj.getDirectoryPath();
                 obj.bundleDisplay.save(directoryPath);
             else
-                uialert(obj.figure, "No image imported!", "Save Image")
+                obj.throwAlertMessage("No image imported!", "Save Image");
             end
         end
-
-        function updateBundleDisplay(obj)
+        function thresholdSliderChanging(obj, ~, event)
+            obj.intensityThresholds = event.Value;
+            obj.updateBundleDisplay();
+        end
+        function invertCheckboxChanged(obj, ~, ~)
+            obj.updateBundleDisplay();
+        end
+        
+        function directoryValueChanged(obj, ~, ~)
+            obj.imageFilepathChanged();
+            obj.clearRegions();
+            obj.updateBundleDisplay();
+        end
+        function imageFilepathChanged(obj)
+            count = obj.getFilecount();
+            directory = obj.getDirectoryPath();
+            if count >= 1
+                filepath = obj.getFirstFilepath();
+                obj.rawImage = imread(filepath);
+            elseif isfolder(directory)
+                obj.throwAlertMessage("No valid images found!", "Choose Directory");
+                obj.rawImage = [];
+            end
+        end
+        function clearRegions(obj)
+            obj.bundleDisplay.clearRegions();
+        end
+        function updateBundleDisplay(obj, ~, ~)
+            im = obj.getPreprocessedImage();
+            obj.bundleDisplay.update(im);
+        end
+        function im = getPreprocessedImage(obj)
             im = obj.rawImage;
+            im = obj.preprocessImage(im);
+        end
+        function im = preprocessImage(obj, im)
             if numel(im) > 0
                 preprocessor = obj.getPreprocessor();
                 im = preprocessor(im);
             end
-            obj.bundleDisplay.update(im);
         end
-
-        function directoryUpdated(obj)
-            directory = obj.getDirectory();
-            pather = ImageFilepath(directory, obj.imageExtension);
-            count = pather.fileCount;
-
-            if count >= 1
-                filepath = pather.get(1);
-                obj.rawImage = imread(filepath);
-            else
-                if isfolder(directory)
-                    uialert(obj.figure, "No valid images found!", "Choose Directory")
-                end
-                obj.rawImage = [];
-            end
-
-            obj.bundleDisplay.clearRegions();
-            obj.updateBundleDisplay();
-            obj.filepather = pather;
-            obj.updateFilecount();
-        end
-
-        function updateFilecount(obj)
-            pather = obj.filepather;
-            count = pather.fileCount;
-            obj.directorySelector.setFilecount(count);
-        end
-
-        function thresholdChanging(obj, ~, event)
-            obj.intensityThresholds = event.Value;
-            obj.updateBundleDisplay();
+    
+        function throwAlertMessage(obj, message, title)
+            fig = obj.getFigure();
+            uialert(fig, message, title);
         end
     end
+
+    methods (Access = private)
+        function thresholdSlider = generateThresholdSlider(obj, gl)
+            thresholdSlider = generateThresholdSlider(gl);
+            set(thresholdSlider, "ValueChangingFcn", @obj.thresholdSliderChanging)
+            obj.intensityThresholds = thresholdSlider.Value;
+            obj.thresholdSlider = thresholdSlider;
+        end
+        function invertCheckbox = generateInvertCheckbox(obj, gl)
+            invertCheckbox = generateInvertCheckbox(gl);
+            set(invertCheckbox, "ValueChangedFcn", @obj.invertCheckboxChanged);
+        end
+        function trackButton = generateTrackButton(obj, gl)
+            trackButton = generateTrackButton(gl);
+            set(trackButton, "ButtonPushedFcn", @obj.trackButtonPushed);
+        end
+        function saveImageButton = generateSaveImageButton(obj, gl)
+            saveImageButton = generateSaveImageButton(gl);
+            set(saveImageButton, "ButtonPushedFcn", @obj.saveImageButtonPushed);
+            obj.saveImageButton = saveImageButton;
+        end
+end
 end
 
 
@@ -565,11 +584,18 @@ slider.MajorTickLabels = majorTickLabels;
 end
 
 %% Miscellaneous helper functions
-%
-% * Color |regions| by given |color|
+
+% Color |regions| by given |color|
 function colorRegions(regions, color)
 for index = 1:numel(regions)
     region = regions(index);
     region.Color = color;
 end
+end
+
+% Postprocess raw XY traces, i.e. |results|
+function results = postprocessResults(results)
+postprocessor = Postprocessor(results);
+postprocessor.process();
+results = postprocessor.getPostprocessedResults();
 end

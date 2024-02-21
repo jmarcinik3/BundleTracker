@@ -1,5 +1,5 @@
-classdef ImageFilepath
-    properties
+classdef ImageFilepather
+    properties (Access = private)
         directory;
         rootname;
         indexFormat;
@@ -8,7 +8,7 @@ classdef ImageFilepath
     end
 
     methods
-        function obj = ImageFilepath(directory, extension)
+        function obj = ImageFilepather(directory, extension)
             obj.directory = directory;
             obj.extension = extension;
 
@@ -33,6 +33,12 @@ classdef ImageFilepath
             rootpath = sprintf("%s\\%s", obj.directory, obj.rootname);
             formatStr = sprintf("%%s_%s%%s", obj.indexFormat);
             filepath = sprintf(formatStr, rootpath, index, obj.extension);
+        end
+    end
+
+    methods
+        function count = getFilecount(obj)
+            count = obj.fileCount;
         end
     end
 end
