@@ -4,7 +4,7 @@ classdef ProgressTracker < handle
     end
 
     properties (Access = private)
-        deltaUpdateTimeSeconds = 0.1;
+        deltaUpdateTimeSeconds = 0.5;
         previousUpdateTimeSeconds = 0;
         progressBar;
     end
@@ -19,25 +19,33 @@ classdef ProgressTracker < handle
         function delete(obj)
             delete(obj.progressBar);
         end
-
-        function update(obj, index)
+        function updateIfNeeded(obj, index)
             timeSeconds = second(datetime);
-
-            if (timeSeconds - obj.previousUpdateTimeSeconds > obj.deltaUpdateTimeSeconds)
-                total = obj.fileCount;
-                message = obj.getMessage(index);
-                waitbar(index / total, obj.progressBar, message);
+            if obj.updateIsNeeded(timeSeconds)
+                obj.update(index);
                 obj.previousUpdateTimeSeconds = timeSeconds;
             end
         end
     end
 
-    methods (Access = private)
+    methods(Access = private)
+        function is = updateIsNeeded(obj, timeSeconds)
+            previousTime = obj.previousUpdateTimeSeconds;
+            deltaTime = obj.deltaUpdateTimeSeconds;
+            is = timeSeconds - previousTime > deltaTime;
+            disp([timeSeconds - previousTime - deltaTime, previousTime, deltaTime, timeSeconds])
+        end
+        function update(obj, index)
+            total = obj.fileCount;
+            message = obj.getMessage(index);
+            proportionComplete = index / total;
+            waitbar(proportionComplete, obj.progressBar, message);
+        end
         function message = getMessage(obj, currentIndex)
+            totalCount = obj.fileCount;
             message = sprintf( ...
                 "Tracking Bundles: %d/%d", ...
-                currentIndex, ...
-                obj.fileCount ...
+                currentIndex, totalCount ...
                 );
         end
     end

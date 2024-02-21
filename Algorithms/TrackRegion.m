@@ -10,7 +10,7 @@ for index = 1:count
     boundedImage = preprocessor(boundedImage);
     center = TrackingAlgorithms.byKeyword(boundedImage, trackingKeyword);
     centers = [centers center];
-    progress.update(index);
+    progress.updateIfNeeded(index);
 end
 
 delete(progress);
