@@ -24,10 +24,6 @@ classdef BundleDisplay < PanZoomer
         unprocessedColor = [0 0.4470 0.7410]; % default rectangle color
     end
 
-    properties (Access = private)
-        
-    end
-
     methods
         function obj = BundleDisplay(gl, varargin)
             p = inputParser;
