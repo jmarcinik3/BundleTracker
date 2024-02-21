@@ -1,8 +1,11 @@
 classdef BundleDisplay < PanZoomer
     properties (Access = private)
-        axis; % uiaxes on which image is plotted
+        %#ok<*PROP>
+        %#ok<*PROPLC>
 
-        originalImage = [];
+        axis; % uiaxes on which image is plotted
+        im = [];  % image object containing pixel data and drawn regions
+
         doZoom;
         axisWidth = 0;
         axisHeight = 0;
@@ -18,32 +21,28 @@ classdef BundleDisplay < PanZoomer
             '*.pdf', "Portable Document Format (PDF)";
             '*.emf', "Enhanced Metafile for Windows® systems only (EMF)";
             }; % compatible extensions to save image as
+        unprocessedColor = [0 0.4470 0.7410]; % default rectangle color
     end
 
     properties (Access = private)
-        im = []; %#ok<*PROP> % image object containing pixel data and drawn regions
-        unprocessedColor = [0 0.4470 0.7410]; % default rectangle color
+        
     end
 
     methods
         function obj = BundleDisplay(gl, varargin)
-            % Generates and stores uiaxes along with image object
-            ax = generateAxes(gl);
-            obj@PanZoomer(ax);
-            obj.axis = ax;
-
-            % generate image object
-            im = generateImage(ax);
-            im.ButtonDownFcn = @obj.buttonDownFcn; % draw rectangles on image
-            obj.im = im;
-
             p = inputParser;
             addOptional(p, "EnableZoom", true);
             parse(p, varargin{:});
             enableZoom = p.Results.EnableZoom;
+
+            ax = generateAxis(gl);
+            obj@PanZoomer(ax);
+            obj.axis = ax;
+
+            obj.generateInteractiveImage(ax);
             obj.doZoom = enableZoom;
         end
-
+        
         function clearRegions(obj)
             % Removes currently drawn regions on image
             regions = obj.getRegions();
@@ -54,7 +53,6 @@ classdef BundleDisplay < PanZoomer
             ax =  obj.getAxis();
             rects = getRegionsFromAxis(ax);
         end
-
         function obj = update(obj, im)
             % Updates displayed image given 2D matrix of pixel intensities
             obj.show(im); % plot 2D matrix on stored axes
@@ -65,6 +63,19 @@ classdef BundleDisplay < PanZoomer
             extensions = BundleDisplay.imageExtensions;
             ax = obj.getAxis();
             saveImageOnAxis(ax, extensions, startDirectory);
+        end
+        
+        function ax = getAxis(obj)
+            % Retrieves uiaxes on which image is plotted
+            ax = obj.axis;
+        end
+    end
+
+    methods (Access = private)
+        function generateInteractiveImage(obj, ax)
+            im = generateImage(ax);
+            im.ButtonDownFcn = @obj.buttonDownFcn; % draw rectangles on image
+            obj.im = im;
         end
     end
 
@@ -108,12 +119,6 @@ classdef BundleDisplay < PanZoomer
         end
     end
 
-    methods
-        function ax = getAxis(obj)
-            ax = obj.axis;
-        end
-    end
-
     methods (Access = private)
         function width = getFullAxisWidth(obj)
             width = obj.axisWidth;
@@ -141,7 +146,7 @@ end
 
 
 
-function ax = generateAxes(gl)
+function ax = generateAxis(gl)
 ax = uiaxes(gl);
 ax.Visible = "off";
 ax.Toolbar.Visible = "off";
@@ -181,7 +186,7 @@ function saveImageOnAxis(ax, extensions, startDirectory)
     extensions, "Save Image", startDirectory ...
     );
 
-if directoryPath ~= 0 % if file dialog canceled
+if isfolder(directoryPath)
     filepath = strcat(directoryPath, filename);
     exportgraphics(ax, filepath);
 end

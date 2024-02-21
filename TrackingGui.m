@@ -44,34 +44,12 @@ classdef TrackingGui < handle
             parse(p, varargin{:});
             startingDirpath = p.Results.StartingDirectory;
             enableZoom = p.Results.EnableZoom;
-
-            fig = uifigure;
-            fig.Name = "Hair-Bundle Tracking";
-            gl = uigridlayout(fig, [10 2]);
-            obj.figure = fig;
-            obj.gridLayout = gl;
-
-            obj.bundleDisplay = BundleDisplay(gl, "EnableZoom", enableZoom);
-            obj.rawImage = [];
-            obj.directorySelector = DirectorySelector( ...
-                gl, ...
-                "ValueChangedFcn", @obj.directoryValueChanged ...
-                );
-
-            obj.trackingSelection = generateTrackingSelection(gl);
-            obj.kinociliumLocation = KinociliumLocation(gl);
-            obj.scaleFactorInputElement = generateScaleFactorElement(gl);
-            obj.fpsInputElement = generateFpsInputElement(gl);
-            obj.saveFilestemElement = generateSaveFilestemElement(gl);
-
-            obj.thresholdSlider = obj.generateThresholdSlider(gl);
-            obj.intensityThresholds = obj.thresholdSlider.Value;
-            obj.invertCheckbox = obj.generateInvertCheckbox(gl);
-            obj.trackButton = obj.generateTrackButton(gl);
-            obj.saveImageButton = obj.generateSaveImageButton(gl);
-
+            
+            gl = obj.generateGridLayout();
+            obj.generateSimpleElements(gl);
+            obj.generateBundleDisplay(gl, enableZoom);
+            obj.generateDirectorySelector(gl, startingDirpath); % must come last
             layoutElements(obj);
-            obj.directorySelector.setDirectory(startingDirpath);
         end
     end
 
@@ -201,12 +179,12 @@ classdef TrackingGui < handle
 
             if count == 0
                 obj.throwAlertMessage("No cells selected!", "Track");
-            else
-                colorRegions(regions, obj.queueColor);
-                for index = 1:count
-                    region = regions(index);
-                    obj.trackAndSaveRegion(region);
-                end
+            end
+
+            colorRegions(regions, obj.queueColor);
+            for index = 1:count
+                region = regions(index);
+                obj.trackAndSaveRegion(region);
             end
         end
         function trackAndSaveRegion(obj, region)
@@ -245,11 +223,11 @@ classdef TrackingGui < handle
         
         function saveImageButtonPushed(obj, ~, ~)
             im = obj.rawImage;
-            if numel(im) > 0
+            if numel(im) == 0
+                obj.throwAlertMessage("No image imported!", "Save Image");
+            else
                 directoryPath = obj.getDirectoryPath();
                 obj.bundleDisplay.save(directoryPath);
-            else
-                obj.throwAlertMessage("No image imported!", "Save Image");
             end
         end
         function thresholdSliderChanging(obj, ~, event)
@@ -268,6 +246,7 @@ classdef TrackingGui < handle
         function imageFilepathChanged(obj)
             count = obj.getFilecount();
             directory = obj.getDirectoryPath();
+            
             if count >= 1
                 filepath = obj.getFirstFilepath();
                 obj.rawImage = imread(filepath);
@@ -300,7 +279,45 @@ classdef TrackingGui < handle
         end
     end
 
+    %% Functions to generate GUI elements
     methods (Access = private)
+        function gl = generateGridLayout(obj)
+            fig = uifigure;
+            fig.Name = "Hair-Bundle Tracking";
+            gl = uigridlayout(fig, [10 2]);
+            obj.figure = fig;
+            obj.gridLayout = gl;
+        end
+        function generateBundleDisplay(obj, gl, enableZoom)
+            obj.bundleDisplay = BundleDisplay(gl, "EnableZoom", enableZoom);
+            obj.rawImage = [];
+        end
+        function generateDirectorySelector(obj, gl, startingDirpath)
+            obj.directorySelector = DirectorySelector( ...
+                gl, ...
+                "ValueChangedFcn", @obj.directoryValueChanged ...
+                );
+            obj.directorySelector.setDirectory(startingDirpath);
+        end
+        function generateSimpleElements(obj, gl)
+            obj.generateTrackingElements(gl);
+            obj.generatePostTrackingElements(gl);
+        end
+        function generateTrackingElements(obj, gl)
+            obj.trackingSelection = generateTrackingSelection(gl);
+            obj.kinociliumLocation = KinociliumLocation(gl);
+            obj.scaleFactorInputElement = generateScaleFactorElement(gl);
+            obj.fpsInputElement = generateFpsInputElement(gl);
+            obj.saveFilestemElement = generateSaveFilestemElement(gl);
+        end
+        function generatePostTrackingElements(obj, gl)
+            obj.thresholdSlider = obj.generateThresholdSlider(gl);
+            obj.intensityThresholds = obj.thresholdSlider.Value;
+            obj.invertCheckbox = obj.generateInvertCheckbox(gl);
+            obj.trackButton = obj.generateTrackButton(gl);
+            obj.saveImageButton = obj.generateSaveImageButton(gl);
+        end
+        
         function thresholdSlider = generateThresholdSlider(obj, gl)
             thresholdSlider = generateThresholdSlider(gl);
             set(thresholdSlider, "ValueChangingFcn", @obj.thresholdSliderChanging)
