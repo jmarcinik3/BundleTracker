@@ -9,9 +9,6 @@ classdef TrackingGui < handle
         %#ok<*PROP>
         %#ok<*PROPLC>
 
-        intensityThresholds;
-        rawImage = [];
-
         % main window components
         figure; % uifigure containing GUI
         gridLayout; % uigridlayout containing GUI components
@@ -20,12 +17,8 @@ classdef TrackingGui < handle
         bundleDisplay; % BundleDisplay object
         directorySelector; % DirectorySelector
 
-        % components to set preprocessing and tracking methods
-        thresholdSlider;
-        invertCheckbox
+        % components to set processing and tracking methods
         trackingSelection;
-
-        % components to set postprocessing methods
         kinociliumLocation;
         scaleFactorInputElement;
         fpsInputElement;
@@ -75,16 +68,13 @@ classdef TrackingGui < handle
         
         % ...for preprocessing
         function processor = getPreprocessor(obj)
-            thresholds = obj.getThresholds();
-            invert = obj.getInvert();
-            processor = Preprocessor(thresholds, invert);
-            processor = @processor.preprocess;
+            processor = obj.bundleDisplay.getPreprocessor();
         end
         function vals = getThresholds(obj)
-            vals = obj.intensityThresholds;
+            vals = obj.bundleDisplay.getThresholds();
         end
         function invert = getInvert(obj)
-            invert = obj.invertCheckbox.Value;
+            invert = obj.bundleDisplay.getInvert();
         end
 
         % ...for tracking
@@ -130,19 +120,14 @@ classdef TrackingGui < handle
         function fig = getFigure(obj)
             fig = obj.figure;
         end
-        function ax = getBundleDisplayAxis(obj)
-            ax = obj.bundleDisplay.getAxis();
+        function gl = getGridLayout(obj)
+            gl = obj.gridLayout;
+        end
+        function elem = getBundleDisplayElement(obj)
+            elem = obj.bundleDisplay.getGridLayout();
         end
         function elem = getDirectorySelectionElement(obj)
             elem = obj.directorySelector.getGridLayout();
-        end
-
-        % threshold slider and invert checkbox
-        function elem = getThresholdSlider(obj)
-            elem = obj.thresholdSlider;
-        end
-        function elem = getInvertCheckbox(obj)
-            elem = obj.invertCheckbox;
         end
 
         % components to set postprocessing methods
@@ -189,16 +174,17 @@ classdef TrackingGui < handle
             end
         end
         function trackAndSaveRegions(obj, regions)
+            count = numel(regions);
             for index = 1:count
                 region = regions(index);
                 obj.trackAndSaveRegion(region);
             end
         end
         function trackAndSaveRegion(obj, region)
-            set(regions, "Color", obj.workingColor); % color region as in-process
+            set(region, "Color", obj.workingColor); % color region as in-process
             results = obj.trackRegion(region);
             obj.saveResults(results, region.Label);
-            set(regions, "Color", obj.finishedColor); % color region as finished
+            set(region, "Color", obj.finishedColor); % color region as finished
         end
         function results = trackRegion(obj, region)
             trackingMode = obj.getTrackingSelection();
@@ -229,36 +215,12 @@ classdef TrackingGui < handle
         end
         
         function saveImageButtonPushed(obj, ~, ~)
-            if obj.imageExists()
-                directoryPath = obj.getDirectoryPath();
-                obj.bundleDisplay.save(directoryPath);
-            end
-        end
-        function exists = imageExists(obj)
-            im = obj.rawImage;
-            exists = numel(im) >= 1;
-            if ~exists
-                obj.throwAlertMessage("No image imported!", "Save Image");
-            end
-        end
-        function thresholdSliderChanging(obj, ~, event)
-            obj.intensityThresholds = event.Value;
-            obj.updateBundleDisplay();
-        end
-        function invertCheckboxChanged(obj, ~, ~)
-            obj.updateBundleDisplay();
+            obj.bundleDisplay.saveImage(directoryPath);
         end
         
         function directoryValueChanged(obj, ~, ~)
-            obj.imageFilepathChanged();
             obj.clearRegions();
-            obj.updateBundleDisplay();
-        end
-        function imageFilepathChanged(obj)
-            if obj.directoryHasImage()
-                filepath = obj.getFirstFilepath();
-                obj.rawImage = imread(filepath);
-            end
+            obj.updateImageForDirectory();
         end
         function has = directoryHasImage(obj)
             count = obj.getFilecount();
@@ -266,25 +228,20 @@ classdef TrackingGui < handle
             has = count >= 1 && isfolder(directory);
             if ~has
                 obj.throwAlertMessage("No valid images found!", "Choose Directory");
-                obj.rawImage = [];
             end
         end
         function clearRegions(obj)
             obj.bundleDisplay.clearRegions();
         end
-        function updateBundleDisplay(obj, ~, ~)
-            im = obj.getPreprocessedImage();
-            obj.bundleDisplay.updateImage(im);
-        end
-        function im = getPreprocessedImage(obj)
-            im = obj.rawImage;
-            im = obj.preprocessImage(im);
-        end
-        function im = preprocessImage(obj, im)
-            if numel(im) > 0
-                preprocessor = obj.getPreprocessor();
-                im = preprocessor(im);
+        function updateImageForDirectoryIfNeeded(obj)
+            if obj.directoryHasImage()
+                obj.updateImageForDirectory();
             end
+        end
+        function updateImageForDirectory(obj)
+            filepath = obj.getFirstFilepath();
+            im = imread(filepath);
+            obj.bundleDisplay.changeImage(im);
         end
     
         function throwAlertMessage(obj, message, title)
@@ -298,13 +255,12 @@ classdef TrackingGui < handle
         function gl = generateGridLayout(obj)
             fig = uifigure;
             fig.Name = "Hair-Bundle Tracking";
-            gl = uigridlayout(fig, [10 2]);
+            gl = uigridlayout(fig, [9 2]);
             obj.figure = fig;
             obj.gridLayout = gl;
         end
         function generateBundleDisplay(obj, gl, enableZoom)
             obj.bundleDisplay = BundleDisplay(gl, "EnableZoom", enableZoom);
-            obj.rawImage = [];
         end
         function generateDirectorySelector(obj, gl, startingDirpath)
             obj.directorySelector = DirectorySelector( ...
@@ -325,22 +281,8 @@ classdef TrackingGui < handle
             obj.saveFilestemElement = generateSaveFilestemElement(gl);
         end
         function generatePostTrackingElements(obj, gl)
-            obj.thresholdSlider = obj.generateThresholdSlider(gl);
-            obj.intensityThresholds = obj.thresholdSlider.Value;
-            obj.invertCheckbox = obj.generateInvertCheckbox(gl);
             obj.trackButton = obj.generateTrackButton(gl);
             obj.saveImageButton = obj.generateSaveImageButton(gl);
-        end
-        
-        function thresholdSlider = generateThresholdSlider(obj, gl)
-            thresholdSlider = generateThresholdSlider(gl);
-            set(thresholdSlider, "ValueChangingFcn", @obj.thresholdSliderChanging)
-            obj.intensityThresholds = thresholdSlider.Value;
-            obj.thresholdSlider = thresholdSlider;
-        end
-        function invertCheckbox = generateInvertCheckbox(obj, gl)
-            invertCheckbox = generateInvertCheckbox(gl);
-            set(invertCheckbox, "ValueChangedFcn", @obj.invertCheckboxChanged);
         end
         function trackButton = generateTrackButton(obj, gl)
             trackButton = generateTrackButton(gl);
@@ -366,33 +308,29 @@ end
 %
 % Returns void
 function layoutElements(gui)
-% Set components heights in grid layout
+% Set component heights in grid layout
 textboxHeight = 25;
 dropdownHeight = 25;
 buttonHeight = 25;
-sliderHeight = 30;
 kinociliumGroupHeight = KinociliumLocation.height;
 
 % Retrieve components
-gl = gui.gridLayout;
+gl = gui.getGridLayout();
 directorySelector = gui.getDirectorySelectionElement();
-bundleAx = gui.getBundleDisplayAxis();
+bundleDisplay = gui.getBundleDisplayElement();
 
 kinociliumLocationGroup = gui.getKinociliumLocationElement();
 scaleFactorElement = gui.getScaleFactorInputElement();
 fpsInputElement = gui.getFpsInputElement();
 
-thresholdSlider = gui.getThresholdSlider();
-invertCheckbox = gui.getInvertCheckbox();
 trackingDropdown = gui.getTrackingSelectionElement();
 saveFilestemElement = gui.getSaveFilestemElement();
 trackButton = gui.getTrackButton();
-
 saveImageButton = gui.getSaveImageButton();
 
 % Set up hair-bundle display with region selection
-bundleAx.Layout.Row = [3 9];
-bundleAx.Layout.Column = 1;
+bundleDisplay.Layout.Row = [2 8];
+bundleDisplay.Layout.Column = 1;
 
 % Set up section to select and display directory with images
 directorySelector.Layout.Row = 1;
@@ -400,48 +338,41 @@ directorySelector.Layout.Column = [1 2];
 directorySelector.RowHeight = textboxHeight;
 directorySelector.ColumnWidth = {'7x', '1x', '2x', '2x'};
 
-% Set up slider for intensity threshold to left of invert checkbox
-thresholdSlider.Layout.Row = 2;
-invertCheckbox.Layout.Row = 2;
-thresholdSlider.Layout.Column = 1;
-invertCheckbox.Layout.Column = 2;
-
 % Set up section to select tracking method, start tracking
-trackingDropdown.Layout.Row = 3;
-trackButton.Layout.Row = 8;
+trackingDropdown.Layout.Row = 2;
+trackButton.Layout.Row = 7;
 trackingDropdown.Layout.Column = 2;
 trackButton.Layout.Column = 2;
 
 % Set up section to select kinocilium direction
-kinociliumLocationGroup.Layout.Row = 4;
+kinociliumLocationGroup.Layout.Row = 3;
 kinociliumLocationGroup.Layout.Column = 2;
 
 % Set up label with textbox to set scale factor
-scaleFactorElement.Layout.Row = 5;
+scaleFactorElement.Layout.Row = 4;
 scaleFactorElement.Layout.Column = 2;
 scaleFactorElement.RowHeight = textboxHeight;
 scaleFactorElement.ColumnWidth = {'3x', '3x', '1x', '2x'};
 
 % Set up label with textbox to set FPS
-fpsInputElement.Layout.Row = 6;
+fpsInputElement.Layout.Row = 5;
 fpsInputElement.Layout.Column = 2;
 fpsInputElement.RowHeight = textboxHeight;
 fpsInputElement.ColumnWidth = {'1x', '2x'};
 
 % Set up field to set save filestem
-saveFilestemElement.Layout.Row = 7;
+saveFilestemElement.Layout.Row = 6;
 saveFilestemElement.Layout.Column = 2;
 saveFilestemElement.RowHeight = textboxHeight;
 saveFilestemElement.ColumnWidth = {'1x', '2x'};
 
 % Set up button to save image
-saveImageButton.Layout.Row = 10;
+saveImageButton.Layout.Row = 9;
 saveImageButton.Layout.Column = [1 2];
 
 % Set up row heights and column widths for grid layout
 gl.RowHeight = {
     textboxHeight, ... % directory selector
-    sliderHeight, ... % threshold slider
     dropdownHeight, ... % tracking method dropdown
     kinociliumGroupHeight, ... % kinocilium group
     textboxHeight, ... % scale factor textbox
@@ -452,19 +383,6 @@ gl.RowHeight = {
     buttonHeight ... % save image button
     };
 gl.ColumnWidth = {'2x', '1x'};
-end
-
-%% Function to generate invert checkbox
-% Generates checkbox allowing user to invert image by intensity
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add checkbox in
-%
-% Returns uicheckbox
-function checkbox = generateInvertCheckbox(gl)
-checkbox = uicheckbox(gl);
-checkbox.Text = "Invert";
 end
 
 %% Function to generate tracking method dropdown
@@ -582,36 +500,6 @@ tb.Value = "results"; % default value
 
 lbl.Layout.Column = 1;
 tb.Layout.Column = 2;
-end
-
-%% Function to generate intensity bound input
-% Generates two-value slider allowing user to set lower and upper bounds on
-% image intensity
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add slider in
-%
-% Returns uislider
-function slider = generateThresholdSlider(gl)
-slider = uislider(gl, "range");
-
-% set major and minor tick locations
-maxIntensity = 2^16; % maximum intensity for TIF image
-slider.Limits = [0 maxIntensity];
-slider.Value = [0 maxIntensity];
-slider.MinorTicks = 0:2^11:maxIntensity;
-slider.MajorTicks = 0:2^14:maxIntensity;
-
-% format major tick labels
-majorTicks = slider.MajorTicks;
-tickCount = numel(majorTicks);
-majorTickLabels = strings(1, tickCount);
-for index = 1:tickCount
-    majorTick = majorTicks(index);
-    majorTickLabels(index) = sprintf("%d", majorTick);
-end
-slider.MajorTickLabels = majorTickLabels;
 end
 
 %% Miscellaneous helper functions
