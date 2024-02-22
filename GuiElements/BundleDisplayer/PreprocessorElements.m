@@ -1,5 +1,6 @@
 classdef PreprocessorElements < handle
     properties (Access = private)
+        gridLayout;
         rawImage;
         interactiveImage;
         thresholdSlider;
@@ -12,7 +13,8 @@ classdef PreprocessorElements < handle
             if nargin == 1
                 ax = PreprocessorElements.generateAxis(gl);
             end
-
+            
+            obj.gridLayout = gl;
             obj.interactiveImage = generateInteractiveImage(ax);
             obj.thresholdSlider = obj.generateThresholdSlider(gl);
             obj.intensityThresholds = obj.thresholdSlider.Value;
@@ -41,6 +43,9 @@ classdef PreprocessorElements < handle
 
     %% Functions to retrieve GUI elements
     methods
+        function gl = getGridLayout(obj)
+            gl = obj.gridLayout;
+        end
         function elem = getThresholdSlider(obj)
             elem = obj.thresholdSlider;
         end

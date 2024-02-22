@@ -3,7 +3,6 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
         %#ok<*PROP>
         %#ok<*PROPLC>
 
-        gridLayout;
         doZoom;
     end
 
@@ -24,7 +23,6 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
             obj.setUserDataFcn(@obj.getPreprocessorInputs);
             obj.doZoom = enableZoom;
 
-            obj.gridLayout = gl;
             iIm = obj.getInteractiveImage();
             set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
             layoutElements(obj);
@@ -59,9 +57,6 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
 
     %% Functions to retrieve GUI elements
     methods
-        function gl = getGridLayout(obj)
-            gl = obj.gridLayout;
-        end
         function ax = getAxis(obj)
             ax = getAxis@PreprocessorElements(obj);
         end
