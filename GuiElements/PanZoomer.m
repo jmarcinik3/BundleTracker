@@ -1,4 +1,9 @@
 classdef PanZoomer < handle
+    properties (Access = private, Constant)
+        panMouseButton = "alt";  % ctrl-click or right-click
+        magnificationFactor = 2^(1/12);
+    end
+
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
@@ -8,9 +13,6 @@ classdef PanZoomer < handle
         xlimOriginal;
         ylimOriginal;
         panningSeedPoint;
-
-        panMouseButton = "alt";  % ctrl-click or right-click
-        magnificationFactor = 2^(1/12);
     end
 
     methods
@@ -24,6 +26,13 @@ classdef PanZoomer < handle
             obj.ylimOriginal = get(ax, "YLim");
         end
         
+        function ax = getAxis(obj)
+            ax = obj.axis;
+        end
+        function fig = getFigure(obj)
+            ax = obj.getAxis();
+            fig = ancestor(ax, "figure");
+        end
     end
 
     methods (Access = private)
@@ -133,13 +142,6 @@ classdef PanZoomer < handle
             set(ax, "Ylim", ylim);
         end
 
-        function ax = getAxis(obj)
-            ax = obj.axis;
-        end
-        function fig = getFigure(obj)
-            ax = obj.getAxis();
-            fig = ancestor(ax, "figure");
-        end
         function point = getPanningSeed(obj)
             point = obj.panningSeedPoint;
         end
@@ -190,7 +192,7 @@ classdef PanZoomer < handle
     end
 
     methods
-        function updateOriginalLims(obj)
+        function fitOriginalLimsToAxis(obj)
             ax = obj.getAxis();
             xlim = get(ax, "XLim");
             ylim = get(ax, "YLim");

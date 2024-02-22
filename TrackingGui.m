@@ -215,6 +215,7 @@ classdef TrackingGui < handle
         end
         
         function saveImageButtonPushed(obj, ~, ~)
+            directoryPath = obj.getDirectoryPath();
             obj.bundleDisplay.saveImage(directoryPath);
         end
         

@@ -1,19 +1,9 @@
-classdef BundleDisplay < PanZoomer
+classdef BundleDisplay < PreprocessorElements & PanZoomer
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
-        
+
         gridLayout;
-        axis; % uiaxes on which image is plotted
-        interactiveImage = [];  % image object containing pixel data and drawn regions
-        rawImage = [];
-        axisWidth = 0;
-        axisHeight = 0;
-
-        thresholdSlider;
-        intensityThresholds;
-        invertCheckbox
-
         doZoom;
     end
 
@@ -36,19 +26,17 @@ classdef BundleDisplay < PanZoomer
             addOptional(p, "EnableZoom", true);
             parse(p, varargin{:});
             enableZoom = p.Results.EnableZoom;
-            
+
             gl = uigridlayout(parent, [2, 1]);
 
             ax = generateAxis(gl);
+            obj@PreprocessorElements(gl, ax);
             obj@PanZoomer(ax);
             obj.doZoom = enableZoom;
-            
+
             obj.gridLayout = gl;
-            obj.axis = ax;
-            obj.interactiveImage = obj.generateInteractiveImage(ax);
-            obj.thresholdSlider = obj.generateThresholdSlider(gl);
-            obj.intensityThresholds = obj.thresholdSlider.Value;
-            obj.invertCheckbox = obj.generateInvertCheckbox(gl);
+            iIm = obj.getInteractiveImage();
+            set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
             layoutElements(obj);
         end
 
@@ -63,9 +51,8 @@ classdef BundleDisplay < PanZoomer
             rects = getRegionsFromAxis(ax);
         end
         function obj = changeImage(obj, im)
-            obj.rawImage = im;
-            obj.updateFromRawImage();
-            obj.resizeAxisIfNeeded();
+            obj.setRawImage(im);
+            obj.resizeAxisToNewImage();
         end
         function saveImage(obj, startDirectory)
             % Saves currently displayed bundle image and drawn regions
@@ -75,38 +62,27 @@ classdef BundleDisplay < PanZoomer
                 saveImageOnAxis(ax, extensions, startDirectory);
             end
         end
-        function exists = imageExists(obj)
-            im = obj.getRawImage();
-            exists = numel(im) >= 1;
-            if ~exists
-                obj.throwAlertMessage("No image imported!", "Save Image");
-            end
-        end
+    end
 
+    %% Functions to retrieve GUI elements
+    methods
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
         end
-        function ax = getAxis(obj)
-            % Retrieves uiaxes on which image is plotted
-            ax = obj.axis;
-        end
     end
 
+    %% Functions to retrieve information of GUI
     methods (Access = private)
-        function thresholdSlider = generateThresholdSlider(obj, gl)
-            thresholdSlider = generateThresholdSlider(gl);
-            set(thresholdSlider, "ValueChangingFcn", @obj.thresholdSliderChanging)
+        function [h, w] = getImageSize(obj)
+            im = obj.getRawImage();
+            [h, w] = size(im);
         end
-        function invertCheckbox = generateInvertCheckbox(obj, gl)
-            invertCheckbox = generateInvertCheckbox(gl);
-            set(invertCheckbox, "ValueChangedFcn", @obj.invertCheckboxChanged);
-        end
-        function iIm = generateInteractiveImage(obj, ax)
-            iIm = generateImage(ax);
-            set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
+        function is = zoomIsEnabled(obj)
+            is = obj.doZoom;
         end
     end
 
+    %% Functions to update state of GUI
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
             mouseButton = event.Button;
@@ -117,19 +93,32 @@ classdef BundleDisplay < PanZoomer
         function generateRectangle(obj, ~, event)
             point = event.IntersectionPoint(1:2);
             rect = obj.drawRectangle(point);
-            obj.formatRectangle(rect);
+            obj.addMetadataToRegion(rect);
             obj.updateRegionLabels();
         end
         function rect = drawRectangle(obj, point)
             ax = obj.getAxis();
             rect = drawRectangle(ax, point);
         end
-        function formatRectangle(obj, rect)
+        function addMetadataToRegion(obj, region)
             color = obj.unprocessedColor;
-            set(rect, "Color", color);
+            userData = obj.getRegionUserData();
+            
+            set(region, ...
+                "Color", color, ...
+                "UserData", userData ...
+                );
             addlistener( ...
-                rect, "ROIClicked", ...
-                @(src, ev) rect.set("Color", color) ...
+                region, "ROIClicked", ...
+                @(src, ev) region.set("Color", color) ...
+                );
+        end
+        function data = getRegionUserData(obj)
+            thresholds = obj.getThresholds();
+            isInverted = obj.getInvert();
+            data = struct( ...
+                "IntensityRange", thresholds, ...
+                "IsInverted", isInverted ...
                 );
         end
         function updateRegionLabels(obj)
@@ -137,152 +126,31 @@ classdef BundleDisplay < PanZoomer
             count = numel(regions);
             for index = 1:count
                 region = regions(index);
-                label = num2str(index);
-                set(region, "Label", label);
+                obj.updateRegionLabel(region, index);
             end
         end
-
-        function showImage(obj, im)
-            imRgb = obj.gray2rgb(im);
-            obj.setImageCData(imRgb);
-        end
-        function imRgb = gray2rgb(obj, im)
-            fig = obj.getFigure();
-            imRgb = gray2rgb(im, fig);
+        function updateRegionLabel(~, region, index)
+            label = num2str(index);
+            set(region, "Label", label);
         end
 
-        function resizeAxisIfNeeded(obj)
-            if obj.axisHasNewImage()
-                obj.resizeAxisToNewImage();
-            end
-        end
         function resizeAxisToNewImage(obj)
             obj.resizeAxis();
-            obj.updateAxisSize();
             obj.updateZoomIfNeeded();
         end
         function resizeAxis(obj)
             ax = obj.getAxis();
-            [height, width] = obj.getImageSize();
-            resizeAxis(ax, height, width);
-        end
-        function updateAxisSize(obj)
-            [height, width] = obj.getImageSize();
-            obj.setAxisSize(height, width);
-        end
-        function setAxisSize(obj, height, width)
-            obj.axisHeight = height;
-            obj.axisWidth = width;
+            [h, w] = obj.getImageSize();
+            resizeAxis(ax, h, w);
         end
         function updateZoomIfNeeded(obj)
             if obj.zoomIsEnabled()
-                obj.updateOriginalLims(); % update zoomer for new image
+                obj.fitOriginalLimsToAxis(); % update zoomer for new image
             end
-        end
-
-        function thresholdSliderChanging(obj, ~, event)
-            obj.intensityThresholds = event.Value;
-            obj.updateFromRawImage();
-        end
-        function updateFromRawImage(obj)
-            im = obj.getPreprocessedImage();
-            obj.showImage(im);
-        end
-        function im = getPreprocessedImage(obj)
-            im = obj.getRawImage();
-            if obj.imageExists()
-                im = obj.preprocessImage(im);
-            end
-        end
-        function im = preprocessImage(obj, im)
-            preprocessor = obj.getPreprocessor();
-            im = preprocessor(im);
-        end
-    
-        function invertCheckboxChanged(obj, ~, ~)
-            obj.updateFromRawImage();
-        end
-    end
-
-    methods (Access = private)
-        function setRawImage(obj, im)
-            obj.rawImage = im;
-        end
-        function setImageCData(obj, cData)
-            set(obj.getInteractiveImage(), "CData", cData);
-        end
-        function iIm = getInteractiveImage(obj)
-            iIm = obj.interactiveImage;
-        end
-        function im = getRawImage(obj)
-            im = obj.rawImage;
-        end
-        function im = getImageCData(obj)
-            im = get(obj.getInteractiveImage(), "CData");
-        end
-
-        function is = zoomIsEnabled(obj)
-            is = obj.doZoom;
-        end
-        function width = getFullAxisWidth(obj)
-            width = obj.axisWidth;
-        end
-        function width = getFullAxisHeight(obj)
-            width = obj.axisHeight;
-        end
-        function [height, width] = getImageSize(obj)
-            im = obj.getImageCData();
-            [height, width, ~] = size(im);
-        end
-
-        function is = isNewHeight(obj, height)
-            fullHeight = obj.getFullAxisHeight();
-            is = fullHeight ~= height;
-        end
-        function is = isNewWidth(obj, width)
-            fullWidth = obj.getFullAxisWidth();
-            is = fullWidth ~= width;
-        end
-        function is = isNewSize(obj, height, width)
-            is = obj.isNewWidth(width) || obj.isNewHeight(height);
-        end
-        function is = axisHasNewImage(obj)
-            [height, width] = obj.getImageSize();
-            is = obj.isNewSize(height, width);
-        end
-    end
-
-    methods
-        % ...for preprocessing
-        function processor = getPreprocessor(obj)
-            thresholds = obj.getThresholds();
-            invert = obj.getInvert();
-            processor = Preprocessor(thresholds, invert);
-            processor = @processor.preprocess;
-        end
-        function vals = getThresholds(obj)
-            vals = obj.intensityThresholds;
-        end
-        function invert = getInvert(obj)
-            invert = obj.invertCheckbox.Value;
-        end
-    end
-
-    methods (Access = private)
-        function fig = getFigure(obj)
-            ax = obj.getAxis();
-            fig = ancestor(ax, "figure");
-        end
-
-        % threshold slider and invert checkbox
-        function elem = getThresholdSlider(obj)
-            elem = obj.thresholdSlider;
-        end
-        function elem = getInvertCheckbox(obj)
-            elem = obj.invertCheckbox;
         end
     end
 end
+
 
 
 function layoutElements(bundleDisplay)
@@ -309,106 +177,58 @@ ax.Layout.Column = [1 2];
 gl.RowHeight = {sliderHeight, '1x'};
 gl.ColumnWidth = {'4x', '1x'};
 end
-
-%% Function to generate intensity bound input
-% Generates two-value slider allowing user to set lower and upper bounds on
-% image intensity
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add slider in
-%
-% Returns uislider
-function slider = generateThresholdSlider(gl)
-slider = uislider(gl, "range");
-
-% set major and minor tick locations
-maxIntensity = 2^16; % maximum intensity for TIF image
-slider.Limits = [0 maxIntensity];
-slider.Value = [0 maxIntensity];
-slider.MinorTicks = 0:2^11:maxIntensity;
-slider.MajorTicks = 0:2^14:maxIntensity;
-
-% format major tick labels
-majorTicks = slider.MajorTicks;
-tickCount = numel(majorTicks);
-majorTickLabels = strings(1, tickCount);
-for index = 1:tickCount
-    majorTick = majorTicks(index);
-    majorTickLabels(index) = sprintf("%d", majorTick);
-end
-slider.MajorTickLabels = majorTickLabels;
-end
-
-%% Function to generate invert checkbox
-% Generates checkbox allowing user to invert image by intensity
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add checkbox in
-%
-% Returns uicheckbox
-function checkbox = generateInvertCheckbox(gl)
-checkbox = uicheckbox(gl);
-checkbox.Text = "Invert";
-end
-
-%% Function to generate plotting axis
-% Generates axis on which hair cell image is plotted
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add axis in
-%
-% Returns uiaxes
 function ax = generateAxis(gl)
 ax = uiaxes(gl);
 ax.Visible = "off";
 ax.Toolbar.Visible = "off";
 end
 
-%% Function to generate interactive image on axis
-% Generates empty image and plots onto |ax|.
-% Set CData property to change image displayed on axis
-%
-% Arguments
-%
-% * uiaxes |ax|: layout to add image in
-%
-% Returns Image
-function im = generateImage(ax)
-fig = ancestor(ax, "figure");
-im = image(ax, gray2rgb([], fig)); % display RGB image
-end
-
-
 function is = isLeftClick(mouseButton)
 is = mouseButton == 1;
 end
 
-function resizeAxis(ax, height, width)
-if width > 0 && height > 0
-    if width <= 2 * height && height <= 2 * width
-        set(ax, ...
-            "XLim", [0, width], ...
-            "YLim", [0, height] ...
-            );
-        pbaspect(ax, [width, height, 1]);
-    elseif width > 2 * height
-        set(ax, ...
-            "XLim", [0, width], ...
-            "YLim", width * [-0.5, 0.5] ...
-            );
-        pbaspect(ax, [1 1 1]);
-    elseif height > 2 * width
-        set(ax, ...
-            "XLim", height * [-0.5, 0.5], ...
-            "YLim", [0, height] ...
-            );
-        pbaspect(ax, [1 1 1]);
+function resizeAxis(ax, h, w)
+if w > 0 && h > 0
+    if axisIsRoughlySquare(h, w)
+        resizeAxisRoughlySquare(ax, h, w);
+    elseif imageIsWide(h, w)
+        resizeAxisWide(ax, h, w);
+    elseif axisIsTall(h, w)
+        resizeAxisTall(ax, h, w);
     end
 end
 end
+function is = axisIsRoughlySquare(h, w)
+is = w <= 2 * h && h <= 2 * w;
+end
+function is = imageIsWide(h, w)
+is = w > 2 * h;
+end
+function is = axisIsTall(h, w)
+is = h > 2 * w;
+end
+function resizeAxisRoughlySquare(ax, h, w)
+set(ax, ...
+    "XLim", [0, w], ...
+    "YLim", [0, h] ...
+    );
+pbaspect(ax, [w, h, 1]);
+end
+function resizeAxisWide(ax, ~, w)
+set(ax, ...
+    "XLim", [0, w], ...
+    "YLim", w * [-0.5, 0.5] ...
+    );
+pbaspect(ax, [1 1 1]);
+end
+function resizeAxisTall(ax, h, ~)
+set(ax, ...
+    "XLim", h * [-0.5, 0.5], ...
+    "YLim", [0, h] ...
+    );
+pbaspect(ax, [1 1 1]);
+end
+
 function saveImageOnAxis(ax, extensions, startDirectory)
 [filename, directoryPath, ~] = uiputfile( ...
     extensions, "Save Image", startDirectory ...
@@ -440,10 +260,4 @@ for index = 2:regionCount
     mask = createMask(region);
     masks(mask) = 1;
 end
-end
-function rgb = gray2rgb(im, fig)
-cmap = colormap(fig, "turbo");
-cmap(1, :) = 0; % set dark pixels as black
-cmap(end, :) = 1; % set saturated pixels as white
-rgb = ind2rgb(im2uint8(im), cmap);
 end
