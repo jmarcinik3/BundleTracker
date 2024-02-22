@@ -7,17 +7,7 @@ classdef BundleDisplay < PreprocessorElements & RectangleDrawer & PanZoomer
         doZoom;
     end
 
-    properties (Access = private, Constant)
-        imageExtensions = { ...
-            '*.png', "Portable Network Graphics (PNG)"; ...
-            '*.jpg;*.jpeg', "Joint Photographic Experts Group (JPEG)"; ...
-            '*.tif;*.tiff', "Tagged Image File Format (TIFF)"; ...
-            '*.gif', "Graphics Interchange Format (GIF)"; ...
-            '*.eps', "Encapsulated PostScript® (EPS)"; ...
-            '*.pdf', "Portable Document Format (PDF)";
-            '*.emf', "Enhanced Metafile for Windows® systems only (EMF)";
-            }; % compatible extensions to save image as
-    end
+
 
     methods
         function obj = BundleDisplay(parent, varargin)
@@ -53,17 +43,21 @@ classdef BundleDisplay < PreprocessorElements & RectangleDrawer & PanZoomer
             children = ax.Children;
             rects = findobj(children, "Type", "images.roi.rectangle");
         end
+
         function obj = changeImage(obj, im)
             obj.setRawImage(im);
-            obj.resizeAxisToNewImage();
+            obj.resizeAxis();
+            obj.updateZoomIfNeeded();
         end
-        function saveImage(obj, startDirectory)
-            % Saves currently displayed bundle image and drawn regions
+
+        function exportImageIfNeeded(obj, startDirectory)
             if obj.imageExists()
-                extensions = BundleDisplay.imageExtensions;
-                ax = obj.getAxis();
-                saveImageOnAxis(ax, extensions, startDirectory);
+                obj.exportImage(startDirectory);
             end
+        end
+        function exportImage(obj, startDirectory)
+            ax = obj.getAxis();
+            ImageExporter.export(ax, startDirectory);
         end
     end
 
@@ -102,10 +96,6 @@ classdef BundleDisplay < PreprocessorElements & RectangleDrawer & PanZoomer
                 );
         end
 
-        function resizeAxisToNewImage(obj)
-            obj.resizeAxis();
-            obj.updateZoomIfNeeded();
-        end
         function resizeAxis(obj)
             ax = obj.getAxis();
             [h, w] = obj.getImageSize();
@@ -153,15 +143,4 @@ end
 
 function is = isLeftClick(mouseButton)
 is = mouseButton == 1;
-end
-
-function saveImageOnAxis(ax, extensions, startDirectory)
-[filename, directoryPath, ~] = uiputfile( ...
-    extensions, "Save Image", startDirectory ...
-    );
-
-if isfolder(directoryPath)
-    filepath = strcat(directoryPath, filename);
-    exportgraphics(ax, filepath);
-end
 end

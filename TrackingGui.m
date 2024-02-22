@@ -216,7 +216,7 @@ classdef TrackingGui < handle
         
         function saveImageButtonPushed(obj, ~, ~)
             directoryPath = obj.getDirectoryPath();
-            obj.bundleDisplay.saveImage(directoryPath);
+            obj.bundleDisplay.exportImageIfNeeded(directoryPath);
         end
         
         function directoryValueChanged(obj, ~, ~)
@@ -241,8 +241,10 @@ classdef TrackingGui < handle
         end
         function updateImageForDirectory(obj)
             filepath = obj.getFirstFilepath();
-            im = imread(filepath);
-            obj.bundleDisplay.changeImage(im);
+            if isfile(filepath)
+                im = imread(filepath);
+                obj.bundleDisplay.changeImage(im);
+            end
         end
     
         function throwAlertMessage(obj, message, title)
