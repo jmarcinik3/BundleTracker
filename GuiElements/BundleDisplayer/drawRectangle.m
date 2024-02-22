@@ -5,7 +5,7 @@ updateRegionLabels(ax);
 end
 
 function updateRegionLabels(ax)
-regions = getRegions(ax);
+regions = flip(getRegions(ax));
 count = numel(regions);
 for index = 1:count
     region = regions(index);
