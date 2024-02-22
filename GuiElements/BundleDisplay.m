@@ -1,4 +1,4 @@
-classdef BundleDisplay < PreprocessorElements & PanZoomer
+classdef BundleDisplay < PreprocessorElements & RectangleDrawer & PanZoomer
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
@@ -17,7 +17,6 @@ classdef BundleDisplay < PreprocessorElements & PanZoomer
             '*.pdf', "Portable Document Format (PDF)";
             '*.emf', "Enhanced Metafile for Windows® systems only (EMF)";
             }; % compatible extensions to save image as
-        unprocessedColor = [0 0.4470 0.7410]; % default rectangle color
     end
 
     methods
@@ -28,10 +27,13 @@ classdef BundleDisplay < PreprocessorElements & PanZoomer
             enableZoom = p.Results.EnableZoom;
 
             gl = uigridlayout(parent, [2, 1]);
-
             ax = generateAxis(gl);
+
             obj@PreprocessorElements(gl, ax);
+            obj@RectangleDrawer(ax);
             obj@PanZoomer(ax);
+
+            obj.setUserDataFcn(@obj.getRegionUserData);
             obj.doZoom = enableZoom;
 
             obj.gridLayout = gl;
@@ -48,7 +50,8 @@ classdef BundleDisplay < PreprocessorElements & PanZoomer
         function rects = getRegions(obj)
             % Retrieves currently drawn regions on image
             ax =  obj.getAxis();
-            rects = getRegionsFromAxis(ax);
+            children = ax.Children;
+            rects = findobj(children, "Type", "images.roi.rectangle");
         end
         function obj = changeImage(obj, im)
             obj.setRawImage(im);
@@ -90,29 +93,6 @@ classdef BundleDisplay < PreprocessorElements & PanZoomer
                 obj.generateRectangle(source, event);
             end
         end
-        function generateRectangle(obj, ~, event)
-            point = event.IntersectionPoint(1:2);
-            rect = obj.drawRectangle(point);
-            obj.addMetadataToRegion(rect);
-            obj.updateRegionLabels();
-        end
-        function rect = drawRectangle(obj, point)
-            ax = obj.getAxis();
-            rect = drawRectangle(ax, point);
-        end
-        function addMetadataToRegion(obj, region)
-            color = obj.unprocessedColor;
-            userData = obj.getRegionUserData();
-            
-            set(region, ...
-                "Color", color, ...
-                "UserData", userData ...
-                );
-            addlistener( ...
-                region, "ROIClicked", ...
-                @(src, ev) region.set("Color", color) ...
-                );
-        end
         function data = getRegionUserData(obj)
             thresholds = obj.getThresholds();
             isInverted = obj.getInvert();
@@ -120,18 +100,6 @@ classdef BundleDisplay < PreprocessorElements & PanZoomer
                 "IntensityRange", thresholds, ...
                 "IsInverted", isInverted ...
                 );
-        end
-        function updateRegionLabels(obj)
-            regions = flip(obj.getRegions());
-            count = numel(regions);
-            for index = 1:count
-                region = regions(index);
-                obj.updateRegionLabel(region, index);
-            end
-        end
-        function updateRegionLabel(~, region, index)
-            label = num2str(index);
-            set(region, "Label", label);
         end
 
         function resizeAxisToNewImage(obj)
@@ -187,48 +155,6 @@ function is = isLeftClick(mouseButton)
 is = mouseButton == 1;
 end
 
-function resizeAxis(ax, h, w)
-if w > 0 && h > 0
-    if axisIsRoughlySquare(h, w)
-        resizeAxisRoughlySquare(ax, h, w);
-    elseif imageIsWide(h, w)
-        resizeAxisWide(ax, h, w);
-    elseif axisIsTall(h, w)
-        resizeAxisTall(ax, h, w);
-    end
-end
-end
-function is = axisIsRoughlySquare(h, w)
-is = w <= 2 * h && h <= 2 * w;
-end
-function is = imageIsWide(h, w)
-is = w > 2 * h;
-end
-function is = axisIsTall(h, w)
-is = h > 2 * w;
-end
-function resizeAxisRoughlySquare(ax, h, w)
-set(ax, ...
-    "XLim", [0, w], ...
-    "YLim", [0, h] ...
-    );
-pbaspect(ax, [w, h, 1]);
-end
-function resizeAxisWide(ax, ~, w)
-set(ax, ...
-    "XLim", [0, w], ...
-    "YLim", w * [-0.5, 0.5] ...
-    );
-pbaspect(ax, [1 1 1]);
-end
-function resizeAxisTall(ax, h, ~)
-set(ax, ...
-    "XLim", h * [-0.5, 0.5], ...
-    "YLim", [0, h] ...
-    );
-pbaspect(ax, [1 1 1]);
-end
-
 function saveImageOnAxis(ax, extensions, startDirectory)
 [filename, directoryPath, ~] = uiputfile( ...
     extensions, "Save Image", startDirectory ...
@@ -237,27 +163,5 @@ function saveImageOnAxis(ax, extensions, startDirectory)
 if isfolder(directoryPath)
     filepath = strcat(directoryPath, filename);
     exportgraphics(ax, filepath);
-end
-end
-function rect = drawRectangle(ax, point)
-rect = images.roi.Rectangle(ax);
-beginDrawingFromPoint(rect, point);
-end
-function rects = getRegionsFromAxis(ax)
-children = ax.Children;
-rects = findobj(children, "Type", "images.roi.rectangle");
-end
-
-function maskRgb = createMaskRgb(regions)
-mask = createMasks(regions);
-maskRgb = repmat(mask, [1 1 3]);
-end
-function masks = createMasks(regions)
-masks = createMask(regions(1));
-regionCount = numel(regions);
-for index = 2:regionCount
-    region = regions(index);
-    mask = createMask(region);
-    masks(mask) = 1;
 end
 end
