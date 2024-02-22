@@ -179,6 +179,7 @@ classdef TrackingGui < handle
                 region = regions(index);
                 obj.trackAndSaveRegion(region);
             end
+            obj.exportImageIfPossible();
         end
         function trackAndSaveRegion(obj, region)
             set(region, "Color", obj.workingColor); % color region as in-process
@@ -215,6 +216,9 @@ classdef TrackingGui < handle
         end
         
         function saveImageButtonPushed(obj, ~, ~)
+            obj.exportImageIfPossible();
+        end
+        function exportImageIfPossible(obj)
             directoryPath = obj.getDirectoryPath();
             obj.bundleDisplay.exportImageIfPossible(directoryPath);
         end
