@@ -25,7 +25,9 @@ classdef PanZoomer < handle
             obj.xlimOriginal = get(ax, "XLim");
             obj.ylimOriginal = get(ax, "YLim");
         end
-        
+    end
+    
+    methods (Access = private)
         function ax = getAxis(obj)
             ax = obj.axis;
         end

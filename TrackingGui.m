@@ -14,7 +14,7 @@ classdef TrackingGui < handle
         gridLayout; % uigridlayout containing GUI components
 
         % components to select and display bundle images
-        bundleDisplay; % BundleDisplay object
+        bundleDisplayer; % BundleDisplayer object
         directorySelector; % DirectorySelector
 
         % components to set processing and tracking methods
@@ -40,7 +40,7 @@ classdef TrackingGui < handle
             
             gl = obj.generateGridLayout();
             obj.generateSimpleElements(gl);
-            obj.generateBundleDisplay(gl, enableZoom);
+            obj.generateBundleDisplayer(gl, enableZoom);
             obj.generateDirectorySelector(gl, startingDirpath); % must come last
             layoutElements(obj);
         end
@@ -68,18 +68,18 @@ classdef TrackingGui < handle
         
         % ...for preprocessing
         function processor = getPreprocessor(obj)
-            processor = obj.bundleDisplay.getPreprocessor();
+            processor = obj.bundleDisplayer.getPreprocessor();
         end
         function vals = getThresholds(obj)
-            vals = obj.bundleDisplay.getThresholds();
+            vals = obj.bundleDisplayer.getThresholds();
         end
         function invert = getInvert(obj)
-            invert = obj.bundleDisplay.getInvert();
+            invert = obj.bundleDisplayer.getInvert();
         end
 
         % ...for tracking
         function regs = getTrackingRegions(obj)
-            regs = obj.bundleDisplay.getRegions();
+            regs = obj.bundleDisplayer.getRegions();
         end
         function paths = getFilepaths(obj)
             paths = obj.directorySelector.getFilepaths();
@@ -123,8 +123,8 @@ classdef TrackingGui < handle
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
         end
-        function elem = getBundleDisplayElement(obj)
-            elem = obj.bundleDisplay.getGridLayout();
+        function elem = getBundleDisplayerElement(obj)
+            elem = obj.bundleDisplayer.getGridLayout();
         end
         function elem = getDirectorySelectionElement(obj)
             elem = obj.directorySelector.getGridLayout();
@@ -220,7 +220,7 @@ classdef TrackingGui < handle
         end
         function exportImageIfPossible(obj)
             directoryPath = obj.getDirectoryPath();
-            obj.bundleDisplay.exportImageIfPossible(directoryPath);
+            obj.bundleDisplayer.exportImageIfPossible(directoryPath);
         end
         
         function directoryValueChanged(obj, ~, ~)
@@ -236,7 +236,7 @@ classdef TrackingGui < handle
             end
         end
         function clearRegions(obj)
-            obj.bundleDisplay.clearRegions();
+            obj.bundleDisplayer.clearRegions();
         end
         function updateImageForDirectoryIfNeeded(obj)
             if obj.directoryHasImage()
@@ -247,7 +247,7 @@ classdef TrackingGui < handle
             filepath = obj.getFirstFilepath();
             if isfile(filepath)
                 im = imread(filepath);
-                obj.bundleDisplay.changeImage(im);
+                obj.bundleDisplayer.changeImage(im);
             end
         end
     
@@ -266,8 +266,8 @@ classdef TrackingGui < handle
             obj.figure = fig;
             obj.gridLayout = gl;
         end
-        function generateBundleDisplay(obj, gl, enableZoom)
-            obj.bundleDisplay = BundleDisplayer(gl, "EnableZoom", enableZoom);
+        function generateBundleDisplayer(obj, gl, enableZoom)
+            obj.bundleDisplayer = ImageDisplayer(gl, "EnableZoom", enableZoom);
         end
         function generateDirectorySelector(obj, gl, startingDirpath)
             obj.directorySelector = DirectorySelector( ...
@@ -324,7 +324,7 @@ kinociliumGroupHeight = KinociliumLocation.height;
 % Retrieve components
 gl = gui.getGridLayout();
 directorySelector = gui.getDirectorySelectionElement();
-bundleDisplay = gui.getBundleDisplayElement();
+bundleDisplayer = gui.getBundleDisplayerElement();
 
 kinociliumLocationGroup = gui.getKinociliumLocationElement();
 scaleFactorElement = gui.getScaleFactorInputElement();
@@ -336,8 +336,8 @@ trackButton = gui.getTrackButton();
 saveImageButton = gui.getSaveImageButton();
 
 % Set up hair-bundle display with region selection
-bundleDisplay.Layout.Row = [2 8];
-bundleDisplay.Layout.Column = 1;
+bundleDisplayer.Layout.Row = [2 8];
+bundleDisplayer.Layout.Column = 1;
 
 % Set up section to select and display directory with images
 directorySelector.Layout.Row = 1;

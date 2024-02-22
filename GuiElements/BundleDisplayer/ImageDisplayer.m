@@ -1,4 +1,4 @@
-classdef BundleDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
+classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
@@ -8,14 +8,14 @@ classdef BundleDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
     end
 
     methods
-        function obj = BundleDisplayer(parent, varargin)
+        function obj = ImageDisplayer(parent, varargin)
             p = inputParser;
             addOptional(p, "EnableZoom", true);
             parse(p, varargin{:});
             enableZoom = p.Results.EnableZoom;
 
             gl = uigridlayout(parent, [2, 1]);
-            ax = generateAxis(gl);
+            ax = PreprocessorElements.generateAxis(gl);
 
             obj@PreprocessorElements(gl, ax);
             obj@RectangleDrawer(ax);
@@ -62,6 +62,12 @@ classdef BundleDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
         end
+        function ax = getAxis(obj)
+            ax = getAxis@PreprocessorElements(obj);
+        end
+        function fig = getFigure(obj)
+            fig = getFigure@PreprocessorElements(obj);
+        end
     end
 
     %% Functions to retrieve information of GUI
@@ -107,15 +113,15 @@ end
 
 
 
-function layoutElements(bundleDisplay)
+function layoutElements(gui)
 % Set component heights in grid layout
 sliderHeight = 30;
 
 % Retrieve components
-gl = bundleDisplay.getGridLayout();
-thresholdSlider = bundleDisplay.getThresholdSlider();
-invertCheckbox = bundleDisplay.getInvertCheckbox();
-ax = bundleDisplay.getAxis();
+gl = gui.getGridLayout();
+thresholdSlider = gui.getThresholdSlider();
+invertCheckbox = gui.getInvertCheckbox();
+ax = gui.getAxis();
 
 % Set up slider for intensity threshold to left of invert checkbox
 thresholdSlider.Layout.Row = 1;
@@ -130,11 +136,6 @@ ax.Layout.Column = [1 2];
 % Set up row heights and column widths for grid layout
 gl.RowHeight = {sliderHeight, '1x'};
 gl.ColumnWidth = {'4x', '1x'};
-end
-function ax = generateAxis(gl)
-ax = uiaxes(gl);
-ax.Visible = "off";
-ax.Toolbar.Visible = "off";
 end
 
 function is = isLeftClick(mouseButton)

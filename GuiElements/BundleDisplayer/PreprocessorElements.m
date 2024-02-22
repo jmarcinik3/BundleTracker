@@ -9,6 +9,10 @@ classdef PreprocessorElements < handle
 
     methods
         function obj = PreprocessorElements(gl, ax)
+            if nargin == 1
+                ax = PreprocessorElements.generateAxis(gl);
+            end
+
             obj.interactiveImage = generateInteractiveImage(ax);
             obj.thresholdSlider = obj.generateThresholdSlider(gl);
             obj.intensityThresholds = obj.thresholdSlider.Value;
@@ -27,6 +31,13 @@ classdef PreprocessorElements < handle
             set(invertCheckbox, "ValueChangedFcn", @obj.invertCheckboxChanged);
         end
     end
+    methods (Static)
+        function ax = generateAxis(gl)
+            ax = uiaxes(gl);
+            ax.Visible = "off";
+            ax.Toolbar.Visible = "off";
+        end
+    end
 
     %% Functions to retrieve GUI elements
     methods
@@ -42,7 +53,12 @@ classdef PreprocessorElements < handle
         function iIm = getInteractiveImage(obj)
             iIm = obj.interactiveImage;
         end
+        function ax = getAxis(obj)
+            iIm = obj.getInteractiveImage();
+            ax = ancestor(iIm, "axes");
+        end
     end
+
     methods (Access = private)
         function fig = getFigure(obj)
             iIm = obj.getInteractiveImage();
@@ -72,7 +88,7 @@ classdef PreprocessorElements < handle
         function invert = getInvert(obj)
             invert = obj.invertCheckbox.Value;
         end
-        
+
         function exists = imageExists(obj)
             im = obj.getRawImage();
             exists = numel(im) >= 1;
@@ -198,8 +214,6 @@ function im = generateInteractiveImage(ax)
 fig = ancestor(ax, "figure");
 im = image(ax, gray2rgb([], fig)); % display RGB image
 end
-
-
 
 function rgb = gray2rgb(im, fig)
 cmap = colormap(fig, "turbo");
