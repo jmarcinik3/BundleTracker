@@ -1,11 +1,5 @@
 classdef PreprocessorElements < handle
-    properties (Access = private, Constant)
-        alertRefractoryTime = 1;
-    end
-
     properties (Access = private)
-        previousAlertTime = 0;
-
         rawImage;
         interactiveImage;
         thresholdSlider;
