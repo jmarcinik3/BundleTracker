@@ -1,5 +1,11 @@
 classdef PreprocessorElements < handle
+    properties (Access = private, Constant)
+        alertRefractoryTime = 1;
+    end
+
     properties (Access = private)
+        previousAlertTime = 0;
+
         rawImage;
         interactiveImage;
         thresholdSlider;
@@ -64,12 +70,10 @@ classdef PreprocessorElements < handle
         function invert = getInvert(obj)
             invert = obj.invertCheckbox.Value;
         end
+        
         function exists = imageExists(obj)
             im = obj.getRawImage();
             exists = numel(im) >= 1;
-            if ~exists
-                obj.throwAlertMessage("No image imported!", "Save Image");
-            end
         end
     end
 
@@ -97,11 +101,15 @@ classdef PreprocessorElements < handle
         end
 
         function invertCheckboxChanged(obj, ~, ~)
-            obj.updateFromRawImage();
+            if obj.imageExists()
+                obj.updateFromRawImage();
+            end
         end
         function thresholdSliderChanging(obj, ~, event)
             obj.intensityThresholds = event.Value;
-            obj.updateFromRawImage();
+            if obj.imageExists()
+                obj.updateFromRawImage();
+            end
         end
 
         function updateFromRawImage(obj)
@@ -117,11 +125,6 @@ classdef PreprocessorElements < handle
         function im = preprocessImage(obj, im)
             preprocessor = obj.getPreprocessor();
             im = preprocessor(im);
-        end
-
-        function throwAlertMessage(obj, message, title)
-            fig = obj.getFigure();
-            uialert(fig, message, title);
         end
     end
 end

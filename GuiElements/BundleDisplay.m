@@ -7,8 +7,6 @@ classdef BundleDisplay < PreprocessorElements & RectangleDrawer & PanZoomer
         doZoom;
     end
 
-
-
     methods
         function obj = BundleDisplay(parent, varargin)
             p = inputParser;
@@ -53,6 +51,8 @@ classdef BundleDisplay < PreprocessorElements & RectangleDrawer & PanZoomer
         function exportImageIfNeeded(obj, startDirectory)
             if obj.imageExists()
                 obj.exportImage(startDirectory);
+            else
+                obj.throwAlertMessage("No image imported!", "Export Image");
             end
         end
         function exportImage(obj, startDirectory)
@@ -105,6 +105,10 @@ classdef BundleDisplay < PreprocessorElements & RectangleDrawer & PanZoomer
             if obj.zoomIsEnabled()
                 obj.fitOriginalLimsToAxis(); % update zoomer for new image
             end
+        end
+        function throwAlertMessage(obj, message, title)
+            fig = obj.getFigure();
+            uialert(fig, message, title);
         end
     end
 end

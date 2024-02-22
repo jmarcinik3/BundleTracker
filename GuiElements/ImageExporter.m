@@ -1,4 +1,4 @@
-classdef ImageExporter  
+classdef ImageExporter
     properties (Access = private, Constant)
         extensions = { ...
             '*.png', "Portable Network Graphics (PNG)"; ...
@@ -10,16 +10,22 @@ classdef ImageExporter
             '*.emf', "Enhanced Metafile for Windows® systems only (EMF)";
             }; % compatible extensions to save image as
     end
-    
+
     methods (Static)
         function export(ax, startDirectory)
             extensions = ImageExporter.extensions;
             [filename, directoryPath, ~] = uiputfile(extensions, "Save Image", startDirectory);
 
-            if isfolder(directoryPath)
+            if isValidDirectoryPath(directoryPath)
                 filepath = strcat(directoryPath, filename);
                 exportgraphics(ax, filepath);
             end
         end
     end
+end
+
+
+
+function is = isValidDirectoryPath(directoryPath)
+is = directoryPath ~= 0 && isfolder(directoryPath);
 end
