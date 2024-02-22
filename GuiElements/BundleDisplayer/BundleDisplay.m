@@ -48,16 +48,12 @@ classdef BundleDisplay < PreprocessorElements & RectangleDrawer & PanZoomer
             obj.updateZoomIfNeeded();
         end
 
-        function exportImageIfNeeded(obj, startDirectory)
+        function exportImageIfPossible(obj, startDirectory)
             if obj.imageExists()
                 obj.exportImage(startDirectory);
             else
                 obj.throwAlertMessage("No image imported!", "Export Image");
             end
-        end
-        function exportImage(obj, startDirectory)
-            ax = obj.getAxis();
-            ImageExporter.export(ax, startDirectory);
         end
     end
 
@@ -105,6 +101,10 @@ classdef BundleDisplay < PreprocessorElements & RectangleDrawer & PanZoomer
             if obj.zoomIsEnabled()
                 obj.fitOriginalLimsToAxis(); % update zoomer for new image
             end
+        end
+        function exportImage(obj, startDirectory)
+            ax = obj.getAxis();
+            ImageExporter.export(ax, startDirectory);
         end
         function throwAlertMessage(obj, message, title)
             fig = obj.getFigure();
