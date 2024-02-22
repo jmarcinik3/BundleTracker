@@ -1,4 +1,4 @@
-classdef BundleDisplay < PreprocessorElements & RectangleDrawer & PanZoomer
+classdef BundleDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
@@ -8,7 +8,7 @@ classdef BundleDisplay < PreprocessorElements & RectangleDrawer & PanZoomer
     end
 
     methods
-        function obj = BundleDisplay(parent, varargin)
+        function obj = BundleDisplayer(parent, varargin)
             p = inputParser;
             addOptional(p, "EnableZoom", true);
             parse(p, varargin{:});

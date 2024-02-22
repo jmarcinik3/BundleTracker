@@ -263,7 +263,7 @@ classdef TrackingGui < handle
             obj.gridLayout = gl;
         end
         function generateBundleDisplay(obj, gl, enableZoom)
-            obj.bundleDisplay = BundleDisplay(gl, "EnableZoom", enableZoom);
+            obj.bundleDisplay = BundleDisplayer(gl, "EnableZoom", enableZoom);
         end
         function generateDirectorySelector(obj, gl, startingDirpath)
             obj.directorySelector = DirectorySelector( ...
