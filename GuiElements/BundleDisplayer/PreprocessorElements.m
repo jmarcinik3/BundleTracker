@@ -58,6 +58,14 @@ classdef PreprocessorElements < handle
 
     %% Functions to retrieve state information
     methods
+        function data = getPreprocessorInputs(obj)
+            thresholds = obj.getThresholds();
+            isInverted = obj.getInvert();
+            data = struct( ...
+                "IntensityRange", thresholds, ...
+                "IsInverted", isInverted ...
+                );
+        end
         function processor = getPreprocessor(obj)
             thresholds = obj.getThresholds();
             invert = obj.getInvert();

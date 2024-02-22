@@ -21,7 +21,7 @@ classdef BundleDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
             obj@RectangleDrawer(ax);
             obj@PanZoomer(ax);
 
-            obj.setUserDataFcn(@obj.getRegionUserData);
+            obj.setUserDataFcn(@obj.getPreprocessorInputs);
             obj.doZoom = enableZoom;
 
             obj.gridLayout = gl;
@@ -82,14 +82,6 @@ classdef BundleDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
             if isLeftClick(mouseButton)
                 obj.generateRectangle(source, event);
             end
-        end
-        function data = getRegionUserData(obj)
-            thresholds = obj.getThresholds();
-            isInverted = obj.getInvert();
-            data = struct( ...
-                "IntensityRange", thresholds, ...
-                "IsInverted", isInverted ...
-                );
         end
 
         function resizeAxis(obj)
