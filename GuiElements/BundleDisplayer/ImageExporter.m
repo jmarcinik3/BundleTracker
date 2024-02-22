@@ -27,5 +27,5 @@ end
 
 
 function is = isValidDirectoryPath(directoryPath)
-is = isstring(directoryPath) && isfolder(directoryPath);
+is = directoryPath ~= 0;
 end
