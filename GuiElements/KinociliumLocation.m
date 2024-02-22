@@ -34,44 +34,60 @@ classdef KinociliumLocation
 
     methods
         function obj = KinociliumLocation(gl)
-            radioGroup = uibuttongroup(gl);
-            radioGroup.Title = obj.title;
-            radioGroup.TitlePosition = "centertop";
-            radioGroup.BorderType = "line";
-            obj.radioGroup = radioGroup;
+            group = generateRadioGroup(gl);
+            obj.radioGroup = group;
 
-            obj.upperLeftButton = generateArrowButton(radioGroup, obj.upperLeftText, [2 1]);
-            obj.upperRightButton = generateArrowButton(radioGroup, obj.upperRightText, [2 2]);
-            obj.lowerLeftButton = generateArrowButton(radioGroup, obj.lowerLeftText, [1 1]);
-            obj.lowerRightButton = generateArrowButton(radioGroup, obj.lowerRightText, [1 2]);
+            obj.upperLeftButton = generateUpperLeftButton(group);
+            obj.upperRightButton = generateUpperRightButton(group);
+            obj.lowerLeftButton = generateLowerLeftButton(group);
+            obj.lowerRightButton = generateLowerRightButton(group);
         end
+    end
 
+    %% Functions to retreive GUI elements and state information
+    methods
         function elem = getElement(obj)
             elem = obj.radioGroup;
         end
-
         function text = getLocation(obj)
             button = obj.getSelectedButton();
             buttonText = button.Text;
             text = obj.textToLocation(buttonText);
         end
+    end
+    methods (Access = private)
         function button = getSelectedButton(obj)
             button = obj.radioGroup.SelectedObject;
         end
-
-        function isSelected = isUpperLeft(obj)
-            isSelected = obj.getSelectedButton() == obj.upperLeftButton;
-        end
-        function isSelected = isLowerLeft(obj)
-            isSelected = obj.getSelectedButton() == obj.lowerLeftButton;
-        end
-        function isSelected = isUpperRight(obj)
-            isSelected = obj.getSelectedButton() == obj.upperRightButton;
-        end
-        function isSelected = isLowerRight(obj)
-            isSelected = obj.getSelectedButton() == obj.lowerRightButton;
-        end
     end
+end
+
+function group = generateRadioGroup(gl)
+group = uibuttongroup(gl);
+group.Title = KinociliumLocation.title;
+group.TitlePosition = "centertop";
+group.BorderType = "line";
+end
+
+function button = generateUpperLeftButton(group)
+text = KinociliumLocation.upperLeftText;
+location = [2, 1];
+button = generateArrowButton(group, text, location);
+end
+function button = generateUpperRightButton(group)
+text = KinociliumLocation.upperRightText;
+location = [2, 2];
+button = generateArrowButton(group, text, location);
+end
+function button = generateLowerLeftButton(group)
+text = KinociliumLocation.lowerLeftText;
+location = [1, 1];
+button = generateArrowButton(group, text, location);
+end
+function button = generateLowerRightButton(group)
+text = KinociliumLocation.lowerRightText;
+location = [1, 2];
+button = generateArrowButton(group, text, location);
 end
 
 function button = generateArrowButton(rg, text, loc)
@@ -81,8 +97,15 @@ column = loc(2);
 leftMargin = 10;
 rowHeight = KinociliumLocation.rowHeight;
 columnWidth = rowHeight;
-widthLimit = 100;
-position = [leftMargin+columnWidth*(column-1), rowHeight*(row-1), columnWidth, rowHeight];
+position = [
+    leftMargin + columnWidth*(column-1), ...
+    rowHeight * (row-1), ...
+    columnWidth, ...
+    rowHeight ...
+    ];
 
-button = uitogglebutton(rg, "Text", text, "Position", position);
+button = uitogglebutton(rg, ...
+    "Text", text, ...
+    "Position", position ...
+    );
 end
