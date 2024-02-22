@@ -194,14 +194,14 @@ classdef TrackingGui < handle
             results = TrackRegion( ...
                 region, filepaths, trackingMode, preprocessor ...
                 ); % preprocess and track
-            
-            results.Bounds = region.Position;
-            results.TrackingMode = trackingMode;
-            results = obj.appendMetadata(results);
+
+            results = obj.appendMetadata(results, region);
             results = postprocessResults(results);
         end
-        function results = appendMetadata(obj, results)
+        function results = appendMetadata(obj, results, region)
             results.DirectoryPath = obj.getDirectoryPath();
+            results.Bounds = region.Position;
+            results.TrackingMode = obj.getTrackingSelection();
             results.IsInverted = obj.getInvert();
             results.IntensityRange = obj.getThresholds();
             results.KinociliumLocation = obj.getKinociliumLocation();
