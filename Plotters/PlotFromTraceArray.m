@@ -8,6 +8,10 @@ classdef PlotFromTraceArray
 
             traceCount = height(traces);
 
+            title("Waterfall Plot of Bundle Position");
+            xlabel("Time [frames]")
+            ylabel("Position [nm]");
+
             hold on;
             for index = 1:traceCount
                 trace = traces(index, :);
