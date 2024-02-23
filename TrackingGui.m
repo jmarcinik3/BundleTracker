@@ -1,8 +1,9 @@
 classdef TrackingGui < handle
-    properties (Access = private, Constant)
+    properties (Constant)
         queueColor = "red";
         workingColor = "yellow";
         finishedColor = "green";
+        rowHeight = 25;
     end
 
     properties (Access = private)
@@ -12,10 +13,12 @@ classdef TrackingGui < handle
         % main window components
         figure; % uifigure containing GUI
         gridLayout; % uigridlayout containing GUI components
+        leftGridLayout % uigridlayout for leftside column
+        rightGridLayout % uigridlayout for rightside column
 
         % components to select and display bundle images
-        bundleDisplayer; % BundleDisplayer object
-        directorySelector; % DirectorySelector
+        imageDisplayer; % ImageDisplayer object
+        directorySelector; % DirectorySelector object
 
         % components to set processing and tracking methods
         trackingSelection;
@@ -37,12 +40,125 @@ classdef TrackingGui < handle
             parse(p, varargin{:});
             startingDirpath = p.Results.StartingDirectory;
             enableZoom = p.Results.EnableZoom;
-            
-            gl = obj.generateGridLayout();
-            obj.generateSimpleElements(gl);
-            obj.generateBundleDisplayer(gl, enableZoom);
+
+            gl = obj.generateGridLayout([2, 2]);
+            set(gl, ...
+                "ColumnWidth", {'3x', '1x'}, ...
+                "RowHeight", {TrackingGui.rowHeight, '1x'} ...
+                );
+
+            lgl = uigridlayout(gl, [2, 1]);
+            rgl = uigridlayout(gl, [7, 1]);
+            lgl.Layout.Row = 2;
+            lgl.Layout.Column = 1;
+            rgl.Layout.Row = 2;
+            rgl.Layout.Column = 2;
+
+            obj.gridLayout = gl;
+            obj.leftGridLayout = lgl;
+            obj.rightGridLayout = rgl;
+
+            obj.generateSimpleElements(rgl);
+            obj.generateImageDisplayer(lgl, enableZoom);
             obj.generateDirectorySelector(gl, startingDirpath); % must come last
             layoutElements(obj);
+        end
+    end
+
+    %% Functions to generate GUI elements
+    methods (Access = private)
+        function gl = generateGridLayout(obj, size)
+            fig = uifigure;
+            fig.Name = "Hair-Bundle Tracking";
+            gl = uigridlayout(fig, size);
+            obj.figure = fig;
+        end
+        function generateImageDisplayer(obj, gl, enableZoom)
+            obj.imageDisplayer = ImageDisplayer(gl, "EnableZoom", enableZoom);
+        end
+        function generateDirectorySelector(obj, gl, startingDirpath)
+            obj.directorySelector = DirectorySelector( ...
+                gl, ...
+                "ValueChangedFcn", @obj.directoryValueChanged ...
+                );
+            obj.directorySelector.setDirectory(startingDirpath);
+        end
+        function generateSimpleElements(obj, gl)
+            obj.generateTrackingElements(gl);
+            obj.generatePostTrackingElements(gl);
+        end
+        function generateTrackingElements(obj, gl)
+            obj.trackingSelection = generateTrackingSelection(gl);
+            obj.kinociliumLocation = KinociliumLocation(gl);
+            obj.scaleFactorInputElement = generateScaleFactorElement(gl);
+            obj.fpsInputElement = generateFpsInputElement(gl);
+            obj.saveFilestemElement = generateSaveFilestemElement(gl);
+        end
+        function generatePostTrackingElements(obj, gl)
+            obj.trackButton = obj.generateTrackButton(gl);
+            obj.saveImageButton = obj.generateSaveImageButton(gl);
+        end
+        function trackButton = generateTrackButton(obj, gl)
+            trackButton = generateTrackButton(gl);
+            set(trackButton, "ButtonPushedFcn", @obj.trackButtonPushed);
+        end
+        function saveImageButton = generateSaveImageButton(obj, gl)
+            saveImageButton = generateSaveImageButton(gl);
+            set(saveImageButton, "ButtonPushedFcn", @obj.saveImageButtonPushed);
+            obj.saveImageButton = saveImageButton;
+        end
+    end
+
+    %% Functions to retrieve GUI elements
+    methods (Access = private)
+        function fig = getFigure(obj)
+            fig = obj.figure;
+        end
+        function gl = getGridLayout(obj)
+            gl = obj.gridLayout;
+        end
+        function lgl = getLeftGridLayout(obj)
+            lgl = obj.leftGridLayout;
+        end
+        function rgl = getRightGridLayout(obj)
+            rgl = obj.rightGridLayout;
+        end
+
+        % complex class objects for visual components
+        function elem = getImageDisplayerElement(obj)
+            elem = obj.imageDisplayer.getGridLayout();
+        end
+        function elem = getRegionDisplayerElement(obj)
+            regionDisplayer = obj.imageDisplayer.getRegionDisplayer();
+            elem = regionDisplayer.getGridLayout();
+        end
+        function elem = getDirectorySelectionElement(obj)
+            elem = obj.directorySelector.getGridLayout();
+        end
+
+        % components to set postprocessing methods
+        function elem = getTrackingSelectionElement(obj)
+            elem = obj.trackingSelection;
+        end
+        function elem = getKinociliumLocationElement(obj)
+            elem = obj.kinociliumLocation.getElement();
+        end
+        function elem = getScaleFactorInputElement(obj)
+            elem = obj.scaleFactorInputElement;
+        end
+        function elem = getFpsInputElement(obj)
+            elem = obj.fpsInputElement;
+        end
+
+        % button to starting tracking and elements for saving
+        function elem = getTrackButton(obj)
+            elem = obj.trackButton;
+        end
+        function elem = getSaveImageButton(obj)
+            elem = obj.saveImageButton;
+        end
+        function elem = getSaveFilestemElement(obj)
+            elem = obj.saveFilestemElement;
         end
     end
 
@@ -65,21 +181,10 @@ classdef TrackingGui < handle
         function count = getFilecount(obj)
             count = obj.directorySelector.getFilecount();
         end
-        
-        % ...for preprocessing
-        function processor = getPreprocessor(obj)
-            processor = obj.bundleDisplayer.getPreprocessor();
-        end
-        function vals = getThresholds(obj)
-            vals = obj.bundleDisplayer.getThresholds();
-        end
-        function invert = getInvert(obj)
-            invert = obj.bundleDisplayer.getInvert();
-        end
 
         % ...for tracking
         function regs = getTrackingRegions(obj)
-            regs = obj.bundleDisplayer.getRegions();
+            regs = obj.imageDisplayer.getRegions();
         end
         function paths = getFilepaths(obj)
             paths = obj.directorySelector.getFilepaths();
@@ -111,48 +216,6 @@ classdef TrackingGui < handle
             gl = obj.saveFilestemElement;
             textbox = gl.Children(2);
             stem = textbox.Value;
-        end
-    end
-
-    %% Functions to retrieve stored child components
-    methods (Access = private)
-        % complex class objects for visual components
-        function fig = getFigure(obj)
-            fig = obj.figure;
-        end
-        function gl = getGridLayout(obj)
-            gl = obj.gridLayout;
-        end
-        function elem = getBundleDisplayerElement(obj)
-            elem = obj.bundleDisplayer.getGridLayout();
-        end
-        function elem = getDirectorySelectionElement(obj)
-            elem = obj.directorySelector.getGridLayout();
-        end
-
-        % components to set postprocessing methods
-        function elem = getTrackingSelectionElement(obj)
-            elem = obj.trackingSelection;
-        end
-        function elem = getKinociliumLocationElement(obj)
-            elem = obj.kinociliumLocation.getElement();
-        end
-        function elem = getScaleFactorInputElement(obj)
-            elem = obj.scaleFactorInputElement;
-        end
-        function elem = getFpsInputElement(obj)
-            elem = obj.fpsInputElement;
-        end
-
-        % button to starting tracking and elements for saving
-        function elem = getTrackButton(obj)
-            elem = obj.trackButton;
-        end
-        function elem = getSaveImageButton(obj)
-            elem = obj.saveImageButton;
-        end
-        function elem = getSaveFilestemElement(obj)
-            elem = obj.saveFilestemElement;
         end
     end
 
@@ -188,8 +251,8 @@ classdef TrackingGui < handle
             set(region, "Color", obj.finishedColor); % color region as finished
         end
         function results = trackRegion(obj, region)
+            preprocessor = Preprocessor.fromRegion(region);
             trackingMode = obj.getTrackingSelection();
-            preprocessor = obj.getPreprocessor();
             filepaths = obj.getFilepaths();
 
             results = TrackRegion( ...
@@ -200,11 +263,13 @@ classdef TrackingGui < handle
             results = postprocessResults(results);
         end
         function results = appendMetadata(obj, results, region)
+            regionParser = RegionParser(region);
+
             results.DirectoryPath = obj.getDirectoryPath();
             results.Bounds = region.Position;
             results.TrackingMode = obj.getTrackingSelection();
-            results.IsInverted = obj.getInvert();
-            results.IntensityRange = obj.getThresholds();
+            results.IsInverted = regionParser.getInvert();
+            results.IntensityRange = regionParser.getThresholds();
             results.KinociliumLocation = obj.getKinociliumLocation();
             results.ScaleFactor = obj.getScaleFactor();
             results.ScaleFactorError = obj.getScaleFactorError();
@@ -214,15 +279,15 @@ classdef TrackingGui < handle
             filepath = obj.generateSaveFilepath(label);
             save(filepath, "results");
         end
-        
+
         function saveImageButtonPushed(obj, ~, ~)
             obj.exportImageIfPossible();
         end
         function exportImageIfPossible(obj)
             directoryPath = obj.getDirectoryPath();
-            obj.bundleDisplayer.exportImageIfPossible(directoryPath);
+            obj.imageDisplayer.exportImageIfPossible(directoryPath);
         end
-        
+
         function directoryValueChanged(obj, ~, ~)
             obj.clearRegions();
             obj.updateImageForDirectory();
@@ -236,7 +301,7 @@ classdef TrackingGui < handle
             end
         end
         function clearRegions(obj)
-            obj.bundleDisplayer.clearRegions();
+            obj.imageDisplayer.clearRegions();
         end
         function updateImageForDirectoryIfNeeded(obj)
             if obj.directoryHasImage()
@@ -247,60 +312,15 @@ classdef TrackingGui < handle
             filepath = obj.getFirstFilepath();
             if isfile(filepath)
                 im = imread(filepath);
-                obj.bundleDisplayer.changeImage(im);
+                obj.imageDisplayer.changeImage(im);
             end
         end
-    
+
         function throwAlertMessage(obj, message, title)
             fig = obj.getFigure();
             uialert(fig, message, title);
         end
     end
-
-    %% Functions to generate GUI elements
-    methods (Access = private)
-        function gl = generateGridLayout(obj)
-            fig = uifigure;
-            fig.Name = "Hair-Bundle Tracking";
-            gl = uigridlayout(fig, [9 2]);
-            obj.figure = fig;
-            obj.gridLayout = gl;
-        end
-        function generateBundleDisplayer(obj, gl, enableZoom)
-            obj.bundleDisplayer = ImageDisplayer(gl, "EnableZoom", enableZoom);
-        end
-        function generateDirectorySelector(obj, gl, startingDirpath)
-            obj.directorySelector = DirectorySelector( ...
-                gl, ...
-                "ValueChangedFcn", @obj.directoryValueChanged ...
-                );
-            obj.directorySelector.setDirectory(startingDirpath);
-        end
-        function generateSimpleElements(obj, gl)
-            obj.generateTrackingElements(gl);
-            obj.generatePostTrackingElements(gl);
-        end
-        function generateTrackingElements(obj, gl)
-            obj.trackingSelection = generateTrackingSelection(gl);
-            obj.kinociliumLocation = KinociliumLocation(gl);
-            obj.scaleFactorInputElement = generateScaleFactorElement(gl);
-            obj.fpsInputElement = generateFpsInputElement(gl);
-            obj.saveFilestemElement = generateSaveFilestemElement(gl);
-        end
-        function generatePostTrackingElements(obj, gl)
-            obj.trackButton = obj.generateTrackButton(gl);
-            obj.saveImageButton = obj.generateSaveImageButton(gl);
-        end
-        function trackButton = generateTrackButton(obj, gl)
-            trackButton = generateTrackButton(gl);
-            set(trackButton, "ButtonPushedFcn", @obj.trackButtonPushed);
-        end
-        function saveImageButton = generateSaveImageButton(obj, gl)
-            saveImageButton = generateSaveImageButton(gl);
-            set(saveImageButton, "ButtonPushedFcn", @obj.saveImageButtonPushed);
-            obj.saveImageButton = saveImageButton;
-        end
-end
 end
 
 
@@ -315,81 +335,66 @@ end
 %
 % Returns void
 function layoutElements(gui)
-% Set component heights in grid layout
-textboxHeight = 25;
-dropdownHeight = 25;
-buttonHeight = 25;
-kinociliumGroupHeight = KinociliumLocation.height;
-
-% Retrieve components
-gl = gui.getGridLayout();
+layoutTopElements(gui);
+layoutLeftsideElements(gui);
+layoutRightsideElements(gui);
+end
+function layoutTopElements(gui)
+rowHeight = TrackingGui.rowHeight;
 directorySelector = gui.getDirectorySelectionElement();
-bundleDisplayer = gui.getBundleDisplayerElement();
+
+directorySelector.Layout.Row = 1;
+directorySelector.Layout.Column = [1, 2];
+set(directorySelector, ...
+    "RowHeight", rowHeight, ...
+    "ColumnWidth", {'7x', '1x', '2x', '2x'} ...
+    );
+end
+function layoutLeftsideElements(gui)
+lgl = gui.getLeftGridLayout();
+
+imageDisplayer = gui.getImageDisplayerElement();
+regionDisplayer = gui.getRegionDisplayerElement();
+
+imageDisplayer.Layout.Row = 1;
+regionDisplayer.Layout.Row = 2;
+set(lgl, "RowHeight", {'2x', '1x'})
+end
+function layoutRightsideElements(gui)
+rowHeight = TrackingGui.rowHeight;
+rgl = gui.getRightGridLayout();
 
 kinociliumLocationGroup = gui.getKinociliumLocationElement();
 scaleFactorElement = gui.getScaleFactorInputElement();
 fpsInputElement = gui.getFpsInputElement();
-
 trackingDropdown = gui.getTrackingSelectionElement();
 saveFilestemElement = gui.getSaveFilestemElement();
 trackButton = gui.getTrackButton();
 saveImageButton = gui.getSaveImageButton();
 
-% Set up hair-bundle display with region selection
-bundleDisplayer.Layout.Row = [2 8];
-bundleDisplayer.Layout.Column = 1;
+trackingDropdown.Layout.Row = 1;
+kinociliumLocationGroup.Layout.Row = 2;
+scaleFactorElement.Layout.Row = 3;
+fpsInputElement.Layout.Row = 4;
+saveFilestemElement.Layout.Row = 5;
+trackButton.Layout.Row = 6;
+saveImageButton.Layout.Row = 7;
 
-% Set up section to select and display directory with images
-directorySelector.Layout.Row = 1;
-directorySelector.Layout.Column = [1 2];
-directorySelector.RowHeight = textboxHeight;
-directorySelector.ColumnWidth = {'7x', '1x', '2x', '2x'};
+set(scaleFactorElement, ...
+    "RowHeight", rowHeight, ...
+    "ColumnWidth", {'3x', '3x', '1x', '2x'} ...
+    );
+set(fpsInputElement, ...
+    "RowHeight", rowHeight, ...
+    "ColumnWidth", {'1x', '2x'} ...
+    );
+set(saveFilestemElement, ...
+    "RowHeight", rowHeight, ...
+    "ColumnWidth", {'1x', '2x'} ...
+    );
 
-% Set up section to select tracking method, start tracking
-trackingDropdown.Layout.Row = 2;
-trackButton.Layout.Row = 7;
-trackingDropdown.Layout.Column = 2;
-trackButton.Layout.Column = 2;
-
-% Set up section to select kinocilium direction
-kinociliumLocationGroup.Layout.Row = 3;
-kinociliumLocationGroup.Layout.Column = 2;
-
-% Set up label with textbox to set scale factor
-scaleFactorElement.Layout.Row = 4;
-scaleFactorElement.Layout.Column = 2;
-scaleFactorElement.RowHeight = textboxHeight;
-scaleFactorElement.ColumnWidth = {'3x', '3x', '1x', '2x'};
-
-% Set up label with textbox to set FPS
-fpsInputElement.Layout.Row = 5;
-fpsInputElement.Layout.Column = 2;
-fpsInputElement.RowHeight = textboxHeight;
-fpsInputElement.ColumnWidth = {'1x', '2x'};
-
-% Set up field to set save filestem
-saveFilestemElement.Layout.Row = 6;
-saveFilestemElement.Layout.Column = 2;
-saveFilestemElement.RowHeight = textboxHeight;
-saveFilestemElement.ColumnWidth = {'1x', '2x'};
-
-% Set up button to save image
-saveImageButton.Layout.Row = 9;
-saveImageButton.Layout.Column = [1 2];
-
-% Set up row heights and column widths for grid layout
-gl.RowHeight = {
-    textboxHeight, ... % directory selector
-    dropdownHeight, ... % tracking method dropdown
-    kinociliumGroupHeight, ... % kinocilium group
-    textboxHeight, ... % scale factor textbox
-    textboxHeight, ... % fps textbox
-    textboxHeight, ... % save filestem textbox
-    buttonHeight, ... % track button
-    '1x', ... % reserved space for image
-    buttonHeight ... % save image button
-    };
-gl.ColumnWidth = {'2x', '1x'};
+rgl.RowHeight = num2cell(rowHeight * ones(1, 7));
+rgl.RowHeight{2} = KinociliumLocation.height;
 end
 
 %% Function to generate tracking method dropdown

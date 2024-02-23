@@ -2,7 +2,7 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
-
+        regionDisplayer;
         doZoom;
     end
 
@@ -20,7 +20,8 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
             obj@RectangleDrawer(ax);
             obj@PanZoomer(ax);
 
-            obj.setUserDataFcn(@obj.getPreprocessorInputs);
+            obj.regionDisplayer = RegionDisplayer(parent);
+            obj.setUserDataFcn(@obj.getRegionUserData);
             obj.doZoom = enableZoom;
 
             iIm = obj.getInteractiveImage();
@@ -42,7 +43,7 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
 
         function obj = changeImage(obj, im)
             obj.setRawImage(im);
-            obj.resizeAxis();
+            obj.regionDisplayer.setRawImage(im);
             obj.updateZoomIfNeeded();
         end
 
@@ -57,20 +58,21 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
 
     %% Functions to retrieve GUI elements
     methods
-        function ax = getAxis(obj)
-            ax = getAxis@PreprocessorElements(obj);
-        end
         function fig = getFigure(obj)
             fig = getFigure@PreprocessorElements(obj);
+        end
+        function displayer = getRegionDisplayer(obj)
+            displayer = obj.regionDisplayer;
+        end
+    end
+    methods (Access = protected)
+        function ax = getAxis(obj)
+            ax = getAxis@PreprocessorElements(obj);
         end
     end
 
     %% Functions to retrieve information of GUI
     methods (Access = private)
-        function [h, w] = getImageSize(obj)
-            im = obj.getRawImage();
-            [h, w] = size(im);
-        end
         function is = zoomIsEnabled(obj)
             is = obj.doZoom;
         end
@@ -79,17 +81,33 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
     %% Functions to update state of GUI
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
-            mouseButton = event.Button;
-            if isLeftClick(mouseButton)
-                obj.generateRectangle(source, event);
+            if isLeftClick(event)
+                rect = obj.generateRectangle(source, event);
+                obj.addRegionListeners(rect);
+                obj.setRegionInDisplayer(rect);
             end
         end
-
-        function resizeAxis(obj)
-            ax = obj.getAxis();
-            [h, w] = obj.getImageSize();
-            resizeAxis(ax, h, w);
+        function addRegionListeners(obj, region)
+            addlistener(region, "MovingROI", @obj.regionMoving);
+            addlistener(region, "ROIClicked", @obj.regionClicked);
         end
+        function regionMoving(obj, source, ~)
+            obj.setRegionInDisplayer(source);
+        end
+        function regionClicked(obj, source, event)
+            if isLeftClick(event)
+                obj.setRegionInDisplayer(source);
+            end
+        end
+        function setRegionInDisplayer(obj, region)
+            regionRawImage = obj.getRegionalRawImage(region);
+            obj.regionDisplayer.setRegion(region, regionRawImage);
+        end
+        function regionRawImage = getRegionalRawImage(obj, region)
+            im = obj.getRawImage();
+            regionRawImage = unpaddedMatrixInRegion(region, im);
+        end
+
         function updateZoomIfNeeded(obj)
             if obj.zoomIsEnabled()
                 obj.fitOriginalLimsToAxis(); % update zoomer for new image
@@ -133,6 +151,23 @@ gl.RowHeight = {sliderHeight, '1x'};
 gl.ColumnWidth = {'4x', '1x'};
 end
 
-function is = isLeftClick(mouseButton)
-is = mouseButton == 1;
+function is = isLeftClick(event)
+name = event.EventName;
+if name == "ROIClicked"
+    is = event.SelectionType == "left";
+elseif name == "Hit"
+    is = event.Button == 1;
+end
+end
+
+function unpaddedMatrix = unpaddedMatrixInRegion(region, im)
+regionMask = createMask(region, im);
+im(regionMask == 0) = 0;
+unpaddedMatrix = unpadMatrix(im);
+end
+function unpaddedMatrix = unpadMatrix(matrix)
+[nonzeroRows, nonzeroColumns] = find(matrix);
+nonzeroRowsSlice = min(nonzeroRows):max(nonzeroRows);
+nonzeroColumnsSlice = min(nonzeroColumns):max(nonzeroColumns);
+unpaddedMatrix = matrix(nonzeroRowsSlice, nonzeroColumnsSlice);
 end

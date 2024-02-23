@@ -9,11 +9,11 @@ classdef PreprocessorElements < handle
     end
 
     methods
-        function obj = PreprocessorElements(gl, ax)
+        function obj = PreprocessorElements(gl, ax, varargin)
             if nargin == 1
                 ax = PreprocessorElements.generateAxis(gl);
             end
-            
+
             obj.gridLayout = gl;
             obj.interactiveImage = generateInteractiveImage(ax);
             obj.thresholdSlider = obj.generateThresholdSlider(gl);
@@ -26,7 +26,10 @@ classdef PreprocessorElements < handle
     methods (Access = private)
         function thresholdSlider = generateThresholdSlider(obj, gl)
             thresholdSlider = generateThresholdSlider(gl);
-            set(thresholdSlider, "ValueChangingFcn", @obj.thresholdSliderChanging)
+            set(thresholdSlider, ...
+                "ValueChangingFcn", @obj.thresholdSliderChanging, ...
+                "ValueChangedFcn", @obj.thresholdSliderChanged ...
+                );
         end
         function invertCheckbox = generateInvertCheckbox(obj, gl)
             invertCheckbox = generateInvertCheckbox(gl);
@@ -36,8 +39,12 @@ classdef PreprocessorElements < handle
     methods (Static)
         function ax = generateAxis(gl)
             ax = uiaxes(gl);
-            ax.Visible = "off";
             ax.Toolbar.Visible = "off";
+            ax.set( ...
+                "Visible", "off", ...
+                "XtickLabel", [], ...
+                "YTickLabel", [] ...
+                );
         end
     end
 
@@ -55,6 +62,8 @@ classdef PreprocessorElements < handle
         function im = getRawImage(obj)
             im = obj.rawImage;
         end
+    end
+    methods (Access = protected)
         function iIm = getInteractiveImage(obj)
             iIm = obj.interactiveImage;
         end
@@ -63,7 +72,6 @@ classdef PreprocessorElements < handle
             ax = ancestor(iIm, "axes");
         end
     end
-
     methods (Access = private)
         function fig = getFigure(obj)
             iIm = obj.getInteractiveImage();
@@ -72,8 +80,8 @@ classdef PreprocessorElements < handle
     end
 
     %% Functions to retrieve state information
-    methods
-        function data = getPreprocessorInputs(obj)
+    methods (Access = protected)
+        function data = getRegionUserData(obj)
             thresholds = obj.getThresholds();
             isInverted = obj.getInvert();
             data = struct( ...
@@ -81,7 +89,7 @@ classdef PreprocessorElements < handle
                 "IsInverted", isInverted ...
                 );
         end
-        function processor = getPreprocessor(obj)
+        function processor = generatePreprocessor(obj)
             thresholds = obj.getThresholds();
             invert = obj.getInvert();
             processor = Preprocessor(thresholds, invert);
@@ -93,22 +101,48 @@ classdef PreprocessorElements < handle
         function invert = getInvert(obj)
             invert = obj.invertCheckbox.Value;
         end
-
+        
         function exists = imageExists(obj)
             im = obj.getRawImage();
             exists = numel(im) >= 1;
         end
     end
+    methods (Access = private)
+        function [h, w] = getImageSize(obj)
+            im = obj.getRawImage();
+            [h, w] = size(im);
+        end
+    end
 
     %% Functions to set state information
-    methods
+    methods (Access = protected)
         function setRawImage(obj, im)
             obj.rawImage = im;
             obj.updateFromRawImage();
+            obj.resizeAxis();
         end
     end
 
     %% Functions to update state of interactive image
+    methods (Access = protected)
+        function invertCheckboxChanged(obj, ~, ~)
+            if obj.imageExists()
+                obj.updateFromRawImage();
+            end
+        end
+        function thresholdSliderChanging(obj, ~, event)
+            obj.intensityThresholds = event.Value;
+            if obj.imageExists()
+                obj.updateFromRawImage();
+            end
+        end
+        function thresholdSliderChanged(obj, source, ~)
+            obj.intensityThresholds = source.Value;
+            if obj.imageExists()
+                obj.updateFromRawImage();
+            end
+        end
+    end
     methods (Access = private)
         function showImage(obj, im)
             imRgb = obj.gray2rgb(im);
@@ -123,30 +157,23 @@ classdef PreprocessorElements < handle
             imRgb = gray2rgb(im, fig);
         end
 
-        function invertCheckboxChanged(obj, ~, ~)
-            if obj.imageExists()
-                obj.updateFromRawImage();
-            end
+        function resizeAxis(obj)
+            ax = obj.getAxis();
+            [h, w] = obj.getImageSize();
+            resizeAxis(ax, h, w);
         end
-        function thresholdSliderChanging(obj, ~, event)
-            obj.intensityThresholds = event.Value;
-            if obj.imageExists()
-                obj.updateFromRawImage();
-            end
-        end
-
         function updateFromRawImage(obj)
-            im = obj.getPreprocessedImage();
+            im = obj.generatePreprocessedImage();
             obj.showImage(im);
         end
-        function im = getPreprocessedImage(obj)
+        function im = generatePreprocessedImage(obj)
             im = obj.getRawImage();
             if obj.imageExists()
                 im = obj.preprocessImage(im);
             end
         end
         function im = preprocessImage(obj, im)
-            preprocessor = obj.getPreprocessor();
+            preprocessor = obj.generatePreprocessor();
             im = preprocessor(im);
         end
     end
