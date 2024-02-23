@@ -36,6 +36,14 @@ classdef PreprocessorGui < handle
         end
     end
     methods (Static)
+        %% Function to generate plotting axis
+        % Generates axis on which hair cell image is plotted
+        %
+        % Arguments
+        %
+        % * uigridlayout |gl|: layout to add axis in
+        %
+        % Returns uiaxes
         function ax = generateAxis(gl)
             ax = uiaxes(gl);
             ax.Toolbar.Visible = "off";
@@ -224,15 +232,6 @@ function checkbox = generateInvertCheckbox(gl)
 checkbox = uicheckbox(gl);
 checkbox.Text = "Invert";
 end
-
-%% Function to generate plotting axis
-% Generates axis on which hair cell image is plotted
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add axis in
-%
-% Returns uiaxes
 
 %% Function to generate interactive image on axis
 % Generates empty image and plots onto |ax|.
