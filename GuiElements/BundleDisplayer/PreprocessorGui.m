@@ -1,4 +1,4 @@
-classdef PreprocessorElements < handle
+classdef PreprocessorGui < handle
     properties (Access = private)
         gridLayout;
         rawImage;
@@ -9,9 +9,9 @@ classdef PreprocessorElements < handle
     end
 
     methods
-        function obj = PreprocessorElements(gl, ax, varargin)
+        function obj = PreprocessorGui(gl, ax, varargin)
             if nargin == 1
-                ax = PreprocessorElements.generateAxis(gl);
+                ax = PreprocessorGui.generateAxis(gl);
             end
 
             obj.gridLayout = gl;

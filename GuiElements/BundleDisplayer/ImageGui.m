@@ -1,26 +1,26 @@
-classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
+classdef ImageGui < PreprocessorGui & RectangleDrawer & PanZoomer
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
-        regionDisplayer;
+        regionGui;
         doZoom;
     end
 
     methods
-        function obj = ImageDisplayer(parent, varargin)
+        function obj = ImageGui(parent, varargin)
             p = inputParser;
             addOptional(p, "EnableZoom", true);
             parse(p, varargin{:});
             enableZoom = p.Results.EnableZoom;
 
             gl = uigridlayout(parent, [2, 1]);
-            ax = PreprocessorElements.generateAxis(gl);
+            ax = PreprocessorGui.generateAxis(gl);
 
-            obj@PreprocessorElements(gl, ax);
+            obj@PreprocessorGui(gl, ax);
             obj@RectangleDrawer(ax);
             obj@PanZoomer(ax);
 
-            obj.regionDisplayer = RegionDisplayer(parent);
+            obj.regionGui = RegionGui(parent);
             obj.setUserDataFcn(@obj.getRegionUserData);
             obj.doZoom = enableZoom;
 
@@ -43,7 +43,7 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
 
         function obj = changeImage(obj, im)
             obj.setRawImage(im);
-            obj.regionDisplayer.setRawImage(im);
+            obj.regionGui.setRawImage(im);
             obj.updateZoomIfNeeded();
         end
 
@@ -59,15 +59,15 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
     %% Functions to retrieve GUI elements
     methods
         function fig = getFigure(obj)
-            fig = getFigure@PreprocessorElements(obj);
+            fig = getFigure@PreprocessorGui(obj);
         end
-        function displayer = getRegionDisplayer(obj)
-            displayer = obj.regionDisplayer;
+        function gui = getRegionGui(obj)
+            gui = obj.regionGui;
         end
     end
     methods (Access = protected)
         function ax = getAxis(obj)
-            ax = getAxis@PreprocessorElements(obj);
+            ax = getAxis@PreprocessorGui(obj);
         end
     end
 
@@ -84,7 +84,7 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
             if isLeftClick(event)
                 rect = obj.generateRectangle(source, event);
                 obj.addRegionListeners(rect);
-                obj.setRegionInDisplayer(rect);
+                obj.setPreviewRegion(rect);
             end
         end
         function addRegionListeners(obj, region)
@@ -92,16 +92,16 @@ classdef ImageDisplayer < PreprocessorElements & RectangleDrawer & PanZoomer
             addlistener(region, "ROIClicked", @obj.regionClicked);
         end
         function regionMoving(obj, source, ~)
-            obj.setRegionInDisplayer(source);
+            obj.setPreviewRegion(source);
         end
         function regionClicked(obj, source, event)
             if isLeftClick(event)
-                obj.setRegionInDisplayer(source);
+                obj.setPreviewRegion(source);
             end
         end
-        function setRegionInDisplayer(obj, region)
+        function setPreviewRegion(obj, region)
             regionRawImage = obj.getRegionalRawImage(region);
-            obj.regionDisplayer.setRegion(region, regionRawImage);
+            obj.regionGui.setRegion(region, regionRawImage);
         end
         function regionRawImage = getRegionalRawImage(obj, region)
             im = obj.getRawImage();

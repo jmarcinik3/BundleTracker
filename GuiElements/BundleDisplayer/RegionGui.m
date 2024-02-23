@@ -1,4 +1,4 @@
-classdef RegionDisplayer < PreprocessorElements
+classdef RegionGui < PreprocessorGui
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
@@ -7,9 +7,9 @@ classdef RegionDisplayer < PreprocessorElements
     end
 
     methods
-        function obj = RegionDisplayer(parent)
+        function obj = RegionGui(parent)
             gl = uigridlayout(parent, [1, 3]);
-            obj@PreprocessorElements(gl);
+            obj@PreprocessorGui(gl);
             
             thresholdSlider = obj.getThresholdSlider();
             invertCheckbox = obj.getInvertCheckbox();
@@ -53,12 +53,12 @@ classdef RegionDisplayer < PreprocessorElements
     %% Functions to update GUI and state information
     methods (Access = protected)
         function thresholdSliderChanged(obj, source, event)
-            thresholdSliderChanged@PreprocessorElements(obj, source, event)
+            thresholdSliderChanged@PreprocessorGui(obj, source, event)
             thresholds = source.Value;
             obj.setRegionThresholds(thresholds);
         end
         function invertCheckboxChanged(obj, source, event)
-            invertCheckboxChanged@PreprocessorElements(obj, source, event);
+            invertCheckboxChanged@PreprocessorGui(obj, source, event);
             invert = source.Value;
             obj.setRegionInvert(invert);
         end

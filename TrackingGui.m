@@ -17,7 +17,7 @@ classdef TrackingGui < handle
         rightGridLayout % uigridlayout for rightside column
 
         % components to select and display bundle images
-        imageDisplayer; % ImageDisplayer object
+        imageGui; % ImageGui object
         directorySelector; % DirectorySelector object
 
         % components to set processing and tracking methods
@@ -59,7 +59,7 @@ classdef TrackingGui < handle
             obj.rightGridLayout = rgl;
 
             obj.generateSimpleElements(rgl);
-            obj.generateImageDisplayer(lgl, enableZoom);
+            obj.generateImageGui(lgl, enableZoom);
             obj.generateDirectorySelector(gl, startingDirpath); % must come last
             layoutElements(obj);
         end
@@ -73,8 +73,8 @@ classdef TrackingGui < handle
             gl = uigridlayout(fig, size);
             obj.figure = fig;
         end
-        function generateImageDisplayer(obj, gl, enableZoom)
-            obj.imageDisplayer = ImageDisplayer(gl, "EnableZoom", enableZoom);
+        function generateImageGui(obj, gl, enableZoom)
+            obj.imageGui = ImageGui(gl, "EnableZoom", enableZoom);
         end
         function generateDirectorySelector(obj, gl, startingDirpath)
             obj.directorySelector = DirectorySelector( ...
@@ -125,12 +125,12 @@ classdef TrackingGui < handle
         end
 
         % complex class objects for visual components
-        function elem = getImageDisplayerElement(obj)
-            elem = obj.imageDisplayer.getGridLayout();
+        function elem = getImageElement(obj)
+            elem = obj.imageGui.getGridLayout();
         end
-        function elem = getRegionDisplayerElement(obj)
-            regionDisplayer = obj.imageDisplayer.getRegionDisplayer();
-            elem = regionDisplayer.getGridLayout();
+        function elem = getRegionElement(obj)
+            regionGui = obj.imageGui.getRegionGui();
+            elem = regionGui.getGridLayout();
         end
         function elem = getDirectorySelectionElement(obj)
             elem = obj.directorySelector.getGridLayout();
@@ -184,7 +184,7 @@ classdef TrackingGui < handle
 
         % ...for tracking
         function regs = getTrackingRegions(obj)
-            regs = obj.imageDisplayer.getRegions();
+            regs = obj.imageGui.getRegions();
         end
         function paths = getFilepaths(obj)
             paths = obj.directorySelector.getFilepaths();
@@ -283,7 +283,7 @@ classdef TrackingGui < handle
         end
         function exportImageIfPossible(obj)
             directoryPath = obj.getDirectoryPath();
-            obj.imageDisplayer.exportImageIfPossible(directoryPath);
+            obj.imageGui.exportImageIfPossible(directoryPath);
         end
 
         function directoryValueChanged(obj, ~, ~)
@@ -299,7 +299,7 @@ classdef TrackingGui < handle
             end
         end
         function clearRegions(obj)
-            obj.imageDisplayer.clearRegions();
+            obj.imageGui.clearRegions();
         end
         function updateImageForDirectoryIfNeeded(obj)
             if obj.directoryHasImage()
@@ -310,7 +310,7 @@ classdef TrackingGui < handle
             filepath = obj.getFirstFilepath();
             if isfile(filepath)
                 im = imread(filepath);
-                obj.imageDisplayer.changeImage(im);
+                obj.imageGui.changeImage(im);
             end
         end
 
@@ -351,11 +351,11 @@ end
 function layoutLeftsideElements(gui)
 lgl = gui.getLeftGridLayout();
 
-imageDisplayer = gui.getImageDisplayerElement();
-regionDisplayer = gui.getRegionDisplayerElement();
+imageGui = gui.getImageElement();
+regionGui = gui.getRegionElement();
 
-imageDisplayer.Layout.Row = 1;
-regionDisplayer.Layout.Row = 2;
+imageGui.Layout.Row = 1;
+regionGui.Layout.Row = 2;
 set(lgl, "RowHeight", {'2x', '1x'})
 end
 function layoutRightsideElements(gui)
