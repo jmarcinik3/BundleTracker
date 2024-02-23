@@ -1,7 +1,6 @@
 classdef PreprocessorGui < handle
     properties (Access = private)
         gridLayout;
-        rawImage;
         interactiveImage;
         thresholdSlider;
         intensityThresholds;
@@ -60,7 +59,8 @@ classdef PreprocessorGui < handle
             elem = obj.invertCheckbox;
         end
         function im = getRawImage(obj)
-            im = obj.rawImage;
+            iIm = obj.getInteractiveImage();
+            im = iIm.UserData.rawImage;
         end
         function iIm = getInteractiveImage(obj)
             iIm = obj.interactiveImage;
@@ -117,7 +117,8 @@ classdef PreprocessorGui < handle
     %% Functions to set state information
     methods
         function setRawImage(obj, im)
-            obj.rawImage = im;
+            iIm = obj.getInteractiveImage();
+            iIm.UserData.rawImage = im;
             obj.updateFromRawImage();
             obj.resizeAxis();
         end
