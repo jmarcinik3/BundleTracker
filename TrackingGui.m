@@ -231,6 +231,23 @@ classdef TrackingGui < handle
             textbox = gl.Children(2);
             stem = textbox.Value;
         end
+    
+        function has = directoryHasImage(obj)
+            count = obj.getFilecount();
+            directory = obj.getDirectoryPath();
+            has = count >= 1 && isfolder(directory);
+            if ~has
+                obj.throwAlertMessage("No valid images found!", "Choose Directory");
+            end
+        end
+        function im = getImage(obj)
+            if obj.directoryHasImage()
+                filepath = obj.getFirstFilepath();
+                im = imread(filepath);
+            else
+                im = [];
+            end
+        end
     end
 
     %% Functions to update state of GUI
@@ -311,32 +328,16 @@ classdef TrackingGui < handle
             obj.clearRegions();
             obj.updateImageForDirectory();
         end
-        function has = directoryHasImage(obj)
-            count = obj.getFilecount();
-            directory = obj.getDirectoryPath();
-            has = count >= 1 && isfolder(directory);
-            if ~has
-                obj.throwAlertMessage("No valid images found!", "Choose Directory");
-            end
-        end
         function clearRegions(obj)
             imageGui = obj.getImageGui();
             imageGui.clearRegions();
         end
-        function updateImageForDirectoryIfNeeded(obj)
-            if obj.directoryHasImage()
-                obj.updateImageForDirectory();
-            end
-        end
         function updateImageForDirectory(obj)
-            filepath = obj.getFirstFilepath();
-            if isfile(filepath)
-                regionPreviewer = obj.getRegionPreviewer();
-                im = imread(filepath);
-                regionPreviewer.changeFullImage(im);
-            end
+            im = obj.getImage();
+            regionPreviewer = obj.getRegionPreviewer();
+            regionPreviewer.changeFullImage(im);
         end
-
+        
         function throwAlertMessage(obj, message, title)
             fig = obj.getFigure();
             uialert(fig, message, title);
