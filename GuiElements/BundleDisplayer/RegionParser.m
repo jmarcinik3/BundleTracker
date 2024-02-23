@@ -1,5 +1,6 @@
 classdef RegionParser
     properties (Constant)
+        labelKeyword = "Label";
         intensityKeyword = "IntensityRange";
         invertKeyword = "IsInverted";
     end
@@ -15,7 +16,7 @@ classdef RegionParser
         end
     end
 
-    %% Functions to retreive state information or generate objects
+    %% Functions to retrieve state information or generate objects
     methods
         function region = getRegion(obj)
             region = obj.region;
@@ -29,6 +30,10 @@ classdef RegionParser
             region = obj.getRegion();
             keyword = RegionParser.invertKeyword;
             invert = region.UserData.(keyword);
+        end
+        function label = getLabel(obj)
+            region = obj.getRegion();
+            label = region.Label;
         end
 
         function processor = generatePreprocessor(obj)
@@ -52,8 +57,8 @@ classdef RegionParser
             region.UserData.(keyword) = invert;
         end
         function results = appendMetadata(obj, results)
-            region = obj.getRegion();
-            results.Region = region;
+            results.(RegionParser.labelKeyword) = obj.getLabel();
+            results.Region = obj.getRegion();
             results.(RegionParser.intensityKeyword) = obj.getThresholds();
             results.(RegionParser.invertKeyword) = obj.getInvert();
         end

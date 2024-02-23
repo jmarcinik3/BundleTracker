@@ -1,5 +1,5 @@
 classdef ResultsParser
-    properties
+    properties (Access = private)
         filepath;
         results;
     end
@@ -8,6 +8,10 @@ classdef ResultsParser
         function obj = ResultsParser(filepath)
             obj.filepath = filepath;
             obj.results = load(filepath, "results").results;
+        end
+
+        function label = getLabel(obj)
+            label = obj.results.Label;
         end
 
         function time = getTime(obj)
@@ -76,7 +80,6 @@ classdef ResultsParser
             resultsParser = ResultsParser(filepath);
             trace = resultsParser.getProcessedTrace();
         end
-
         function traces = traceArrayFromFilepaths(filepaths)
             firstFilepath = filepaths(1);
             firstTrace = ResultsParser.traceArrayFromFilepath(firstFilepath);
