@@ -10,7 +10,7 @@ classdef RegionParser
         end
     end
 
-    %% Function to retreive state infomration or generate objects
+    %% Function to retreive state information or generate objects
     methods
         function region = getRegion(obj)
             region = obj.region;
