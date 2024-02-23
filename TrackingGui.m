@@ -262,14 +262,12 @@ classdef TrackingGui < handle
             results = obj.appendMetadata(results, region);
             results = postprocessResults(results);
         end
-        function results = appendMetadata(obj, results, region)
+        function results = appendMetadata(obj, results, region)  
             regionParser = RegionParser(region);
+            results = regionParser.appendMetadata(results);
 
             results.DirectoryPath = obj.getDirectoryPath();
-            results.Bounds = region.Position;
             results.TrackingMode = obj.getTrackingSelection();
-            results.IsInverted = regionParser.getInvert();
-            results.IntensityRange = regionParser.getThresholds();
             results.KinociliumLocation = obj.getKinociliumLocation();
             results.ScaleFactor = obj.getScaleFactor();
             results.ScaleFactorError = obj.getScaleFactorError();

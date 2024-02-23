@@ -67,7 +67,7 @@ classdef ResultsParser
             intensities = obj.results.IntensityRange;
         end
         function bounds = getRegionBounds(obj)
-            bounds = obj.results.Bounds;
+            bounds = obj.results.Region.Position;
         end
     end
 

@@ -1,4 +1,9 @@
 classdef RegionParser
+    properties (Constant)
+        intensityKeyword = "IntensityRange";
+        invertKeyword = "IsInverted";
+    end
+
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
@@ -10,18 +15,20 @@ classdef RegionParser
         end
     end
 
-    %% Function to retreive state information or generate objects
+    %% Functions to retreive state information or generate objects
     methods
         function region = getRegion(obj)
             region = obj.region;
         end
         function thresholds = getThresholds(obj)
             region = obj.getRegion();
-            thresholds = region.UserData.IntensityRange;
+            keyword = RegionParser.intensityKeyword;
+            thresholds = region.UserData.(keyword);
         end
         function invert = getInvert(obj)
             region = obj.getRegion();
-            invert = region.UserData.IsInverted;
+            keyword = RegionParser.invertKeyword;
+            invert = region.UserData.(keyword);
         end
 
         function processor = generatePreprocessor(obj)
@@ -36,11 +43,19 @@ classdef RegionParser
     methods
         function setThresholds(obj, thresholds)
             region = obj.getRegion();
-            region.UserData.IntensityRange = thresholds;
+            keyword = RegionParser.intensityKeyword;
+            region.UserData.(keyword) = thresholds;
         end
         function setInvert(obj, invert)
             region = obj.getRegion();
-            region.UserData.IsInverted = invert;
+            keyword = RegionParser.invertKeyword;
+            region.UserData.(keyword) = invert;
+        end
+        function results = appendMetadata(obj, results)
+            region = obj.getRegion();
+            results.Region = region;
+            results.(RegionParser.intensityKeyword) = obj.getThresholds();
+            results.(RegionParser.invertKeyword) = obj.getInvert();
         end
     end
 end

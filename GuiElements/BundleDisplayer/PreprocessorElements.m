@@ -85,8 +85,8 @@ classdef PreprocessorElements < handle
             thresholds = obj.getThresholds();
             isInverted = obj.getInvert();
             data = struct( ...
-                "IntensityRange", thresholds, ...
-                "IsInverted", isInverted ...
+                RegionParser.intensityKeyword, thresholds, ...
+                RegionParser.invertKeyword, isInverted ...
                 );
         end
         function processor = generatePreprocessor(obj)
@@ -101,7 +101,7 @@ classdef PreprocessorElements < handle
         function invert = getInvert(obj)
             invert = obj.invertCheckbox.Value;
         end
-        
+
         function exists = imageExists(obj)
             im = obj.getRawImage();
             exists = numel(im) >= 1;
