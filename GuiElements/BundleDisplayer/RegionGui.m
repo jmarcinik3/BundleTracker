@@ -2,7 +2,6 @@ classdef RegionGui < PreprocessorGui
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
-        rawImage;
         regionParser;
     end
 
