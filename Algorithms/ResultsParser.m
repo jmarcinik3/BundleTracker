@@ -1,57 +1,55 @@
 classdef ResultsParser
     properties (Access = private)
-        filepath;
         results;
     end
 
     methods
         function obj = ResultsParser(filepath)
-            obj.filepath = filepath;
             obj.results = load(filepath, "results").results;
         end
 
         function label = getLabel(obj)
-            label = obj.results.Label;
+            label = vertcat(obj.results.Label);
         end
 
         function time = getTime(obj)
-            time = obj.results.t;
+            time = vertcat(obj.results.t);
         end
         function trace = getProcessedTrace(obj)
-            trace = obj.results.xProcessed;
+            trace = vertcat(obj.results.xProcessed);
         end
         function error = getProcessedTraceError(obj)
-            error = obj.results.xProcessedError;
+            error = vertcat(obj.results.xProcessedError);
         end
         function trace = getProcessedTrace2(obj)
-            trace = obj.results.yProcessed;
+            trace = vertcat(obj.results.yProcessed);
         end
         function trace = getProcessedTraceError2(obj)
-            trace = obj.results.yProcessedError;
+            trace = vertcat(obj.results.yProcessedError);
         end
 
         function x = getRawTraceX(obj)
-            x = obj.results.x;
+            x = vertcat(obj.results.x);
         end
         function y = getRawTraceY(obj)
-            y = obj.results.y;
+            y = vertcat(obj.results.y);
         end
         function error = getRawTraceErrorX(obj)
-            error = obj.results.xError;
+            error = vertcat(obj.results.xError);
         end
         function error = getRawTraceErrorY(obj)
-            error = obj.results.yError;
+            error = vertcat(obj.results.yError);
         end
 
         function angle = getAngleRadians(obj)
-            angle = obj.results.angle;
+            angle = vertcat(obj.results.angle);
         end
         function angle = getAngleDegrees(obj)
             angleRad = obj.getAngleRadians();
             angle = rad2deg(angleRad);
         end
         function error = getAngleErrorRadians(obj)
-            error = obj.results.angleError;
+            error = vertcat(obj.results.angleError);
         end
         function error = getAngleErrorDegrees(obj)
             errorRad = obj.getAngleErrorRadians();
@@ -59,40 +57,16 @@ classdef ResultsParser
         end
 
         function location = getKinociliumLocation(obj)
-            location = obj.results.KinociliumLocation;
+            location = vertcat(obj.results.KinociliumLocation);
         end
         function fps = getFps(obj)
             fps = obj.results.Fps;
         end
         function is = pixelsAreInverted(obj)
-            is = obj.results.IsInverted;
+            is = vertcat(obj.results.IsInverted);
         end
         function intensities = getIntensityRange(obj)
-            intensities = obj.results.IntensityRange;
-        end
-        function bounds = getRegionBounds(obj)
-            bounds = obj.results.Region.Position;
-        end
-    end
-
-    methods (Static)
-        function trace = traceArrayFromFilepath(filepath)
-            resultsParser = ResultsParser(filepath);
-            trace = resultsParser.getProcessedTrace();
-        end
-        function traces = traceArrayFromFilepaths(filepaths)
-            firstFilepath = filepaths(1);
-            firstTrace = ResultsParser.traceArrayFromFilepath(firstFilepath);
-            traceCount = numel(filepaths);
-            traceSize = numel(firstTrace);
-
-            traces = zeros(traceCount, traceSize);
-            traces(1, :) = firstTrace;
-            for index = 2:traceCount
-                newFilepath = filepaths(index);
-                newTrace = ResultsParser.traceArrayFromFilepath(newFilepath);
-                traces(index, :) = newTrace;
-            end
+            intensities = vertcat(obj.results.IntensityRange);
         end
     end
 end
