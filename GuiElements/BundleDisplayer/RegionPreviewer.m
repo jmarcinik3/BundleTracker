@@ -1,7 +1,7 @@
 classdef RegionPreviewer < RectangleDrawer
     properties (Access = private)
         %#ok<*PROPLC>
-        fullGui;
+        imageGui;
         regionGui;
     end
 
@@ -13,11 +13,30 @@ classdef RegionPreviewer < RectangleDrawer
             
             iIm = fullGui.getInteractiveImage();
             set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
-            obj.fullGui = fullGui;
+            obj.imageGui = fullGui;
             obj.regionGui = regionGui;
         end
     end
 
+    %% Functions to retrieve GUI elements
+    methods
+        function gui = getImageGui(obj)
+            gui = obj.imageGui;
+        end
+        function gui = getRegionGui(obj)
+            gui = obj.regionGui;
+        end
+    end
+
+    %% Function to update state of GUI
+    methods
+        function changeFullImage(obj, im)
+            imageGui = obj.getImageGui();
+            regionGui = obj.getRegionGui();
+            imageGui.changeImage(im);
+            regionGui.setRawImage(im);
+        end
+    end
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
@@ -44,11 +63,13 @@ classdef RegionPreviewer < RectangleDrawer
         end
 
         function setPreviewRegion(obj, region)
+            regionGui = obj.getRegionGui();
             regionRawImage = obj.getRegionalRawImage(region);
-            obj.regionGui.setRegion(region, regionRawImage);
+            regionGui.setRegion(region, regionRawImage);
         end
         function regionRawImage = getRegionalRawImage(obj, region)
-            im = obj.fullGui.getRawImage();
+            imageGui = obj.getImageGui();
+            im = imageGui.getRawImage();
             regionRawImage = unpaddedMatrixInRegion(region, im);
         end
     end

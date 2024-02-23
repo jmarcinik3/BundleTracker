@@ -2,7 +2,6 @@ classdef ImageGui < PreprocessorGui & ImageExporter & PanZoomer
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
-        regionGui;
         zoomIsEnabled;
     end
 
@@ -13,16 +12,12 @@ classdef ImageGui < PreprocessorGui & ImageExporter & PanZoomer
             parse(p, varargin{:});
             enableZoom = p.Results.EnableZoom;
 
-            regionGui = RegionGui(parent);
             gl = uigridlayout(parent, [2, 1]);
             ax = PreprocessorGui.generateAxis(gl);
 
             obj@PreprocessorGui(gl, ax);
             obj@ImageExporter(ax);
             obj@PanZoomer(ax);
-
-            RegionPreviewer(obj, regionGui);
-            obj.regionGui = regionGui;
             obj.zoomIsEnabled = enableZoom;
 
             layoutElements(obj);
@@ -41,9 +36,7 @@ classdef ImageGui < PreprocessorGui & ImageExporter & PanZoomer
         end
 
         function obj = changeImage(obj, im)
-            regionGui = obj.getRegionGui();
             obj.setRawImage(im);
-            regionGui.setRawImage(im);
             obj.updateZoomIfEnabled();
         end
 
@@ -60,9 +53,6 @@ classdef ImageGui < PreprocessorGui & ImageExporter & PanZoomer
     methods
         function fig = getFigure(obj)
             fig = getFigure@PreprocessorGui(obj);
-        end
-        function gui = getRegionGui(obj)
-            gui = obj.regionGui;
         end
         function ax = getAxis(obj)
             ax = getAxis@PreprocessorGui(obj);

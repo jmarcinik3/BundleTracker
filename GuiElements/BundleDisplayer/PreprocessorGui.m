@@ -115,7 +115,7 @@ classdef PreprocessorGui < handle
     end
 
     %% Functions to set state information
-    methods (Access = protected)
+    methods
         function setRawImage(obj, im)
             obj.rawImage = im;
             obj.updateFromRawImage();
