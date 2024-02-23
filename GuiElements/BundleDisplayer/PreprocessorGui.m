@@ -62,8 +62,6 @@ classdef PreprocessorGui < handle
         function im = getRawImage(obj)
             im = obj.rawImage;
         end
-    end
-    methods (Access = protected)
         function iIm = getInteractiveImage(obj)
             iIm = obj.interactiveImage;
         end
@@ -80,7 +78,7 @@ classdef PreprocessorGui < handle
     end
 
     %% Functions to retrieve state information
-    methods (Access = protected)
+    methods
         function data = getRegionUserData(obj)
             thresholds = obj.getThresholds();
             isInverted = obj.getInvert();
@@ -89,6 +87,8 @@ classdef PreprocessorGui < handle
                 RegionParser.invertKeyword, isInverted ...
                 );
         end
+    end
+    methods (Access = protected)
         function processor = generatePreprocessor(obj)
             thresholds = obj.getThresholds();
             invert = obj.getInvert();

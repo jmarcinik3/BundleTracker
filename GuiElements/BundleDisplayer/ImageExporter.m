@@ -1,5 +1,6 @@
-classdef ImageExporter
+classdef ImageExporter < handle
     properties (Access = private, Constant)
+        %#ok<*PROPLC>
         extensions = { ...
             '*.png', "Portable Network Graphics (PNG)"; ...
             '*.jpg;*.jpeg', "Joint Photographic Experts Group (JPEG)"; ...
@@ -9,6 +10,21 @@ classdef ImageExporter
             '*.pdf', "Portable Document Format (PDF)";
             '*.emf', "Enhanced Metafile for Windows® systems only (EMF)";
             }; % compatible extensions to save image as
+    end
+
+    properties (Access = private)
+        axis;
+    end
+
+    methods
+        function obj = ImageExporter(ax)
+            obj.axis = ax;
+        end
+
+        function exportImage(obj, startDirectory)
+            ax = obj.axis;
+            ImageExporter.export(ax, startDirectory);
+        end
     end
 
     methods (Static)

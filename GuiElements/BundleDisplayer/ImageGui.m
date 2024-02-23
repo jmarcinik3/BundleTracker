@@ -1,9 +1,9 @@
-classdef ImageGui < PreprocessorGui & RectangleDrawer & PanZoomer
+classdef ImageGui < PreprocessorGui & ImageExporter & PanZoomer
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
         regionGui;
-        doZoom;
+        zoomIsEnabled;
     end
 
     methods
@@ -13,19 +13,18 @@ classdef ImageGui < PreprocessorGui & RectangleDrawer & PanZoomer
             parse(p, varargin{:});
             enableZoom = p.Results.EnableZoom;
 
+            regionGui = RegionGui(parent);
             gl = uigridlayout(parent, [2, 1]);
             ax = PreprocessorGui.generateAxis(gl);
 
             obj@PreprocessorGui(gl, ax);
-            obj@RectangleDrawer(ax);
+            obj@ImageExporter(ax);
             obj@PanZoomer(ax);
 
-            obj.regionGui = RegionGui(parent);
-            obj.setUserDataFcn(@obj.getRegionUserData);
-            obj.doZoom = enableZoom;
+            RegionPreviewer(obj, regionGui);
+            obj.regionGui = regionGui;
+            obj.zoomIsEnabled = enableZoom;
 
-            iIm = obj.getInteractiveImage();
-            set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
             layoutElements(obj);
         end
 
@@ -42,9 +41,10 @@ classdef ImageGui < PreprocessorGui & RectangleDrawer & PanZoomer
         end
 
         function obj = changeImage(obj, im)
+            regionGui = obj.getRegionGui();
             obj.setRawImage(im);
-            obj.regionGui.setRawImage(im);
-            obj.updateZoomIfNeeded();
+            regionGui.setRawImage(im);
+            obj.updateZoomIfEnabled();
         end
 
         function exportImageIfPossible(obj, startDirectory)
@@ -64,58 +64,17 @@ classdef ImageGui < PreprocessorGui & RectangleDrawer & PanZoomer
         function gui = getRegionGui(obj)
             gui = obj.regionGui;
         end
-    end
-    methods (Access = protected)
         function ax = getAxis(obj)
             ax = getAxis@PreprocessorGui(obj);
         end
     end
 
-    %% Functions to retrieve information of GUI
-    methods (Access = private)
-        function is = zoomIsEnabled(obj)
-            is = obj.doZoom;
-        end
-    end
-
     %% Functions to update state of GUI
     methods (Access = private)
-        function buttonDownFcn(obj, source, event)
-            if isLeftClick(event)
-                rect = obj.generateRectangle(source, event);
-                obj.addRegionListeners(rect);
-                obj.setPreviewRegion(rect);
-            end
-        end
-        function addRegionListeners(obj, region)
-            addlistener(region, "MovingROI", @obj.regionMoving);
-            addlistener(region, "ROIClicked", @obj.regionClicked);
-        end
-        function regionMoving(obj, source, ~)
-            obj.setPreviewRegion(source);
-        end
-        function regionClicked(obj, source, event)
-            if isLeftClick(event)
-                obj.setPreviewRegion(source);
-            end
-        end
-        function setPreviewRegion(obj, region)
-            regionRawImage = obj.getRegionalRawImage(region);
-            obj.regionGui.setRegion(region, regionRawImage);
-        end
-        function regionRawImage = getRegionalRawImage(obj, region)
-            im = obj.getRawImage();
-            regionRawImage = unpaddedMatrixInRegion(region, im);
-        end
-
-        function updateZoomIfNeeded(obj)
-            if obj.zoomIsEnabled()
+        function updateZoomIfEnabled(obj)
+            if obj.zoomIsEnabled
                 obj.fitOriginalLimsToAxis(); % update zoomer for new image
             end
-        end
-        function exportImage(obj, startDirectory)
-            ax = obj.getAxis();
-            ImageExporter.export(ax, startDirectory);
         end
         function throwAlertMessage(obj, message, title)
             fig = obj.getFigure();
@@ -149,25 +108,4 @@ ax.Layout.Column = [1 2];
 % Set up row heights and column widths for grid layout
 gl.RowHeight = {sliderHeight, '1x'};
 gl.ColumnWidth = {'4x', '1x'};
-end
-
-function is = isLeftClick(event)
-name = event.EventName;
-if name == "ROIClicked"
-    is = event.SelectionType == "left";
-elseif name == "Hit"
-    is = event.Button == 1;
-end
-end
-
-function unpaddedMatrix = unpaddedMatrixInRegion(region, im)
-regionMask = createMask(region, im);
-im(regionMask == 0) = 0;
-unpaddedMatrix = unpadMatrix(im);
-end
-function unpaddedMatrix = unpadMatrix(matrix)
-[nonzeroRows, nonzeroColumns] = find(matrix);
-nonzeroRowsSlice = min(nonzeroRows):max(nonzeroRows);
-nonzeroColumnsSlice = min(nonzeroColumns):max(nonzeroColumns);
-unpaddedMatrix = matrix(nonzeroRowsSlice, nonzeroColumnsSlice);
 end
