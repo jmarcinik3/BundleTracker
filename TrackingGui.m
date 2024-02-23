@@ -185,10 +185,10 @@ classdef TrackingGui < handle
         function filepath = getFirstFilepath(obj)
             filepath = obj.directorySelector.getFirstFilepath();
         end
-        function filepath = generateSaveFilepath(obj, suffix)
+        function filepath = generateSaveFilepath(obj)
             directoryPath = obj.getDirectoryPath();
             filestem = obj.getSaveFilestem();
-            filename = sprintf("%s%s.mat", filestem, suffix);
+            filename = sprintf("%s%s.mat", filestem);
             filepath = fullfile(directoryPath, filename);
         end
         function count = getFilecount(obj)
@@ -237,9 +237,7 @@ classdef TrackingGui < handle
     methods (Access = private)
         function trackButtonPushed(obj, ~, ~)
             if obj.regionExists()
-                regions = obj.getTrackingRegions();
-                set(regions, "Color", obj.queueColor);
-                obj.trackAndSaveRegions(regions);
+                obj.trackAndSaveRegions();
             end
         end
         function exists = regionExists(obj)
@@ -250,45 +248,53 @@ classdef TrackingGui < handle
                 obj.throwAlertMessage("No cells selected!", "Track");
             end
         end
-        function trackAndSaveRegions(obj, regions)
-            count = numel(regions);
-            for index = 1:count
-                region = regions(index);
-                obj.trackAndSaveRegion(region);
-            end
+        function trackAndSaveRegions(obj)
+            regions = obj.getTrackingRegions();
+            set(regions, "Color", obj.queueColor);
+            results = obj.trackRegions(regions);
+            obj.saveResults(results)
             obj.exportImageIfPossible();
         end
-        function trackAndSaveRegion(obj, region)
+        function results = trackRegions(obj, regions)
+            results = [];
+            bundleCount = numel(regions);
+            for index = bundleCount:-1:1
+                region = regions(index);
+                result = obj.trackAndTagRegion(region);
+                results = [results, result];
+            end
+        end
+        function result = trackAndTagRegion(obj, region)
             set(region, "Color", obj.workingColor); % color region as in-process
-            results = obj.trackRegion(region);
-            obj.saveResults(results, region.Label);
+            result = obj.trackRegion(region);
+            result = obj.appendMetadata(result, region);
+            result = postprocessResults(result);
             set(region, "Color", obj.finishedColor); % color region as finished
         end
         function results = trackRegion(obj, region)
             preprocessor = Preprocessor.fromRegion(region);
             trackingMode = obj.getTrackingSelection();
             filepaths = obj.getFilepaths();
-
             results = TrackRegion( ...
-                region, filepaths, trackingMode, preprocessor ...
+                region, ...
+                filepaths, ...
+                trackingMode, ...
+                preprocessor ...
                 ); % preprocess and track
-
-            results = obj.appendMetadata(results, region);
-            results = postprocessResults(results);
         end
-        function results = appendMetadata(obj, results, region)  
+        function result = appendMetadata(obj, result, region)  
             regionParser = RegionParser(region);
-            results = regionParser.appendMetadata(results);
+            result = regionParser.appendMetadata(result);
 
-            results.DirectoryPath = obj.getDirectoryPath();
-            results.TrackingMode = obj.getTrackingSelection();
-            results.KinociliumLocation = obj.getKinociliumLocation();
-            results.ScaleFactor = obj.getScaleFactor();
-            results.ScaleFactorError = obj.getScaleFactorError();
-            results.Fps = obj.getFps();
+            result.DirectoryPath = obj.getDirectoryPath();
+            result.TrackingMode = obj.getTrackingSelection();
+            result.KinociliumLocation = obj.getKinociliumLocation();
+            result.ScaleFactor = obj.getScaleFactor();
+            result.ScaleFactorError = obj.getScaleFactorError();
+            result.Fps = obj.getFps();
         end
-        function saveResults(obj, results, label)
-            filepath = obj.generateSaveFilepath(label);
+        function saveResults(obj, results)
+            filepath = obj.generateSaveFilepath();
             save(filepath, "results");
         end
 
