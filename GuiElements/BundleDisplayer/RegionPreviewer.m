@@ -27,7 +27,7 @@ classdef RegionPreviewer < RectangleDrawer
         end
     end
 
-    %% Function to update state of GUI
+    %% Functions to update state of GUI
     methods
         function changeFullImage(obj, im)
             imageGui = obj.getImageGui();
