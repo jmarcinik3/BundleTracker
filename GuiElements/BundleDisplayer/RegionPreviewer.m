@@ -84,15 +84,3 @@ elseif name == "Hit"
     is = event.Button == 1;
 end
 end
-
-function unpaddedMatrix = unpaddedMatrixInRegion(region, im)
-regionMask = createMask(region, im);
-im(regionMask == 0) = 0;
-unpaddedMatrix = unpadMatrix(im);
-end
-function unpaddedMatrix = unpadMatrix(matrix)
-[nonzeroRows, nonzeroColumns] = find(matrix);
-nonzeroRowsSlice = min(nonzeroRows):max(nonzeroRows);
-nonzeroColumnsSlice = min(nonzeroColumns):max(nonzeroColumns);
-unpaddedMatrix = matrix(nonzeroRowsSlice, nonzeroColumnsSlice);
-end
