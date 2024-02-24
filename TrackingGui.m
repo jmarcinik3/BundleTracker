@@ -9,7 +9,6 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
 
         % main window components
         gridLayout; % uigridlayout containing GUI components
-        leftGridLayout % uigridlayout for leftside column
         rightGridLayout % uigridlayout for rightside column
 
         % components to set processing and tracking methods
@@ -34,17 +33,13 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
             enableZoom = p.Results.EnableZoom;
 
             gl = generateGridLayout([2, 2]);
-            lgl = generateLeftGridLayout(gl);
             rgl = generateRightGridLayout(gl);
-            regionGui = RegionGui(lgl);
-            imageGui = ImageGui(lgl, "EnableZoom", enableZoom);
             
             obj@RegionTracker();
-            obj@DirectorySelector(gl);
-            obj@RegionPreviewer(imageGui, regionGui);
+            obj@DirectorySelector(gl, {1, [1, 2]});
+            obj@RegionPreviewer(gl, {2, 1}, "EnableZoom", enableZoom);
 
             obj.gridLayout = gl;
-            obj.leftGridLayout = lgl;
             obj.rightGridLayout = rgl;
 
             obj.generateSimpleElements(rgl);
@@ -100,21 +95,8 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
         end
-        function lgl = getLeftGridLayout(obj)
-            lgl = obj.leftGridLayout;
-        end
         function rgl = getRightGridLayout(obj)
             rgl = obj.rightGridLayout;
-        end
-
-        % complex class objects for visual components
-        function elem = getImageElement(obj)
-            imageGui = obj.getImageGui();
-            elem = imageGui.getGridLayout();
-        end
-        function elem = getRegionElement(obj)
-            regionGui = obj.getRegionGui();
-            elem = regionGui.getGridLayout();
         end
 
         % components to set postprocessing methods
@@ -268,29 +250,22 @@ end
 %
 % Returns void
 function layoutElements(gui)
+gl = gui.getGridLayout();
+set(gl, ...
+    "ColumnWidth", {'3x', '1x'}, ...
+    "RowHeight", {TrackingGui.rowHeight, '1x'} ...
+    );
+
 layoutTopElements(gui);
-layoutLeftsideElements(gui);
 layoutRightsideElements(gui);
 end
 function layoutTopElements(gui)
 rowHeight = TrackingGui.rowHeight;
 directorySelector = gui.getDirectorySelectionElement();
-
-directorySelector.Layout.Row = 1;
-directorySelector.Layout.Column = [1, 2];
 set(directorySelector, ...
     "RowHeight", rowHeight, ...
     "ColumnWidth", {'7x', '1x', '2x', '2x'} ...
     );
-end
-function layoutLeftsideElements(gui)
-lgl = gui.getLeftGridLayout();
-
-imageGui = gui.getImageElement();
-regionGui = gui.getRegionElement();
-imageGui.Layout.Row = 1;
-regionGui.Layout.Row = 2;
-set(lgl, "RowHeight", {'2x', '1x'})
 end
 function layoutRightsideElements(gui)
 rowHeight = TrackingGui.rowHeight;
@@ -333,16 +308,6 @@ function gl = generateGridLayout(size)
 fig = uifigure;
 fig.Name = "Hair-Bundle Tracking";
 gl = uigridlayout(fig, size);
-set(gl, ...
-    "ColumnWidth", {'3x', '1x'}, ...
-    "RowHeight", {TrackingGui.rowHeight, '1x'} ...
-    );
-end
-
-function lgl = generateLeftGridLayout(gl)
-lgl = uigridlayout(gl, [2, 1]);
-lgl.Layout.Row = 2;
-lgl.Layout.Column = 1;
 end
 
 function rgl = generateRightGridLayout(gl)

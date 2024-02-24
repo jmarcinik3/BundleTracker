@@ -6,8 +6,8 @@ classdef RegionGui < PreprocessorGui
     end
 
     methods
-        function obj = RegionGui(parent)
-            gl = uigridlayout(parent, [1, 3]);
+        function obj = RegionGui(parent, location)
+            gl = generateGridLayout(parent, location);
             obj@PreprocessorGui(gl);
             
             thresholdSlider = obj.getThresholdSlider();
@@ -100,4 +100,10 @@ invertCheckbox.Layout.Column = 2;
 % Set up row heights and column widths for grid layout
 gl.RowHeight = {rowHeight, rowHeight, '1x'};
 gl.ColumnWidth = {'1x', '2x'};
+end
+
+function gl = generateGridLayout(parent, location)
+gl = uigridlayout(parent, [1, 3]);
+gl.Layout.Row = location{1};
+gl.Layout.Column = location{2};
 end

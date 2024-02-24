@@ -13,13 +13,13 @@ classdef DirectorySelector < handle
     end
 
     methods
-        function obj = DirectorySelector(parent, varargin)
+        function obj = DirectorySelector(parent, location, varargin)
             p = inputParser;
             addOptional(p, "ValueChangedFcn", []);
             parse(p, varargin{:});
             valueChangedFcn = p.Results.ValueChangedFcn;
 
-            gl = generateGridLayout(parent);
+            gl = generateGridLayout(parent, location);
             obj.directoryPathField = generateDirpathField(gl, valueChangedFcn);
             obj.filecountField = generateFilecountField(gl);
             obj.chooseButton = obj.generateChooseButton(gl);
@@ -181,9 +181,11 @@ end
 
 
 
-function gl = generateGridLayout(parent)
-gl = uigridlayout(parent, [1 4]);
+function gl = generateGridLayout(parent, location)
+gl = uigridlayout(parent, [1, 4]);
 gl.Padding = [0 0 0 0];
+gl.Layout.Row = location{1};
+gl.Layout.Column = location{2};
 end
 
 function editfield = generateDirpathField(gl, valueChangedFcn)

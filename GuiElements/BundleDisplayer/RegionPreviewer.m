@@ -2,19 +2,31 @@ classdef RegionPreviewer < RectangleDrawer
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
+        gridLayout;
         imageGui;
         regionGui;
     end
 
     methods
-        function obj = RegionPreviewer(imageGui, regionGui)
+        function obj = RegionPreviewer(parent, location, varargin)
+            p = inputParser;
+            addOptional(p, "EnableZoom", true);
+            parse(p, varargin{:});
+            enableZoom = p.Results.EnableZoom;
+
+            gl = generateGridLayout(parent, location);
+            regionGui = RegionGui(gl, {2, 1});
+            imageGui = ImageGui(gl, {1, 1}, "EnableZoom", enableZoom);
             ax = imageGui.getAxis();
-            obj@RectangleDrawer(ax, @imageGui.getRegionUserData);
-            
             iIm = imageGui.getInteractiveImage();
+
+            obj@RectangleDrawer(ax, @imageGui.getRegionUserData);
+
             set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
+            obj.gridLayout = gl;
             obj.imageGui = imageGui;
             obj.regionGui = regionGui;
+            layoutElements(obj);
         end
     end
 
@@ -31,6 +43,19 @@ classdef RegionPreviewer < RectangleDrawer
             imageGui = obj.getImageGui();
             ax =  imageGui.getAxis();
             rects = getRegions(ax);
+        end
+    end
+    methods (Access = private)
+        function gl = getGridLayout(obj)
+            gl = obj.gridLayout;
+        end
+        function elem = getImageElement(obj)
+            imageGui = obj.getImageGui();
+            elem = imageGui.getGridLayout();
+        end
+        function elem = getRegionElement(obj)
+            regionGui = obj.getRegionGui();
+            elem = regionGui.getGridLayout();
         end
     end
 
@@ -93,6 +118,17 @@ classdef RegionPreviewer < RectangleDrawer
 end
 
 
+
+function layoutElements(gui)
+gl = gui.getGridLayout();
+set(gl, "RowHeight", {'2x', '1x'})
+end
+
+function gl = generateGridLayout(parent, location)
+gl = uigridlayout(parent, [2, 1]);
+gl.Layout.Row = location{1};
+gl.Layout.Column = location{2};
+end
 
 function is = isLeftClick(event)
 name = event.EventName;

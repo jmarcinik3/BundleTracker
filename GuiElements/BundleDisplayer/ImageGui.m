@@ -6,13 +6,13 @@ classdef ImageGui < PreprocessorGui & ImageExporter & PanZoomer
     end
 
     methods
-        function obj = ImageGui(parent, varargin)
+        function obj = ImageGui(parent, location, varargin)
             p = inputParser;
             addOptional(p, "EnableZoom", true);
             parse(p, varargin{:});
             enableZoom = p.Results.EnableZoom;
 
-            gl = uigridlayout(parent, [2, 1]);
+            gl = generateGridLayout(parent, location);
             ax = PreprocessorGui.generateAxis(gl);
 
             obj@PreprocessorGui(gl, ax);
@@ -86,4 +86,10 @@ ax.Layout.Column = [1 2];
 % Set up row heights and column widths for grid layout
 gl.RowHeight = {sliderHeight, '1x'};
 gl.ColumnWidth = {'4x', '1x'};
+end
+
+function gl = generateGridLayout(parent, location)
+gl = uigridlayout(parent, [2, 1]);
+gl.Layout.Row = location{1};
+gl.Layout.Column = location{2};
 end
