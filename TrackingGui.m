@@ -8,7 +8,6 @@ classdef TrackingGui < RegionTracker & RegionPreviewer
         %#ok<*PROPLC>
 
         % main window components
-        figure; % uifigure containing GUI
         gridLayout; % uigridlayout containing GUI components
         leftGridLayout % uigridlayout for leftside column
         rightGridLayout % uigridlayout for rightside column
@@ -66,7 +65,6 @@ classdef TrackingGui < RegionTracker & RegionPreviewer
 
     %% Functions to generate GUI elements
     methods (Access = private)
-        
         function generateDirectorySelector(obj, gl, startingDirpath)
             obj.directorySelector = DirectorySelector( ...
                 gl, ...
