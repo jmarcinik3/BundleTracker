@@ -54,7 +54,7 @@ classdef RegionTracker < ImageImporter
                 struct2table(centers), ...
                 struct2table(initialResult) ...
                 ]);
-            appendRegionalMetadata(region, result);
+            result = appendRegionalMetadata(region, result);
             result = postprocessResults(result);
 
             set(region, "Color", RegionTracker.finishedColor); % color region as finished
