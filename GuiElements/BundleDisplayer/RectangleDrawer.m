@@ -9,13 +9,11 @@ classdef RectangleDrawer < handle
     end
     
     methods
-        function obj = RectangleDrawer(ax)
+        function obj = RectangleDrawer(ax, userDataFcn)
+            obj.userDataFcn = userDataFcn;
             obj.axis = ax;
         end
 
-        function setUserDataFcn(obj, userDataFcn)
-            obj.userDataFcn = userDataFcn;
-        end
         function rect = generateRectangle(obj, ~, event)
             point = event.IntersectionPoint(1:2);
             rect = obj.drawRectangle(point);

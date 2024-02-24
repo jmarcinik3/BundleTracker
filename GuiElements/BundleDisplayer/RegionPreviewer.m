@@ -8,8 +8,7 @@ classdef RegionPreviewer < RectangleDrawer
     methods
         function obj = RegionPreviewer(fullGui, regionGui)
             ax = fullGui.getAxis();
-            obj@RectangleDrawer(ax);
-            obj.setUserDataFcn(@fullGui.getRegionUserData);
+            obj@RectangleDrawer(ax, @fullGui.getRegionUserData);
             
             iIm = fullGui.getInteractiveImage();
             set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
