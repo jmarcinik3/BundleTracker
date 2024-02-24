@@ -101,7 +101,6 @@ classdef PreprocessorGui < handle
             thresholds = obj.getThresholds();
             invert = obj.getInvert();
             processor = Preprocessor(thresholds, invert);
-            processor = @processor.preprocess;
         end
         function thresholds = getThresholds(obj)
             thresholds = obj.intensityThresholds;
@@ -183,7 +182,7 @@ classdef PreprocessorGui < handle
         end
         function im = preprocessImage(obj, im)
             preprocessor = obj.generatePreprocessor();
-            im = preprocessor(im);
+            im = preprocessor.preprocess(im);
         end
     end
 end

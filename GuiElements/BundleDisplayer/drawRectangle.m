@@ -5,7 +5,7 @@ updateRegionLabels(ax);
 end
 
 function updateRegionLabels(ax)
-regions = flip(getRegions(ax));
+regions = getRegions(ax);
 count = numel(regions);
 for index = 1:count
     region = regions(index);
@@ -21,4 +21,5 @@ end
 function regions = getRegions(ax)
 children = ax.Children;
 regions = findobj(children, "Type", "images.roi.rectangle");
+regions = flip(regions);
 end

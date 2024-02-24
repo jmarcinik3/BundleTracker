@@ -1,8 +1,5 @@
-classdef TrackingGui < handle
+classdef TrackingGui < RegionTracker
     properties (Constant)
-        queueColor = "red";
-        workingColor = "yellow";
-        finishedColor = "green";
         rowHeight = 25;
     end
 
@@ -232,6 +229,7 @@ classdef TrackingGui < handle
             stem = textbox.Value;
         end
     
+        % ...for image
         function has = directoryHasImage(obj)
             count = obj.getFilecount();
             directory = obj.getDirectoryPath();
@@ -266,49 +264,32 @@ classdef TrackingGui < handle
             end
         end
         function trackAndSaveRegions(obj)
-            regions = obj.getTrackingRegions();
-            set(regions, "Color", obj.queueColor);
-            results = obj.trackRegions(regions);
+            results = obj.trackAndProcess();
             obj.saveResults(results)
             obj.exportImageIfPossible();
         end
-        function results = trackRegions(obj, regions)
-            results = [];
-            bundleCount = numel(regions);
-            for index = bundleCount:-1:1
-                region = regions(index);
-                result = obj.trackAndTagRegion(region);
-                results = [results, result];
-            end
+        function results = trackAndProcess(obj)
+            obj.prepareTracking();
+            regions = obj.getTrackingRegions();
+            results = obj.trackAndProcessRegions(regions);
         end
-        function result = trackAndTagRegion(obj, region)
-            set(region, "Color", obj.workingColor); % color region as in-process
-            result = obj.trackRegion(region);
-            result = obj.appendMetadata(result, region);
-            result = postprocessResults(result);
-            set(region, "Color", obj.finishedColor); % color region as finished
-        end
-        function results = trackRegion(obj, region)
-            preprocessor = Preprocessor.fromRegion(region);
-            trackingMode = obj.getTrackingSelection();
+        function prepareTracking(obj)
             filepaths = obj.getFilepaths();
-            results = TrackRegion( ...
-                region, ...
-                filepaths, ...
-                trackingMode, ...
-                preprocessor ...
-                ); % preprocess and track
+            trackingMode = obj.getTrackingSelection();
+            initialResult = obj.generateInitialResult();
+            obj.setFilepaths(filepaths);
+            obj.setTrackingMode(trackingMode);
+            obj.setInitialResult(initialResult);
         end
-        function result = appendMetadata(obj, result, region)  
-            regionParser = RegionParser(region);
-            result = regionParser.appendMetadata(result);
-
-            result.DirectoryPath = obj.getDirectoryPath();
-            result.TrackingMode = obj.getTrackingSelection();
-            result.KinociliumLocation = obj.getKinociliumLocation();
-            result.ScaleFactor = obj.getScaleFactor();
-            result.ScaleFactorError = obj.getScaleFactorError();
-            result.Fps = obj.getFps();
+        function result = generateInitialResult(obj)  
+            result = struct( ...
+                "DirectoryPath", obj.getDirectoryPath(), ...
+                "TrackingMode", obj.getTrackingSelection(), ...
+                "KinociliumLocation", obj.getKinociliumLocation(), ...
+                "ScaleFactor", obj.getScaleFactor(), ...
+                "ScaleFactorError", obj.getScaleFactorError(), ...
+                "Fps", obj.getFps() ...
+                );
         end
         function saveResults(obj, results)
             filepath = obj.generateSaveFilepath();
@@ -535,10 +516,3 @@ lbl.Layout.Column = 1;
 tb.Layout.Column = 2;
 end
 
-%% Miscellaneous helper functions
-% Postprocess raw XY traces, i.e. |results|
-function results = postprocessResults(results)
-postprocessor = Postprocessor(results);
-postprocessor.process();
-results = postprocessor.getPostprocessedResults();
-end

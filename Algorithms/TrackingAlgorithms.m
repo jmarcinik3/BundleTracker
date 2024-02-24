@@ -68,11 +68,14 @@ xstds = 0 * ones(1, bootstrapCount);
 ystds = 0 * ones(1, bootstrapCount);
 
 for index = 1:bootstrapCount
-    randomMask = rand(rows, columns);
-    newWeights = weights;
-    newWeights(randomMask < weights) = 0;
-    newArea = sum(newWeights, "all");
-    newWeights = newWeights / newArea;
+    newArea = 0;
+    while newArea == 0
+        randomMask = rand(rows, columns);
+        newWeights = weights;
+        newWeights(randomMask < weights) = 0;
+        newArea = sum(newWeights, "all");
+        newWeights = newWeights / newArea;
+    end
 
     xnew = sum(newWeights.*x, "all");
     ynew = sum(newWeights.*y, "all");

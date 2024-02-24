@@ -31,8 +31,7 @@ classdef ImageGui < PreprocessorGui & ImageExporter & PanZoomer
         function rects = getRegions(obj)
             % Retrieves currently drawn regions on image
             ax =  obj.getAxis();
-            children = ax.Children;
-            rects = findobj(children, "Type", "images.roi.rectangle");
+            rects = getRegions(ax);
         end
 
         function obj = changeImage(obj, im)
@@ -98,4 +97,10 @@ ax.Layout.Column = [1 2];
 % Set up row heights and column widths for grid layout
 gl.RowHeight = {sliderHeight, '1x'};
 gl.ColumnWidth = {'4x', '1x'};
+end
+
+function rects= getRegions(ax)
+children = ax.Children;
+rects = findobj(children, "Type", "images.roi.rectangle");
+rects = flip(rects);
 end

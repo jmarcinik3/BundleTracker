@@ -30,6 +30,7 @@ maxThreshold = thresholds(2);
 noiseRemover = NoiseRemover(minThreshold, maxThreshold);
 processor = @noiseRemover.get;
 end
+
 function processor = generateImageInverter(invert)
 imageInverter = ImageInverter(invert, 1);
 processor = @imageInverter.get;

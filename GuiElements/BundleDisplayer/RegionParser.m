@@ -40,7 +40,6 @@ classdef RegionParser
             thresholds = obj.getThresholds();
             invert = obj.getInvert();
             processor = Preprocessor(thresholds, invert);
-            processor = @processor.preprocess;
         end
     end
 
