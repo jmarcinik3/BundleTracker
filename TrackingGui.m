@@ -1,4 +1,4 @@
-classdef TrackingGui < RegionTracker
+classdef TrackingGui < RegionTracker & RegionPreviewer
     properties (Constant)
         rowHeight = 25;
     end
@@ -14,7 +14,6 @@ classdef TrackingGui < RegionTracker
         rightGridLayout % uigridlayout for rightside column
 
         % components to select and display bundle images
-        regionPreviewer; % RegionPreviewer object
         directorySelector; % DirectorySelector object
 
         % components to set processing and tracking methods
@@ -38,7 +37,7 @@ classdef TrackingGui < RegionTracker
             startingDirpath = p.Results.StartingDirectory;
             enableZoom = p.Results.EnableZoom;
 
-            gl = obj.generateGridLayout([2, 2]);
+            gl = generateGridLayout([2, 2]);
             set(gl, ...
                 "ColumnWidth", {'3x', '1x'}, ...
                 "RowHeight", {TrackingGui.rowHeight, '1x'} ...
@@ -51,16 +50,15 @@ classdef TrackingGui < RegionTracker
             rgl.Layout.Row = 2;
             rgl.Layout.Column = 2;
 
+            regionGui = RegionGui(lgl);
+            imageGui = ImageGui(lgl, "EnableZoom", enableZoom);
+            obj@RegionPreviewer(imageGui, regionGui);
+
             obj.gridLayout = gl;
             obj.leftGridLayout = lgl;
             obj.rightGridLayout = rgl;
 
             obj.generateSimpleElements(rgl);
-            
-            regionGui = RegionGui(lgl);
-            imageGui = ImageGui(lgl, "EnableZoom", enableZoom);
-            obj.regionPreviewer = RegionPreviewer(imageGui, regionGui);
-
             obj.generateDirectorySelector(gl, startingDirpath); % must come last
             layoutElements(obj);
         end
@@ -68,12 +66,7 @@ classdef TrackingGui < RegionTracker
 
     %% Functions to generate GUI elements
     methods (Access = private)
-        function gl = generateGridLayout(obj, size)
-            fig = uifigure;
-            fig.Name = "Hair-Bundle Tracking";
-            gl = uigridlayout(fig, size);
-            obj.figure = fig;
-        end
+        
         function generateDirectorySelector(obj, gl, startingDirpath)
             obj.directorySelector = DirectorySelector( ...
                 gl, ...
@@ -110,7 +103,8 @@ classdef TrackingGui < RegionTracker
     %% Functions to retrieve GUI elements
     methods (Access = private)
         function fig = getFigure(obj)
-            fig = obj.figure;
+            gl = obj.getGridLayout();
+            fig = ancestor(gl, "figure");
         end
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
@@ -123,17 +117,6 @@ classdef TrackingGui < RegionTracker
         end
 
         % complex class objects for visual components
-        function previewer = getRegionPreviewer(obj)
-            previewer = obj.regionPreviewer;
-        end
-        function gui = getImageGui(obj)
-            regionPreviewer = obj.getRegionPreviewer();
-            gui = regionPreviewer.getImageGui();
-        end
-        function gui = getRegionGui(obj)
-            regionPreviewer = obj.getRegionPreviewer();
-            gui = regionPreviewer.getRegionGui();
-        end
         function elem = getImageElement(obj)
             imageGui = obj.getImageGui();
             elem = imageGui.getGridLayout();
@@ -315,8 +298,7 @@ classdef TrackingGui < RegionTracker
         end
         function updateImageForDirectory(obj)
             im = obj.getImage();
-            regionPreviewer = obj.getRegionPreviewer();
-            regionPreviewer.changeFullImage(im);
+            obj.changeFullImage(im);
         end
         
         function throwAlertMessage(obj, message, title)
@@ -397,6 +379,12 @@ set(saveFilestemElement, ...
 
 rgl.RowHeight = num2cell(rowHeight * ones(1, 7));
 rgl.RowHeight{2} = KinociliumLocation.height;
+end
+
+function gl = generateGridLayout(size)
+fig = uifigure;
+fig.Name = "Hair-Bundle Tracking";
+gl = uigridlayout(fig, size);
 end
 
 %% Function to generate tracking method dropdown
