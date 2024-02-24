@@ -34,7 +34,6 @@ classdef RegionGui < PreprocessorGui
     %% Functions to set state information
     methods
         function setRegion(obj, region, rawImage)
-            obj.setVisible("on");
             obj.regionParser = RegionParser(region); % must come before updating GUI
             obj.updateThresholdSlider();
             obj.updateInvertCheckbox();
