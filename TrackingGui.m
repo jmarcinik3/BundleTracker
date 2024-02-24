@@ -38,13 +38,16 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
             obj@RegionTracker();
             obj@DirectorySelector(gl, {1, [1, 2]});
             obj@RegionPreviewer(gl, {2, 1}, "EnableZoom", enableZoom);
-
+            
             obj.gridLayout = gl;
             obj.rightGridLayout = rgl;
 
             obj.generateSimpleElements(rgl);
             obj.configureDirectorySelector(startingDirpath)
             layoutElements(obj);
+
+            fig = obj.getFigure();
+            TrackingToolbar(fig, obj);
         end
     end
 

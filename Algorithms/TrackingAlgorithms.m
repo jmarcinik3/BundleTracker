@@ -10,7 +10,7 @@ classdef TrackingAlgorithms
 
     methods (Static)
         function center = byKeyword(im, keyword)
-            switch(keyword)
+            switch keyword
                 case TrackingAlgorithms.centerOfMass
                     center = TrackingAlgorithms.byCenterOfMass(im);
                 case TrackingAlgorithms.gaussianFit

@@ -19,14 +19,14 @@ classdef PanZoomer < handle
         function obj = PanZoomer(ax)
             fig = ancestor(ax, "figure");
             obj.prepareFigure(fig);
-            obj.prepareAxis(ax);
+            prepareAxis(ax);
 
             obj.axis = ax;
             obj.xlimOriginal = get(ax, "XLim");
             obj.ylimOriginal = get(ax, "YLim");
         end
     end
-    
+
     methods (Access = private)
         function ax = getAxis(obj)
             ax = obj.axis;
@@ -44,12 +44,6 @@ classdef PanZoomer < handle
                 "WindowScrollWheelFcn", @obj.windowScrollWheelFcn, ...
                 "WindowButtonDownFcn", @obj.windowButtonDownFcn, ...
                 "WindowButtonUpFcn", @obj.windowButtonUpFcn ...
-                );
-        end
-        function prepareAxis(obj, ax)
-            set(ax, ...
-                "XLimMode", "manual", ...
-                "YLimMode", "manual" ...
                 );
         end
 
@@ -198,7 +192,7 @@ classdef PanZoomer < handle
             ax = obj.getAxis();
             xlim = get(ax, "XLim");
             ylim = get(ax, "YLim");
-            
+
             obj.setOriginalXLim(xlim);
             obj.setOriginalYLim(ylim);
         end
@@ -209,6 +203,15 @@ classdef PanZoomer < handle
             obj.ylimOriginal = ylim;
         end
     end
+end
+
+
+
+function prepareAxis(ax)
+set(ax, ...
+    "XLimMode", "manual", ...
+    "YLimMode", "manual" ...
+    );
 end
 
 function stopFigureForPanning(fig)

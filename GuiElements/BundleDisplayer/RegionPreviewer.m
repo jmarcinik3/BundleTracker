@@ -1,4 +1,4 @@
-classdef RegionPreviewer < RectangleDrawer
+classdef RegionPreviewer < RegionDrawer
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
@@ -20,7 +20,7 @@ classdef RegionPreviewer < RectangleDrawer
             ax = imageGui.getAxis();
             iIm = imageGui.getInteractiveImage();
 
-            obj@RectangleDrawer(ax, @imageGui.getRegionUserData);
+            obj@RegionDrawer(ax, @imageGui.getRegionUserData);
 
             set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
             obj.gridLayout = gl;
@@ -38,11 +38,11 @@ classdef RegionPreviewer < RectangleDrawer
         function gui = getRegionGui(obj)
             gui = obj.regionGui;
         end
-        function rects = getRegions(obj)
+        function regions = getRegions(obj)
             % Retrieves currently drawn regions on image
             imageGui = obj.getImageGui();
             ax =  imageGui.getAxis();
-            rects = getRegions(ax);
+            regions = RegionDrawer.getRegions(ax);
         end
     end
     methods (Access = private)
@@ -76,8 +76,8 @@ classdef RegionPreviewer < RectangleDrawer
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
-                rect = obj.generateRectangle(source, event);
-                obj.previewGeneratedRegion(rect);
+                region = obj.generateRegion(source, event);
+                obj.previewGeneratedRegion(region);
             end
         end
         function previewGeneratedRegion(obj, region)
@@ -139,11 +139,6 @@ elseif name == "Hit"
 end
 end
 
-function rects = getRegions(ax)
-children = ax.Children;
-rects = findobj(children, "Type", "images.roi.rectangle");
-rects = flip(rects);
-end
 function updateRegionColors(activeRegion, regions)
 set(regions, "Color", RegionColor.unprocessedColor);
 set(activeRegion, "Color", RegionColor.workingColor);
