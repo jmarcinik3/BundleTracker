@@ -8,7 +8,12 @@ classdef ImageFilepather
     end
 
     methods
-        function obj = ImageFilepather(directory, extension)
+        function obj = ImageFilepather(directory, varargin)
+            p = inputParser;
+            addOptional(p, "Extension", ".tif");
+            parse(p, varargin{:});
+            extension = p.Results.Extension;
+
             obj.directory = directory;
             obj.extension = extension;
 
@@ -18,25 +23,19 @@ classdef ImageFilepather
             end
             obj.fileCount = fileCount;
         end
+    end
 
+    %% Functions to retrieve state information
+    methods
         function filepaths = getFilepaths(obj)
-            count = obj.fileCount;
-            filepaths = strings(1, count);
-
-            for index = 1:count
-                filepath = obj.get(index);
-                filepaths(index) = filepath;
-            end
+            count = obj.getFilecount();
+            filepaths = arrayfun(@obj.getFilepath, 1:count);
         end
-
-        function filepath = get(obj, index)
+        function filepath = getFilepath(obj, index)
             rootpath = sprintf("%s\\%s", obj.directory, obj.rootname);
             formatStr = sprintf("%%s_%s%%s", obj.indexFormat);
             filepath = sprintf(formatStr, rootpath, index, obj.extension);
         end
-    end
-
-    methods
         function count = getFilecount(obj)
             count = obj.fileCount;
         end
@@ -54,7 +53,6 @@ nameSplits = strsplit( ...
 
 rootname = nameSplits{1};
 indexFormat = sprintf("%%0%dd", strlength(nameSplits{2}));
-
 end
 
 function [file, count] = getFirstFile(directory, extension)
