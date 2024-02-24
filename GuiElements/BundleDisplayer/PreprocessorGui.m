@@ -112,6 +112,7 @@ classdef PreprocessorGui < handle
         function exists = imageExists(obj)
             im = obj.getRawImage();
             exists = numel(im) >= 1;
+            obj.setVisible(exists);
         end
     end
     methods (Access = private)
@@ -133,6 +134,10 @@ classdef PreprocessorGui < handle
 
     %% Functions to update state of interactive image
     methods (Access = protected)
+        function setVisible(obj, visible)
+            gl = obj.getGridLayout();
+            set(gl, "Visible", visible);
+        end
         function invertCheckboxChanged(obj, ~, ~)
             if obj.imageExists()
                 obj.updateFromRawImage();

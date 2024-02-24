@@ -34,7 +34,7 @@ classdef RegionPreviewer < RectangleDrawer
             imageGui = obj.getImageGui();
             regionGui = obj.getRegionGui();
             imageGui.changeImage(im);
-            regionGui.setRawImage(im);
+            regionGui.setRawImage([]);
         end
     end
     methods (Access = private)
