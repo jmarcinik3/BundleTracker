@@ -36,6 +36,8 @@ classdef TrackingGui < RegionTracker & RegionPreviewer
             startingDirpath = p.Results.StartingDirectory;
             enableZoom = p.Results.EnableZoom;
 
+            obj@RegionTracker();
+
             gl = generateGridLayout([2, 2]);
             set(gl, ...
                 "ColumnWidth", {'3x', '1x'}, ...
@@ -174,10 +176,6 @@ classdef TrackingGui < RegionTracker & RegionPreviewer
         end
 
         % ...for tracking
-        function regions = getTrackingRegions(obj)
-            imageGui = obj.getImageGui();
-            regions = imageGui.getRegions();
-        end
         function paths = getFilepaths(obj)
             paths = obj.directorySelector.getFilepaths();
         end
@@ -237,7 +235,7 @@ classdef TrackingGui < RegionTracker & RegionPreviewer
             end
         end
         function exists = regionExists(obj)
-            regions = obj.getTrackingRegions();
+            regions = obj.getRegions();
             count = numel(regions);
             exists = count >= 1;
             if ~exists
@@ -251,7 +249,7 @@ classdef TrackingGui < RegionTracker & RegionPreviewer
         end
         function results = trackAndProcess(obj)
             obj.prepareTracking();
-            regions = obj.getTrackingRegions();
+            regions = obj.getRegions();
             results = obj.trackAndProcessRegions(regions);
         end
         function prepareTracking(obj)
@@ -289,10 +287,6 @@ classdef TrackingGui < RegionTracker & RegionPreviewer
         function directoryValueChanged(obj, ~, ~)
             obj.clearRegions();
             obj.updateImageForDirectory();
-        end
-        function clearRegions(obj)
-            imageGui = obj.getImageGui();
-            imageGui.clearRegions();
         end
         function updateImageForDirectory(obj)
             im = obj.getImage();

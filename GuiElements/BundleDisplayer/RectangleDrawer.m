@@ -1,8 +1,4 @@
 classdef RectangleDrawer < handle
-    properties(Access = private, Constant)
-        unprocessedColor = [0, 0.447, 0.741]; % default rectangle color
-    end
-
     properties (Access = private)
         axis;
         userDataFcn;
@@ -31,19 +27,8 @@ classdef RectangleDrawer < handle
             rect = drawRectangle(ax, point);
         end
         function addMetadataToRegion(obj, region)
-            color = obj.unprocessedColor;
             userData = obj.userDataFcn();
-
-            set(region, ...
-                "Color", color, ...
-                "UserData", userData ...
-                );
-            addlistener(region, "ROIMoved", @obj.regionMoved);
-        end
-
-        function regionMoved(obj, source, ~)
-            color = obj.unprocessedColor;
-            source.set("Color", color);
+            set(region, "UserData", userData);
         end
     end
 end

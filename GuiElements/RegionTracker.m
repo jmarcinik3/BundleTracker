@@ -1,10 +1,4 @@
 classdef RegionTracker < ImageImporter
-    properties (Constant)
-        queueColor = "red";
-        workingColor = "yellow";
-        finishedColor = "green";
-    end
-
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
@@ -38,7 +32,7 @@ classdef RegionTracker < ImageImporter
             obj.initialResult = result;
         end
         function results = trackAndProcessRegions(obj, regions)
-            set(regions, "Color", RegionTracker.queueColor);
+            set(regions, "Color", RegionColor.queueColor);
             results = arrayfun(@obj.trackAndProcessRegion, regions);
         end
     end
@@ -46,7 +40,7 @@ classdef RegionTracker < ImageImporter
     %% Functions to perform tracking
     methods (Access = private)
         function result = trackAndProcessRegion(obj, region)
-            set(region, "Color", RegionTracker.workingColor); % color region as in-process
+            set(region, "Color", RegionColor.workingColor); % color region as in-process
             initialResult = obj.initialResult;
             centers = obj.trackRegion(region);
 
@@ -57,7 +51,7 @@ classdef RegionTracker < ImageImporter
             result = appendRegionalMetadata(region, result);
             result = postprocessResults(result);
 
-            set(region, "Color", RegionTracker.finishedColor); % color region as finished
+            set(region, "Color", RegionColor.finishedColor); % color region as finished
         end
         function centers = trackRegion(obj, region)
             preprocessor = Preprocessor.fromRegion(region);

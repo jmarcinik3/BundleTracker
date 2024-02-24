@@ -22,30 +22,6 @@ classdef ImageGui < PreprocessorGui & ImageExporter & PanZoomer
 
             layoutElements(obj);
         end
-
-        function clearRegions(obj)
-            % Removes currently drawn regions on image
-            regions = obj.getRegions();
-            delete(regions);
-        end
-        function rects = getRegions(obj)
-            % Retrieves currently drawn regions on image
-            ax =  obj.getAxis();
-            rects = getRegions(ax);
-        end
-
-        function obj = changeImage(obj, im)
-            obj.setRawImage(im);
-            obj.updateZoomIfEnabled();
-        end
-
-        function exportImageIfPossible(obj, startDirectory)
-            if obj.imageExists()
-                obj.exportImage(startDirectory);
-            else
-                obj.throwAlertMessage("No image imported!", "Export Image");
-            end
-        end
     end
 
     %% Functions to retrieve GUI elements
@@ -59,6 +35,19 @@ classdef ImageGui < PreprocessorGui & ImageExporter & PanZoomer
     end
 
     %% Functions to update state of GUI
+    methods
+        function obj = changeImage(obj, im)
+            obj.setRawImage(im);
+            obj.updateZoomIfEnabled();
+        end
+        function exportImageIfPossible(obj, startDirectory)
+            if obj.imageExists()
+                obj.exportImage(startDirectory);
+            else
+                obj.throwAlertMessage("No image imported!", "Export Image");
+            end
+        end
+    end
     methods (Access = private)
         function updateZoomIfEnabled(obj)
             if obj.zoomIsEnabled
@@ -97,10 +86,4 @@ ax.Layout.Column = [1 2];
 % Set up row heights and column widths for grid layout
 gl.RowHeight = {sliderHeight, '1x'};
 gl.ColumnWidth = {'4x', '1x'};
-end
-
-function rects= getRegions(ax)
-children = ax.Children;
-rects = findobj(children, "Type", "images.roi.rectangle");
-rects = flip(rects);
 end
