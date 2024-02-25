@@ -6,9 +6,6 @@ classdef DirectorySelector < handle
         gridLayout;
         directoryPathField;
         filecountField;
-        chooseButton;
-        openButton;
-
         filepather;
     end
 
@@ -22,30 +19,12 @@ classdef DirectorySelector < handle
             gl = generateGridLayout(parent, location);
             obj.directoryPathField = generateDirpathField(gl, valueChangedFcn);
             obj.filecountField = generateFilecountField(gl);
-            obj.chooseButton = obj.generateChooseButton(gl);
-            obj.openButton = obj.generateOpenButton(gl);
             obj.gridLayout = gl;
         end 
     end
 
     %% Functions to generate GUI elements
     methods (Access = private)
-        function button = generateChooseButton(obj, gl)
-            button = uibutton(gl);
-            set(button, ...
-                "Text", "Choose", ...
-                "ButtonPushedFcn", @obj.chooseButtonPushed ...
-                );
-            button.Layout.Column = 3;
-        end
-        function button = generateOpenButton(obj, gl)
-            button = uibutton(gl);
-            set(button, ...
-                "Text", "Open", ...
-                "ButtonPushedFcn", @obj.openButtonPushed ...
-                );
-            button.Layout.Column = 4;
-        end
         function filepather = generateFilepather(obj)
             directoryPath = obj.getDirectoryPath();
             filepather = ImageFilepather(directoryPath);
@@ -66,9 +45,6 @@ classdef DirectorySelector < handle
         function fig = getFigure(obj)
             gl = obj.getGridLayout();
             fig = ancestor(gl, "figure");
-        end
-        function btn = getChooseButton(obj)
-            btn = obj.chooseButton;
         end
     end
 
@@ -122,6 +98,7 @@ classdef DirectorySelector < handle
             directoryPathField.Value = directoryPath;
             obj.updateFilepather();
 
+            
             if nargin == 2
                 source = obj;
                 event = struct( ...
@@ -150,19 +127,20 @@ classdef DirectorySelector < handle
     end
     
     %% Functions to update state information
-    methods (Access = private)
-        function chooseButtonPushed(obj, source, event)
+    methods
+        function chooseDirectory(obj, source, event)
             previousDirectoryPath = obj.getDirectoryPath();
             directoryPath = uigetdir(previousDirectoryPath);
             obj.setDirectoryIfChosen(directoryPath, source, event);
         end
-        function openButtonPushed(obj, ~, ~)
+        function openDirectory(obj, ~, ~)
             if obj.directoryIsValid()
                 directoryPath = obj.getDirectoryPath();
                 winopen(directoryPath);
             end
         end
-        
+    end
+    methods (Access = private)
         function updateFilepather(obj)
             filepather = obj.generateFilepather();
             obj.filepather = filepather;
@@ -182,10 +160,16 @@ end
 
 
 function gl = generateGridLayout(parent, location)
-gl = uigridlayout(parent, [1, 4]);
-gl.Padding = [0 0 0 0];
+rowHeight = TrackingGui.rowHeight;
+
+gl = uigridlayout(parent, [1, 2]);
 gl.Layout.Row = location{1};
 gl.Layout.Column = location{2};
+
+set(gl, ...
+    "Padding", [0, 0, 0, 0], ...
+    "ColumnWidth", {'1x', 3 * rowHeight} ...
+    );
 end
 
 function editfield = generateDirpathField(gl, valueChangedFcn)
@@ -196,7 +180,6 @@ set(editfield, ...
     );
 editfield.Layout.Column = 1;
 end
-
 function editfield = generateFilecountField(gl)
 editfield = uilabel(gl);
 set(editfield, "Text", num2str(0));

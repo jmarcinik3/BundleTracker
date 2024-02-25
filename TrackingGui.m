@@ -18,8 +18,6 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
         fpsInputElement;
 
         % components to start tracking and save results
-        trackButton;
-        saveImageButton;
         saveFilestemElement;
     end
 
@@ -34,15 +32,15 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
 
             gl = generateGridLayout([2, 2]);
             rgl = generateRightGridLayout(gl);
-            
+
             obj@RegionTracker();
             obj@DirectorySelector(gl, {1, [1, 2]});
             obj@RegionPreviewer(gl, {2, 1}, "EnableZoom", enableZoom);
-            
+
             obj.gridLayout = gl;
             obj.rightGridLayout = rgl;
 
-            obj.generateSimpleElements(rgl);
+            obj.generateTrackingElements(rgl);
             obj.configureDirectorySelector(startingDirpath)
             layoutElements(obj);
 
@@ -57,29 +55,12 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
             obj.setDirectoryValueChangedFcn(@obj.directoryValueChanged);
             obj.setDirectory(startingDirpath);
         end
-        function generateSimpleElements(obj, gl)
-            obj.generateTrackingElements(gl);
-            obj.generatePostTrackingElements(gl);
-        end
         function generateTrackingElements(obj, gl)
             obj.trackingSelection = generateTrackingSelection(gl);
             obj.kinociliumLocation = KinociliumLocation(gl);
             obj.scaleFactorInputElement = generateScaleFactorElement(gl);
             obj.fpsInputElement = generateFpsInputElement(gl);
             obj.saveFilestemElement = generateSaveFilestemElement(gl);
-        end
-        function generatePostTrackingElements(obj, gl)
-            obj.trackButton = obj.generateTrackButton(gl);
-            obj.saveImageButton = obj.generateSaveImageButton(gl);
-        end
-        function trackButton = generateTrackButton(obj, gl)
-            trackButton = generateTrackButton(gl);
-            set(trackButton, "ButtonPushedFcn", @obj.trackButtonPushed);
-        end
-        function saveImageButton = generateSaveImageButton(obj, gl)
-            saveImageButton = generateSaveImageButton(gl);
-            set(saveImageButton, "ButtonPushedFcn", @obj.saveImageButtonPushed);
-            obj.saveImageButton = saveImageButton;
         end
     end
 
@@ -116,13 +97,7 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
             elem = obj.fpsInputElement;
         end
 
-        % button to starting tracking and elements for saving
-        function elem = getTrackButton(obj)
-            elem = obj.trackButton;
-        end
-        function elem = getSaveImageButton(obj)
-            elem = obj.saveImageButton;
-        end
+        % other components
         function elem = getSaveFilestemElement(obj)
             elem = obj.saveFilestemElement;
         end
@@ -158,7 +133,7 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
             textbox = gl.Children(2);
             stem = textbox.Value;
         end
-    
+
         % ...for image
         function filepath = generateSaveFilepath(obj)
             directoryPath = obj.getDirectoryPath();
@@ -169,12 +144,19 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
     end
 
     %% Functions to update state of GUI
-    methods (Access = private)
+    methods
+        function exportImageIfPossible(obj, ~, ~)
+            imageGui = obj.getImageGui();
+            directoryPath = obj.getDirectoryPath();
+            imageGui.exportImageIfPossible(directoryPath);
+        end
         function trackButtonPushed(obj, ~, ~)
             if obj.regionExists()
                 obj.trackAndSaveRegions();
             end
         end
+    end
+    methods (Access = private)
         function exists = regionExists(obj)
             regions = obj.getRegions();
             count = numel(regions);
@@ -201,7 +183,7 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
             obj.setTrackingMode(trackingMode);
             obj.setInitialResult(initialResult);
         end
-        function result = generateInitialResult(obj)  
+        function result = generateInitialResult(obj)
             result = struct( ...
                 "DirectoryPath", obj.getDirectoryPath(), ...
                 "TrackingMode", obj.getTrackingSelection(), ...
@@ -216,15 +198,6 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
             save(filepath, "results");
         end
 
-        function saveImageButtonPushed(obj, ~, ~)
-            obj.exportImageIfPossible();
-        end
-        function exportImageIfPossible(obj)
-            imageGui = obj.getImageGui();
-            directoryPath = obj.getDirectoryPath();
-            imageGui.exportImageIfPossible(directoryPath);
-        end
-
         function directoryValueChanged(obj, ~, ~)
             obj.updateImageForDirectory();
         end
@@ -232,7 +205,7 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
             im = obj.getFirstImage();
             obj.changeFullImage(im);
         end
-        
+
         function throwAlertMessage(obj, message, title)
             fig = obj.getFigure();
             uialert(fig, message, title);
@@ -264,10 +237,7 @@ end
 function layoutTopElements(gui)
 rowHeight = TrackingGui.rowHeight;
 directorySelector = gui.getDirectorySelectionElement();
-set(directorySelector, ...
-    "RowHeight", rowHeight, ...
-    "ColumnWidth", {'7x', '1x', '2x', '2x'} ...
-    );
+set(directorySelector, "RowHeight", rowHeight);
 end
 function layoutRightsideElements(gui)
 rowHeight = TrackingGui.rowHeight;
@@ -278,16 +248,12 @@ scaleFactorElement = gui.getScaleFactorInputElement();
 fpsInputElement = gui.getFpsInputElement();
 trackingDropdown = gui.getTrackingSelectionElement();
 saveFilestemElement = gui.getSaveFilestemElement();
-trackButton = gui.getTrackButton();
-saveImageButton = gui.getSaveImageButton();
 
 trackingDropdown.Layout.Row = 1;
 kinociliumLocationGroup.Layout.Row = 2;
 scaleFactorElement.Layout.Row = 3;
 fpsInputElement.Layout.Row = 4;
 saveFilestemElement.Layout.Row = 5;
-trackButton.Layout.Row = 6;
-saveImageButton.Layout.Row = 7;
 
 set(scaleFactorElement, ...
     "RowHeight", rowHeight, ...
@@ -308,12 +274,16 @@ end
 
 function gl = generateGridLayout(size)
 fig = uifigure;
-fig.Name = "Hair-Bundle Tracking";
+position = [300, 200, 800, 700];
+set(fig, ...
+    "Name", "Hair-Bundle Tracking", ...
+    "Position", position ...
+    );
 gl = uigridlayout(fig, size);
 end
 
 function rgl = generateRightGridLayout(gl)
-rgl = uigridlayout(gl, [7, 1]);
+rgl = uigridlayout(gl, [5, 1]);
 rgl.Layout.Row = 2;
 rgl.Layout.Column = 2;
 end
@@ -330,36 +300,6 @@ end
 function dropdown = generateTrackingSelection(gl)
 dropdown = uidropdown(gl);
 dropdown.Items = TrackingAlgorithms.keywords;
-end
-
-%% Function to generate save image button
-% Generates button allowing user to save displayed bundle image with
-% selected regions
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add button in
-%
-% Returns uibutton
-function button = generateSaveImageButton(gl)
-% Button to save displayed image of bundle
-button = uibutton(gl);
-button.Text = "Save Image";
-end
-
-%% Function to generate track button
-% Generates button allowing user to starting tracking of selected regions
-% on bundle image
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add button in
-%
-% Returns uibutton
-function button = generateTrackButton(gl)
-% Button to start tracking selected regions on image
-button = uibutton(gl);
-button.Text = "Track";
 end
 
 %% Function to generate FPS input
@@ -434,4 +374,3 @@ tb.Value = "results"; % default value
 lbl.Layout.Column = 1;
 tb.Layout.Column = 2;
 end
-

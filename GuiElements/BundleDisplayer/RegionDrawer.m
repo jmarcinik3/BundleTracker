@@ -1,5 +1,5 @@
 classdef RegionDrawer < handle
-    properties (Access = private, Constant)
+    properties (Constant)
         rectangleKeyword = "Rectangle";
         ellipseKeyword = "Ellipse";
         polygonKeyword = "Polygon";
@@ -49,6 +49,9 @@ classdef RegionDrawer < handle
 
     %% Functions to set state information
     methods
+        function setRegionShape(obj, shapeKeyword)
+            obj.shapeKeyword = shapeKeyword;
+        end
         function setRectangleShape(obj, ~, ~)
             rectangleKeyword = RegionDrawer.rectangleKeyword;
             obj.setRegionShape(rectangleKeyword);
@@ -64,11 +67,6 @@ classdef RegionDrawer < handle
         function setFreehandShape(obj, ~, ~)
             freehandKeyword = RegionDrawer.freehandKeyword;
             obj.setRegionShape(freehandKeyword);
-        end
-    end
-    methods (Access = private)
-        function setRegionShape(obj, shapeKeyword)
-            obj.shapeKeyword = shapeKeyword;
         end
     end
 
