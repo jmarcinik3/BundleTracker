@@ -103,14 +103,14 @@ classdef RegionGui < PreprocessorGui & RegionParser
             obj.setThresholds(thresholds);
         end
         function thresholdSliderChanged(obj, source, event)
-            thresholdSliderChanged@PreprocessorGui(obj, source, event)
             thresholds = source.Value;
             obj.setThresholds(thresholds);
+            thresholdSliderChanged@PreprocessorGui(obj, source, event)
         end
         function invertCheckboxChanged(obj, source, event)
-            invertCheckboxChanged@PreprocessorGui(obj, source, event);
             invert = source.Value;
             obj.setInvert(invert);
+            invertCheckboxChanged@PreprocessorGui(obj, source, event);
         end
     end
 end
