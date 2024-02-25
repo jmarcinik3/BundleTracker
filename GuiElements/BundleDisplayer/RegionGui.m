@@ -3,6 +3,7 @@ classdef RegionGui < PreprocessorGui & RegionParser
         %#ok<*PROP>
         %#ok<*PROPLC>
         fullRawImage;
+        regionMoverGui;
     end
 
     methods
@@ -10,8 +11,10 @@ classdef RegionGui < PreprocessorGui & RegionParser
             gl = generateGridLayout(parent, location);
             obj@RegionParser(region);
             obj@PreprocessorGui(gl);
+            obj.regionMoverGui = RegionMoverGui(gl, region);
 
             addlistener(region, "MovingROI", @obj.regionMoving);
+            addlistener(region, "ROIMoved", @obj.regionMoving);
             obj.configureThresholdSlider();
             obj.configureInvertCheckbox();
 
@@ -39,6 +42,13 @@ classdef RegionGui < PreprocessorGui & RegionParser
                 "ValueChangedFcn", @obj.invertCheckboxChanged, ...
                 "Value", invert ...
                 );
+        end
+    end
+
+    %% Functions to retrieve GUI elements
+    methods
+        function elem = getRegionMoverElement(obj)
+            elem = obj.regionMoverGui.getGridLayout();
         end
     end
 
@@ -116,21 +126,25 @@ gl = gui.getGridLayout();
 ax = gui.getAxis();
 thresholdSlider = gui.getThresholdSlider();
 invertCheckbox = gui.getInvertCheckbox();
+regionMoverElement = gui.getRegionMoverElement();
 
-ax.Layout.Row = [1, 3];
+ax.Layout.Row = [1, 4];
 ax.Layout.Column = 1;
+
 thresholdSlider.Layout.Row = 1;
-thresholdSlider.Layout.Column = 2;
 invertCheckbox.Layout.Row = 2;
+regionMoverElement.Layout.Row = 3;
+thresholdSlider.Layout.Column = 2;
 invertCheckbox.Layout.Column = 2;
+regionMoverElement.Layout.Column = 2;
 
 % Set up row heights and column widths for grid layout
-gl.RowHeight = {rowHeight, rowHeight, '1x'};
+gl.RowHeight = {rowHeight, rowHeight, '1x', 'fit'};
 gl.ColumnWidth = {'1x', '2x'};
 end
 
 function gl = generateGridLayout(parent, location)
-gl = uigridlayout(parent, [1, 3]);
+gl = uigridlayout(parent, [4, 2]);
 gl.Layout.Row = location{1};
 gl.Layout.Column = location{2};
 end
