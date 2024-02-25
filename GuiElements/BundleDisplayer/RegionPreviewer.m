@@ -1,10 +1,15 @@
 classdef RegionPreviewer < RegionDrawer
+    properties (Access = private, Constant)
+        regionGuiLocation = {2, 1};
+    end
+
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
         gridLayout;
         imageGui;
-        regionGui;
+        tag2gui = dictionary;
+        tagCounter = 0;
     end
 
     methods
@@ -15,7 +20,6 @@ classdef RegionPreviewer < RegionDrawer
             enableZoom = p.Results.EnableZoom;
 
             gl = generateGridLayout(parent, location);
-            regionGui = RegionGui(gl, {2, 1});
             imageGui = ImageGui(gl, {1, 1}, "EnableZoom", enableZoom);
             ax = imageGui.getAxis();
             iIm = imageGui.getInteractiveImage();
@@ -25,8 +29,24 @@ classdef RegionPreviewer < RegionDrawer
             set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
             obj.gridLayout = gl;
             obj.imageGui = imageGui;
-            obj.regionGui = regionGui;
             layoutElements(obj);
+        end
+    end
+
+    %% Functions to generate GUI elements
+    methods (Access = private)
+        function regionGui = generateRegionGui(obj, region)
+            tagCounter = obj.tagCounter + 1;
+            obj.tagCounter = tagCounter;
+            tag = num2str(tagCounter);
+
+            gl = obj.getGridLayout();
+            location = RegionPreviewer.regionGuiLocation;
+            fullRawImage = obj.getRawImage();
+            regionGui = RegionGui(gl, location, region, fullRawImage);
+
+            set(region, "Tag", tag);
+            obj.tag2gui(tag) = regionGui;
         end
     end
 
@@ -35,8 +55,9 @@ classdef RegionPreviewer < RegionDrawer
         function gui = getImageGui(obj)
             gui = obj.imageGui;
         end
-        function gui = getRegionGui(obj)
-            gui = obj.regionGui;
+        function gui = getRegionGui(obj, region)
+            tag = get(region, "Tag");
+            gui = obj.tag2gui(tag);
         end
         function regions = getRegions(obj)
             % Retrieves currently drawn regions on image
@@ -49,70 +70,68 @@ classdef RegionPreviewer < RegionDrawer
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
         end
-        function elem = getImageElement(obj)
-            imageGui = obj.getImageGui();
-            elem = imageGui.getGridLayout();
+        function guis = getRegionGuis(obj)
+            guis = values(obj.tag2gui);
         end
-        function elem = getRegionElement(obj)
-            regionGui = obj.getRegionGui();
-            elem = regionGui.getGridLayout();
+        function rawImage = getRawImage(obj)
+            imageGui = obj.getImageGui();
+            rawImage = imageGui.getRawImage();
         end
     end
 
     %% Functions to update state of GUI
     methods (Access = protected)
         function changeFullImage(obj, im)
+            obj.clearRegions();
             imageGui = obj.getImageGui();
-            regionGui = obj.getRegionGui();
             imageGui.changeImage(im);
-            regionGui.setRawImage([]);
-        end
-        function clearRegions(obj)
-            % Removes currently drawn regions on image
-            regions = obj.getRegions();
-            delete(regions);
         end
     end
     methods (Access = private)
+        function clearRegions(obj)
+            % Removes currently drawn regions on image
+            regions = obj.getRegions();
+            fakeEvent = struct("EventName", "FakeEvent");
+            arrayfun(@(region) obj.deletingRegion(region, fakeEvent), regions);
+            delete(regions);
+        end
+
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
                 region = obj.generateRegion(source, event);
-                obj.previewGeneratedRegion(region);
+                obj.generateRegionGui(region);
+                obj.addListeners(region);
+                obj.previewRegion(region);
             end
         end
-        function previewGeneratedRegion(obj, region)
-            obj.addListeners(region);
-            obj.setPreviewRegion(region);
-        end
-
         function addListeners(obj, region)
             addlistener(region, "ROIClicked", @obj.regionClicked);
-            addlistener(region, "MovingROI", @obj.regionMoving);
-        end
-        function regionMoving(obj, source, ~)
-            obj.setPreviewRegion(source);
+            addlistener(region, "DeletingROI", @obj.deletingRegion);
         end
         function regionClicked(obj, source, event)
             if isLeftClick(event)
-                obj.setPreviewRegion(source);
+                obj.previewRegion(source);
             end
         end
-
-        function setPreviewRegion(obj, region)
-            regionGui = obj.getRegionGui();
-            regionRawImage = obj.getRegionalRawImage(region);
-            regionGui.setRegion(region, regionRawImage);
-            obj.updateRegionColors(region);
-        end
-        function regionRawImage = getRegionalRawImage(obj, region)
-            imageGui = obj.getImageGui();
-            im = imageGui.getRawImage();
-            regionRawImage = unpaddedMatrixInRegion(region, im);
+        function deletingRegion(obj, source, event)
+            regionGui = obj.getRegionGui(source);
+            obj.removeRegionEntry(source);
+            regionGui.deletingRegion(source, event);
         end
 
-        function updateRegionColors(obj, activeRegion)
-            regions = obj.getRegions();
-            updateRegionColors(activeRegion, regions);
+        function previewRegion(obj, region)
+            obj.updateRegionGuiVisible(region);
+            updateRegionColors(region);
+        end
+        function updateRegionGuiVisible(obj, activeRegion)
+            regionGui = obj.getRegionGui(activeRegion);
+            regionGuis = obj.getRegionGuis();
+            arrayfun(@(gui) gui.setVisible(false), regionGuis);
+            regionGui.setVisible(true);
+        end
+        function removeRegionEntry(obj, region)
+            tag = get(region, "Tag");
+            obj.tag2gui = remove(obj.tag2gui, tag);
         end
     end
 end
@@ -139,7 +158,9 @@ elseif name == "Hit"
 end
 end
 
-function updateRegionColors(activeRegion, regions)
+function updateRegionColors(activeRegion)
+ax = ancestor(activeRegion, "axes");
+regions = RegionDrawer.getRegions(ax);
 set(regions, "Color", RegionColor.unprocessedColor);
 set(activeRegion, "Color", RegionColor.workingColor);
 end

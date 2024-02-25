@@ -226,7 +226,6 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
         end
 
         function directoryValueChanged(obj, ~, ~)
-            obj.clearRegions();
             obj.updateImageForDirectory();
         end
         function updateImageForDirectory(obj)

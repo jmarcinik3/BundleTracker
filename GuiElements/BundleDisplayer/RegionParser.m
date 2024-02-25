@@ -1,4 +1,4 @@
-classdef RegionParser
+classdef RegionParser < handle
     properties (Constant)
         labelKeyword = "Label";
         intensityKeyword = "IntensityRange";
@@ -17,7 +17,13 @@ classdef RegionParser
     end
 
     %% Functions to retrieve state information or generate objects
-    methods
+    methods (Static)
+        function processor = toProcessor(region)
+            regionParser = RegionParser(region);
+            processor = regionParser.generatePreprocessor();
+        end
+    end
+    methods (Access = protected)
         function region = getRegion(obj)
             region = obj.region;
         end

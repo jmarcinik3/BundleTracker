@@ -3,7 +3,6 @@ classdef PreprocessorGui < handle
         gridLayout;
         interactiveImage;
         thresholdSlider;
-        intensityThresholds;
         invertCheckbox;
     end
 
@@ -16,7 +15,6 @@ classdef PreprocessorGui < handle
             obj.gridLayout = gl;
             obj.interactiveImage = generateInteractiveImage(ax);
             obj.thresholdSlider = obj.generateThresholdSlider(gl);
-            obj.intensityThresholds = obj.thresholdSlider.Value;
             obj.invertCheckbox = obj.generateInvertCheckbox(gl);
         end
     end
@@ -97,13 +95,12 @@ classdef PreprocessorGui < handle
         end
     end
     methods (Access = protected)
-        function processor = generatePreprocessor(obj)
-            thresholds = obj.getThresholds();
+        function processor = generatePreprocessor(obj, thresholds)
             invert = obj.getInvert();
             processor = Preprocessor(thresholds, invert);
         end
         function thresholds = getThresholds(obj)
-            thresholds = obj.intensityThresholds;
+            thresholds = obj.thresholdSlider.Value;
         end
         function invert = getInvert(obj)
             invert = obj.invertCheckbox.Value;
@@ -127,7 +124,9 @@ classdef PreprocessorGui < handle
         function setRawImage(obj, im)
             iIm = obj.getInteractiveImage();
             iIm.UserData.rawImage = im;
-            obj.updateFromRawImage();
+
+            thresholds = obj.getThresholds();
+            obj.updateFromRawImage(thresholds);
             obj.resizeAxis();
         end
     end
@@ -135,20 +134,21 @@ classdef PreprocessorGui < handle
     %% Functions to update state of interactive image
     methods (Access = protected)
         function invertCheckboxChanged(obj, ~, ~)
+            thresholds = obj.getThresholds();
             if obj.imageExists()
-                obj.updateFromRawImage();
+                obj.updateFromRawImage(thresholds);
             end
         end
         function thresholdSliderChanging(obj, ~, event)
-            obj.intensityThresholds = event.Value;
+            thresholds = event.Value;
             if obj.imageExists()
-                obj.updateFromRawImage();
+                obj.updateFromRawImage(thresholds);
             end
         end
         function thresholdSliderChanged(obj, source, ~)
-            obj.intensityThresholds = source.Value;
+            thresholds = source.Value;
             if obj.imageExists()
-                obj.updateFromRawImage();
+                obj.updateFromRawImage(thresholds);
             end
         end
     end
@@ -176,18 +176,18 @@ classdef PreprocessorGui < handle
             [h, w] = obj.getImageSize();
             resizeAxis(ax, h, w);
         end
-        function updateFromRawImage(obj)
-            im = obj.generatePreprocessedImage();
+        function updateFromRawImage(obj, thresholds)
+            im = obj.generatePreprocessedImage(thresholds);
             obj.showImage(im);
         end
-        function im = generatePreprocessedImage(obj)
+        function im = generatePreprocessedImage(obj, thresholds)
             im = obj.getRawImage();
             if obj.imageExists()
-                im = obj.preprocessImage(im);
+                im = obj.preprocessImage(im, thresholds);
             end
         end
-        function im = preprocessImage(obj, im)
-            preprocessor = obj.generatePreprocessor();
+        function im = preprocessImage(obj, im, thresholds)
+            preprocessor = obj.generatePreprocessor(thresholds);
             im = preprocessor.preprocess(im);
         end
     end

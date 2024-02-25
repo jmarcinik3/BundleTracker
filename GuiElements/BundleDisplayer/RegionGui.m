@@ -1,79 +1,106 @@
-classdef RegionGui < PreprocessorGui
+classdef RegionGui < PreprocessorGui & RegionParser
     properties (Access = private)
         %#ok<*PROP>
         %#ok<*PROPLC>
-        regionParser;
+        fullRawImage;
     end
 
     methods
-        function obj = RegionGui(parent, location)
+        function obj = RegionGui(parent, location, region, fullRawImage)
             gl = generateGridLayout(parent, location);
+            obj@RegionParser(region);
             obj@PreprocessorGui(gl);
-            
-            thresholdSlider = obj.getThresholdSlider();
-            invertCheckbox = obj.getInvertCheckbox();
-            set(thresholdSlider, "ValueChangedFcn", @obj.thresholdSliderChanged);
-            set(invertCheckbox, "ValueChangedFcn", @obj.invertCheckboxChanged);
+
+            addlistener(region, "MovingROI", @obj.regionMoving);
+            obj.configureThresholdSlider();
+            obj.configureInvertCheckbox();
+
+            obj.fullRawImage = fullRawImage;
+            obj.updateRegionalRawImage();
             layoutElements(obj);
         end
     end
 
-    %% Functions to retreive state information
+    %% Functions to generate GUI elements
     methods (Access = private)
-        function region = getRegion(obj)
-            region = obj.regionParser.getRegion();
+        function configureThresholdSlider(obj)
+            thresholds = obj.getThresholds();
+            thresholdSlider = obj.getThresholdSlider();
+            set(thresholdSlider, ...
+                "ValueChangingFcn", @obj.thresholdSliderChanging, ...
+                "ValueChangedFcn", @obj.thresholdSliderChanged, ...
+                "Value", thresholds ...
+                );
         end
-        function thresholds = getRegionThresholds(obj)
-            thresholds = obj.regionParser.getThresholds();
-        end
-        function invert = getRegionInvert(obj)
-            invert = obj.regionParser.getInvert();
+        function configureInvertCheckbox(obj)
+            invert = obj.getInvert();
+            invertCheckbox = obj.getInvertCheckbox();
+            set(invertCheckbox, ...
+                "ValueChangedFcn", @obj.invertCheckboxChanged, ...
+                "Value", invert ...
+                );
         end
     end
 
-    %% Functions to set state information
-    methods
-        function setRegion(obj, region, rawImage)
-            obj.regionParser = RegionParser(region); % must come before updating GUI
-            obj.updateThresholdSlider();
-            obj.updateInvertCheckbox();
-            obj.setRawImage(rawImage);
+    %% Functions to retrieve state information
+    methods (Access = protected)
+        function thresholds = getThresholds(obj)
+            thresholds = getThresholds@RegionParser(obj);
+        end
+        function invert = getInvert(obj)
+            invert = getInvert@RegionParser(obj);
+        end
+        function processor = generatePreprocessor(obj, ~)
+            processor = generatePreprocessor@RegionParser(obj);
         end
     end
     methods (Access = private)
-        function setRegionThresholds(obj, thresholds)
-            obj.regionParser.setThresholds(thresholds);
+        function regionRawImage = generateRegionalRawImage(obj)
+            fullRawImage = obj.fullRawImage;
+            region = obj.getRegion();
+            regionRawImage = unpaddedMatrixInRegion(region, fullRawImage);
         end
-        function setRegionInvert(obj, invert)
-            obj.regionParser.setInvert(invert);
+    end
+
+    %% Functions to set GUI state information
+    methods
+        function setVisible(obj, visible)
+            gl = obj.getGridLayout();
+            set(gl, "Visible", visible);
         end
     end
 
     %% Functions to update GUI and state information
+    methods
+        function deletingRegion(obj, ~, ~)
+            gl = obj.getGridLayout();
+            delete(gl);
+            delete(obj);
+        end
+    end
     methods (Access = protected)
+        function regionMoving(obj, ~, ~)
+            obj.updateRegionalRawImage();
+        end
+        function updateRegionalRawImage(obj)
+            regionRawImage = obj.generateRegionalRawImage();
+            obj.setRawImage(regionRawImage);
+        end
+
+        function thresholdSliderChanging(obj, source, event)
+            thresholdSliderChanging@PreprocessorGui(obj, source, event)
+            thresholds = event.Value;
+            obj.setThresholds(thresholds);
+        end
         function thresholdSliderChanged(obj, source, event)
             thresholdSliderChanged@PreprocessorGui(obj, source, event)
             thresholds = source.Value;
-            obj.setRegionThresholds(thresholds);
+            obj.setThresholds(thresholds);
         end
         function invertCheckboxChanged(obj, source, event)
             invertCheckboxChanged@PreprocessorGui(obj, source, event);
             invert = source.Value;
-            obj.setRegionInvert(invert);
-        end
-    end
-    methods (Access = private)
-        function updateThresholdSlider(obj)
-            thresholds = obj.getRegionThresholds();
-            thresholdSlider = obj.getThresholdSlider();
-            event = struct("EventName", "RegionChanged");
-            set(thresholdSlider, "Value", thresholds);
-            obj.thresholdSliderChanged(thresholdSlider, event);
-        end
-        function updateInvertCheckbox(obj)
-            invert = obj.getRegionInvert();
-            invertCheckbox = obj.getInvertCheckbox();
-            set(invertCheckbox, "Value", invert);
+            obj.setInvert(invert);
         end
     end
 end
