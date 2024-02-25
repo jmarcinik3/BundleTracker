@@ -17,8 +17,8 @@ classdef TrackingToolbar < handle
             trackTool = generateTrackTool(toolbar, trackingGui);
             set(trackTool, "Separator", true);
 
-            githubTool = generateGithubTool(toolbar);
-            set(githubTool, "Separator", true)
+            websiteTools = generateWebsiteTools(toolbar);
+            set(websiteTools(1), "Separator", true)
 
             obj.trackingGui = trackingGui;
         end
@@ -92,6 +92,21 @@ function tool = generateTrackTool(toolbar, trackingGui)
 tool = uipushtool(toolbar, ...
     "Icon", playIcon, ...
     "ClickedCallback", @trackingGui.trackButtonPushed ...
+    );
+end
+
+
+function tools = generateWebsiteTools(toolbar)
+labWebsiteTool = generateLabWebsiteTool(toolbar);
+githubTool = generateGithubTool(toolbar);
+tools = [labWebsiteTool, githubTool];
+end
+function tool = generateLabWebsiteTool(toolbar)
+[frogIcon, ~, ~] = imread("img/frog.png");
+url = "https://bozoviclab.physics.ucla.edu";
+tool = uipushtool(toolbar, ...
+    "Icon", frogIcon, ...
+    "ClickedCallback", @(src, ev) web(url) ...
     );
 end
 function tool = generateGithubTool(toolbar)
