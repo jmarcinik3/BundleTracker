@@ -139,8 +139,11 @@ invertCheckbox.Layout.Column = 2;
 regionMoverElement.Layout.Column = 2;
 
 % Set up row heights and column widths for grid layout
-gl.RowHeight = {rowHeight, rowHeight, '1x', 'fit'};
-gl.ColumnWidth = {'1x', '2x'};
+set(gl, ...
+    "Padding", [rowHeight, 0, rowHeight, 0], ...
+    "RowHeight", {rowHeight, rowHeight, '1x', 'fit'}, ...
+    "ColumnWidth", {'1x', '2x'} ...
+    );
 end
 
 function gl = generateGridLayout(parent, location)

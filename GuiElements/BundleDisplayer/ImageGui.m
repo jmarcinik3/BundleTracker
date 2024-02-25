@@ -65,7 +65,7 @@ end
 
 function layoutElements(gui)
 % Set component heights in grid layout
-sliderHeight = 30;
+rowHeight = TrackingGui.rowHeight;
 
 % Retrieve components
 gl = gui.getGridLayout();
@@ -84,8 +84,11 @@ ax.Layout.Row = 2;
 ax.Layout.Column = [1 2];
 
 % Set up row heights and column widths for grid layout
-gl.RowHeight = {sliderHeight, '1x'};
-gl.ColumnWidth = {'4x', '1x'};
+set(gl, ...
+    "Padding", [0, 0, 0, 0], ...
+    "RowHeight", {rowHeight, '1x'}, ...
+    "ColumnWidth", {'4x', '1x'} ...
+    );
 end
 
 function gl = generateGridLayout(parent, location)

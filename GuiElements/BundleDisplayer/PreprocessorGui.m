@@ -157,7 +157,7 @@ classdef PreprocessorGui < handle
             gl = obj.getGridLayout();
             set(gl, "Visible", visible);
         end
-        
+
         function showImage(obj, im)
             imRgb = obj.gray2rgb(im);
             obj.setImageCData(imRgb);
@@ -209,20 +209,16 @@ slider = uislider(gl, "range");
 
 % set major and minor tick locations
 maxIntensity = 2^16; % maximum intensity for TIF image
-slider.Limits = [0, maxIntensity];
-slider.Value = [0, maxIntensity];
-slider.MinorTicks = 0:2^11:maxIntensity;
-slider.MajorTicks = 0:2^14:maxIntensity;
+majorTicks = 0:2^14:maxIntensity;
+majorTickLabels = arrayfun(@(tick) sprintf("%d", tick), majorTicks);
 
-% format major tick labels
-majorTicks = slider.MajorTicks;
-tickCount = numel(majorTicks);
-majorTickLabels = strings(1, tickCount);
-for index = 1:tickCount
-    majorTick = majorTicks(index);
-    majorTickLabels(index) = sprintf("%d", majorTick);
-end
-slider.MajorTickLabels = majorTickLabels;
+set(slider, ...
+    "Limits", [0, maxIntensity], ...
+    "Value", [0, maxIntensity], ...
+    "MinorTicks", 0:2^11:maxIntensity, ...
+    "MajorTicks", 0:2^14:maxIntensity, ...
+    "MajorTickLabels", majorTickLabels...
+    );
 end
 
 %% Function to generate invert checkbox
