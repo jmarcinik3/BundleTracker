@@ -10,15 +10,12 @@ classdef TrackingToolbar < handle
             toolbar = uitoolbar(fig);
 
             obj.regionShapeTools = obj.generateRegionShapeSection(toolbar, trackingGui);
-            
             explorerTools = generateExplorerSection(toolbar, trackingGui);
-            set(explorerTools(1), "Separator", true);
-
             trackTool = generateTrackTool(toolbar, trackingGui);
-            set(trackTool, "Separator", true);
-
             websiteTools = generateWebsiteTools(toolbar);
-            set(websiteTools(1), "Separator", true)
+
+            separatedTools = [explorerTools(1), trackTool, websiteTools(1)];
+            set(separatedTools, "Separator", true);
 
             obj.trackingGui = trackingGui;
         end
