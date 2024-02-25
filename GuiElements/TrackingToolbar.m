@@ -17,6 +17,9 @@ classdef TrackingToolbar < handle
             trackTool = generateTrackTool(toolbar, trackingGui);
             set(trackTool, "Separator", true);
 
+            githubTool = generateGithubTool(toolbar);
+            set(githubTool, "Separator", true)
+
             obj.trackingGui = trackingGui;
         end
     end
@@ -89,6 +92,14 @@ function tool = generateTrackTool(toolbar, trackingGui)
 tool = uipushtool(toolbar, ...
     "Icon", playIcon, ...
     "ClickedCallback", @trackingGui.trackButtonPushed ...
+    );
+end
+function tool = generateGithubTool(toolbar)
+[githubIcon, ~, ~] = imread("img/github-logo.png");
+url = "https://github.com/jmarcinik3/BundleTracker";
+tool = uipushtool(toolbar, ...
+    "Icon", githubIcon, ...
+    "ClickedCallback", @(src, ev) web(url) ...
     );
 end
 
