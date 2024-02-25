@@ -11,7 +11,10 @@ classdef RegionGui < PreprocessorGui & RegionParser
             gl = generateGridLayout(parent, location);
             obj@RegionParser(region);
             obj@PreprocessorGui(gl);
-            obj.regionMoverGui = RegionMoverGui(gl, region);
+            
+            regionMoverGui = RegionMoverGui(gl);
+            RegionMoverLinker(regionMoverGui, region);
+            obj.regionMoverGui = regionMoverGui;
 
             addlistener(region, "MovingROI", @obj.regionMoving);
             addlistener(region, "ROIMoved", @obj.regionMoving);
