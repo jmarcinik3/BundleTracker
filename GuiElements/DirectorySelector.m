@@ -130,7 +130,7 @@ classdef DirectorySelector < handle
     methods
         function chooseDirectory(obj, source, event)
             previousDirectoryPath = obj.getDirectoryPath();
-            directoryPath = uigetdir(previousDirectoryPath);
+            directoryPath = uigetdir(previousDirectoryPath, "Choose Directory");
             obj.setDirectoryIfChosen(directoryPath, source, event);
         end
         function openDirectory(obj, ~, ~)
