@@ -1,24 +1,24 @@
-classdef RegionCompressorGui
-    properties (Access = private, Constant)
-        filepaths = "img/" + [
-            ["compress-down-right.png", "compress-down.png", "compress-down-left.png"];
-            ["compress-right.png", "arrows-in.png", "compress-left.png"];
-            ["compress-up-right.png", "compress-up.png", "compress-up-left.png"];
-        ];
-    end
-
+classdef RegionAdjusterGui
     properties (Access = private)
         gridLayout;
         imageElements;
     end
 
     methods
-        function obj = RegionCompressorGui(parent)
+        function obj = RegionAdjusterGui(parent, filepaths, varargin)
+            p = inputParser;
+            addOptional(p, "Tooltips", []);
+            parse(p, varargin{:});
+            tooltips = p.Results.Tooltips;
+
             gl = generateGridLayout(parent);
-            filepaths = RegionCompressorGui.filepaths;
+            imageElements = generateImageGrid(gl, filepaths);
+            if numel(tooltips) >= 0
+                generateTooltips(imageElements, tooltips);
+            end
 
             obj.gridLayout = gl;
-            obj.imageElements = generateImageGrid(gl, filepaths);
+            obj.imageElements = imageElements;
         end
     end
 
@@ -32,7 +32,6 @@ classdef RegionCompressorGui
         end
     end
 end
-
 
 
 function gl = generateGridLayout(parent)
@@ -60,6 +59,17 @@ for rowIndex = 1:rowCount
     for columnIndex = 1:columnCount
         imageElement = generateImage(rowIndex, columnIndex);
         imageElements{rowIndex, columnIndex} = imageElement;
+    end
+end
+end
+
+function generateTooltips(imageElements, tooltips)
+[rowCount, columnCount] = size(imageElements);
+for rowIndex = 1:rowCount
+    for columnIndex = 1:columnCount
+        imageElement = imageElements{rowIndex, columnIndex};
+        tooltip = tooltips(rowIndex, columnIndex);
+        set(imageElement, "Tooltip", tooltip);
     end
 end
 end
