@@ -17,6 +17,7 @@ classdef RegionPreviewer < RegionDrawer
 
         generateRegionGui;
         addRegionEntry;
+        deletingRegion;
     end
 
     methods
@@ -26,7 +27,7 @@ classdef RegionPreviewer < RegionDrawer
                 regionGuiGridLayout, ...
                 regionGuiLocation ...
                 );
-            
+
             ax = imageGui.getAxis();
             iIm = imageGui.getInteractiveImage();
 
@@ -41,6 +42,7 @@ classdef RegionPreviewer < RegionDrawer
             obj.changeFullImage = @regionPreviewGui.changeFullImage;
             obj.generateRegionGui = @regionPreviewGui.generateRegionGui;
             obj.addRegionEntry = @regionPreviewGui.addRegionEntry;
+            obj.deletingRegion = @regionPreviewGui.deletingRegion;
 
             set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
         end

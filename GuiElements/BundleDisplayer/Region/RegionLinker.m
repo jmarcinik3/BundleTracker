@@ -5,6 +5,7 @@ classdef RegionLinker
     end
 
     properties (Access = private)
+        regionGui;
         fullRawImage;
         preprocessorLinker;
         regionParser;
@@ -36,6 +37,7 @@ classdef RegionLinker
             obj.setRawImage = @preprocessorGui.setRawImage;
             obj.setVisible = @preprocessorGui.setVisible;
 
+            obj.regionGui = regionGui;
             obj.preprocessorLinker = preprocessorLinker;
             obj.regionParser = regionParser;
             obj.fullRawImage = fullRawImage;
@@ -62,7 +64,6 @@ classdef RegionLinker
         function deletingRegion(obj, ~, ~)
             gl = obj.getGridLayout();
             delete(gl);
-            delete(obj);
         end
     end
     methods (Access = protected)
