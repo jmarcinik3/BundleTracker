@@ -48,7 +48,11 @@ classdef RegionPreviewGui < handle
             gui = obj.tag2linker(tag);
         end
         function guis = getRegionGuis(obj)
-            guis = values(obj.tag2linker);
+            if isConfigured(obj.tag2linker)
+                guis = values(obj.tag2linker);
+            else
+                guis = [];
+            end
         end
     end
     methods (Access = private)
@@ -61,6 +65,15 @@ classdef RegionPreviewGui < handle
     end
     methods (Access = private)
         
+    end
+
+    %% Functions to retrieve state information
+    methods
+        function exists = regionExists(obj)
+            regions = obj.getRegions();
+            count = numel(regions);
+            exists = count >= 1;
+        end
     end
 
     %% Functions to update state of GUI

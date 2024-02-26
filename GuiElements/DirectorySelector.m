@@ -1,4 +1,9 @@
 classdef DirectorySelector < handle
+    properties (Constant)
+        chooseTitle = "Choose Directory";
+        openTitle = "Open Directory";
+    end
+
     properties (Access = private)
         gridLayout;
         directoryPathField;
@@ -75,7 +80,8 @@ classdef DirectorySelector < handle
             directoryPath = obj.getDirectoryPath();
             is = directoryIsValid(directoryPath);
             if ~is
-                obj.throwAlertMessage("Directory path is invalid!", "Open Directory");
+                title = DirectorySelector.openTitle;
+                obj.throwAlertMessage("Directory path is invalid!", title);
             end
         end
         function has = directoryHasImage(obj)
@@ -83,7 +89,8 @@ classdef DirectorySelector < handle
             directory = obj.getDirectoryPath();
             has = count >= 1 && isfolder(directory);
             if ~has
-                obj.throwAlertMessage("No valid images found!", "Choose Directory");
+                title = DirectorySelector.chooseTitle;
+                obj.throwAlertMessage("No valid images found!", title);
             end
         end
     end
@@ -127,7 +134,8 @@ classdef DirectorySelector < handle
     methods
         function chooseDirectory(obj, source, event)
             previousDirectoryPath = obj.getDirectoryPath();
-            directoryPath = uigetdir(previousDirectoryPath, "Choose Directory");
+            title = DirectorySelector.chooseTitle;
+            directoryPath = uigetdir(previousDirectoryPath, title);
             obj.setDirectoryIfChosen(directoryPath, source, event);
         end
         function openDirectory(obj, ~, ~)

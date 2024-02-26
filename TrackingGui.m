@@ -5,6 +5,8 @@ classdef TrackingGui < RegionTracker & DirectorySelector
 
     properties
         getCurrentRegion;
+        setPreviousRegionVisible;
+        setNextRegionVisible;
         setRegionShape;
     end
 
@@ -51,9 +53,15 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             obj@DirectorySelector(gl, {1, [1, 2]});
             
             regionPreviewer = RegionPreviewer(imageGui, lgl, {2, 1});
+
+            % inherited getters
             obj.getCurrentRegion = @regionPreviewer.getCurrentRegion;
             obj.getRegions = @regionPreviewer.getRegions;
+            
+            % inherited setters
             obj.changeFullImage = @regionPreviewer.changeFullImage;
+            obj.setPreviousRegionVisible = @regionPreviewer.setPreviousRegionVisible;
+            obj.setNextRegionVisible = @regionPreviewer.setNextRegionVisible;
             obj.setRegionShape = @regionPreviewer.setRegionShape;
 
             obj.gridLayout = gl;

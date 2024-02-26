@@ -2,22 +2,44 @@ function keyPressed(trackingGui, ~, event)
 currentRegion = trackingGui.getCurrentRegion();
 key = event.Key;
 
-if objectExists(currentRegion) && RegionAdjustKey.is(key)
+if  RegionAdjustKey.is(key)
     modifiers = event.Modifier;
-    configureRegion(currentRegion, key, modifiers)
+
+    hasAlt = any(ismember(modifiers, "alt"));
+    modifierCount = numel(modifiers);
+    hasOneModifier = modifierCount == 1;
+    hasPureAlt = hasAlt && hasOneModifier;
+
+    if hasPureAlt
+        switchRegion(key, trackingGui);
+    elseif objectExists(currentRegion)
+        configureRegion(currentRegion, key, modifiers) ;
+    end
 end
 end
 
+
+function switchRegion(key, trackingGui)
+if ArrowKey.isLeft(key)
+    trackingGui.setPreviousRegionVisible();
+elseif ArrowKey.isRight(key)
+    trackingGui.setNextRegionVisible();
+end
+end
 
 
 function configureRegion(region, key, modifiers)
-isUnmodified = numel(modifiers) == 0;
+modifierCount = numel(modifiers);
+isUnmodified = modifierCount == 0;
+hasOneModifier = modifierCount == 1;
+hasTwoModifiers = modifierCount == 2;
+
 hasShift = any(ismember(modifiers, "shift"));
 hasCtrl = any(ismember(modifiers, "control"));
 hasAlt = any(ismember(modifiers, "alt"));
 
-hasPureCtrl = hasCtrl && ~hasShift && ~hasAlt;
-hasPureCtrlShift = hasCtrl && hasShift && ~hasAlt;
+hasPureCtrl = hasCtrl && hasOneModifier;
+hasPureCtrlShift = hasCtrl && hasShift && hasTwoModifiers;
 hasCtrlShiftAlt = hasCtrl && hasShift && hasAlt;
 
 if hasCtrlShiftAlt && ArrowKey.isUp(key)

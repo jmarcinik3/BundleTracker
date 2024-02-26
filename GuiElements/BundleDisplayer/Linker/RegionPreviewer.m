@@ -15,6 +15,7 @@ classdef RegionPreviewer < RegionDrawer
         getRawImage;
         getRegionGui
         getRegionGuis;
+        regionExists;
 
         generateRegionGui;
         addRegionEntry;
@@ -39,6 +40,7 @@ classdef RegionPreviewer < RegionDrawer
             obj.getRegions = @regionPreviewGui.getRegions;
             obj.getRegionGui = @regionPreviewGui.getRegionGui;
             obj.getRegionGuis = @regionPreviewGui.getRegionGuis;
+            obj.regionExists = @regionPreviewGui.regionExists;
 
             obj.changeFullImage = @regionPreviewGui.changeFullImage;
             obj.generateRegionGui = @regionPreviewGui.generateRegionGui;
@@ -74,6 +76,26 @@ classdef RegionPreviewer < RegionDrawer
     end
 
     %% Functions to update state of GUI
+    methods
+        function setPreviousRegionVisible(obj, ~, ~)
+            currentRegion = obj.getCurrentRegion();
+            if objectIsValid(currentRegion)
+                nextRegion = obj.getPreviousRegion();
+                obj.previewRegion(nextRegion);
+            elseif obj.regionExists()
+                obj.setFirstRegionVisible();
+            end
+        end
+        function setNextRegionVisible(obj, ~, ~)
+            currentRegion = obj.getCurrentRegion();
+            if objectIsValid(currentRegion)
+                nextRegion = obj.getNextRegion();
+                obj.previewRegion(nextRegion);
+            elseif obj.regionExists()
+                obj.setFirstRegionVisible();
+            end
+        end
+    end
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
@@ -104,6 +126,32 @@ classdef RegionPreviewer < RegionDrawer
             arrayfun(@(gui) gui.setVisible(false), regionGuis);
             regionGui.setVisible(true);
         end
+
+        function setFirstRegionVisible(obj)
+            regions = obj.getRegions();
+            firstRegion = regions(1);
+            obj.previewRegion(firstRegion);
+        end
+        function previousRegion = getPreviousRegion(obj)
+            currentRegion = obj.getCurrentRegion();
+            regions = obj.getRegions();
+            
+            currentIndex = str2double(get(currentRegion, "Tag"));
+            regionIndices = str2double(get(regions, "Tag"));
+            previousIndex = getPreviousFloatCyclic(regionIndices, currentIndex);
+            previousTag = num2str(previousIndex);
+            previousRegion = findobj(regions, "Tag", previousTag);
+        end
+        function nextRegion = getNextRegion(obj)
+            currentRegion = obj.getCurrentRegion();
+            regions = obj.getRegions();
+            
+            currentIndex = str2double(get(currentRegion, "Tag"));
+            regionIndices = str2double(get(regions, "Tag"));
+            nextIndex = getNextFloatCyclic(regionIndices, currentIndex);
+            nextTag = num2str(nextIndex);
+            nextRegion = findobj(regions, "Tag", nextTag);
+        end
     end
 end
 
@@ -123,4 +171,27 @@ ax = ancestor(activeRegion, "axes");
 regions = RegionDrawer.getRegions(ax);
 set(regions, "Color", RegionColor.unprocessedColor);
 set(activeRegion, "Color", RegionColor.workingColor);
+end
+
+
+function isValid = objectIsValid(obj)
+isValid = ~isempty(obj) && isvalid(obj);
+end
+function nextFloat = getNextFloatCyclic(array, number)
+greaterFloats = array(array > number);
+existsGreaterFloat = numel(greaterFloats) >= 1;
+if existsGreaterFloat
+    nextFloat = min(greaterFloats);
+else
+    nextFloat = array(1);
+end
+end
+function previousFloat = getPreviousFloatCyclic(array, number)
+lesserFloats = array(array < number);
+existsGreaterFloat = numel(lesserFloats) >= 1;
+if existsGreaterFloat
+    previousFloat = max(lesserFloats);
+else
+    previousFloat = array(end);
+end
 end

@@ -1,4 +1,8 @@
 classdef ImageExporter < handle
+    properties (Constant)
+        title = "Export Image";
+    end
+
     properties (Access = private, Constant)
         extensions = { ...
             '*.png', "Portable Network Graphics (PNG)"; ...
@@ -31,7 +35,8 @@ classdef ImageExporter < handle
     methods (Static)
         function export(ax, startDirectory)
             extensions = ImageExporter.extensions;
-            [filename, directoryPath, ~] = uiputfile(extensions, "Save Image", startDirectory);
+            title = ImageExporter.title;
+            [filename, directoryPath, ~] = uiputfile(extensions, title, startDirectory);
 
             if isValidDirectoryPath(directoryPath)
                 filepath = strcat(directoryPath, filename);
