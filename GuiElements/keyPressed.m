@@ -6,9 +6,8 @@ if  objectExists(currentRegion) && RegionAdjustKey.is(key)
     modifiers = event.Modifier;
     modifierAnalyzer = KeyModifierAnalyzer(modifiers);
 
-    if modifierAnalyzer.hasAlt
+    if modifierAnalyzer.hasPureAlt
         RegionOrderer.byKey(currentRegion, key, modifiers);
-    elseif modifierAnalyzer.hasPureAlt
         switchRegion(key, trackingGui);
     else
         configureRegion(currentRegion, key, modifiers) ;
