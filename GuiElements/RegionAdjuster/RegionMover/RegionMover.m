@@ -85,25 +85,63 @@ delete(region);
 end
 
 function moveUp(region)
-position = get(region, "Position");
-position(2) = position(2) - 1;
-set(region, "Position", position);
+if RegionType.hasPointPosition(region)
+    positionUp(region);
+elseif RegionType.hasVertexPosition(region)
+    vertexUp(region);
+end
 end
 function moveDown(region)
-position = get(region, "Position");
-position(2) = position(2) + 1;
-set(region, "Position", position);
+if RegionType.hasPointPosition(region)
+    positionDown(region);
+elseif RegionType.hasVertexPosition(region)
+    vertexDown(region);
+end
 end
 function moveLeft(region)
-position = get(region, "Position");
-position(1) = position(1) - 1;
-set(region, "Position", position);
+if RegionType.hasPointPosition(region)
+    positionLeft(region);
+elseif RegionType.hasVertexPosition(region)
+    vertexLeft(region);
+end
 end
 function moveRight(region)
-position = get(region, "Position");
-position(1) = position(1) + 1;
-set(region, "Position", position);
+if RegionType.hasPointPosition(region)
+    positionRight(region);
+elseif RegionType.hasVertexPosition(region)
+    vertexRight(region);
 end
+end
+
+
+
+function positionUp(rect)
+rect.Position(2) = rect.Position(2) - 1;
+end
+function positionDown(rect)
+rect.Position(2) = rect.Position(2) + 1;
+end
+function positionLeft(rect)
+rect.Position(1) = rect.Position(1) - 1;
+end
+function positionRight(rect)
+rect.Position(1) = rect.Position(1) + 1;
+end
+
+
+function vertexUp(polygon)
+polygon.Position(:, 2) = polygon.Position(:, 2) - 1;
+end
+function vertexDown(polygon)
+polygon.Position(:, 2) = polygon.Position(:, 2) + 1;
+end
+function vertexLeft(polygon)
+polygon.Position(:, 1) = polygon.Position(:, 1) - 1;
+end
+function vertexRight(polygon)
+polygon.Position(:, 1) = polygon.Position(:, 1) + 1;
+end
+
 
 function moveUpLeft(region)
 moveUp(region);
