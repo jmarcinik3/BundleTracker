@@ -1,17 +1,15 @@
-classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
+classdef TrackingGui < RegionTracker & DirectorySelector
     properties (Constant)
         rowHeight = 25;
     end
 
     properties (Access = private)
-        %#ok<*PROP>
-        %#ok<*PROPLC>
-
         % main window components
         gridLayout; % uigridlayout containing GUI components
         rightGridLayout % uigridlayout for rightside column
 
         % components to set processing and tracking methods
+        imageGui;
         trackingSelection;
         kinociliumLocation;
         scaleFactorInputElement;
@@ -19,6 +17,12 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
 
         % components to start tracking and save results
         saveFilestemElement;
+    end
+
+    properties
+        getRegions;
+        changeFullImage;
+        setRegionShape;
     end
 
     methods
@@ -33,12 +37,24 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
             gl = generateGridLayout([2, 2]);
             rgl = generateRightGridLayout(gl);
 
+            lgl = uigridlayout(gl, [2, 1]);
+            lgl.Layout.Row = 2;
+            lgl.Layout.Column = 1;
+            set(gl, "RowHeight", {'2x', '1x'})
+
+            imageGui = ImageGui(lgl, {1, 1}, "EnableZoom", enableZoom);
+
             obj@RegionTracker();
             obj@DirectorySelector(gl, {1, [1, 2]});
-            obj@RegionPreviewer(gl, {2, 1}, "EnableZoom", enableZoom);
+            
+            regionPreviewer = RegionPreviewer(imageGui, lgl, {2, 1});
+            obj.getRegions = @regionPreviewer.getRegions;
+            obj.changeFullImage = @regionPreviewer.changeFullImage;
+            obj.setRegionShape = @regionPreviewer.setRegionShape;
 
             obj.gridLayout = gl;
             obj.rightGridLayout = rgl;
+            obj.imageGui = imageGui;
 
             obj.generateTrackingElements(rgl);
             obj.configureDirectorySelector(startingDirpath)
@@ -81,6 +97,9 @@ classdef TrackingGui < RegionTracker & RegionPreviewer & DirectorySelector
         end
         function rgl = getRightGridLayout(obj)
             rgl = obj.rightGridLayout;
+        end
+        function imageGui = getImageGui(obj)
+            imageGui = obj.imageGui;
         end
 
         % components to set postprocessing methods

@@ -4,32 +4,45 @@ classdef RegionPreviewer < RegionDrawer
     end
 
     properties (Access = private)
-        %#ok<*PROP>
-        %#ok<*PROPLC>
         gridLayout;
-        imageGui;
-        tag2linker = dictionary;
-        tagCounter = 0;
+
+        getRawImage;
+        getRegionGui
+        getRegionGuis;
+        
+        generateRegionGui;
+        addRegionEntry;
+    end
+
+    properties
+        getRegions;
+        changeFullImage;
     end
 
     methods
-        function obj = RegionPreviewer(parent, location, varargin)
-            p = inputParser;
-            addOptional(p, "EnableZoom", true);
-            parse(p, varargin{:});
-            enableZoom = p.Results.EnableZoom;
-
-            gl = generateGridLayout(parent, location);
-            imageGui = ImageGui(gl, {1, 1}, "EnableZoom", enableZoom);
+        function obj = RegionPreviewer(imageGui, regionGuiGridLayout, regionGuiLocation)
+            regionPreviewGui = RegionPreviewGui( ...
+                imageGui, ...
+                regionGuiGridLayout, ...
+                regionGuiLocation ...
+                );
+            
             ax = imageGui.getAxis();
             iIm = imageGui.getInteractiveImage();
 
             obj@RegionDrawer(ax, @imageGui.getRegionUserData);
 
+            % inherited functions
+            obj.getRawImage = @imageGui.getRawImage;
+            obj.getRegions = @regionPreviewGui.getRegions;
+            obj.getRegionGui = @regionPreviewGui.getRegionGui;
+            obj.getRegionGuis = @regionPreviewGui.getRegionGuis;
+
+            obj.changeFullImage = @regionPreviewGui.changeFullImage;
+            obj.generateRegionGui = @regionPreviewGui.generateRegionGui;
+            obj.addRegionEntry = @regionPreviewGui.addRegionEntry;
+
             set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
-            obj.gridLayout = gl;
-            obj.imageGui = imageGui;
-            layoutElements(obj);
         end
     end
 
@@ -41,59 +54,10 @@ classdef RegionPreviewer < RegionDrawer
             regionLinker = RegionLinker(regionGui, region, fullRawImage);
             obj.addRegionEntry(regionLinker);
         end
-        function regionGui = generateRegionGui(obj)
-            gl = obj.getGridLayout();
-            location = RegionPreviewer.regionGuiLocation;
-            regionGui = RegionGui(gl, location);
-        end
-    end
-
-    %% Functions to retrieve GUI elements and state information
-    methods (Access = protected)
-        function gui = getImageGui(obj)
-            gui = obj.imageGui;
-        end
-        function gui = getRegionGui(obj, region)
-            tag = get(region, "Tag");
-            gui = obj.tag2linker(tag);
-        end
-        function regions = getRegions(obj)
-            % Retrieves currently drawn regions on image
-            imageGui = obj.getImageGui();
-            ax =  imageGui.getAxis();
-            regions = RegionDrawer.getRegions(ax);
-        end
-    end
-    methods (Access = private)
-        function gl = getGridLayout(obj)
-            gl = obj.gridLayout;
-        end
-        function guis = getRegionGuis(obj)
-            guis = values(obj.tag2linker);
-        end
-        function rawImage = getRawImage(obj)
-            imageGui = obj.getImageGui();
-            rawImage = imageGui.getRawImage();
-        end
     end
 
     %% Functions to update state of GUI
-    methods (Access = protected)
-        function changeFullImage(obj, im)
-            obj.clearRegions();
-            imageGui = obj.getImageGui();
-            imageGui.changeImage(im);
-        end
-    end
     methods (Access = private)
-        function clearRegions(obj)
-            % Removes currently drawn regions on image
-            regions = obj.getRegions();
-            fakeEvent = struct("EventName", "FakeEvent");
-            arrayfun(@(region) obj.deletingRegion(region, fakeEvent), regions);
-            delete(regions);
-        end
-
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
                 region = obj.generateRegion(source, event);
@@ -111,11 +75,6 @@ classdef RegionPreviewer < RegionDrawer
                 obj.previewRegion(source);
             end
         end
-        function deletingRegion(obj, source, event)
-            regionGui = obj.getRegionGui(source);
-            obj.removeRegionEntry(source);
-            regionGui.deletingRegion(source, event);
-        end
 
         function previewRegion(obj, region)
             obj.updateRegionGuiVisible(region);
@@ -128,39 +87,9 @@ classdef RegionPreviewer < RegionDrawer
             regionGui.setVisible(true);
         end
     end
-
-    %% Functions to update state information
-    methods (Access = private)
-        function tag = iterateTag(obj)
-            tagCounter = obj.tagCounter + 1;
-            obj.tagCounter = tagCounter;
-            tag = num2str(tagCounter);
-        end
-        function addRegionEntry(obj, regionLinker)
-            region = regionLinker.getRegion();
-            tag = obj.iterateTag();
-            set(region, "Tag", tag);
-            obj.tag2linker(tag) = regionLinker;
-        end
-        function removeRegionEntry(obj, region)
-            tag = get(region, "Tag");
-            obj.tag2linker = remove(obj.tag2linker, tag);
-        end
-    end
 end
 
 
-
-function layoutElements(gui)
-gl = gui.getGridLayout();
-set(gl, "RowHeight", {'2x', '1x'})
-end
-
-function gl = generateGridLayout(parent, location)
-gl = uigridlayout(parent, [2, 1]);
-gl.Layout.Row = location{1};
-gl.Layout.Column = location{2};
-end
 
 function is = isLeftClick(event)
 name = event.EventName;

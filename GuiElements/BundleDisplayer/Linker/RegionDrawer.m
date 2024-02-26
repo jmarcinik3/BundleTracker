@@ -5,9 +5,8 @@ classdef RegionDrawer < handle
         polygonKeyword = "Polygon";
         freehandKeyword = "Freehand";
     end
+
     properties (Access = private)
-        %#ok<*PROP>
-        %#ok<*PROPLC>
         axis;
         shapeKeyword;
         userDataFcn;
@@ -31,19 +30,19 @@ classdef RegionDrawer < handle
     end
 
     %% Functions to retrieve GUI elements and state information
+    methods (Static)
+        function regions = getRegions(ax)
+            children = ax.Children;
+            regions = findobj(children, "Type", "images.roi");
+            regions = flip(regions);
+        end
+    end
     methods (Access = private)
         function ax = getAxis(obj)
             ax = obj.axis;
         end
         function shapeKeyword = getRegionShape(obj)
             shapeKeyword = obj.shapeKeyword;
-        end
-    end
-    methods (Access = protected, Static)
-        function regions = getRegions(ax)
-            children = ax.Children;
-            regions = findobj(children, "Type", "images.roi");
-            regions = flip(regions);
         end
     end
 

@@ -1,20 +1,14 @@
-classdef ImageGui < PreprocessorLinker & ImageExporter & PanZoomer
+classdef ImageGui < ImageExporter & PanZoomer
     properties (Access = private)
         zoomIsEnabled;
     end
 
     properties
-        getGridLayout;
         getFigure;
         getAxis;
-        getThresholdSlider;
-        getInvertCheckbox;
         getInteractiveImage;
         getRawImage;
-
         getRegionUserData;
-        getThresholds;
-        getInvert;
         imageExists;
 
         setRawImage;
@@ -30,24 +24,19 @@ classdef ImageGui < PreprocessorLinker & ImageExporter & PanZoomer
             gl = generateGridLayout(parent, location);
             ax = PreprocessorGui.generateAxis(gl);
             preprocessorGui = PreprocessorGui(gl, ax);
-
-            obj@PreprocessorLinker(preprocessorGui);
+            PreprocessorLinker(preprocessorGui);
+            
             obj@ImageExporter(ax);
             obj@PanZoomer(ax);
             
             % inherited GUI getters
-            obj.getGridLayout = @preprocessorGui.getGridLayout;
             obj.getFigure = @preprocessorGui.getFigure;
             obj.getAxis = @preprocessorGui.getAxis;
-            obj.getThresholdSlider = @preprocessorGui.getThresholdSlider;
-            obj.getInvertCheckbox = @preprocessorGui.getInvertCheckbox;
             obj.getInteractiveImage = @preprocessorGui.getInteractiveImage;
             obj.getRawImage = @preprocessorGui.getRawImage;
 
             % inherited state getters
             obj.getRegionUserData = @preprocessorGui.getRegionUserData;
-            obj.getThresholds = @preprocessorGui.getThresholds;
-            obj.getInvert = @preprocessorGui.getInvert;
             obj.imageExists = @preprocessorGui.imageExists;
 
             % inherited setters
@@ -55,7 +44,7 @@ classdef ImageGui < PreprocessorLinker & ImageExporter & PanZoomer
             
             obj.zoomIsEnabled = enableZoom;
 
-            layoutElements(obj);
+            layoutElements(preprocessorGui);
         end
     end
 
@@ -88,15 +77,15 @@ end
 
 
 
-function layoutElements(gui)
+function layoutElements(preprocessorGui)
 % Set component heights in grid layout
 rowHeight = TrackingGui.rowHeight;
 
 % Retrieve components
-gl = gui.getGridLayout();
-thresholdSlider = gui.getThresholdSlider();
-invertCheckbox = gui.getInvertCheckbox();
-ax = gui.getAxis();
+gl = preprocessorGui.getGridLayout();
+thresholdSlider = preprocessorGui.getThresholdSlider();
+invertCheckbox = preprocessorGui.getInvertCheckbox();
+ax = preprocessorGui.getAxis();
 
 % Set up slider for intensity threshold to left of invert checkbox
 thresholdSlider.Layout.Row = 1;
