@@ -9,6 +9,8 @@ if  objectExists(currentRegion) && RegionAdjustKey.is(key)
     if modifierAnalyzer.hasPureAlt
         RegionOrderer.byKey(currentRegion, key, modifiers);
         switchRegion(key, trackingGui);
+    elseif modifierAnalyzer.hasAlt
+        RegionOrderer.byKey(currentRegion, key, modifiers);
     else
         configureRegion(currentRegion, key, modifiers) ;
     end
