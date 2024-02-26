@@ -73,7 +73,8 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             layoutElements(obj);
 
             TrackingToolbar(fig, obj);
-            set(fig, "KeyPressFcn", @(src, ev) keyPressed(obj, src, ev));
+            figureKeyPressFcn = @(src, ev) keyPressed(obj, src, ev);
+            set(fig, "WindowKeyPressFcn", figureKeyPressFcn);
         end
     end
 
