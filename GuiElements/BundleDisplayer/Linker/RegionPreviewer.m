@@ -77,6 +77,35 @@ classdef RegionPreviewer < RegionDrawer
 
     %% Functions to update state of GUI
     methods
+        function bringRegionToFront(obj, ~, ~)
+            if obj.regionExists()
+                currentRegion = obj.getCurrentRegion();
+                regionOrderer = RegionOrderer(currentRegion);
+                regionOrderer.bringToFront();
+            end
+        end
+        function bringRegionForward(obj, ~, ~)
+            if obj.regionExists()
+                currentRegion = obj.getCurrentRegion();
+                regionOrderer = RegionOrderer(currentRegion);
+                regionOrderer.bringForward();
+            end
+        end
+        function sendRegionBackward(obj, ~, ~)
+            if obj.regionExists()
+                currentRegion = obj.getCurrentRegion();
+                regionOrderer = RegionOrderer(currentRegion);
+                regionOrderer.sendBackward();
+            end
+        end
+        function sendRegionToBack(obj, ~, ~)
+            if obj.regionExists()
+                currentRegion = obj.getCurrentRegion();
+                regionOrderer = RegionOrderer(currentRegion);
+                regionOrderer.sendToBack();
+            end
+        end
+
         function setPreviousRegionVisible(obj, ~, ~)
             currentRegion = obj.getCurrentRegion();
             if objectIsValid(currentRegion)
@@ -135,7 +164,7 @@ classdef RegionPreviewer < RegionDrawer
         function previousRegion = getPreviousRegion(obj)
             currentRegion = obj.getCurrentRegion();
             regions = obj.getRegions();
-            
+
             currentIndex = str2double(get(currentRegion, "Tag"));
             regionIndices = str2double(get(regions, "Tag"));
             previousIndex = getPreviousFloatCyclic(regionIndices, currentIndex);
@@ -145,7 +174,7 @@ classdef RegionPreviewer < RegionDrawer
         function nextRegion = getNextRegion(obj)
             currentRegion = obj.getCurrentRegion();
             regions = obj.getRegions();
-            
+
             currentIndex = str2double(get(currentRegion, "Tag"));
             regionIndices = str2double(get(regions, "Tag"));
             nextIndex = getNextFloatCyclic(regionIndices, currentIndex);

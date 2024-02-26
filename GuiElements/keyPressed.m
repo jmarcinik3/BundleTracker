@@ -2,17 +2,15 @@ function keyPressed(trackingGui, ~, event)
 currentRegion = trackingGui.getCurrentRegion();
 key = event.Key;
 
-if  RegionAdjustKey.is(key)
+if  objectExists(currentRegion) && RegionAdjustKey.is(key)
     modifiers = event.Modifier;
+    modifierAnalyzer = KeyModifierAnalyzer(modifiers);
 
-    hasAlt = any(ismember(modifiers, "alt"));
-    modifierCount = numel(modifiers);
-    hasOneModifier = modifierCount == 1;
-    hasPureAlt = hasAlt && hasOneModifier;
-
-    if hasPureAlt
+    if modifierAnalyzer.hasAlt
+        RegionOrderer.byKey(currentRegion, key, modifiers);
+    elseif modifierAnalyzer.hasPureAlt
         switchRegion(key, trackingGui);
-    elseif objectExists(currentRegion)
+    else
         configureRegion(currentRegion, key, modifiers) ;
     end
 end
@@ -29,26 +27,14 @@ end
 
 
 function configureRegion(region, key, modifiers)
-modifierCount = numel(modifiers);
-isUnmodified = modifierCount == 0;
-hasOneModifier = modifierCount == 1;
-hasTwoModifiers = modifierCount == 2;
-
-hasShift = any(ismember(modifiers, "shift"));
-hasCtrl = any(ismember(modifiers, "control"));
-hasAlt = any(ismember(modifiers, "alt"));
-
-hasPureCtrl = hasCtrl && hasOneModifier;
-hasPureCtrlShift = hasCtrl && hasShift && hasTwoModifiers;
-hasCtrlShiftAlt = hasCtrl && hasShift && hasAlt;
-
-if hasCtrlShiftAlt && ArrowKey.isUp(key)
+modifierAnalyzer = KeyModifierAnalyzer(modifiers);
+if modifierAnalyzer.hasCtrlShiftAlt && ArrowKey.isUp(key)
     bringToFront(region);
-elseif isUnmodified
+elseif modifierAnalyzer.hasZeroModifiers
     RegionMover.byKey(region, key);
-elseif hasPureCtrl
+elseif modifierAnalyzer.hasPureCtrl
     RegionCompressor.byKey(region, key);
-elseif hasPureCtrlShift
+elseif modifierAnalyzer.hasPureCtrlShift
     RegionExpander.byKey(region, key);
 end
 end
