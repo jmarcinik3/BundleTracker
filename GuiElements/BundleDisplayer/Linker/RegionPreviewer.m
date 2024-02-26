@@ -8,7 +8,7 @@ classdef RegionPreviewer < RegionDrawer
         %#ok<*PROPLC>
         gridLayout;
         imageGui;
-        tag2gui = dictionary;
+        tag2linker = dictionary;
         tagCounter = 0;
     end
 
@@ -35,18 +35,16 @@ classdef RegionPreviewer < RegionDrawer
 
     %% Functions to generate GUI elements
     methods (Access = private)
-        function regionGui = generateRegionGui(obj, region)
-            tagCounter = obj.tagCounter + 1;
-            obj.tagCounter = tagCounter;
-            tag = num2str(tagCounter);
-
+        function regionLinker = generateRegionLinker(obj, region)
+            fullRawImage = obj.getRawImage();
+            regionGui = obj.generateRegionGui();
+            regionLinker = RegionLinker(regionGui, region, fullRawImage);
+            obj.addRegionEntry(regionLinker);
+        end
+        function regionGui = generateRegionGui(obj)
             gl = obj.getGridLayout();
             location = RegionPreviewer.regionGuiLocation;
-            fullRawImage = obj.getRawImage();
-            regionGui = RegionGui(gl, location, region, fullRawImage);
-
-            set(region, "Tag", tag);
-            obj.tag2gui(tag) = regionGui;
+            regionGui = RegionGui(gl, location);
         end
     end
 
@@ -57,7 +55,7 @@ classdef RegionPreviewer < RegionDrawer
         end
         function gui = getRegionGui(obj, region)
             tag = get(region, "Tag");
-            gui = obj.tag2gui(tag);
+            gui = obj.tag2linker(tag);
         end
         function regions = getRegions(obj)
             % Retrieves currently drawn regions on image
@@ -71,7 +69,7 @@ classdef RegionPreviewer < RegionDrawer
             gl = obj.gridLayout;
         end
         function guis = getRegionGuis(obj)
-            guis = values(obj.tag2gui);
+            guis = values(obj.tag2linker);
         end
         function rawImage = getRawImage(obj)
             imageGui = obj.getImageGui();
@@ -99,7 +97,7 @@ classdef RegionPreviewer < RegionDrawer
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
                 region = obj.generateRegion(source, event);
-                obj.generateRegionGui(region);
+                obj.generateRegionLinker(region);
                 obj.addListeners(region);
                 obj.previewRegion(region);
             end
@@ -129,9 +127,24 @@ classdef RegionPreviewer < RegionDrawer
             arrayfun(@(gui) gui.setVisible(false), regionGuis);
             regionGui.setVisible(true);
         end
+    end
+
+    %% Functions to update state information
+    methods (Access = private)
+        function tag = iterateTag(obj)
+            tagCounter = obj.tagCounter + 1;
+            obj.tagCounter = tagCounter;
+            tag = num2str(tagCounter);
+        end
+        function addRegionEntry(obj, regionLinker)
+            region = regionLinker.getRegion();
+            tag = obj.iterateTag();
+            set(region, "Tag", tag);
+            obj.tag2linker(tag) = regionLinker;
+        end
         function removeRegionEntry(obj, region)
             tag = get(region, "Tag");
-            obj.tag2gui = remove(obj.tag2gui, tag);
+            obj.tag2linker = remove(obj.tag2linker, tag);
         end
     end
 end

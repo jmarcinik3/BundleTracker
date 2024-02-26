@@ -7,32 +7,18 @@ classdef PreprocessorGui < handle
     end
 
     methods
-        function obj = PreprocessorGui(gl, ax, varargin)
+        function obj = PreprocessorGui(gl, ax)
             if nargin == 1
                 ax = PreprocessorGui.generateAxis(gl);
             end
 
-            obj.gridLayout = gl;
             obj.interactiveImage = generateInteractiveImage(ax);
-            obj.thresholdSlider = obj.generateThresholdSlider(gl);
-            obj.invertCheckbox = obj.generateInvertCheckbox(gl);
+            obj.thresholdSlider = generateThresholdSlider(gl);
+            obj.invertCheckbox = generateInvertCheckbox(gl);
+            obj.gridLayout = gl;
         end
     end
 
-    %% Functions to generate GUI elements
-    methods (Access = private)
-        function thresholdSlider = generateThresholdSlider(obj, gl)
-            thresholdSlider = generateThresholdSlider(gl);
-            set(thresholdSlider, ...
-                "ValueChangingFcn", @obj.thresholdSliderChanging, ...
-                "ValueChangedFcn", @obj.thresholdSliderChanged ...
-                );
-        end
-        function invertCheckbox = generateInvertCheckbox(obj, gl)
-            invertCheckbox = generateInvertCheckbox(gl);
-            set(invertCheckbox, "ValueChangedFcn", @obj.invertCheckboxChanged);
-        end
-    end
     methods (Static)
         %% Function to generate plotting axis
         % Generates axis on which hair cell image is plotted
@@ -55,8 +41,16 @@ classdef PreprocessorGui < handle
 
     %% Functions to retrieve GUI elements
     methods
+        function fig = getFigure(obj)
+            iIm = obj.getInteractiveImage();
+            fig = ancestor(iIm, "figure");
+        end
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
+        end
+        function ax = getAxis(obj)
+            iIm = obj.getInteractiveImage();
+            ax = ancestor(iIm, "axes");
         end
         function elem = getThresholdSlider(obj)
             elem = obj.thresholdSlider;
@@ -71,16 +65,6 @@ classdef PreprocessorGui < handle
         function iIm = getInteractiveImage(obj)
             iIm = obj.interactiveImage;
         end
-        function ax = getAxis(obj)
-            iIm = obj.getInteractiveImage();
-            ax = ancestor(iIm, "axes");
-        end
-    end
-    methods (Access = private)
-        function fig = getFigure(obj)
-            iIm = obj.getInteractiveImage();
-            fig = ancestor(iIm, "figure");
-        end
     end
 
     %% Functions to retrieve state information
@@ -94,7 +78,7 @@ classdef PreprocessorGui < handle
                 );
         end
     end
-    methods (Access = protected)
+    methods
         function processor = generatePreprocessor(obj, thresholds)
             invert = obj.getInvert();
             processor = Preprocessor(thresholds, invert);
@@ -131,28 +115,7 @@ classdef PreprocessorGui < handle
         end
     end
 
-    %% Functions to update state of interactive image
-    methods (Access = protected)
-        function invertCheckboxChanged(obj, ~, ~)
-            thresholds = obj.getThresholds();
-            if obj.imageExists()
-                obj.updateFromRawImage(thresholds);
-            end
-        end
-        function thresholdSliderChanging(obj, ~, event)
-            thresholds = event.Value;
-            if obj.imageExists()
-                obj.updateFromRawImage(thresholds);
-            end
-        end
-        function thresholdSliderChanged(obj, source, ~)
-            thresholds = source.Value;
-            if obj.imageExists()
-                obj.updateFromRawImage(thresholds);
-            end
-        end
-    end
-    methods (Access = private)
+    methods
         function setVisible(obj, visible)
             gl = obj.getGridLayout();
             set(gl, "Visible", visible);

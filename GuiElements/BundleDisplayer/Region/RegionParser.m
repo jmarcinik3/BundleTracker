@@ -6,10 +6,9 @@ classdef RegionParser < handle
     end
 
     properties (Access = private)
-        %#ok<*PROP>
-        %#ok<*PROPLC>
         region;
     end
+
     methods
         function obj = RegionParser(region)
             obj.region = region;
@@ -23,7 +22,7 @@ classdef RegionParser < handle
             processor = regionParser.generatePreprocessor();
         end
     end
-    methods (Access = protected)
+    methods
         function region = getRegion(obj)
             region = obj.region;
         end
@@ -41,7 +40,10 @@ classdef RegionParser < handle
             region = obj.getRegion();
             label = region.Label;
         end
+    end
 
+    %% Functions to generate objects
+    methods
         function processor = generatePreprocessor(obj)
             thresholds = obj.getThresholds();
             invert = obj.getInvert();

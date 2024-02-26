@@ -1,8 +1,23 @@
-classdef ImageGui < PreprocessorGui & ImageExporter & PanZoomer
+classdef ImageGui < PreprocessorLinker & ImageExporter & PanZoomer
     properties (Access = private)
-        %#ok<*PROP>
-        %#ok<*PROPLC>
         zoomIsEnabled;
+    end
+
+    properties
+        getGridLayout;
+        getFigure;
+        getAxis;
+        getThresholdSlider;
+        getInvertCheckbox;
+        getInteractiveImage;
+        getRawImage;
+
+        getRegionUserData;
+        getThresholds;
+        getInvert;
+        imageExists;
+
+        setRawImage;
     end
 
     methods
@@ -14,23 +29,33 @@ classdef ImageGui < PreprocessorGui & ImageExporter & PanZoomer
 
             gl = generateGridLayout(parent, location);
             ax = PreprocessorGui.generateAxis(gl);
+            preprocessorGui = PreprocessorGui(gl, ax);
 
-            obj@PreprocessorGui(gl, ax);
+            obj@PreprocessorLinker(preprocessorGui);
             obj@ImageExporter(ax);
             obj@PanZoomer(ax);
+            
+            % inherited GUI getters
+            obj.getGridLayout = @preprocessorGui.getGridLayout;
+            obj.getFigure = @preprocessorGui.getFigure;
+            obj.getAxis = @preprocessorGui.getAxis;
+            obj.getThresholdSlider = @preprocessorGui.getThresholdSlider;
+            obj.getInvertCheckbox = @preprocessorGui.getInvertCheckbox;
+            obj.getInteractiveImage = @preprocessorGui.getInteractiveImage;
+            obj.getRawImage = @preprocessorGui.getRawImage;
+
+            % inherited state getters
+            obj.getRegionUserData = @preprocessorGui.getRegionUserData;
+            obj.getThresholds = @preprocessorGui.getThresholds;
+            obj.getInvert = @preprocessorGui.getInvert;
+            obj.imageExists = @preprocessorGui.imageExists;
+
+            % inherited setters
+            obj.setRawImage = @preprocessorGui.setRawImage;
+            
             obj.zoomIsEnabled = enableZoom;
 
             layoutElements(obj);
-        end
-    end
-
-    %% Functions to retrieve GUI elements
-    methods
-        function fig = getFigure(obj)
-            fig = getFigure@PreprocessorGui(obj);
-        end
-        function ax = getAxis(obj)
-            ax = getAxis@PreprocessorGui(obj);
         end
     end
 

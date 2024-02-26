@@ -8,7 +8,6 @@ classdef RegionMoverGui
     end
 
     properties (Access = private)
-        %#ok<*PROPLC>
         gridLayout;
         imageElements;
     end
@@ -23,6 +22,7 @@ classdef RegionMoverGui
         end
     end
 
+    %% Functions to retrieve GUI elements
     methods
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
@@ -47,15 +47,18 @@ set(gl, ...
 end
 
 function imageElements = generateImageGrid(gl, filepaths)
-imageElements = {};
-[rowCount, columnCount] = size(filepaths);
-
-for rowIndex = 1:rowCount
-    for columnIndex = 1:columnCount
+    function imageElement = generateImage(rowIndex, columnIndex)
         filepath = filepaths(rowIndex, columnIndex);
         imageElement = uiimage(gl, "ImageSource", filepath);
         imageElement.Layout.Row = rowIndex;
         imageElement.Layout.Column = columnIndex;
+    end
+
+imageElements = {};
+[rowCount, columnCount] = size(filepaths);
+for rowIndex = 1:rowCount
+    for columnIndex = 1:columnCount
+        imageElement = generateImage(rowIndex, columnIndex);
         imageElements{rowIndex, columnIndex} = imageElement;
     end
 end
