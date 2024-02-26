@@ -7,7 +7,7 @@ classdef RegionCompressorGui < RegionAdjusterGui
         ];
         tooltips = [
             ["Compress Down-Right", "Compress Down (Ctrl+↓)", "Compress Down-Left"];
-            ["Compress Right (Ctrl+→)", "Compress In", "Compress Left (Ctrl+←)"];
+            ["Compress Right (Ctrl+→)", "Compress In (Ctrl+⎵)", "Compress Left (Ctrl+←)"];
             ["Compress Up-Right", "Compress Up (Ctrl+↑)", "Compress Up-Left"];
             ];
     end

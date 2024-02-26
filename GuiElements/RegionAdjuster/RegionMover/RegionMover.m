@@ -13,14 +13,16 @@ classdef RegionMover
     methods (Static)
         function byKey(region, key)
             regionMover = RegionMover(region);
-            if ArrowKey.isUp(key)
+            if RegionAdjustKey.isUp(key)
                 regionMover.moveUp();
-            elseif ArrowKey.isLeft(key)
+            elseif RegionAdjustKey.isLeft(key)
                 regionMover.moveLeft();
-            elseif ArrowKey.isDown(key)
+            elseif RegionAdjustKey.isDown(key)
                 regionMover.moveDown();
-            elseif ArrowKey.isRight(key)
+            elseif RegionAdjustKey.isRight(key)
                 regionMover.moveRight();
+            elseif RegionAdjustKey.isSpace(key)
+                regionMover.deleteRegion();
             end
         end
     end

@@ -13,14 +13,16 @@ classdef RegionExpander
     methods (Static)
         function byKey(region, key)
             regionExpander = RegionExpander(region);
-            if ArrowKey.isUp(key)
+            if RegionAdjustKey.isUp(key)
                 regionExpander.expandUp();
-            elseif ArrowKey.isLeft(key)
+            elseif RegionAdjustKey.isLeft(key)
                 regionExpander.expandLeft();
-            elseif ArrowKey.isDown(key)
+            elseif RegionAdjustKey.isDown(key)
                 regionExpander.expandDown();
-            elseif ArrowKey.isRight(key)
+            elseif RegionAdjustKey.isRight(key)
                 regionExpander.expandRight();
+            elseif RegionAdjustKey.isSpace(key)
+                regionExpander.expandOut();
             end
         end
     end

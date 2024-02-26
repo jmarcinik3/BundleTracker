@@ -7,7 +7,7 @@ classdef RegionExpanderGui < RegionAdjusterGui
             ];
         tooltips = [
             ["Expand Up-Left", "Expand Up (Ctrl+Shift++↑)", "Expand Up-Right"];
-            ["Expand Left (Ctrl+Shift+←)", "Expand In", "Expand Right (Ctrl+Shift+→)"];
+            ["Expand Left (Ctrl+Shift+←)", "Expand In (Ctrl+Shift+⎵)", "Expand Right (Ctrl+Shift+→)"];
             ["Expand Down-Left", "Expand Down (Ctrl+Shift+↓)", "Expand Down-Right"];
             ];
     end

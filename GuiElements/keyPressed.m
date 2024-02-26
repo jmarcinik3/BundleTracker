@@ -2,7 +2,7 @@ function keyPressed(trackingGui, ~, event)
 currentRegion = trackingGui.getCurrentRegion();
 key = event.Key;
 
-if objectExists(currentRegion) && ArrowKey.is(key)
+if objectExists(currentRegion) && RegionAdjustKey.is(key)
     modifiers = event.Modifier;
     configureRegion(currentRegion, key, modifiers)
 end

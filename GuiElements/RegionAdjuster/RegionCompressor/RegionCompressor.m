@@ -13,14 +13,16 @@ classdef RegionCompressor
     methods (Static)
         function byKey(region, key)
             regionCompressor = RegionCompressor(region);
-            if ArrowKey.isUp(key)
+            if RegionAdjustKey.isUp(key)
                 regionCompressor.compressUp();
-            elseif ArrowKey.isLeft(key)
+            elseif RegionAdjustKey.isLeft(key)
                 regionCompressor.compressLeft();
-            elseif ArrowKey.isDown(key)
+            elseif RegionAdjustKey.isDown(key)
                 regionCompressor.compressDown();
-            elseif ArrowKey.isRight(key)
+            elseif RegionAdjustKey.isRight(key)
                 regionCompressor.compressRight();
+            elseif RegionAdjustKey.isSpace(key)
+                regionCompressor.compressIn();
             end
         end
     end
