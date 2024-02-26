@@ -49,7 +49,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             lgl = uigridlayout(gl, [2, 1]);
             lgl.Layout.Row = 2;
             lgl.Layout.Column = 1;
-            set(gl, "RowHeight", {'2x', '1x'})
+            set(lgl, "RowHeight", {'2x', '1x'})
 
             imageGui = ImageGui(lgl, {1, 1}, "EnableZoom", enableZoom);
 
