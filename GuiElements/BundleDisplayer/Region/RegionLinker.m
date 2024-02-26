@@ -1,19 +1,20 @@
 classdef RegionLinker
+    properties
+        getRegion;
+        setVisible;
+    end
+
     properties (Access = private)
         fullRawImage;
         preprocessorLinker;
         regionParser;
-    end
-
-    properties
+        
         getGridLayout;
-        getRegion;
         getThresholds;
         getInvert;
+        
         generatePreprocessor;
-
         setRawImage;
-        setVisible;
     end
 
     methods

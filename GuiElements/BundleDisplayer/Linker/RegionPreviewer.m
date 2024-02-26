@@ -3,20 +3,20 @@ classdef RegionPreviewer < RegionDrawer
         regionGuiLocation = {2, 1};
     end
 
+    properties
+        getRegions;
+        changeFullImage;
+    end
+
     properties (Access = private)
         gridLayout;
 
         getRawImage;
         getRegionGui
         getRegionGuis;
-        
+
         generateRegionGui;
         addRegionEntry;
-    end
-
-    properties
-        getRegions;
-        changeFullImage;
     end
 
     methods

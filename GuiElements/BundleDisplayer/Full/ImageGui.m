@@ -1,16 +1,15 @@
 classdef ImageGui < ImageExporter & PanZoomer
-    properties (Access = private)
-        zoomIsEnabled;
-    end
-
     properties
-        getFigure;
         getAxis;
         getInteractiveImage;
         getRawImage;
         getRegionUserData;
-        imageExists;
+    end
 
+    properties (Access = private)
+        zoomIsEnabled;
+        getFigure;
+        imageExists;
         setRawImage;
     end
 

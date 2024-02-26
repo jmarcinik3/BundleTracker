@@ -1,6 +1,5 @@
 classdef TrackingToolbar < handle
     properties (Access = private)
-        %#ok<*PROPLC>
         trackingGui;
         regionShapeTools;
     end

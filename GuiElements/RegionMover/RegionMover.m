@@ -1,6 +1,5 @@
 classdef RegionMover
     properties (Access = private)
-        %#ok<*PROPLC>
         region;
     end
 

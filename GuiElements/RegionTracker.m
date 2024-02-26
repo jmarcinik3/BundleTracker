@@ -1,7 +1,5 @@
 classdef RegionTracker < ImageImporter
     properties (Access = private)
-        %#ok<*PROP>
-        %#ok<*PROPLC>
         trackingMode;
         initialResult;
     end

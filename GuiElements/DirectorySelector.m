@@ -1,8 +1,5 @@
 classdef DirectorySelector < handle
     properties (Access = private)
-        %#ok<*PROP>
-        %#ok<*PROPLC>
-
         gridLayout;
         directoryPathField;
         filecountField;

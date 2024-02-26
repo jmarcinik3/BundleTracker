@@ -5,9 +5,6 @@ classdef PanZoomer < handle
     end
 
     properties (Access = private)
-        %#ok<*PROP>
-        %#ok<*PROPLC>
-
         axis;
 
         xlimOriginal;

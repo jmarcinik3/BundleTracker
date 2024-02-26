@@ -1,5 +1,5 @@
 classdef ProgressTracker < handle
-    properties (Access = public)
+    properties
         fileCount;
     end
 

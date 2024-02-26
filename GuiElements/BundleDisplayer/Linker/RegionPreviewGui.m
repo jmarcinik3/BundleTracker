@@ -1,20 +1,19 @@
 classdef RegionPreviewGui < handle
+    properties
+        getAxis;
+    end
+
     properties (Access = private)
         tagCounter = 0;
         tag2linker = dictionary;
         location;
+        
         gridLayout;
         imageGui;
-    end
 
-    properties
-        getAxis;
-    end
-    
-    properties (Access = private)
         getRawImage;
         changeImage;
-    end
+    end    
 
     methods
         function obj = RegionPreviewGui(imageGui, regionGuiGridLayout, location)

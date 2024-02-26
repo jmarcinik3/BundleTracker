@@ -3,6 +3,10 @@ classdef TrackingGui < RegionTracker & DirectorySelector
         rowHeight = 25;
     end
 
+    properties
+        setRegionShape;
+    end
+
     properties (Access = private)
         % main window components
         gridLayout; % uigridlayout containing GUI components
@@ -17,13 +21,11 @@ classdef TrackingGui < RegionTracker & DirectorySelector
 
         % components to start tracking and save results
         saveFilestemElement;
-    end
 
-    properties
+        % inherited functions
         getRegions;
         changeFullImage;
-        setRegionShape;
-    end
+    end    
 
     methods
         function obj = TrackingGui(varargin)
