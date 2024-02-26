@@ -10,6 +10,21 @@ classdef RegionCompressor
     end
 
     %% Functions to compress or delete region
+    methods (Static)
+        function byKey(region, key)
+            regionCompressor = RegionCompressor(region);
+            if ArrowKey.isUp(key)
+                regionCompressor.compressUp();
+            elseif ArrowKey.isLeft(key)
+                regionCompressor.compressLeft();
+            elseif ArrowKey.isDown(key)
+                regionCompressor.compressDown();
+            elseif ArrowKey.isRight(key)
+                regionCompressor.compressRight();
+            end
+        end
+    end
+
     methods
         function compressUp(obj, ~, ~)
             region = obj.region;

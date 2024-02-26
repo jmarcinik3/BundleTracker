@@ -10,6 +10,21 @@ classdef RegionExpander
     end
 
     %% Functions to expand or delete region
+    methods (Static)
+        function byKey(region, key)
+            regionExpander = RegionExpander(region);
+            if ArrowKey.isUp(key)
+                regionExpander.expandUp();
+            elseif ArrowKey.isLeft(key)
+                regionExpander.expandLeft();
+            elseif ArrowKey.isDown(key)
+                regionExpander.expandDown();
+            elseif ArrowKey.isRight(key)
+                regionExpander.expandRight();
+            end
+        end
+    end
+
     methods
         function expandUp(obj, ~, ~)
             region = obj.region;

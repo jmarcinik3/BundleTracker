@@ -4,6 +4,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
     end
 
     properties
+        getCurrentRegion;
         setRegionShape;
     end
 
@@ -36,7 +37,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             startingDirpath = p.Results.StartingDirectory;
             enableZoom = p.Results.EnableZoom;
 
-            gl = generateGridLayout([2, 2]);
+            [fig, gl] = generateGridLayout([2, 2]);
             rgl = generateRightGridLayout(gl);
 
             lgl = uigridlayout(gl, [2, 1]);
@@ -50,6 +51,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             obj@DirectorySelector(gl, {1, [1, 2]});
             
             regionPreviewer = RegionPreviewer(imageGui, lgl, {2, 1});
+            obj.getCurrentRegion = @regionPreviewer.getCurrentRegion;
             obj.getRegions = @regionPreviewer.getRegions;
             obj.changeFullImage = @regionPreviewer.changeFullImage;
             obj.setRegionShape = @regionPreviewer.setRegionShape;
@@ -62,8 +64,8 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             obj.configureDirectorySelector(startingDirpath)
             layoutElements(obj);
 
-            fig = obj.getFigure();
             TrackingToolbar(fig, obj);
+            set(fig, "KeyPressFcn", @(src, ev) keyPressed(obj, src, ev));
         end
     end
 
@@ -293,7 +295,7 @@ rgl.RowHeight = num2cell(rowHeight * ones(1, 7));
 rgl.RowHeight{2} = KinociliumLocation.height;
 end
 
-function gl = generateGridLayout(size)
+function [fig, gl] = generateGridLayout(size)
 fig = uifigure;
 position = [300, 200, 800, 700];
 set(fig, ...

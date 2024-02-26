@@ -10,6 +10,21 @@ classdef RegionMover
     end
 
     %% Functions to move or delete region
+    methods (Static)
+        function byKey(region, key)
+            regionMover = RegionMover(region);
+            if ArrowKey.isUp(key)
+                regionMover.moveUp();
+            elseif ArrowKey.isLeft(key)
+                regionMover.moveLeft();
+            elseif ArrowKey.isDown(key)
+                regionMover.moveDown();
+            elseif ArrowKey.isRight(key)
+                regionMover.moveRight();
+            end
+        end
+    end
+    
     methods
         function moveUp(obj, ~, ~)
             region = obj.region;

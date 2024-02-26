@@ -10,6 +10,7 @@ classdef RegionPreviewer < RegionDrawer
 
     properties (Access = private)
         gridLayout;
+        currentRegion;
 
         getRawImage;
         getRegionGui
@@ -58,6 +59,20 @@ classdef RegionPreviewer < RegionDrawer
         end
     end
 
+    %% Functions to retrieve GUI elements
+    methods
+        function region = getCurrentRegion(obj)
+            region = obj.currentRegion;
+        end
+    end
+
+    %% Functions to set state of GUI
+    methods (Access = private)
+        function setCurrentRegion(obj, region)
+            obj.currentRegion = region;
+        end
+    end
+
     %% Functions to update state of GUI
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
@@ -79,6 +94,7 @@ classdef RegionPreviewer < RegionDrawer
         end
 
         function previewRegion(obj, region)
+            obj.setCurrentRegion(region);
             obj.updateRegionGuiVisible(region);
             updateRegionColors(region);
         end
