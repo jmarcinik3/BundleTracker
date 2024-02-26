@@ -9,6 +9,7 @@ classdef RegionMover
         end
     end
 
+    %% Functions to move or delete region
     methods
         function moveUp(obj, ~, ~)
             region = obj.region;

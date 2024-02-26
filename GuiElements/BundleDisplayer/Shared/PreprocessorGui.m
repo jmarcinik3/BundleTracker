@@ -67,6 +67,14 @@ classdef PreprocessorGui < handle
         end
     end
 
+    %% Functions to generate objects
+    methods
+        function processor = generatePreprocessor(obj, thresholds)
+            invert = obj.getInvert();
+            processor = Preprocessor(thresholds, invert);
+        end
+    end
+    
     %% Functions to retrieve state information
     methods
         function data = getRegionUserData(obj)
@@ -76,12 +84,6 @@ classdef PreprocessorGui < handle
                 RegionParser.intensityKeyword, thresholds, ...
                 RegionParser.invertKeyword, isInverted ...
                 );
-        end
-    end
-    methods
-        function processor = generatePreprocessor(obj, thresholds)
-            invert = obj.getInvert();
-            processor = Preprocessor(thresholds, invert);
         end
         function thresholds = getThresholds(obj)
             thresholds = obj.thresholdSlider.Value;
@@ -113,18 +115,17 @@ classdef PreprocessorGui < handle
             obj.updateFromRawImage(thresholds);
             obj.resizeAxis();
         end
-    end
-
-    methods
         function setVisible(obj, visible)
             gl = obj.getGridLayout();
             set(gl, "Visible", visible);
         end
-
         function showImage(obj, im)
             imRgb = obj.gray2rgb(im);
             obj.setImageCData(imRgb);
         end
+    end
+
+    methods (Access = private)
         function setImageCData(obj, cData)
             iIm = obj.getInteractiveImage();
             set(iIm, "CData", cData);

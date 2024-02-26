@@ -66,7 +66,7 @@ classdef RegionLinker
             delete(gl);
         end
     end
-    methods (Access = protected)
+    methods (Access = private)
         function regionMoving(obj, ~, ~)
             obj.updateRegionalRawImage();
         end
@@ -104,6 +104,7 @@ set(thresholdSlider, ...
     "Value", thresholds ...
     );
 end
+
 function configureInvertCheckbox(obj, gui, regionParser)
 invert = regionParser.getInvert();
 invertCheckbox = gui.getInvertCheckbox();
@@ -112,6 +113,7 @@ set(invertCheckbox, ...
     "Value", invert ...
     );
 end
+
 function configureRegion(obj, region)
 addlistener(region, "MovingROI", @obj.regionMoving);
 addlistener(region, "ROIMoved", @obj.regionMoving);

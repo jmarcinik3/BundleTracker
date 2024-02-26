@@ -39,27 +39,28 @@ classdef RegionPreviewGui < handle
 
     %% Functions to retrieve GUI elements
     methods
-        function gui = getImageGui(obj)
-            gui = obj.imageGui;
+        function regions = getRegions(obj)
+            ax =  obj.getAxis();
+            regions = RegionDrawer.getRegions(ax);
         end
         function gui = getRegionGui(obj, region)
             tag = get(region, "Tag");
             gui = obj.tag2linker(tag);
         end
-        function regions = getRegions(obj)
-            ax =  obj.getAxis();
-            regions = RegionDrawer.getRegions(ax);
+        function guis = getRegionGuis(obj)
+            guis = values(obj.tag2linker);
         end
     end
-    methods
+    methods (Access = private)
+        function gui = getImageGui(obj)
+            gui = obj.imageGui;
+        end
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
         end
     end
-    methods
-        function guis = getRegionGuis(obj)
-            guis = values(obj.tag2linker);
-        end
+    methods (Access = private)
+        
     end
 
     %% Functions to update state of GUI
@@ -81,21 +82,23 @@ classdef RegionPreviewGui < handle
 
     %% Functions to update state information
     methods
-        function deletingRegion(obj, source, event)
-            regionGui = obj.getRegionGui(source);
-            obj.removeRegionEntry(source);
-            regionGui.deletingRegion(source, event);
-        end
-        function tag = iterateTag(obj)
-            tagCounter = obj.tagCounter + 1;
-            obj.tagCounter = tagCounter;
-            tag = num2str(tagCounter);
-        end
         function addRegionEntry(obj, regionLinker)
             region = regionLinker.getRegion();
             tag = obj.iterateTag();
             set(region, "Tag", tag);
             obj.tag2linker(tag) = regionLinker;
+        end
+        function deletingRegion(obj, source, event)
+            regionGui = obj.getRegionGui(source);
+            obj.removeRegionEntry(source);
+            regionGui.deletingRegion(source, event);
+        end
+    end
+    methods (Access = private)
+        function tag = iterateTag(obj)
+            tagCounter = obj.tagCounter + 1;
+            obj.tagCounter = tagCounter;
+            tag = num2str(tagCounter);
         end
         function removeRegionEntry(obj, region)
             tag = get(region, "Tag");

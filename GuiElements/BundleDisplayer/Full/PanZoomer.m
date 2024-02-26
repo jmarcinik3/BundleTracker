@@ -24,6 +24,7 @@ classdef PanZoomer < handle
         end
     end
 
+    %% Functions to retrieve GUI elements
     methods (Access = private)
         function ax = getAxis(obj)
             ax = obj.axis;

@@ -19,7 +19,9 @@ classdef ImageExporter < handle
         function obj = ImageExporter(ax)
             obj.axis = ax;
         end
-
+    end
+        
+    methods (Access = protected)
         function exportImage(obj, startDirectory)
             ax = obj.axis;
             ImageExporter.export(ax, startDirectory);

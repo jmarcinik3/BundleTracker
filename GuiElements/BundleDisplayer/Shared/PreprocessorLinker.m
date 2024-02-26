@@ -1,4 +1,4 @@
-classdef PreprocessorLinker < handle
+classdef PreprocessorLinker
     properties (Access = private)
         getInvert;
         getThresholds;
@@ -11,9 +11,6 @@ classdef PreprocessorLinker < handle
 
     methods
         function obj = PreprocessorLinker(gui)
-            obj.configureThresholdSlider(gui);
-            obj.configureInvertCheckbox(gui);
-
             % inherited getters
             obj.getInvert = @gui.getInvert;
             obj.getThresholds = @gui.getThresholds;
@@ -24,6 +21,9 @@ classdef PreprocessorLinker < handle
             % inherited updaters
             obj.showImage = @gui.showImage;
             obj.resizeAxis = @gui.resizeAxis;
+
+            obj.configureThresholdSlider(gui);
+            obj.configureInvertCheckbox(gui);
         end
     end
 
@@ -37,9 +37,6 @@ classdef PreprocessorLinker < handle
             invertCheckbox = gui.getInvertCheckbox();
             configureInvertCheckbox(obj, invertCheckbox);
         end
-    end
-
-    methods (Access = protected)
         function processor = generatePreprocessor(obj, thresholds)
             invert = obj.getInvert();
             processor = Preprocessor(thresholds, invert);
@@ -93,6 +90,7 @@ set(thresholdSlider, ...
     "ValueChangedFcn", @obj.thresholdSliderChanged ...
     );
 end
+
 function configureInvertCheckbox(obj, invertCheckbox)
 set(invertCheckbox, "ValueChangedFcn", @obj.invertCheckboxChanged);
 end
