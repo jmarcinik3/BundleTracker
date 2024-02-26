@@ -1,10 +1,10 @@
 classdef RegionCompressorGui
     properties (Access = private, Constant)
         filepaths = "img/" + [
-            ["arrow-up-left.png", "arrow-up.png", "arrow-up-right.png"]; ...
-            ["arrow-left.png", "trash.png", "arrow-right.png"]; ...
-            ["arrow-down-left.png", "arrow-down.png", "arrow-down-right.png"]; ...
-            ];
+            ["compress-down-right.png", "compress-down.png", "compress-down-left.png"];
+            ["compress-right.png", "arrows-in.png", "compress-left.png"];
+            ["compress-up-right.png", "compress-up.png", "compress-up-left.png"];
+        ];
     end
 
     properties (Access = private)

@@ -22,8 +22,13 @@ classdef RegionLinker
         function obj = RegionLinker(regionGui, region, fullRawImage)
             preprocessorGui = regionGui.getPreprocessorGui();
             regionMoverGui = regionGui.getRegionMoverGui();
+            regionCompressorGui = regionGui.getRegionCompressorGui();
+            regionExpanderGui = regionGui.getRegionExpanderGui();
+
             preprocessorLinker = PreprocessorLinker(preprocessorGui);
             RegionMoverLinker(regionMoverGui, region);
+            RegionCompressorLinker(regionCompressorGui, region);
+            RegionExpanderLinker(regionExpanderGui, region);
             regionParser = RegionParser(region);
 
             % inherited getters

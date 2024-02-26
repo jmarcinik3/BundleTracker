@@ -17,15 +17,15 @@ end
 
 
 function generateImageClickedFcns(imageElements, regionCompressor)
-imageElements{1, 1}.ImageClickedFcn = @regionCompressor.compressUpLeft;
-imageElements{1, 2}.ImageClickedFcn = @regionCompressor.compressUp;
-imageElements{1, 3}.ImageClickedFcn = @regionCompressor.compressUpRight;
+imageElements{1, 1}.ImageClickedFcn = @regionCompressor.compressDownRight;
+imageElements{1, 2}.ImageClickedFcn = @regionCompressor.compressDown;
+imageElements{1, 3}.ImageClickedFcn = @regionCompressor.compressDownLeft;
 
-imageElements{2, 1}.ImageClickedFcn = @regionCompressor.compressLeft;
+imageElements{2, 1}.ImageClickedFcn = @regionCompressor.compressRight;
 imageElements{2, 2}.ImageClickedFcn = @regionCompressor.compressIn;
-imageElements{2, 3}.ImageClickedFcn = @regionCompressor.compressRight;
+imageElements{2, 3}.ImageClickedFcn = @regionCompressor.compressLeft;
 
-imageElements{3, 1}.ImageClickedFcn = @regionCompressor.compressDownLeft;
-imageElements{3, 2}.ImageClickedFcn = @regionCompressor.compressDown;
-imageElements{3, 3}.ImageClickedFcn = @regionCompressor.compressDownRight;
+imageElements{3, 1}.ImageClickedFcn = @regionCompressor.compressUpRight;
+imageElements{3, 2}.ImageClickedFcn = @regionCompressor.compressUp;
+imageElements{3, 3}.ImageClickedFcn = @regionCompressor.compressUpLeft;
 end
