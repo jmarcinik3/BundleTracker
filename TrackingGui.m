@@ -209,14 +209,16 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             end
         end
         function trackAndSaveRegions(obj)
-            results = obj.trackAndProcess();
-            obj.saveResults(results)
-            obj.exportImageIfPossible();
+            [results, completed] = obj.trackAndProcess();
+            if completed
+                obj.saveResults(results)
+                obj.exportImageIfPossible();
+            end
         end
-        function results = trackAndProcess(obj)
+        function [results, completed] = trackAndProcess(obj)
             obj.prepareTracking();
             regions = obj.getRegions();
-            results = obj.trackAndProcessRegions(regions);
+            [results, completed] = obj.trackAndProcessRegions(regions);
         end
         function prepareTracking(obj)
             filepaths = obj.getFilepaths();

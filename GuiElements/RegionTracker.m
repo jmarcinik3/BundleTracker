@@ -2,6 +2,7 @@ classdef RegionTracker < ImageImporter
     properties (Access = private)
         trackingMode;
         initialResult;
+        continueCalculation = true;
     end
 
     methods
@@ -29,16 +30,34 @@ classdef RegionTracker < ImageImporter
         function setInitialResult(obj, result)
             obj.initialResult = result;
         end
-        function results = trackAndProcessRegions(obj, regions)
+        function [results, completed] = trackAndProcessRegions(obj, regions)
             set(regions, "Color", RegionColor.queueColor);
-            results = arrayfun(@obj.trackAndProcessRegion, regions);
+            results = arrayfun( ...
+                @obj.trackAndProcessIfContinued, regions, ...
+                "UniformOutput", false ...
+                );
+            set(regions, "Color", RegionColor.unprocessedColor);
+            
+            completed = obj.continueCalculation;
+            if completed
+                results = cell2mat(results);
+            end
+            obj.continueCalculation = true;
         end
     end
 
     %% Functions to perform tracking
     methods (Access = private)
+        function result = trackAndProcessIfContinued(obj, region)
+            if obj.continueCalculation
+                set(region, "Color", RegionColor.workingColor); % color region as in-process
+                result = obj.trackAndProcessRegion(region);
+                set(region, "Color", RegionColor.finishedColor); % color region as finished
+            else
+                result = [];
+            end
+        end
         function result = trackAndProcessRegion(obj, region)
-            set(region, "Color", RegionColor.workingColor); % color region as in-process
             initialResult = obj.initialResult;
             centers = obj.trackRegion(region);
 
@@ -48,8 +67,6 @@ classdef RegionTracker < ImageImporter
                 ]);
             result = appendRegionalMetadata(region, result);
             result = postprocessResults(result);
-
-            set(region, "Color", RegionColor.finishedColor); % color region as finished
         end
         function centers = trackRegion(obj, region)
             preprocessor = Preprocessor.fromRegion(region);
@@ -58,17 +75,22 @@ classdef RegionTracker < ImageImporter
 
             progress = ProgressTracker(count);
             for index = 1:count
-                im = obj.getImageInRegion(index, region);
-                im = preprocessor.preprocess(im);
-                center = obj.trackFrame(im);
-                centers = [centers, center];
-                progress.updateIfNeeded(index);
+                continueCalculation = progress.updateIfValid(index - 1);
+                if continueCalculation
+                    center = obj.trackFrame(index, region, preprocessor);
+                    centers = [centers, center];
+                else
+                    break;
+                end
             end
             delete(progress);
 
             centers = PointStructurer.mergePoints(centers);
+            obj.continueCalculation = continueCalculation;
         end
-        function center = trackFrame(obj, im)
+        function center = trackFrame(obj, index, region, preprocessor)
+            im = obj.getImageInRegion(index, region);
+            im = preprocessor.preprocess(im);
             trackingMode = obj.trackingMode;
             center = TrackingAlgorithms.byKeyword(im, trackingMode);
         end
