@@ -137,8 +137,6 @@ rect.Position(1) = rect.Position(1) + 1;
 rect.Position(3) = rect.Position(3) - 1;
 end
 
-
-
 function ellipseUp(ellipse)
 ellipse.SemiAxes(2) = ellipse.SemiAxes(2) - 1;
 end
@@ -151,8 +149,6 @@ end
 function ellipseRight(ellipse)
 ellipse.SemiAxes(1) = ellipse.SemiAxes(1) - 1;
 end
-
-
 
 function vertexUp(polygon)
 y = polygon.Position(:, 2);

@@ -122,8 +122,6 @@ end
 
 
 
-
-
 function rectangleUp(rect)
 rect.Position(2) = rect.Position(2) - 1;
 rect.Position(4) = rect.Position(4) + 1;
@@ -180,6 +178,8 @@ xmin = min(x);
 scaleFactor = (polygonHeight + 1) / polygonHeight;
 polygon.Position(:, 1) = xmin + scaleFactor * (x - xmin);
 end
+
+
 
 function expandUpLeft(region)
 expandUp(region);
