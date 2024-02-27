@@ -4,10 +4,17 @@ classdef ResultsParser
     end
 
     methods
-        function obj = ResultsParser(filepath)
-            obj.results = load(filepath, "results").results;
+        function obj = ResultsParser(results)
+            if isstring(results)
+                obj.results = load(results, "results").results;
+            elseif isstruct(results)
+                obj.results = results;
+            end
         end
 
+        function count = getRegionCount(obj)
+            count = numel(obj.results);
+        end
         function label = getLabel(obj)
             label = vertcat(obj.results.Label);
         end
@@ -56,8 +63,11 @@ classdef ResultsParser
             error = rad2deg(errorRad);
         end
 
+        function trackingMode = getTrackingMode(obj)
+            trackingMode = obj.results.TrackingMode;
+        end
         function location = getKinociliumLocation(obj)
-            location = vertcat(obj.results.KinociliumLocation);
+            location = obj.results.KinociliumLocation;
         end
         function fps = getFps(obj)
             fps = obj.results.Fps;

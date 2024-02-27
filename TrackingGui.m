@@ -149,7 +149,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
     %% Functions to retrieve state information
     methods (Access = private)
         function val = getTrackingSelection(obj)
-            val = obj.trackingSelection.Value;
+            val = string(obj.trackingSelection.Value);
         end
 
         % ...for postprocessing
@@ -205,15 +205,24 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             count = numel(regions);
             exists = count >= 1;
             if ~exists
-                obj.throwAlertMessage("No cells selected!", "Track");
+                obj.throwAlertMessage( ...
+                    "No cells selected!", ...
+                    "Start Tracking" ...
+                    );
             end
         end
         function trackAndSaveRegions(obj)
             [results, completed] = obj.trackAndProcess();
             if completed
-                obj.saveResults(results)
-                obj.exportImageIfPossible();
+                obj.trackingCompleted(results);
+            else
+                obj.throwAlertMessage("Tracking Canceled", "Start Tracking");
             end
+        end
+        function trackingCompleted(obj, results)
+            filepath = obj.saveResults(results);
+            obj.exportImageIfPossible();
+            displayTrackingCompleted(results, filepath);
         end
         function [results, completed] = trackAndProcess(obj)
             obj.prepareTracking();
@@ -238,7 +247,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
                 "Fps", obj.getFps() ...
                 );
         end
-        function saveResults(obj, results)
+        function filepath = saveResults(obj, results)
             filepath = obj.generateSaveFilepath();
             save(filepath, "results");
         end
@@ -336,6 +345,28 @@ function rgl = generateRightGridLayout(gl)
 rgl = uigridlayout(gl, [6, 1]);
 rgl.Layout.Row = 2;
 rgl.Layout.Column = 2;
+end
+
+function displayTrackingCompleted(results, filepath)
+resultsParser = ResultsParser(results);
+count = resultsParser.getRegionCount();
+title = sprintf("Tracking Completed (%d)", count);
+message = trackingCompletedMessage(results, filepath);
+msgbox(message, title);
+end
+function message = trackingCompletedMessage(results, filepath)
+resultsParser = ResultsParser(results);
+count = resultsParser.getRegionCount();
+trackingMode = resultsParser.getTrackingMode();
+kinociliumLocation = resultsParser.getKinociliumLocation();
+fps = resultsParser.getFps();
+
+savedMsg = sprintf("Results saved to %s", filepath);
+countMsg = sprintf("Cell Count: %d", count);
+modeMsg = sprintf("Tracking Algorithm: %s", trackingMode);
+fpsMsg = sprintf("FPS: %d", fps);
+kinoMsg = sprintf("Kinocilium Location: %s", kinociliumLocation);
+message = [savedMsg, countMsg, modeMsg, kinoMsg, fpsMsg];
 end
 
 %% Function to generate tracking method dropdown
