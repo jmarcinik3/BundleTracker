@@ -216,7 +216,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             if completed
                 obj.trackingCompleted(results);
             else
-                obj.throwAlertMessage("Tracking Canceled", "Start Tracking");
+                obj.throwAlertMessage("Tracking Canceled!", "Start Tracking");
             end
         end
         function trackingCompleted(obj, results)
