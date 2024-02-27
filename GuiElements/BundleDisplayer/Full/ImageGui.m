@@ -9,6 +9,7 @@ classdef ImageGui < ImageExporter & PanZoomer
     properties (Access = private)
         zoomIsEnabled;
         getFigure;
+        getImageSize;
         imageExists;
         setRawImage;
     end
@@ -27,6 +28,9 @@ classdef ImageGui < ImageExporter & PanZoomer
             
             obj@ImageExporter(ax);
             obj@PanZoomer(ax);
+
+            iIm = preprocessorGui.getInteractiveImage();
+            addlistener(iIm, "CData", "PostSet", @obj.resizeAxis);
             
             % inherited GUI getters
             obj.getFigure = @preprocessorGui.getFigure;
@@ -36,11 +40,11 @@ classdef ImageGui < ImageExporter & PanZoomer
 
             % inherited state getters
             obj.getRegionUserData = @preprocessorGui.getRegionUserData;
+            obj.getImageSize = @preprocessorGui.getImageSize;
             obj.imageExists = @preprocessorGui.imageExists;
 
             % inherited setters
             obj.setRawImage = @preprocessorGui.setRawImage;
-            
             obj.zoomIsEnabled = enableZoom;
 
             layoutElements(preprocessorGui);
@@ -62,6 +66,11 @@ classdef ImageGui < ImageExporter & PanZoomer
         end
     end
     methods (Access = private)
+        function resizeAxis(obj, ~, ~)
+            ax = obj.getAxis();
+            [h, w] = obj.getImageSize();
+            resizeAxis(ax, h, w);
+        end
         function updateZoomIfEnabled(obj)
             if obj.zoomIsEnabled
                 obj.fitOriginalLimsToAxis(); % update zoomer for new image

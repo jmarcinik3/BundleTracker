@@ -13,6 +13,7 @@ classdef PreprocessorGui < handle
             end
 
             obj.interactiveImage = generateInteractiveImage(ax);
+            
             obj.thresholdSlider = generateThresholdSlider(gl);
             obj.invertCheckbox = generateInvertCheckbox(gl);
             obj.gridLayout = gl;
@@ -92,16 +93,15 @@ classdef PreprocessorGui < handle
             invert = obj.invertCheckbox.Value;
         end
 
+        function [h, w] = getImageSize(obj)
+            iIm = obj.getInteractiveImage();
+            im = get(iIm, "CData");
+            [h, w, ~] = size(im);
+        end
         function exists = imageExists(obj)
             im = obj.getRawImage();
             exists = numel(im) >= 1;
             obj.setVisible(exists);
-        end
-    end
-    methods (Access = private)
-        function [h, w] = getImageSize(obj)
-            im = obj.getRawImage();
-            [h, w] = size(im);
         end
     end
 
@@ -110,10 +110,8 @@ classdef PreprocessorGui < handle
         function setRawImage(obj, im)
             iIm = obj.getInteractiveImage();
             iIm.UserData.rawImage = im;
-
             thresholds = obj.getThresholds();
             obj.updateFromRawImage(thresholds);
-            obj.resizeAxis();
         end
         function setVisible(obj, visible)
             gl = obj.getGridLayout();
@@ -124,7 +122,6 @@ classdef PreprocessorGui < handle
             obj.setImageCData(imRgb);
         end
     end
-
     methods (Access = private)
         function setImageCData(obj, cData)
             iIm = obj.getInteractiveImage();
@@ -135,11 +132,6 @@ classdef PreprocessorGui < handle
             imRgb = gray2rgb(im, fig);
         end
 
-        function resizeAxis(obj)
-            ax = obj.getAxis();
-            [h, w] = obj.getImageSize();
-            resizeAxis(ax, h, w);
-        end
         function updateFromRawImage(obj, thresholds)
             im = obj.generatePreprocessedImage(thresholds);
             obj.showImage(im);

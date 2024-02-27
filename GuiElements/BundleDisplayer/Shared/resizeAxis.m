@@ -1,43 +1,37 @@
-function resizeAxis(ax, h, w)
+function resizeAxis(ax, h, w, varargin)
+p = inputParser;
+addOptional(p, "FitToContent", false);
+parse(p, varargin{:});
+fitToContent = p.Results.FitToContent;
+
 if w > 0 && h > 0
-    if axisIsRoughlySquare(h, w)
-        resizeAxisRoughlySquare(ax, h, w);
-    elseif imageIsWide(h, w)
+    if h == w || fitToContent
+        resizeAxisToContent(ax, h, w);
+    elseif w > h
         resizeAxisWide(ax, h, w);
-    elseif axisIsTall(h, w)
+    elseif w < h
         resizeAxisTall(ax, h, w);
     end
 end
 end
 
-function is = axisIsRoughlySquare(h, w)
-is = w <= 2 * h && h <= 2 * w;
-end
-function is = imageIsWide(h, w)
-is = w > 2 * h;
-end
-function is = axisIsTall(h, w)
-is = h > 2 * w;
-end
 
-function resizeAxisRoughlySquare(ax, h, w)
-set(ax, ...
-    "XLim", [0, w], ...
-    "YLim", [0, h] ...
-    );
+
+function resizeAxisToContent(ax, h, w)
+xlim = w * [0, 1];
+ylim = h * [0, 1];
+set(ax, "XLim", xlim, "YLim", ylim);
 pbaspect(ax, [w, h, 1]);
 end
-function resizeAxisWide(ax, ~, w)
-set(ax, ...
-    "XLim", [0, w], ...
-    "YLim", w * [-0.5, 0.5] ...
-    );
-pbaspect(ax, [1 1 1]);
+function resizeAxisWide(ax, h, w)
+xlim = w * [0, 1];
+ylim = h / 2 + w * [-0.5, 0.5];
+set(ax, "XLim", xlim, "YLim", ylim);
+pbaspect(ax, [1, 1, 1]);
 end
-function resizeAxisTall(ax, h, ~)
-set(ax, ...
-    "XLim", h * [-0.5, 0.5], ...
-    "YLim", [0, h] ...
-    );
-pbaspect(ax, [1 1 1]);
+function resizeAxisTall(ax, h, w)
+xlim = w / 2 + h * [-0.5, 0.5];
+ylim = h * [0, 1];
+set(ax, "XLim", xlim, "YLim", ylim);
+pbaspect(ax, [1, 1, 1]);
 end

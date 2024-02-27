@@ -91,8 +91,6 @@ label.Layout.Column = 1;
 group.Layout.Column = 2;
 end
 
-
-
 function label = generateLabel(gl)
 text = "Kinocilium:";
 label = uilabel(gl, "Text", text);
