@@ -26,7 +26,6 @@ elseif ArrowKey.isRight(key)
 end
 end
 
-
 function configureRegion(region, key, modifiers)
 modifierAnalyzer = KeyModifierAnalyzer(modifiers);
 if modifierAnalyzer.hasCtrlShiftAlt && ArrowKey.isUp(key)

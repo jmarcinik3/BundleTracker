@@ -23,12 +23,8 @@ classdef RegionPreviewer < RegionDrawer
     end
 
     methods
-        function obj = RegionPreviewer(imageGui, regionGuiGridLayout, regionGuiLocation)
-            regionPreviewGui = RegionPreviewGui( ...
-                imageGui, ...
-                regionGuiGridLayout, ...
-                regionGuiLocation ...
-                );
+        function obj = RegionPreviewer(imageGui, regionGuiParent)
+            regionPreviewGui = RegionPreviewGui(imageGui, regionGuiParent);
 
             ax = imageGui.getAxis();
             iIm = imageGui.getInteractiveImage();

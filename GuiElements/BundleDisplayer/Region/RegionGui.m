@@ -8,8 +8,8 @@ classdef RegionGui
     end
 
     methods
-        function obj = RegionGui(parent, location)
-            gl = generateGridLayout(parent, location);
+        function obj = RegionGui(parent)
+            gl = uigridlayout(parent, [4, 5]);
             preprocessorGui = PreprocessorGui(gl);
             regionMoverGui = RegionMoverGui(gl);
             regionCompressorGui = RegionCompressorGui(gl);
@@ -66,22 +66,24 @@ gl = preprocessorGui.getGridLayout();
 ax = preprocessorGui.getAxis();
 thresholdSlider = preprocessorGui.getThresholdSlider();
 invertCheckbox = preprocessorGui.getInvertCheckbox();
-
 regionMoverElement = regionMoverGui.getGridLayout();
 regionCompressorElement = regionCompressorGui.getGridLayout();
 regionExpanderElement = regionExpanderGui.getGridLayout();
 
-ax.Layout.Row = [1, 4];
-ax.Layout.Column = 1;
+% layout axis
+ax.Layout.Row = 1;
+ax.Layout.Column = [1, 5];
 
-thresholdSlider.Layout.Row = 1;
-invertCheckbox.Layout.Row = 2;
-regionMoverElement.Layout.Row = 3;
-regionCompressorElement.Layout.Row = 3;
-regionExpanderElement.Layout.Row = 3;
+% layout rows
+thresholdSlider.Layout.Row = 2;
+invertCheckbox.Layout.Row = 3;
+regionMoverElement.Layout.Row = 4;
+regionCompressorElement.Layout.Row = 4;
+regionExpanderElement.Layout.Row = 4;
 
-thresholdSlider.Layout.Column = [2, 5];
-invertCheckbox.Layout.Column = [2, 5];
+% layout columns
+thresholdSlider.Layout.Column = [1, 5];
+invertCheckbox.Layout.Column = [1, 5];
 regionMoverElement.Layout.Column = 2;
 regionCompressorElement.Layout.Column = 3;
 regionExpanderElement.Layout.Column = 4;
@@ -89,13 +91,7 @@ regionExpanderElement.Layout.Column = 4;
 % Set up row heights and column widths for grid layout
 set(gl, ...
     "Padding", [rowHeight, 0, rowHeight, 0], ...
-    "RowHeight", {rowHeight, rowHeight, '1x', 'fit'}, ...
+    "RowHeight", {'1x', rowHeight, rowHeight, 48}, ...
     "ColumnWidth", {'1x', 48, 48, 48, '1x'} ...
     );
-end
-
-function gl = generateGridLayout(parent, location)
-gl = uigridlayout(parent, [4, 5]);
-gl.Layout.Row = location{1};
-gl.Layout.Column = location{2};
 end

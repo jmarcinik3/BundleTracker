@@ -21,6 +21,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
 
         % components to set processing and tracking methods
         imageGui;
+        regionGuiPanel;
         trackingSelection;
         kinociliumLocation;
         scaleFactorInputElement;
@@ -45,18 +46,15 @@ classdef TrackingGui < RegionTracker & DirectorySelector
 
             [fig, gl] = generateGridLayout([2, 2]);
             rgl = generateRightGridLayout(gl);
-
-            lgl = uigridlayout(gl, [2, 1]);
-            lgl.Layout.Row = 2;
-            lgl.Layout.Column = 1;
-            set(lgl, "RowHeight", {'2x', '1x'})
-
-            imageGui = ImageGui(lgl, {1, 1}, "EnableZoom", enableZoom);
+            imageGui = ImageGui(gl, {2, 1}, "EnableZoom", enableZoom);
+            regionGuiPanel = uipanel(rgl, ...
+                "Title", "Region Editor", ...
+                "TitlePosition", "centertop" ...
+                );
+            regionPreviewer = RegionPreviewer(imageGui, regionGuiPanel);
 
             obj@RegionTracker();
             obj@DirectorySelector(gl, {1, [1, 2]});
-
-            regionPreviewer = RegionPreviewer(imageGui, lgl, {2, 1});
 
             % inherited getters
             obj.getCurrentRegion = @regionPreviewer.getCurrentRegion;
@@ -76,6 +74,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             obj.gridLayout = gl;
             obj.rightGridLayout = rgl;
             obj.imageGui = imageGui;
+            obj.regionGuiPanel = regionGuiPanel;
 
             obj.generateTrackingElements(rgl);
             obj.configureDirectorySelector(startingDirpath)
@@ -122,6 +121,9 @@ classdef TrackingGui < RegionTracker & DirectorySelector
         end
         function imageGui = getImageGui(obj)
             imageGui = obj.imageGui;
+        end
+        function panel = getRegionPanel(obj)
+            panel = obj.regionGuiPanel;
         end
 
         % components to set postprocessing methods
@@ -275,11 +277,13 @@ set(gl, ...
 layoutTopElements(gui);
 layoutRightsideElements(gui);
 end
+
 function layoutTopElements(gui)
 rowHeight = TrackingGui.rowHeight;
 directorySelector = gui.getDirectorySelectionElement();
 set(directorySelector, "RowHeight", rowHeight);
 end
+
 function layoutRightsideElements(gui)
 rowHeight = TrackingGui.rowHeight;
 rgl = gui.getRightGridLayout();
@@ -289,12 +293,14 @@ scaleFactorElement = gui.getScaleFactorInputElement();
 fpsInputElement = gui.getFpsInputElement();
 trackingDropdown = gui.getTrackingSelectionElement();
 saveFilestemElement = gui.getSaveFilestemElement();
+regionGuiPanel = gui.getRegionPanel();
 
 trackingDropdown.Layout.Row = 1;
 kinociliumLocationGroup.Layout.Row = 2;
 scaleFactorElement.Layout.Row = 3;
 fpsInputElement.Layout.Row = 4;
 saveFilestemElement.Layout.Row = 5;
+regionGuiPanel.Layout.Row = 6;
 
 set(scaleFactorElement, ...
     "RowHeight", rowHeight, ...
@@ -309,13 +315,14 @@ set(saveFilestemElement, ...
     "ColumnWidth", {'1x', '2x'} ...
     );
 
-rgl.RowHeight = num2cell(rowHeight * ones(1, 7));
+rgl.RowHeight = num2cell(rowHeight * ones(1, 6));
 rgl.RowHeight{2} = KinociliumLocation.height;
+rgl.RowHeight{6} = '1x';
 end
 
 function [fig, gl] = generateGridLayout(size)
 fig = uifigure;
-position = [300, 200, 800, 700];
+position = [300, 200, 1000, 700];
 set(fig, ...
     "Name", "Hair-Bundle Tracking", ...
     "Position", position ...
@@ -324,7 +331,7 @@ gl = uigridlayout(fig, size);
 end
 
 function rgl = generateRightGridLayout(gl)
-rgl = uigridlayout(gl, [5, 1]);
+rgl = uigridlayout(gl, [6, 1]);
 rgl.Layout.Row = 2;
 rgl.Layout.Column = 2;
 end

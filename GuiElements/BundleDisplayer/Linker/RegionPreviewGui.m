@@ -6,24 +6,21 @@ classdef RegionPreviewGui < handle
     properties (Access = private)
         tagCounter = 0;
         tag2linker = dictionary;
-        location;
         
-        gridLayout;
+        parent;
         imageGui;
-
         getRawImage;
         changeImage;
     end    
 
     methods
-        function obj = RegionPreviewGui(imageGui, regionGuiGridLayout, location)
+        function obj = RegionPreviewGui(imageGui, regionGuiParent)
             % inherited functions
             obj.getAxis = @imageGui.getAxis;
             obj.getRawImage = @imageGui.getRawImage;
             obj.changeImage = @imageGui.changeImage;
 
-            obj.location = location;
-            obj.gridLayout = regionGuiGridLayout;
+            obj.parent = regionGuiParent;
             obj.imageGui = imageGui;
         end
     end
@@ -31,9 +28,8 @@ classdef RegionPreviewGui < handle
     %% Functions to generate GUI elements
     methods
         function regionGui = generateRegionGui(obj)
-            gl = obj.getGridLayout();
-            location = obj.location;
-            regionGui = RegionGui(gl, location);
+            parent = obj.getGuiParent();
+            regionGui = RegionGui(parent);
         end
     end
 
@@ -59,8 +55,8 @@ classdef RegionPreviewGui < handle
         function gui = getImageGui(obj)
             gui = obj.imageGui;
         end
-        function gl = getGridLayout(obj)
-            gl = obj.gridLayout;
+        function parent = getGuiParent(obj)
+            parent = obj.parent;
         end
     end
     methods (Access = private)
