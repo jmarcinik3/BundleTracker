@@ -21,7 +21,7 @@ classdef RegionMover
                 regionMover.moveDown();
             elseif RegionAdjustKey.isRight(key)
                 regionMover.moveRight();
-            elseif RegionAdjustKey.isSpace(key)
+            elseif RegionAdjustKey.isDelete(key)
                 regionMover.deleteRegion();
             end
         end
