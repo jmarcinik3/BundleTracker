@@ -131,7 +131,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             elem = obj.trackingSelection;
         end
         function elem = getKinociliumLocationElement(obj)
-            elem = obj.kinociliumLocation.getElement();
+            elem = obj.kinociliumLocation.getGridLayout();
         end
         function elem = getScaleFactorInputElement(obj)
             elem = obj.scaleFactorInputElement;
@@ -327,7 +327,7 @@ set(saveFilestemElement, ...
     );
 
 rgl.RowHeight = num2cell(rowHeight * ones(1, 6));
-rgl.RowHeight{2} = KinociliumLocation.height;
+rgl.RowHeight{2} = 'fit';
 rgl.RowHeight{6} = '1x';
 end
 
