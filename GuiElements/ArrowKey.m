@@ -26,6 +26,13 @@ classdef ArrowKey
         function is = isRight(key)
             is = strcmp(key, ArrowKey.rightKey);
         end
+
+        function is = isVertical(key)
+            is = ArrowKey.isUp(key) || ArrowKey.isDown(key);
+        end
+        function is = isHorizontal(key)
+            is = ArrowKey.isLeft(key) || ArrowKey.isRight(key);
+        end
     end
 end
 

@@ -11,7 +11,17 @@ classdef RegionExpander
 
     %% Functions to expand or delete region
     methods (Static)
-        function byKey(region, key)
+        function byKey(region, event)
+            key = event.Key;
+            modifiers = event.Modifier;
+            modKey = ModifierKey(modifiers);
+            if modKey.isPureCtrlShift
+                RegionExpander.byKeyUnchecked(region, key)
+            end
+        end
+    end
+    methods (Access = private, Static)
+        function byKeyUnchecked(region, key)
             regionExpander = RegionExpander(region);
             if RegionAdjustKey.isUp(key)
                 regionExpander.expandUp();

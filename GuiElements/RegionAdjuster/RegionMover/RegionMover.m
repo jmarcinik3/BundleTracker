@@ -11,7 +11,20 @@ classdef RegionMover
 
     %% Functions to move or delete region
     methods (Static)
-        function byKey(region, key)
+        function byKey(region, event)
+            key = event.Key;
+            modifiers = event.Modifier;
+            modKey = ModifierKey(modifiers);
+            if modKey.hasZeroModifiers
+                RegionMover.byKeyUnmodified(region, key)
+            elseif modKey.isPureCtrl && RegionAdjustKey.isDelete(key)
+                regionMover = RegionMover(region);
+                regionMover.deleteRegion();
+            end
+        end
+    end
+    methods (Access = private, Static)
+        function byKeyUnmodified(region, key)
             regionMover = RegionMover(region);
             if RegionAdjustKey.isUp(key)
                 regionMover.moveUp();
@@ -21,8 +34,6 @@ classdef RegionMover
                 regionMover.moveDown();
             elseif RegionAdjustKey.isRight(key)
                 regionMover.moveRight();
-            elseif RegionAdjustKey.isDelete(key)
-                regionMover.deleteRegion();
             end
         end
     end

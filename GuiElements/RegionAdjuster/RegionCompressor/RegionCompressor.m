@@ -11,7 +11,17 @@ classdef RegionCompressor
 
     %% Functions to compress or delete region
     methods (Static)
-        function byKey(region, key)
+        function  byKey(region, event)
+            key = event.Key;
+            modifiers = event.Modifier;
+            modKey = ModifierKey(modifiers);
+            if modKey.isPureCtrl
+                RegionCompressor.byKeyUnchecked(region, key)
+            end
+        end
+    end
+    methods (Access = private, Static)
+        function byKeyUnchecked(region, key)
             regionCompressor = RegionCompressor(region);
             if RegionAdjustKey.isUp(key)
                 regionCompressor.compressUp();

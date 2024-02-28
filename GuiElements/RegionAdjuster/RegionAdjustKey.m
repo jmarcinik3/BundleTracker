@@ -10,6 +10,9 @@ classdef RegionAdjustKey < ArrowKey
                 || RegionAdjustKey.isSpace(key) ...
                 || RegionAdjustKey.isDelete(key);
         end
+        function is = isStandard(key)
+            is = ArrowKey.is(key) || RegionAdjustKey.isSpace(key);
+        end
 
         function is = isSpace(key)
             is = strcmp(key, RegionAdjustKey.space);

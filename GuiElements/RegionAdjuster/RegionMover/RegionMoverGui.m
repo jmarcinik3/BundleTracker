@@ -7,7 +7,7 @@ classdef RegionMoverGui < RegionAdjusterGui
             ];
         tooltips = [
             ["Move Up-Left", "Move Up (↑)", "Move Up-Right"];
-            ["Move Left (←)", "Delete Region (Del)", "Move Right (→)"];
+            ["Move Left (←)", "Delete Region (Ctrl+Del)", "Move Right (→)"];
             ["Move Down-Left", "Move Down (↓)", "Move Down-Right"];
             ];
     end

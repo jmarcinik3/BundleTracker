@@ -11,22 +11,28 @@ classdef RegionOrderer
 
     %% Functions to move or delete region
     methods (Static)
-        function byKey(region, key, modifiers)
-            modifierAnalyzer = KeyModifierAnalyzer(modifiers);
+        function byKey(region, event)
+            key = event.Key;
+            modifiers = event.Modifier;
+            modKey = ModifierKey(modifiers);
             regionOrderer = RegionOrderer(region);
 
-            if modifierAnalyzer.hasCtrlShiftAlt && ArrowKey.isUp(key)
-                regionOrderer.bringToFront();
-            elseif modifierAnalyzer.hasCtrlShiftAlt && ArrowKey.isDown(key)
-                regionOrderer.sendToBack();
-            elseif modifierAnalyzer.hasPureAlt && ArrowKey.isUp(key)
-                regionOrderer.bringForward();
-            elseif modifierAnalyzer.hasPureAlt && ArrowKey.isDown(key)
-                regionOrderer.sendBackward();
+            if modKey.isCtrlShiftAlt
+                if ArrowKey.isUp(key)
+                    regionOrderer.bringToFront();
+                elseif ArrowKey.isDown(key)
+                    regionOrderer.sendToBack();
+                end
+            elseif modKey.isPureAlt
+                if ArrowKey.isUp(key)
+                    regionOrderer.bringForward();
+                elseif ArrowKey.isDown(key)
+                    regionOrderer.sendBackward();
+                end
             end
         end
     end
-    
+
     methods
         function bringToFront(obj, ~, ~)
             region = obj.region;

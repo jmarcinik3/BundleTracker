@@ -4,18 +4,30 @@ key = event.Key;
 
 if  objectExists(currentRegion) && RegionAdjustKey.is(key)
     modifiers = event.Modifier;
-    modifierAnalyzer = KeyModifierAnalyzer(modifiers);
+    modKey = ModifierKey(modifiers);
 
-    if modifierAnalyzer.hasPureAlt
-        RegionOrderer.byKey(currentRegion, key, modifiers);
-        switchRegion(key, trackingGui);
-    elseif modifierAnalyzer.hasAlt
-        RegionOrderer.byKey(currentRegion, key, modifiers);
-    else
-        configureRegion(currentRegion, key, modifiers) ;
+    if modKey.isCtrlShiftAlt && ArrowKey.isVertical(key)
+        RegionOrderer.byKey(currentRegion, event);
+    elseif modKey.isPureAlt
+        if ArrowKey.isVertical(key)
+            RegionOrderer.byKey(currentRegion, event);
+        elseif ArrowKey.isHorizontal(key)
+            switchRegion(key, trackingGui);
+        end
+    elseif modKey.hasZeroModifiers
+        RegionMover.byKey(currentRegion, event);
+    elseif modKey.isPureCtrl
+        if RegionAdjustKey.isStandard(key)
+            RegionCompressor.byKey(currentRegion, event);
+        elseif RegionAdjustKey.isDelete(key)
+            RegionMover.byKey(currentRegion, event);
+        end
+    elseif modKey.isPureCtrlShift
+        RegionExpander.byKey(currentRegion, event);
     end
 end
 end
+
 
 
 function switchRegion(key, trackingGui)
@@ -26,18 +38,7 @@ elseif ArrowKey.isRight(key)
 end
 end
 
-function configureRegion(region, key, modifiers)
-modifierAnalyzer = KeyModifierAnalyzer(modifiers);
-if modifierAnalyzer.hasCtrlShiftAlt && ArrowKey.isUp(key)
-    bringToFront(region);
-elseif modifierAnalyzer.hasZeroModifiers
-    RegionMover.byKey(region, key);
-elseif modifierAnalyzer.hasPureCtrl
-    RegionCompressor.byKey(region, key);
-elseif modifierAnalyzer.hasPureCtrlShift
-    RegionExpander.byKey(region, key);
-end
-end
+
 
 function exists = objectExists(obj)
 exists = isobject(obj) && isvalid(obj);
