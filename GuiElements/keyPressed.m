@@ -11,8 +11,10 @@ if  objectExists(currentRegion) && RegionAdjustKey.is(key)
     elseif modKey.isPureAlt
         if ArrowKey.isVertical(key)
             RegionOrderer.byKey(currentRegion, event);
-        elseif ArrowKey.isHorizontal(key)
-            switchRegion(key, trackingGui);
+        elseif ArrowKey.isLeft(key)
+            trackingGui.setPreviousRegionVisible();
+        elseif ArrowKey.isRight(key)
+            trackingGui.setNextRegionVisible();
         end
     elseif modKey.hasZeroModifiers
         RegionMover.byKey(currentRegion, event);
@@ -35,16 +37,6 @@ elseif modKey.isPureCtrl
     elseif strcmp(key, "return")
         trackingGui.trackButtonPushed(source, event)
     end
-end
-end
-
-
-
-function switchRegion(key, trackingGui)
-if ArrowKey.isLeft(key)
-    trackingGui.setPreviousRegionVisible();
-elseif ArrowKey.isRight(key)
-    trackingGui.setNextRegionVisible();
 end
 end
 
