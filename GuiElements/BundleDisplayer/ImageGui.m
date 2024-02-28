@@ -1,4 +1,4 @@
-classdef ImageGui < ImageExporter & PanZoomer
+classdef ImageGui < AxisExporter & AxisPanZoomer
     properties
         getAxis;
         getInteractiveImage;
@@ -26,8 +26,8 @@ classdef ImageGui < ImageExporter & PanZoomer
             preprocessorGui = PreprocessorGui(gl, ax);
             PreprocessorLinker(preprocessorGui);
             
-            obj@ImageExporter(ax);
-            obj@PanZoomer(ax);
+            obj@AxisExporter(ax);
+            obj@AxisPanZoomer(ax);
 
             iIm = preprocessorGui.getInteractiveImage();
             addlistener(iIm, "CData", "PostSet", @obj.resizeAxis);
@@ -73,7 +73,7 @@ classdef ImageGui < ImageExporter & PanZoomer
         end
         function updateZoomIfEnabled(obj)
             if obj.zoomIsEnabled
-                obj.fitOriginalLimsToAxis(); % update zoomer for new image
+                obj.setBoundsToCurrent(); % update zoomer for new image
             end
         end
         function throwAlertMessage(obj, message, title)

@@ -1,8 +1,7 @@
-classdef ImageExporter < handle
+classdef AxisExporter < handle
     properties (Constant)
         title = "Export Image";
     end
-
     properties (Access = private, Constant)
         extensions = { ...
             '*.png', "Portable Network Graphics (PNG)"; ...
@@ -20,25 +19,26 @@ classdef ImageExporter < handle
     end
 
     methods
-        function obj = ImageExporter(ax)
+        function obj = AxisExporter(ax)
             obj.axis = ax;
         end
     end
-        
+       
+    %% Functions to export image
     methods (Access = protected)
         function exportImage(obj, startDirectory)
             ax = obj.axis;
-            ImageExporter.export(ax, startDirectory);
+            AxisExporter.export(ax, startDirectory);
         end
     end
-
+    
     methods (Static)
         function export(ax, startDirectory)
-            extensions = ImageExporter.extensions;
-            title = ImageExporter.title;
+            extensions = AxisExporter.extensions;
+            title = AxisExporter.title;
             [filename, directoryPath, ~] = uiputfile(extensions, title, startDirectory);
 
-            if isValidDirectoryPath(directoryPath)
+            if directoryIsChosen(directoryPath)
                 filepath = strcat(directoryPath, filename);
                 exportgraphics(ax, filepath);
             end
@@ -48,6 +48,6 @@ end
 
 
 
-function is = isValidDirectoryPath(directoryPath)
+function is = directoryIsChosen(directoryPath)
 is = directoryPath ~= 0;
 end
