@@ -3,7 +3,6 @@ currentRegion = trackingGui.getCurrentRegion();
 key = event.Key;
 modifiers = event.Modifier;
 modKey = ModifierKey(modifiers);
-disp(key);
 
 if  objectExists(currentRegion) && RegionAdjustKey.is(key)
     if modKey.isCtrlShiftAlt && ArrowKey.isVertical(key)
