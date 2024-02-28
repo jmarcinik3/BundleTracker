@@ -1,20 +1,8 @@
 classdef RegionLinker < PreprocessorLinker
-    properties
-        getRegion;
-        setVisible;
-    end
-
     properties (Access = private)
         fullRawImage;
-        
-        getGridLayout;
-        getThresholds;
-        getInvert;
-        
-        generatePreprocessor;
-        setRawImage;
-        setThresholds;
-        setInvert;
+        regionGui;
+        regionParser;
     end
 
     methods
@@ -30,20 +18,9 @@ classdef RegionLinker < PreprocessorLinker
             regionParser = RegionParser(region);
             obj@PreprocessorLinker(preprocessorGui);
 
-            % inherited getters
-            obj.getGridLayout = @regionGui.getGridLayout;
-            obj.getRegion = @regionParser.getRegion;
-            obj.getThresholds = @regionParser.getThresholds;
-            obj.getInvert = @regionParser.getInvert;
-            obj.generatePreprocessor = @regionParser.generatePreprocessor;
-
-            % inherited setters
-            obj.setRawImage = @preprocessorGui.setRawImage;
-            obj.setVisible = @preprocessorGui.setVisible;
-            obj.setThresholds = @regionParser.setThresholds;
-            obj.setInvert = @regionParser.setInvert;
-
             % own properties
+            obj.regionGui = regionGui;
+            obj.regionParser = regionParser;
             obj.fullRawImage = fullRawImage;
 
             % configure GUI elements, must come last
@@ -54,17 +31,35 @@ classdef RegionLinker < PreprocessorLinker
         end
     end
 
+    %% Functions to retrieve GUI elements
+    methods
+        function region = getRegion(obj)
+            region = obj.regionParser.getRegion();
+        end
+    end
+    methods (Access = private)
+        function gl = getGridLayout(obj)
+            gl = obj.regionGui.getGridLayout();
+        end
+        function gui = getPreprocessorGui(obj)
+            gui = obj.regionGui.getPreprocessorGui();
+        end
+    end
     %% Functions to retrieve state information
     methods (Access = private)
         function regionRawImage = generateRegionalRawImage(obj)
             fullRawImage = obj.fullRawImage;
-            region = obj.getRegion();
+            region = obj.regionParser.getRegion();
             regionRawImage = unpaddedMatrixInRegion(region, fullRawImage);
         end
     end
 
     %% Functions to update GUI and state information
     methods
+        function setVisible(obj, visible)
+            preprocessorGui = obj.getPreprocessorGui();
+            preprocessorGui.setVisible(visible);
+        end
         function deletingRegion(obj, ~, ~)
             gl = obj.getGridLayout();
             delete(gl);
@@ -73,17 +68,17 @@ classdef RegionLinker < PreprocessorLinker
     methods (Access = protected)
         function thresholdSliderChanging(obj, source, event)
             thresholds = event.Value;
-            obj.setThresholds(thresholds);
+            obj.regionParser.setThresholds(thresholds);
             thresholdSliderChanging@PreprocessorLinker(obj, source, event);
         end
         function thresholdSliderChanged(obj, source, event)
             thresholds = source.Value;
-            obj.setThresholds(thresholds);
+            obj.regionParser.setThresholds(thresholds);
             thresholdSliderChanged@PreprocessorLinker(obj, source, event);
         end
         function invertCheckboxChanged(obj, source, event)
             invert = source.Value;
-            obj.setInvert(invert);
+            obj.regionParser.setInvert(invert);
             invertCheckboxChanged@PreprocessorLinker(obj, source, event);
         end
     end
@@ -93,10 +88,14 @@ classdef RegionLinker < PreprocessorLinker
         end
         function updateRegionalRawImage(obj)
             regionRawImage = obj.generateRegionalRawImage();
-            obj.setRawImage(regionRawImage);
+            preprocessorGui = obj.getPreprocessorGui();
+            preprocessorGui.setRawImage(regionRawImage);
         end
     end
 end
+
+
+
 
 
 %% Functions to configure GUI elements

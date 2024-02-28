@@ -34,6 +34,7 @@ classdef RegionAdjusterGui
 end
 
 
+
 function gl = generateGridLayout(parent)
 gl = uigridlayout(parent, [3, 3]);
 set(gl, ...
@@ -55,8 +56,8 @@ function imageElements = generateImageGrid(gl, filepaths)
 
 imageElements = {};
 [rowCount, columnCount] = size(filepaths);
-for rowIndex = 1:rowCount
-    for columnIndex = 1:columnCount
+for rowIndex = rowCount:-1:1
+    for columnIndex = columnCount:-1:1
         imageElement = generateImage(rowIndex, columnIndex);
         imageElements{rowIndex, columnIndex} = imageElement;
     end

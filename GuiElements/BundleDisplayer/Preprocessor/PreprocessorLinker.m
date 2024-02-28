@@ -22,21 +22,13 @@ classdef PreprocessorLinker
             obj.showImage = @gui.showImage;
             obj.resizeAxis = @gui.resizeAxis;
 
-            obj.configureThresholdSlider(gui);
-            obj.configureInvertCheckbox(gui);
+            configureThresholdSlider(obj, gui);
+            configureInvertCheckbox(obj, gui);
         end
     end
 
     %% Functions to generate GUI elements
     methods (Access = private)
-        function configureThresholdSlider(obj, gui)
-            thresholdSlider = gui.getThresholdSlider();
-            configureThresholdSlider(obj, thresholdSlider);
-        end
-        function configureInvertCheckbox(obj, gui)
-            invertCheckbox = gui.getInvertCheckbox();
-            configureInvertCheckbox(obj, invertCheckbox);
-        end
         function processor = generatePreprocessor(obj, thresholds)
             invert = obj.getInvert();
             processor = Preprocessor(thresholds, invert);
@@ -58,7 +50,7 @@ classdef PreprocessorLinker
             end
         end
         function thresholdSliderChanged(obj, source, ~)
-            thresholds = source.Value;
+            thresholds = get(source, "Value");
             if obj.imageExists()
                 obj.updateFromRawImage(thresholds);
             end
@@ -84,13 +76,15 @@ end
 
 
 
-function configureThresholdSlider(obj, thresholdSlider)
+function configureThresholdSlider(obj, gui)
+thresholdSlider = gui.getThresholdSlider();
 set(thresholdSlider, ...
     "ValueChangingFcn", @obj.thresholdSliderChanging, ...
     "ValueChangedFcn", @obj.thresholdSliderChanged ...
     );
 end
 
-function configureInvertCheckbox(obj, invertCheckbox)
+function configureInvertCheckbox(obj, gui)
+invertCheckbox = gui.getInvertCheckbox();
 set(invertCheckbox, "ValueChangedFcn", @obj.invertCheckboxChanged);
 end

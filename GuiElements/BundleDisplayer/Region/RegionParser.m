@@ -1,4 +1,4 @@
-classdef RegionParser
+classdef RegionParser < matlab.mixin.SetGet
     properties (Constant)
         labelKeyword = "Label";
         intensityKeyword = "IntensityRange";
