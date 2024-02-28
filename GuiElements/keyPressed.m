@@ -3,6 +3,7 @@ currentRegion = trackingGui.getCurrentRegion();
 key = event.Key;
 modifiers = event.Modifier;
 modKey = ModifierKey(modifiers);
+disp(key);
 
 if  objectExists(currentRegion) && RegionAdjustKey.is(key)
     if modKey.isCtrlShiftAlt && ArrowKey.isVertical(key)
@@ -31,6 +32,8 @@ elseif modKey.isPureCtrl
         trackingGui.openDirectory();
     elseif strcmp(key, "s")
         trackingGui.exportImageIfPossible(source, event);
+    elseif strcmp(key, "return")
+        trackingGui.trackButtonPushed(source, event)
     end
 end
 end
