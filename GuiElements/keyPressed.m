@@ -1,11 +1,10 @@
-function keyPressed(trackingGui, ~, event)
+function keyPressed(trackingGui, source, event)
 currentRegion = trackingGui.getCurrentRegion();
 key = event.Key;
+modifiers = event.Modifier;
+modKey = ModifierKey(modifiers);
 
 if  objectExists(currentRegion) && RegionAdjustKey.is(key)
-    modifiers = event.Modifier;
-    modKey = ModifierKey(modifiers);
-
     if modKey.isCtrlShiftAlt && ArrowKey.isVertical(key)
         RegionOrderer.byKey(currentRegion, event);
     elseif modKey.isPureAlt
@@ -24,6 +23,14 @@ if  objectExists(currentRegion) && RegionAdjustKey.is(key)
         end
     elseif modKey.isPureCtrlShift
         RegionExpander.byKey(currentRegion, event);
+    end
+elseif modKey.isPureCtrl
+    if strcmp(key, "i")
+        trackingGui.chooseDirectory(source, event);
+    elseif strcmp(key, "o")
+        trackingGui.openDirectory();
+    elseif strcmp(key, "s")
+        trackingGui.exportImageIfPossible(source, event);
     end
 end
 end
