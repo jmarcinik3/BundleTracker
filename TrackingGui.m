@@ -221,8 +221,8 @@ classdef TrackingGui < RegionTracker & DirectorySelector
         end
         function trackingCompleted(obj, results)
             filepath = obj.saveResults(results);
-            obj.exportImageIfPossible();
             displayTrackingCompleted(results, filepath);
+            obj.exportImageIfPossible();
         end
         function [results, completed] = trackAndProcess(obj)
             obj.prepareTracking();
