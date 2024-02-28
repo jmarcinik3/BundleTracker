@@ -15,7 +15,6 @@ classdef AxisPanner < AxisAdjuster
         end
     end
 
-
     %% Functions to generate objects
     methods (Access = private)
         function xlimNew = generatePannedX(obj)
@@ -114,7 +113,6 @@ function stopFigureForPanning(fig)
 set(fig, "WindowButtonMotionFcn", []);
 setptr(fig, "arrow");
 end
-
 
 function point = getAxisPoint(ax)
 point = get(ax, 'CurrentPoint');
