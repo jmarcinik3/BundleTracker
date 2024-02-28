@@ -1,6 +1,6 @@
 classdef DirectorySelector < handle
     properties (Constant)
-        chooseTitle = "Choose Directory";
+        chooseTitle = "Import Directory";
         openTitle = "Open Directory";
     end
 

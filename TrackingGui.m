@@ -107,9 +107,6 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             gl = obj.getGridLayout();
             fig = ancestor(gl, "figure");
         end
-        function elem = getDirectorySelectionElement(obj)
-            elem = getDirectorySelectionElement@DirectorySelector(obj);
-        end
     end
     methods (Access = private)
         % grid layouts
@@ -432,7 +429,6 @@ lbl1.Layout.Column = 1;
 tb1.Layout.Column = 2;
 lbl2.Layout.Column = 3;
 tb2.Layout.Column = 4;
-
 end
 
 %% Function to generate save filestem input
