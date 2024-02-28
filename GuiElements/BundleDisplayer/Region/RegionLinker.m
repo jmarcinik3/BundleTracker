@@ -1,14 +1,11 @@
-classdef RegionLinker
+classdef RegionLinker < PreprocessorLinker
     properties
         getRegion;
         setVisible;
     end
 
     properties (Access = private)
-        regionGui;
         fullRawImage;
-        preprocessorLinker;
-        regionParser;
         
         getGridLayout;
         getThresholds;
@@ -16,6 +13,8 @@ classdef RegionLinker
         
         generatePreprocessor;
         setRawImage;
+        setThresholds;
+        setInvert;
     end
 
     methods
@@ -25,11 +24,11 @@ classdef RegionLinker
             regionCompressorGui = regionGui.getRegionCompressorGui();
             regionExpanderGui = regionGui.getRegionExpanderGui();
 
-            preprocessorLinker = PreprocessorLinker(preprocessorGui);
             RegionMoverLinker(regionMoverGui, region);
             RegionCompressorLinker(regionCompressorGui, region);
             RegionExpanderLinker(regionExpanderGui, region);
             regionParser = RegionParser(region);
+            obj@PreprocessorLinker(preprocessorGui);
 
             % inherited getters
             obj.getGridLayout = @regionGui.getGridLayout;
@@ -41,10 +40,10 @@ classdef RegionLinker
             % inherited setters
             obj.setRawImage = @preprocessorGui.setRawImage;
             obj.setVisible = @preprocessorGui.setVisible;
+            obj.setThresholds = @regionParser.setThresholds;
+            obj.setInvert = @regionParser.setInvert;
 
-            obj.regionGui = regionGui;
-            obj.preprocessorLinker = preprocessorLinker;
-            obj.regionParser = regionParser;
+            % own properties
             obj.fullRawImage = fullRawImage;
 
             % configure GUI elements, must come last
@@ -71,6 +70,23 @@ classdef RegionLinker
             delete(gl);
         end
     end
+    methods (Access = protected)
+        function thresholdSliderChanging(obj, source, event)
+            thresholds = event.Value;
+            obj.setThresholds(thresholds);
+            thresholdSliderChanging@PreprocessorLinker(obj, source, event);
+        end
+        function thresholdSliderChanged(obj, source, event)
+            thresholds = source.Value;
+            obj.setThresholds(thresholds);
+            thresholdSliderChanged@PreprocessorLinker(obj, source, event);
+        end
+        function invertCheckboxChanged(obj, source, event)
+            invert = source.Value;
+            obj.setInvert(invert);
+            invertCheckboxChanged@PreprocessorLinker(obj, source, event);
+        end
+    end
     methods (Access = private)
         function regionMoving(obj, ~, ~)
             obj.updateRegionalRawImage();
@@ -78,22 +94,6 @@ classdef RegionLinker
         function updateRegionalRawImage(obj)
             regionRawImage = obj.generateRegionalRawImage();
             obj.setRawImage(regionRawImage);
-        end
-
-        function thresholdSliderChanging(obj, source, event)
-            thresholds = event.Value;
-            obj.regionParser.setThresholds(thresholds);
-            obj.preprocessorLinker.thresholdSliderChanging(source, event);
-        end
-        function thresholdSliderChanged(obj, source, event)
-            thresholds = source.Value;
-            obj.regionParser.setThresholds(thresholds);
-            obj.preprocessorLinker.thresholdSliderChanged(source, event);
-        end
-        function invertCheckboxChanged(obj, source, event)
-            invert = source.Value;
-            obj.regionParser.setInvert(invert);
-            obj.preprocessorLinker.invertCheckboxChanged(source, event);
         end
     end
 end

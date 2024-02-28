@@ -44,7 +44,7 @@ classdef PreprocessorLinker
     end
 
     %% Functions to update state of interactive image
-    methods
+    methods (Access = protected)
         function invertCheckboxChanged(obj, ~, ~)
             thresholds = obj.getThresholds();
             if obj.imageExists()

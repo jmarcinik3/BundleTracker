@@ -18,8 +18,6 @@ classdef RegionGui
             regionCompressorGui = RegionCompressorGui(gl);
             regionExpanderGui = RegionExpanderGui(gl);
 
-            
-
             % inherited getters
             obj.getAxis = @preprocessorGui.getAxis;
             obj.getImageSize = @preprocessorGui.getImageSize;
@@ -32,7 +30,7 @@ classdef RegionGui
                 regionCompressorGui, ...
                 regionExpanderGui ...
                 );
-            
+
             obj.gridLayout = gl;
             obj.preprocessorGui = preprocessorGui;
             obj.regionMoverGui = regionMoverGui;

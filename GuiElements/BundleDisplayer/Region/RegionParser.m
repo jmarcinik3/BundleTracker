@@ -1,4 +1,4 @@
-classdef RegionParser < handle
+classdef RegionParser
     properties (Constant)
         labelKeyword = "Label";
         intensityKeyword = "IntensityRange";
