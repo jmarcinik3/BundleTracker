@@ -125,7 +125,7 @@ classdef DirectorySelector < handle
         end
         function setFilecount(obj, count)
             elem = obj.getFilecountField();
-            label = num2str(count);
+            label = sprintf("%d Frames", count);
             set(elem, "Text", label);
         end
     end
