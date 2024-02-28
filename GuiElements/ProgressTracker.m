@@ -5,7 +5,7 @@ classdef ProgressTracker < handle
 
     properties (Access = private)
         totalCount;
-        previousUpdateTimeSeconds = 0;
+        previousUpdateTimeSeconds = tic;
         continueProgress = true;
         progressBar;
         messageFormat = "Tracking Bundles: %d/%d";
@@ -42,16 +42,16 @@ classdef ProgressTracker < handle
         end
     end
     methods (Access = private)
-        function is = updateIsNeeded(obj, timeSeconds)
+        function is = updateIsNeeded(obj)
             previousTime = obj.previousUpdateTimeSeconds;
+            elapsedTime = toc(previousTime);
             deltaTime = obj.deltaUpdateTimeSeconds;
-            is = timeSeconds - previousTime > deltaTime;
+            is = elapsedTime > deltaTime;
         end
         function updateIfNeeded(obj, index)
-            timeSeconds = second(datetime);
-            if obj.updateIsNeeded(timeSeconds)
+            if obj.updateIsNeeded()
                 obj.update(index);
-                obj.previousUpdateTimeSeconds = timeSeconds;
+                obj.previousUpdateTimeSeconds = tic;
             end
         end
         function update(obj, index)
