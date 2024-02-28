@@ -15,10 +15,10 @@ classdef TrackingToolbar < handle
             websiteTools = generateWebsiteTools(toolbar);
 
             separatedTools = [
-                explorerTools(1),
-                trackingTools(1),
-                regionOrderTools(1),
-                websiteTools(1)
+                explorerTools(1), ...
+                trackingTools(1), ...
+                regionOrderTools(1), ...
+                websiteTools(1) ...
                 ];
             set(separatedTools, "Separator", true);
 
