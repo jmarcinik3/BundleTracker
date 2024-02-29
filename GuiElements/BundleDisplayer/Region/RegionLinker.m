@@ -29,10 +29,6 @@ classdef RegionLinker < PreprocessorLinker
             configureInvertCheckbox(obj, preprocessorGui, regionParser);
             obj.updateRegionalRawImage();
         end
-
-        function delete(obj)
-            delete(obj.regionGui);
-        end
     end
 
     %% Functions to retrieve GUI elements
@@ -88,6 +84,9 @@ classdef RegionLinker < PreprocessorLinker
             preprocessorGui = obj.getPreprocessorGui();
             preprocessorGui.setRawImage(regionRawImage);
         end
+        function deletingRegion(obj, ~, ~)
+            delete(obj.regionGui);
+        end
     end
 end
 
@@ -118,4 +117,5 @@ end
 function configureRegion(obj, region)
 addlistener(region, "MovingROI", @obj.regionMoving);
 addlistener(region, "ROIMoved", @obj.regionMoving);
+addlistener(region, "DeletingROI", @obj.deletingRegion);
 end

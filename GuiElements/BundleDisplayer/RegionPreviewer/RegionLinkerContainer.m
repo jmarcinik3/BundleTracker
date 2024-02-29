@@ -1,4 +1,4 @@
-classdef RegionPreviewGui < handle
+classdef RegionLinkerContainer < handle
     properties
         getAxis;
     end
@@ -9,15 +9,13 @@ classdef RegionPreviewGui < handle
         
         parent;
         imageGui;
-        getRawImage;
         changeImage;
     end    
 
     methods
-        function obj = RegionPreviewGui(imageGui, regionGuiParent)
+        function obj = RegionLinkerContainer(imageGui, regionGuiParent)
             % inherited functions
             obj.getAxis = @imageGui.getAxis;
-            obj.getRawImage = @imageGui.getRawImage;
             obj.changeImage = @imageGui.changeImage;
 
             obj.parent = regionGuiParent;
@@ -28,7 +26,7 @@ classdef RegionPreviewGui < handle
     %% Functions to generate GUI elements
     methods
         function regionGui = generateRegionGui(obj)
-            parent = obj.getGuiParent();
+            parent = obj.getRegionGuiParent();
             regionGui = RegionGui(parent);
         end
     end
@@ -39,23 +37,20 @@ classdef RegionPreviewGui < handle
             ax =  obj.getAxis();
             regions = RegionDrawer.getRegions(ax);
         end
-        function gui = getRegionGui(obj, region)
+        function linker = getRegionLinker(obj, region)
             tag = get(region, "Tag");
-            gui = obj.tag2linker(tag);
+            linker = obj.tag2linker(tag);
         end
-        function guis = getRegionGuis(obj)
+        function linkers = getRegionLinkers(obj)
             if isConfigured(obj.tag2linker)
-                guis = values(obj.tag2linker);
+                linkers = values(obj.tag2linker);
             else
-                guis = [];
+                linkers = [];
             end
         end
     end
     methods (Access = private)
-        function gui = getImageGui(obj)
-            gui = obj.imageGui;
-        end
-        function parent = getGuiParent(obj)
+        function parent = getRegionGuiParent(obj)
             parent = obj.parent;
         end
     end
@@ -71,8 +66,7 @@ classdef RegionPreviewGui < handle
         function clearRegions(obj)
             % Removes currently drawn regions on image
             regions = obj.getRegions();
-            fakeEvent = struct("EventName", "FakeEvent");
-            arrayfun(@(region) obj.deletingRegion(region, fakeEvent), regions);
+            arrayfun(@(region) region.notify("DeletingROI"), regions);
             delete(regions);
         end
     end
@@ -89,15 +83,13 @@ classdef RegionPreviewGui < handle
         end
     end
     methods (Access = private)
-        function deletingRegion(obj, source, ~)
-            regionLinker = obj.getRegionGui(source);
-            obj.removeRegionEntry(source);
-            delete(regionLinker);
-        end
         function tag = iterateTag(obj)
             tagCounter = obj.tagCounter + 1;
             obj.tagCounter = tagCounter;
             tag = num2str(tagCounter);
+        end
+        function deletingRegion(obj, source, ~)
+            obj.removeRegionEntry(source);
         end
         function removeRegionEntry(obj, region)
             tag = get(region, "Tag");
