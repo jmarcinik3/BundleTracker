@@ -9,7 +9,6 @@ classdef ImageGui < AxisExporter & AxisPanZoomer
     properties (Access = private)
         zoomIsEnabled;
         getFigure;
-        getImageSize;
         imageExists;
         setRawImage;
     end
@@ -24,13 +23,12 @@ classdef ImageGui < AxisExporter & AxisPanZoomer
             gl = generateGridLayout(parent, location);
             ax = PreprocessorGui.generateAxis(gl);
             preprocessorGui = PreprocessorGui(gl, ax);
-            PreprocessorLinker(preprocessorGui);
+            iIm = preprocessorGui.getInteractiveImage();
+            AxisResizer(iIm);
             
+            PreprocessorLinker(preprocessorGui);
             obj@AxisExporter(ax);
             obj@AxisPanZoomer(ax);
-
-            iIm = preprocessorGui.getInteractiveImage();
-            addlistener(iIm, "CData", "PostSet", @obj.resizeAxis);
             
             % inherited GUI getters
             obj.getFigure = @preprocessorGui.getFigure;
@@ -40,7 +38,6 @@ classdef ImageGui < AxisExporter & AxisPanZoomer
 
             % inherited state getters
             obj.getRegionUserData = @preprocessorGui.getRegionUserData;
-            obj.getImageSize = @preprocessorGui.getImageSize;
             obj.imageExists = @preprocessorGui.imageExists;
 
             % inherited setters
@@ -66,11 +63,6 @@ classdef ImageGui < AxisExporter & AxisPanZoomer
         end
     end
     methods (Access = private)
-        function resizeAxis(obj, ~, ~)
-            ax = obj.getAxis();
-            [h, w] = obj.getImageSize();
-            resizeAxis(ax, h, w);
-        end
         function updateZoomIfEnabled(obj)
             if obj.zoomIsEnabled
                 obj.setBoundsToCurrent(); % update zoomer for new image

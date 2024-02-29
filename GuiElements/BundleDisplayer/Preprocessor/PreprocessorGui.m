@@ -13,7 +13,6 @@ classdef PreprocessorGui < handle
             end
 
             obj.interactiveImage = generateInteractiveImage(ax);
-            
             obj.thresholdSlider = generateThresholdSlider(gl);
             obj.invertCheckbox = generateInvertCheckbox(gl);
             obj.gridLayout = gl;
@@ -93,11 +92,6 @@ classdef PreprocessorGui < handle
             invert = obj.invertCheckbox.Value;
         end
 
-        function [h, w] = getImageSize(obj)
-            iIm = obj.getInteractiveImage();
-            im = get(iIm, "CData");
-            [h, w, ~] = size(im);
-        end
         function exists = imageExists(obj)
             im = obj.getRawImage();
             exists = numel(im) >= 1;

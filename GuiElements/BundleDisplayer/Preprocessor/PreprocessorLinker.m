@@ -2,11 +2,9 @@ classdef PreprocessorLinker
     properties (Access = private)
         getInvert;
         getThresholds;
-        getInteractiveImage;
         getRawImage;
         imageExists;
         showImage;
-        resizeAxis;
     end
 
     methods
@@ -14,13 +12,11 @@ classdef PreprocessorLinker
             % inherited getters
             obj.getInvert = @gui.getInvert;
             obj.getThresholds = @gui.getThresholds;
-            obj.getInteractiveImage = @gui.getInteractiveImage;
             obj.getRawImage = @gui.getRawImage;
             obj.imageExists = @gui.imageExists;
 
             % inherited updaters
             obj.showImage = @gui.showImage;
-            obj.resizeAxis = @gui.resizeAxis;
 
             configureThresholdSlider(obj, gui);
             configureInvertCheckbox(obj, gui);

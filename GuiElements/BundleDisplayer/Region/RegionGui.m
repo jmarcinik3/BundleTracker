@@ -5,9 +5,6 @@ classdef RegionGui
         regionMoverGui;
         regionCompressorGui;
         regionExpanderGui;
-
-        getAxis;
-        getImageSize;
     end
 
     methods
@@ -18,11 +15,8 @@ classdef RegionGui
             regionCompressorGui = RegionCompressorGui(gl);
             regionExpanderGui = RegionExpanderGui(gl);
 
-            % inherited getters
-            obj.getAxis = @preprocessorGui.getAxis;
-            obj.getImageSize = @preprocessorGui.getImageSize;
             iIm = preprocessorGui.getInteractiveImage();
-            addlistener(iIm, "CData", "PostSet", @obj.resizeAxis);
+            AxisResizer(iIm, "FitToContent", true);
 
             layoutElements( ...
                 preprocessorGui, ...
@@ -55,15 +49,6 @@ classdef RegionGui
         end
         function gui = getRegionExpanderGui(obj)
             gui = obj.regionExpanderGui;
-        end
-    end
-
-    %% Functions to update state of GUI
-    methods (Access = private)
-        function resizeAxis(obj, ~, ~)
-            ax = obj.getAxis();
-            [h, w] = obj.getImageSize();
-            resizeAxis(ax, h, w, "FitToContent", true);
         end
     end
 end
