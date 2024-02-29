@@ -402,8 +402,7 @@ tb.Layout.Column = 2;
 end
 
 %% Function to generate scale factor input
-% Generates edit fields (with labels) allowing user to set scaling (in
-% nm/px) with error
+% Generates edit fields (with labels) allowing user to set scaling
 %
 % Arguments
 %
@@ -416,7 +415,7 @@ gl = uigridlayout(parent, [1 4]);
 gl.Padding = [0 0 0 0];
 
 lbl1 = uilabel(gl);
-lbl1.Text = "nm/px:"; % label for scaling
+lbl1.Text = "length/px:"; % label for scaling
 tb1 = uieditfield(gl, "numeric");
 tb1.Value = 108.3; % default scaling
 
