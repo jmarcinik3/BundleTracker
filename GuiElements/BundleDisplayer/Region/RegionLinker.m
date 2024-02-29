@@ -1,7 +1,7 @@
 classdef RegionLinker < PreprocessorLinker
     properties (Access = private)
         fullRawImage;
-        regionGui;
+        gui;
         regionParser;
     end
 
@@ -19,7 +19,7 @@ classdef RegionLinker < PreprocessorLinker
             obj@PreprocessorLinker(preprocessorGui);
 
             % own properties
-            obj.regionGui = regionGui;
+            obj.gui = regionGui;
             obj.regionParser = regionParser;
             obj.fullRawImage = fullRawImage;
 
@@ -37,11 +37,6 @@ classdef RegionLinker < PreprocessorLinker
             region = obj.regionParser.getRegion();
         end
     end
-    methods (Access = private)
-        function gui = getPreprocessorGui(obj)
-            gui = obj.regionGui.getPreprocessorGui();
-        end
-    end
     %% Functions to retrieve state information
     methods (Access = private)
         function regionRawImage = generateRegionalRawImage(obj)
@@ -54,8 +49,7 @@ classdef RegionLinker < PreprocessorLinker
     %% Functions to update GUI and state information
     methods
         function setVisible(obj, visible)
-            preprocessorGui = obj.getPreprocessorGui();
-            preprocessorGui.setVisible(visible);
+            obj.gui.setVisible(visible);
         end
     end
     methods (Access = protected)
@@ -81,11 +75,10 @@ classdef RegionLinker < PreprocessorLinker
         end
         function updateRegionalRawImage(obj)
             regionRawImage = obj.generateRegionalRawImage();
-            preprocessorGui = obj.getPreprocessorGui();
-            preprocessorGui.setRawImage(regionRawImage);
+            obj.setRawImage(regionRawImage);
         end
         function deletingRegion(obj, ~, ~)
-            delete(obj.regionGui);
+            delete(obj.gui);
         end
     end
 end

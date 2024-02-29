@@ -8,18 +8,17 @@ classdef RegionLinkerContainer < handle
         tag2linker = dictionary;
         
         parent;
-        imageGui;
         changeImage;
     end    
 
     methods
-        function obj = RegionLinkerContainer(imageGui, regionGuiParent)
+        function obj = RegionLinkerContainer(imageLinker, regionGuiParent)
+            imageGui = imageLinker.getGui();
             % inherited functions
             obj.getAxis = @imageGui.getAxis;
-            obj.changeImage = @imageGui.changeImage;
+            obj.changeImage = @imageLinker.changeImage;
 
             obj.parent = regionGuiParent;
-            obj.imageGui = imageGui;
         end
     end
 

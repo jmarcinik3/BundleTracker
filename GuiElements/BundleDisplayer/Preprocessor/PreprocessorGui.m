@@ -99,17 +99,15 @@ classdef PreprocessorGui < handle
         end
     end
 
-    %% Functions to set state information
+    %% Functions to set state information or GUI
     methods
-        function setRawImage(obj, im)
-            iIm = obj.getInteractiveImage();
-            iIm.UserData.rawImage = im;
-            thresholds = obj.getThresholds();
-            obj.updateFromRawImage(thresholds);
-        end
         function setVisible(obj, visible)
             gl = obj.getGridLayout();
             set(gl, "Visible", visible);
+        end
+        function setRawImage(obj, im)
+            iIm = obj.getInteractiveImage();
+            iIm.UserData.rawImage = im;
         end
         function showImage(obj, im)
             imRgb = obj.gray2rgb(im);
@@ -124,21 +122,6 @@ classdef PreprocessorGui < handle
         function imRgb = gray2rgb(obj, im)
             fig = obj.getFigure();
             imRgb = gray2rgb(im, fig);
-        end
-
-        function updateFromRawImage(obj, thresholds)
-            im = obj.generatePreprocessedImage(thresholds);
-            obj.showImage(im);
-        end
-        function im = generatePreprocessedImage(obj, thresholds)
-            im = obj.getRawImage();
-            if obj.imageExists()
-                im = obj.preprocessImage(im, thresholds);
-            end
-        end
-        function im = preprocessImage(obj, im, thresholds)
-            preprocessor = obj.generatePreprocessor(thresholds);
-            im = preprocessor.preprocess(im);
         end
     end
 end

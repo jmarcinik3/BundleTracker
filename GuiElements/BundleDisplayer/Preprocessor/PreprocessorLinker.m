@@ -1,23 +1,11 @@
-classdef PreprocessorLinker
+classdef PreprocessorLinker < handle
     properties (Access = private)
-        getInvert;
-        getThresholds;
-        getRawImage;
-        imageExists;
-        showImage;
+        gui;
     end
 
     methods
         function obj = PreprocessorLinker(gui)
-            % inherited getters
-            obj.getInvert = @gui.getInvert;
-            obj.getThresholds = @gui.getThresholds;
-            obj.getRawImage = @gui.getRawImage;
-            obj.imageExists = @gui.imageExists;
-
-            % inherited updaters
-            obj.showImage = @gui.showImage;
-
+            obj.gui = gui;
             configureThresholdSlider(obj, gui);
             configureInvertCheckbox(obj, gui);
         end
@@ -26,28 +14,35 @@ classdef PreprocessorLinker
     %% Functions to generate GUI elements
     methods (Access = private)
         function processor = generatePreprocessor(obj, thresholds)
-            invert = obj.getInvert();
+            invert = obj.gui.getInvert();
             processor = Preprocessor(thresholds, invert);
         end
     end
 
     %% Functions to update state of interactive image
+    methods
+        function setRawImage(obj, im)
+            obj.gui.setRawImage(im);
+            thresholds = obj.gui.getThresholds();
+            obj.updateFromRawImage(thresholds);
+        end
+    end
     methods (Access = protected)
         function invertCheckboxChanged(obj, ~, ~)
-            thresholds = obj.getThresholds();
-            if obj.imageExists()
+            thresholds = obj.gui.getThresholds();
+            if obj.gui.imageExists()
                 obj.updateFromRawImage(thresholds);
             end
         end
         function thresholdSliderChanging(obj, ~, event)
             thresholds = event.Value;
-            if obj.imageExists()
+            if obj.gui.imageExists()
                 obj.updateFromRawImage(thresholds);
             end
         end
         function thresholdSliderChanged(obj, source, ~)
             thresholds = get(source, "Value");
-            if obj.imageExists()
+            if obj.gui.imageExists()
                 obj.updateFromRawImage(thresholds);
             end
         end
@@ -55,11 +50,11 @@ classdef PreprocessorLinker
     methods (Access = private)
         function updateFromRawImage(obj, thresholds)
             im = obj.generatePreprocessedImage(thresholds);
-            obj.showImage(im);
+            obj.gui.showImage(im);
         end
         function im = generatePreprocessedImage(obj, thresholds)
-            im = obj.getRawImage();
-            if obj.imageExists()
+            im = obj.gui.getRawImage();
+            if obj.gui.imageExists()
                 im = obj.preprocessImage(im, thresholds);
             end
         end

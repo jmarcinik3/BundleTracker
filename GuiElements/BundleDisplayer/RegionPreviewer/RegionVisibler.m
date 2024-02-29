@@ -1,9 +1,10 @@
 classdef RegionVisibler < ActiveRegionOrderer & RegionLinkerContainer
     methods
-        function obj = RegionVisibler(imageGui, regionGuiParent)
+        function obj = RegionVisibler(imageLinker, regionGuiParent)
+            imageGui = imageLinker.getGui();
             ax = imageGui.getAxis();
             obj@ActiveRegionOrderer(ax);
-            obj@RegionLinkerContainer(imageGui, regionGuiParent)
+            obj@RegionLinkerContainer(imageLinker, regionGuiParent)
         end
     end
 

@@ -4,23 +4,24 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
     end
 
     methods
-        function obj = RegionPreviewer(imageGui, regionGuiParent)
+        function obj = RegionPreviewer(imageLinker, regionGuiParent)
+            imageGui = imageLinker.getGui();
             ax = imageGui.getAxis();
-            iIm = imageGui.getInteractiveImage();
-
-            obj@RegionVisibler(imageGui, regionGuiParent);
+            obj@RegionVisibler(imageLinker, regionGuiParent);
             obj@RegionDrawer(ax, @imageGui.getRegionUserData);
 
             % inherited functions
             obj.getRawImage = @imageGui.getRawImage;
 
+            iIm = imageGui.getInteractiveImage();
             set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
         end
     end
 
+    %% Functions to retrieve GUI elements
     methods
         function regions = getRegions(obj)
-            regions  = getRegions@RegionLinkerContainer(obj);
+            regions  = getRegions@RegionVisibler(obj);
         end
     end
 

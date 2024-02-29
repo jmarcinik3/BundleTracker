@@ -20,7 +20,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
         rightGridLayout % uigridlayout for rightside column
 
         % components to set processing and tracking methods
-        imageGui;
+        imageLinker;
         regionGuiPanel;
         trackingSelection;
         positiveDirection;
@@ -51,7 +51,8 @@ classdef TrackingGui < RegionTracker & DirectorySelector
                 "Title", "Region Editor", ...
                 "TitlePosition", "centertop" ...
                 );
-            regionPreviewer = RegionPreviewer(imageGui, regionGuiPanel);
+            imageLinker = ImageLinker(imageGui);
+            regionPreviewer = RegionPreviewer(imageLinker, regionGuiPanel);
 
             obj@RegionTracker();
             obj@DirectorySelector(gl, {1, [1, 2]});
@@ -73,7 +74,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
 
             obj.gridLayout = gl;
             obj.rightGridLayout = rgl;
-            obj.imageGui = imageGui;
+            obj.imageLinker = imageLinker;
             obj.regionGuiPanel = regionGuiPanel;
 
             obj.generateTrackingElements(rgl);
@@ -116,8 +117,8 @@ classdef TrackingGui < RegionTracker & DirectorySelector
         function rgl = getRightGridLayout(obj)
             rgl = obj.rightGridLayout;
         end
-        function imageGui = getImageGui(obj)
-            imageGui = obj.imageGui;
+        function imageGui = getImageLinker(obj)
+            imageGui = obj.imageLinker;
         end
         function panel = getRegionPanel(obj)
             panel = obj.regionGuiPanel;
@@ -186,9 +187,9 @@ classdef TrackingGui < RegionTracker & DirectorySelector
     %% Functions to update state of GUI
     methods
         function exportImageIfPossible(obj, ~, ~)
-            imageGui = obj.getImageGui();
+            imageLinker = obj.getImageLinker();
             directoryPath = obj.getDirectoryPath();
-            imageGui.exportImageIfPossible(directoryPath);
+            imageLinker.exportImageIfPossible(directoryPath);
         end
         function trackButtonPushed(obj, ~, ~)
             if obj.regionExists()

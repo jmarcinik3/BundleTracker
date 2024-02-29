@@ -55,6 +55,14 @@ classdef RegionGui
             gui = obj.regionExpanderGui;
         end
     end
+
+    %% Functions to set state of GUI
+    methods
+        function setVisible(obj, visible)
+            gl = obj.getGridLayout();
+            set(gl, "Visible", visible);
+        end
+    end
 end
 
 
