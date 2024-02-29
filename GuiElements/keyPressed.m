@@ -4,7 +4,7 @@ key = event.Key;
 modifiers = event.Modifier;
 modKey = ModifierKey(modifiers);
 
-if  objectExists(activeRegion) && RegionAdjustKey.is(key)
+if objectExists(activeRegion) && RegionAdjustKey.is(key)
     if modKey.isCtrlShiftAlt && ArrowKey.isVertical(key)
         RegionOrderer.byKey(activeRegion, event);
     elseif modKey.isPureAlt
