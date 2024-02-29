@@ -19,13 +19,11 @@ classdef RegionPreviewer < RegionDrawer
 
         generateRegionGui;
         addRegionEntry;
-        deletingRegion;
     end
 
     methods
         function obj = RegionPreviewer(imageGui, regionGuiParent)
             regionPreviewGui = RegionPreviewGui(imageGui, regionGuiParent);
-
             ax = imageGui.getAxis();
             iIm = imageGui.getInteractiveImage();
 
@@ -41,7 +39,6 @@ classdef RegionPreviewer < RegionDrawer
             obj.changeFullImage = @regionPreviewGui.changeFullImage;
             obj.generateRegionGui = @regionPreviewGui.generateRegionGui;
             obj.addRegionEntry = @regionPreviewGui.addRegionEntry;
-            obj.deletingRegion = @regionPreviewGui.deletingRegion;
 
             set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
         end
@@ -132,7 +129,6 @@ classdef RegionPreviewer < RegionDrawer
         end
         function addListeners(obj, region)
             addlistener(region, "ROIClicked", @obj.regionClicked);
-            addlistener(region, "DeletingROI", @obj.deletingRegion);
         end
         function regionClicked(obj, source, event)
             if isLeftClick(event)
@@ -197,7 +193,6 @@ regions = RegionDrawer.getRegions(ax);
 set(regions, "Color", RegionColor.unprocessedColor);
 set(activeRegion, "Color", RegionColor.workingColor);
 end
-
 
 function isValid = objectIsValid(obj)
 isValid = ~isempty(obj) && isvalid(obj);

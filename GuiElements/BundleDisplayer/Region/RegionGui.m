@@ -31,6 +31,10 @@ classdef RegionGui
             obj.regionCompressorGui = regionCompressorGui;
             obj.regionExpanderGui = regionExpanderGui;
         end
+
+        function delete(obj)
+            delete(obj.gridLayout);
+        end
     end
 
     %% Functions to retrieve GUI elements

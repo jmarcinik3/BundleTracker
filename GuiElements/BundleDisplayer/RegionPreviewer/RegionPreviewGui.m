@@ -59,9 +59,6 @@ classdef RegionPreviewGui < handle
             parent = obj.parent;
         end
     end
-    methods (Access = private)
-        
-    end
 
     %% Functions to retrieve state information
     methods
@@ -93,17 +90,19 @@ classdef RegionPreviewGui < handle
     methods
         function addRegionEntry(obj, regionLinker)
             region = regionLinker.getRegion();
+            addlistener(region, "DeletingROI", @obj.deletingRegion);
+            
             tag = obj.iterateTag();
             set(region, "Tag", tag);
             obj.tag2linker(tag) = regionLinker;
         end
-        function deletingRegion(obj, source, event)
-            regionGui = obj.getRegionGui(source);
-            obj.removeRegionEntry(source);
-            regionGui.deletingRegion(source, event);
-        end
     end
     methods (Access = private)
+        function deletingRegion(obj, source, ~)
+            regionLinker = obj.getRegionGui(source);
+            obj.removeRegionEntry(source);
+            delete(regionLinker);
+        end
         function tag = iterateTag(obj)
             tagCounter = obj.tagCounter + 1;
             obj.tagCounter = tagCounter;
