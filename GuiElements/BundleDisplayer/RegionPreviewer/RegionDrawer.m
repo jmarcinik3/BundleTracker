@@ -31,10 +31,15 @@ classdef RegionDrawer < handle
 
     %% Functions to retrieve GUI elements and state information
     methods (Static)
-        function regions = getRegions(ax)
-            children = ax.Children;
-            regions = findobj(children, "Type", "images.roi");
-            regions = flip(regions);
+        function regions = getRegions(obj)
+            if strcmp(get(obj, 'type'), 'axes')
+                children = obj.Children;
+                regions = findobj(children, "Type", "images.roi");
+                regions = flip(regions);
+            elseif RegionType.isRegion(obj)
+                ax = ancestor(obj, "axes");
+                regions = RegionDrawer.getRegions(ax);
+            end
         end
     end
     methods (Access = private)
@@ -70,11 +75,21 @@ classdef RegionDrawer < handle
     end
 
     %% Functions to update GUI and state information
+    methods (Static)
+        function updateSelected(activeRegion)
+            regions = RegionDrawer.getRegions(activeRegion);
+            set(regions, "Selected", false);
+            set(activeRegion, "Selected", true);
+            updateRegionColors(activeRegion);
+        end
+    end
     methods (Access = protected)
         function region = drawRegion(obj, point)
             ax = obj.getAxis();
             keyword = obj.getRegionShape();
             region = drawRegionByKeyword(ax, point, keyword);
+            updateRegionLabels(ax);
+            RegionDrawer.updateSelected(region);
         end
     end
     methods (Access = private)
@@ -100,7 +115,13 @@ switch keyword
 end
 
 beginDrawingFromPoint(region, point);
-updateRegionLabels(ax);
+end
+
+function updateRegionColors(activeRegion)
+ax = ancestor(activeRegion, "axes");
+regions = RegionDrawer.getRegions(ax);
+set(regions, "Color", RegionColor.unprocessedColor);
+set(activeRegion, "Color", RegionColor.workingColor);
 end
 
 function updateRegionLabels(ax)

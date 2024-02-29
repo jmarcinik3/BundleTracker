@@ -1,5 +1,12 @@
 classdef RegionType      
     methods (Static)
+        function is = isRegion(region)
+            is = RegionType.isRectangle(region) ...
+                || RegionType.isEllipse(region) ...
+                || RegionType.isPolygon(region) ...
+                || RegionType.isFreehand(region);
+        end
+
         function is = isRectangle(region)
             is = isa(region, "images.roi.Rectangle");
         end

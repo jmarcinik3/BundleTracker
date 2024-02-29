@@ -1,30 +1,30 @@
 function keyPressed(trackingGui, source, event)
-currentRegion = trackingGui.getCurrentRegion();
+activeRegion = trackingGui.getActiveRegion();
 key = event.Key;
 modifiers = event.Modifier;
 modKey = ModifierKey(modifiers);
 
-if  objectExists(currentRegion) && RegionAdjustKey.is(key)
+if  objectExists(activeRegion) && RegionAdjustKey.is(key)
     if modKey.isCtrlShiftAlt && ArrowKey.isVertical(key)
-        RegionOrderer.byKey(currentRegion, event);
+        RegionOrderer.byKey(activeRegion, event);
     elseif modKey.isPureAlt
         if ArrowKey.isVertical(key)
-            RegionOrderer.byKey(currentRegion, event);
+            RegionOrderer.byKey(activeRegion, event);
         elseif ArrowKey.isLeft(key)
             trackingGui.setPreviousRegionVisible();
         elseif ArrowKey.isRight(key)
             trackingGui.setNextRegionVisible();
         end
     elseif modKey.hasZeroModifiers
-        RegionMover.byKey(currentRegion, event);
+        RegionMover.byKey(activeRegion, event);
     elseif modKey.isPureCtrl
         if RegionAdjustKey.isStandard(key)
-            RegionCompressor.byKey(currentRegion, event);
+            RegionCompressor.byKey(activeRegion, event);
         elseif RegionAdjustKey.isDelete(key)
-            RegionMover.byKey(currentRegion, event);
+            RegionMover.byKey(activeRegion, event);
         end
     elseif modKey.isPureCtrlShift
-        RegionExpander.byKey(currentRegion, event);
+        RegionExpander.byKey(activeRegion, event);
     end
 elseif modKey.isPureCtrl
     if strcmp(key, "i")

@@ -4,7 +4,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
     end
 
     properties
-        getCurrentRegion;
+        getActiveRegion;
         setPreviousRegionVisible;
         setNextRegionVisible;
         setRegionShape;
@@ -57,7 +57,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             obj@DirectorySelector(gl, {1, [1, 2]});
 
             % inherited getters
-            obj.getCurrentRegion = @regionPreviewer.getCurrentRegion;
+            obj.getActiveRegion = @regionPreviewer.getActiveRegion;
             obj.getRegions = @regionPreviewer.getRegions;
 
             % inherited setters

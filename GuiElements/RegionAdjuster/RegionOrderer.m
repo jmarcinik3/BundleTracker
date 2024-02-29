@@ -70,10 +70,6 @@ end
 
 
 
-function regions = getRegions(region)
-ax = ancestor(region, "axes");
-regions = RegionDrawer.getRegions(ax);
-end
 function children = getFigureChildren(region)
 fig = ancestor(region, "figure");
 children = findobj(fig);
@@ -83,7 +79,7 @@ children = getFigureChildren(region);
 z = find(children==region);
 end
 function z = getRegionsZ(region)
-regions = getRegions(region);
+regions = RegionDrawer.getRegions(region);
 z = arrayfun(@(region) getRegionZ(region), regions);
 end
 
