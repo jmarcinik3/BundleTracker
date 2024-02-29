@@ -1,5 +1,4 @@
 classdef RegionPreviewer < RegionDrawer & RegionVisibler
-
     properties (Access = private)
         getRawImage;
     end
@@ -47,6 +46,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         end
         function addListeners(obj, region)
             addlistener(region, "ROIClicked", @obj.regionClicked);
+            addlistener(region, "DeletingROI", @obj.setPreviousRegionVisible);
         end
 
         function regionClicked(obj, source, event)
