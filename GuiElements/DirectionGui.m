@@ -1,7 +1,7 @@
-classdef KinociliumLocation
+classdef DirectionGui
     properties (Constant)
         rowHeight = 24;
-        height = 2 * KinociliumLocation.rowHeight;
+        height = 2 * DirectionGui.rowHeight;
 
         filepaths = "img/" + [
             ["arrow-down-left.png", "arrow-down-right.png"];
@@ -11,10 +11,6 @@ classdef KinociliumLocation
         upperRight = "Upper Right";
         lowerLeft = "Lower Left";
         lowerRight = "Lower Right";
-    end
-
-    properties (Access = private, Constant)
-        title = "Kinocilium";
     end
 
     properties (Access = private)
@@ -28,7 +24,7 @@ classdef KinociliumLocation
     end
 
     methods
-        function obj = KinociliumLocation(parent)
+        function obj = DirectionGui(parent)
             gl = uigridlayout(parent, [1, 2]);
             gl.Padding = [0, 0, 0, 0];
             
@@ -84,7 +80,7 @@ group = gui.getRadioGroup();
 label = gui.getLabel();
 
 set(gl, ...
-    "RowHeight", KinociliumLocation.height, ...
+    "RowHeight", DirectionGui.height, ...
     "ColumnWidth", {'fit', '1x'} ...
     );
 label.Layout.Column = 1;
@@ -92,35 +88,35 @@ group.Layout.Column = 2;
 end
 
 function label = generateLabel(gl)
-text = "Kinocilium:";
+text = "Positive Direction:";
 label = uilabel(gl, "Text", text);
 end
 
 function button = generateUpperLeftButton(group)
 location = {2, 1};
-tag = KinociliumLocation.upperLeft;
-icon = KinociliumLocation.filepaths(location{:});
+tag = DirectionGui.upperLeft;
+icon = DirectionGui.filepaths(location{:});
 button = generateArrowButton(group, location{:});
 set(button, "Text", "", "Tag", tag, "Icon", icon);
 end
 function button = generateUpperRightButton(group)
 location = {2, 2};
-tag = KinociliumLocation.upperRight;
-icon = KinociliumLocation.filepaths(location{:});
+tag = DirectionGui.upperRight;
+icon = DirectionGui.filepaths(location{:});
 button = generateArrowButton(group, location{:});
 set(button, "Text", "", "Tag", tag, "Icon", icon);
 end
 function button = generateLowerLeftButton(group)
 location = {1, 1};
-tag = KinociliumLocation.lowerLeft;
-icon = KinociliumLocation.filepaths(location{:});
+tag = DirectionGui.lowerLeft;
+icon = DirectionGui.filepaths(location{:});
 button = generateArrowButton(group, location{:});
 set(button, "Text", "", "Tag", tag, "Icon", icon);
 end
 function button = generateLowerRightButton(group)
 location = {1, 2};
-tag = KinociliumLocation.lowerRight;
-icon = KinociliumLocation.filepaths(location{:});
+tag = DirectionGui.lowerRight;
+icon = DirectionGui.filepaths(location{:});
 button = generateArrowButton(group, location{:});
 set(button, "Text", "", "Tag", tag, "Icon", icon);
 end
@@ -129,7 +125,7 @@ function button = generateArrowButton(rg, row, column)
 leftMargin = 1;
 bottomMargin = 1;
 
-rowHeight = KinociliumLocation.rowHeight;
+rowHeight = DirectionGui.rowHeight;
 columnWidth = rowHeight;
 position = [
     leftMargin + columnWidth*(column-1), ...

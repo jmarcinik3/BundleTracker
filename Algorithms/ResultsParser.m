@@ -66,8 +66,8 @@ classdef ResultsParser
         function trackingMode = getTrackingMode(obj)
             trackingMode = obj.results.TrackingMode;
         end
-        function location = getKinociliumLocation(obj)
-            location = obj.results.KinociliumLocation;
+        function location = getPositiveDirection(obj)
+            location = obj.results.Direction;
         end
         function fps = getFps(obj)
             fps = obj.results.Fps;

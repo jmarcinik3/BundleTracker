@@ -23,7 +23,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
         imageGui;
         regionGuiPanel;
         trackingSelection;
-        kinociliumLocation;
+        positiveDirection;
         scaleFactorInputElement;
         fpsInputElement;
 
@@ -94,7 +94,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
         end
         function generateTrackingElements(obj, gl)
             obj.trackingSelection = generateTrackingSelection(gl);
-            obj.kinociliumLocation = KinociliumLocation(gl);
+            obj.positiveDirection = DirectionGui(gl);
             obj.scaleFactorInputElement = generateScaleFactorElement(gl);
             obj.fpsInputElement = generateFpsInputElement(gl);
             obj.saveFilestemElement = generateSaveFilestemElement(gl);
@@ -127,8 +127,8 @@ classdef TrackingGui < RegionTracker & DirectorySelector
         function elem = getTrackingSelectionElement(obj)
             elem = obj.trackingSelection;
         end
-        function elem = getKinociliumLocationElement(obj)
-            elem = obj.kinociliumLocation.getGridLayout();
+        function elem = getPositiveDirectionElement(obj)
+            elem = obj.positiveDirection.getGridLayout();
         end
         function elem = getScaleFactorInputElement(obj)
             elem = obj.scaleFactorInputElement;
@@ -150,8 +150,8 @@ classdef TrackingGui < RegionTracker & DirectorySelector
         end
 
         % ...for postprocessing
-        function loc = getKinociliumLocation(obj)
-            loc = obj.kinociliumLocation.getLocation();
+        function loc = getPositiveDirection(obj)
+            loc = obj.positiveDirection.getLocation();
         end
         function factor = getScaleFactor(obj)
             gl = obj.scaleFactorInputElement;
@@ -238,7 +238,7 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             result = struct( ...
                 "DirectoryPath", obj.getDirectoryPath(), ...
                 "TrackingMode", obj.getTrackingSelection(), ...
-                "KinociliumLocation", obj.getKinociliumLocation(), ...
+                "Direction", obj.getPositiveDirection(), ...
                 "ScaleFactor", obj.getScaleFactor(), ...
                 "ScaleFactorError", obj.getScaleFactorError(), ...
                 "Fps", obj.getFps() ...
@@ -296,7 +296,7 @@ function layoutRightsideElements(gui)
 rowHeight = TrackingGui.rowHeight;
 rgl = gui.getRightGridLayout();
 
-kinociliumLocationGroup = gui.getKinociliumLocationElement();
+positiveDirectionGroup = gui.getPositiveDirectionElement();
 scaleFactorElement = gui.getScaleFactorInputElement();
 fpsInputElement = gui.getFpsInputElement();
 trackingDropdown = gui.getTrackingSelectionElement();
@@ -304,7 +304,7 @@ saveFilestemElement = gui.getSaveFilestemElement();
 regionGuiPanel = gui.getRegionPanel();
 
 trackingDropdown.Layout.Row = 1;
-kinociliumLocationGroup.Layout.Row = 2;
+positiveDirectionGroup.Layout.Row = 2;
 scaleFactorElement.Layout.Row = 3;
 fpsInputElement.Layout.Row = 4;
 saveFilestemElement.Layout.Row = 5;
@@ -355,15 +355,15 @@ function message = trackingCompletedMessage(results, filepath)
 resultsParser = ResultsParser(results);
 count = resultsParser.getRegionCount();
 trackingMode = resultsParser.getTrackingMode();
-kinociliumLocation = resultsParser.getKinociliumLocation();
+positiveDirection = resultsParser.getPositiveDirection();
 fps = resultsParser.getFps();
 
 savedMsg = sprintf("Results saved to %s", filepath);
 countMsg = sprintf("Cell Count: %d", count);
 modeMsg = sprintf("Tracking Algorithm: %s", trackingMode);
 fpsMsg = sprintf("FPS: %d", fps);
-kinoMsg = sprintf("Kinocilium Location: %s", kinociliumLocation);
-message = [savedMsg, countMsg, modeMsg, kinoMsg, fpsMsg];
+directionMsg = sprintf("Positive Direction: %s", positiveDirection);
+message = [savedMsg, countMsg, modeMsg, directionMsg, fpsMsg];
 end
 
 %% Function to generate tracking method dropdown

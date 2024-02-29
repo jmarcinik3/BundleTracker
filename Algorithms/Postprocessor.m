@@ -1,6 +1,6 @@
 classdef Postprocessor < handle
     properties (Access = private)
-        results; %#ok<*PROP>
+        results;
     end
 
     methods
@@ -22,7 +22,7 @@ classdef Postprocessor < handle
         end
         function process(obj)
             % shift first to reduce error and to rotate about mean
-            obj.direct(); % set direction based on kinocilium location
+            obj.direct(); % set direction based on given diagonal
             obj.shift(); % center trace around zero by subtracting its mean
             obj.scale(); % scale traces nm/px and add time from FPS
             obj.rotate(); % rotate trace to direction of maximal movement
@@ -30,23 +30,23 @@ classdef Postprocessor < handle
         function results = getPostprocessedResults(obj)
             results = obj.results;
         end
-        
+
         function direct(obj)
             results = obj.results;
-            kinociliumLocation = results.KinociliumLocation;
+            positiveDirection = results.Direction;
 
-            % process trace direction based on kinocilium position
-            switch (kinociliumLocation)
-                case KinociliumLocation.upperLeft
+            % process trace direction based on given diagonal
+            switch positiveDirection
+                case DirectionGui.upperLeft
                     x = -results.xProcessed;
                     y = -results.yProcessed;
-                case KinociliumLocation.upperRight
+                case DirectionGui.upperRight
                     x = results.xProcessed;
                     y = -results.yProcessed;
-                case KinociliumLocation.lowerLeft
+                case DirectionGui.lowerLeft
                     x = -results.xProcessed;
                     y = results.yProcessed;
-                case KinociliumLocation.lowerRight
+                case DirectionGui.lowerRight
                     x = results.xProcessed;
                     y = results.yProcessed;
             end
