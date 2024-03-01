@@ -4,12 +4,11 @@ classdef ImageAxis < AxisExporter & AxisPanZoomer
             obj@AxisExporter(ax);
             obj@AxisPanZoomer(ax);
             AxisResizer(iIm);
-            addlistener(iIm, "CData", "PostSet", @obj.cDataChanged);
+            configureInteractiveImage(obj, iIm);
         end
     end
 
     %% Functions to update state of GUI
-    
     methods (Access = protected)
         function fig = getFigure(obj)
             fig = getFigure@AxisPanZoomer(obj);
@@ -18,4 +17,10 @@ classdef ImageAxis < AxisExporter & AxisPanZoomer
             ax = getAxis@AxisPanZoomer(obj);
         end
     end
+end
+
+
+
+function configureInteractiveImage(obj, iIm)
+addlistener(iIm, "CData", "PostSet", @obj.cDataChanged);
 end

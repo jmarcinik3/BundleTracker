@@ -31,15 +31,11 @@ classdef PointStructurer
 
     methods (Static)
         function merged = mergePoints(points)
-            xMeanLabel = PointStructurer.xMeanLabel;
-            yMeanLabel = PointStructurer.yMeanLabel;
-            xErrorLabel = PointStructurer.xErrorLabel;
-            yErrorLabel = PointStructurer.yErrorLabel;
-            
-            merged.(xMeanLabel) = [points.(xMeanLabel)];
-            merged.(yMeanLabel) = [points.(yMeanLabel)];
-            merged.(xErrorLabel) = [points.(xErrorLabel)];
-            merged.(yErrorLabel) = [points.(yErrorLabel)];
+            fields = fieldnames(points);
+            for index = 1:numel(fields)
+                field = fields{index};
+                merged.(field) = [points.(field)];
+            end
         end
 
         function point = asPoint(xmean, ymean, xerr, yerr)
@@ -49,6 +45,16 @@ classdef PointStructurer
                 PointStructurer.xErrorLabel, xerr, ...
                 PointStructurer.yErrorLabel, yerr ...
                 );
+        end
+
+        function points = preallocate(count)
+            point = PointStructurer.asPoint(0, 0, 0, 0);
+            fields = fieldnames(point);
+            points = struct();
+            for index = 1:numel(fields)
+                field = fields{index};
+                points.(field) = zeros(1, count);
+            end
         end
     end
 end

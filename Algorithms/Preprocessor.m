@@ -18,7 +18,8 @@ classdef Preprocessor
 
     methods (Static)
         function processor = fromRegion(region)
-            processor = RegionParser.toProcessor(region);
+            regionParser = RegionParser(region);
+            processor = regionParser.toPreprocessor();
         end
     end
 end

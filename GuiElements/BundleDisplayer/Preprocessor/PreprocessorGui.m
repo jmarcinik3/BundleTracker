@@ -7,35 +7,12 @@ classdef PreprocessorGui < handle
     end
 
     methods
-        function obj = PreprocessorGui(gl, ax)
-            if nargin == 1
-                ax = PreprocessorGui.generateAxis(gl);
-            end
-
+        function obj = PreprocessorGui(gl)
+            ax = generateAxis(gl);
             obj.interactiveImage = generateInteractiveImage(ax);
             obj.thresholdSlider = generateThresholdSlider(gl);
             obj.invertCheckbox = generateInvertCheckbox(gl);
             obj.gridLayout = gl;
-        end
-    end
-
-    methods (Static)
-        %% Function to generate plotting axis
-        % Generates axis on which hair cell image is plotted
-        %
-        % Arguments
-        %
-        % * uigridlayout |gl|: layout to add axis in
-        %
-        % Returns uiaxes
-        function ax = generateAxis(gl)
-            ax = uiaxes(gl);
-            ax.Toolbar.Visible = "off";
-            ax.set( ...
-                "Visible", "off", ...
-                "XtickLabel", [], ...
-                "YTickLabel", [] ...
-                );
         end
     end
 
@@ -58,23 +35,11 @@ classdef PreprocessorGui < handle
         function elem = getInvertCheckbox(obj)
             elem = obj.invertCheckbox;
         end
-        function im = getRawImage(obj)
-            iIm = obj.getInteractiveImage();
-            im = iIm.UserData.rawImage;
-        end
         function iIm = getInteractiveImage(obj)
             iIm = obj.interactiveImage;
         end
     end
 
-    %% Functions to generate objects
-    methods
-        function processor = generatePreprocessor(obj, thresholds)
-            invert = obj.getInvert();
-            processor = Preprocessor(thresholds, invert);
-        end
-    end
-    
     %% Functions to retrieve state information
     methods
         function data = getRegionUserData(obj)
@@ -91,34 +56,10 @@ classdef PreprocessorGui < handle
         function invert = getInvert(obj)
             invert = obj.invertCheckbox.Value;
         end
-
-        function exists = imageExists(obj)
-            im = obj.getRawImage();
-            exists = numel(im) >= 1;
-            obj.setVisible(exists);
-        end
     end
 
-    %% Functions to set state information or GUI
+    %% Functions to generate objects
     methods
-        function setVisible(obj, visible)
-            gl = obj.getGridLayout();
-            set(gl, "Visible", visible);
-        end
-        function setRawImage(obj, im)
-            iIm = obj.getInteractiveImage();
-            iIm.UserData.rawImage = im;
-        end
-        function showImage(obj, im)
-            imRgb = obj.gray2rgb(im);
-            obj.setImageCData(imRgb);
-        end
-    end
-    methods (Access = private)
-        function setImageCData(obj, cData)
-            iIm = obj.getInteractiveImage();
-            set(iIm, "CData", cData);
-        end
         function imRgb = gray2rgb(obj, im)
             fig = obj.getFigure();
             imRgb = gray2rgb(im, fig);
@@ -127,6 +68,24 @@ classdef PreprocessorGui < handle
 end
 
 
+
+%% Function to generate plotting axis
+% Generates axis on which hair cell image is plotted
+%
+% Arguments
+%
+% * uigridlayout |gl|: layout to add axis in
+%
+% Returns uiaxes
+function ax = generateAxis(gl)
+ax = uiaxes(gl);
+ax.Toolbar.Visible = "off";
+ax.set( ...
+    "Visible", "off", ...
+    "XtickLabel", [], ...
+    "YTickLabel", [] ...
+    );
+end
 
 %% Function to generate intensity bound input
 % Generates two-value slider allowing user to set lower and upper bounds on

@@ -8,15 +8,11 @@ classdef RegionGui
     end
 
     methods
-        function obj = RegionGui(parent)
-            gl = uigridlayout(parent, [4, 5]);
+        function obj = RegionGui(gl)
             preprocessorGui = PreprocessorGui(gl);
             regionMoverGui = RegionMoverGui(gl);
             regionCompressorGui = RegionCompressorGui(gl);
             regionExpanderGui = RegionExpanderGui(gl);
-
-            iIm = preprocessorGui.getInteractiveImage();
-            AxisResizer(iIm, "FitToContent", true);
 
             layoutElements( ...
                 preprocessorGui, ...
@@ -37,6 +33,13 @@ classdef RegionGui
         end
     end
 
+    %% Functions to generate GUI elements
+    methods (Static)
+        function gl = generateGridLayout(parent)
+            gl = uigridlayout(parent, [4, 5]);
+        end
+    end
+
     %% Functions to retrieve GUI elements
     methods
         function gl = getGridLayout(obj)
@@ -53,14 +56,6 @@ classdef RegionGui
         end
         function gui = getRegionExpanderGui(obj)
             gui = obj.regionExpanderGui;
-        end
-    end
-
-    %% Functions to set state of GUI
-    methods
-        function setVisible(obj, visible)
-            gl = obj.getGridLayout();
-            set(gl, "Visible", visible);
         end
     end
 end

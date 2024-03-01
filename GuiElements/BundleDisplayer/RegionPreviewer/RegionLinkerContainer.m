@@ -26,7 +26,8 @@ classdef RegionLinkerContainer < handle
     methods
         function regionGui = generateRegionGui(obj)
             parent = obj.getRegionGuiParent();
-            regionGui = RegionGui(parent);
+            gl = RegionGui.generateGridLayout(parent);
+            regionGui = RegionGui(gl);
         end
     end
 

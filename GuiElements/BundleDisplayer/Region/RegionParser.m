@@ -1,4 +1,4 @@
-classdef RegionParser < matlab.mixin.SetGet
+classdef RegionParser
     properties (Constant)
         labelKeyword = "Label";
         intensityKeyword = "IntensityRange";
@@ -15,13 +15,16 @@ classdef RegionParser < matlab.mixin.SetGet
         end
     end
 
-    %% Functions to retrieve state information or generate objects
-    methods (Static)
-        function processor = toProcessor(region)
-            regionParser = RegionParser(region);
-            processor = regionParser.generatePreprocessor();
+    %% Functions to generate objects
+    methods
+        function processor = toPreprocessor(obj)
+            thresholds = obj.getThresholds();
+            invert = obj.getInvert();
+            processor = Preprocessor(thresholds, invert);
         end
     end
+
+    %% Functions to retrieve state information
     methods
         function region = getRegion(obj)
             region = obj.region;
@@ -39,15 +42,6 @@ classdef RegionParser < matlab.mixin.SetGet
         function label = getLabel(obj)
             region = obj.getRegion();
             label = region.Label;
-        end
-    end
-
-    %% Functions to generate objects
-    methods
-        function processor = generatePreprocessor(obj)
-            thresholds = obj.getThresholds();
-            invert = obj.getInvert();
-            processor = Preprocessor(thresholds, invert);
         end
     end
 
@@ -71,4 +65,3 @@ classdef RegionParser < matlab.mixin.SetGet
         end
     end
 end
-

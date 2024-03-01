@@ -1,29 +1,17 @@
 classdef ImageLinker < PreprocessorLinker & ImageAxis
-    properties (Access = private)
-        gui;
-    end
-
     methods
         function obj = ImageLinker(imageGui)
-            obj@PreprocessorLinker(imageGui);
-
-            ax= imageGui.getAxis();
+            ax = imageGui.getAxis();
             iIm = imageGui.getInteractiveImage();
+            obj@PreprocessorLinker(imageGui);
             obj@ImageAxis(ax, iIm);
-            obj.gui = imageGui;
-        end
-    end
-
-    methods
-        function gui = getGui(obj)
-            gui = obj.gui;
         end
     end
 
     %% Functions to update state of GUI
     methods
         function exportImageIfPossible(obj, startDirectory)
-            if obj.gui.imageExists()
+            if obj.imageExists()
                 obj.exportImage(startDirectory);
             else
                 obj.throwAlertMessage("No image imported!", "Export Image");

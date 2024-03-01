@@ -7,12 +7,14 @@ classdef ProgressTracker < handle
         totalCount;
         previousUpdateTimeSeconds = tic;
         continueProgress = true;
+        index;
         progressBar;
         messageFormat = "Tracking Bundles: %d/%d";
     end
 
     methods
         function obj = ProgressTracker(totalCount)
+            obj.index = 0;
             obj.progressBar = obj.generateProgressBar(totalCount);
         end
     end
@@ -31,6 +33,12 @@ classdef ProgressTracker < handle
 
     %% Functions to update GUI elements
     methods
+        function [index, continueProgress] = iterateStep(obj)
+            index = obj.index;
+            index = index + 1;
+            continueProgress = obj.updateIfValid(index);
+            obj.index = index;
+        end
         function continueProgress = updateIfValid(obj, index)
             continueProgress = obj.continueProgress;
             if continueProgress

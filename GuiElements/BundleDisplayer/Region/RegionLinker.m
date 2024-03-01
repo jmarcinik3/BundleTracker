@@ -18,6 +18,9 @@ classdef RegionLinker < PreprocessorLinker
             regionParser = RegionParser(region);
             obj@PreprocessorLinker(preprocessorGui);
 
+            iIm = preprocessorGui.getInteractiveImage();
+            AxisResizer(iIm, "FitToContent", true);
+
             % own properties
             obj.gui = regionGui;
             obj.regionParser = regionParser;
@@ -37,7 +40,8 @@ classdef RegionLinker < PreprocessorLinker
             region = obj.regionParser.getRegion();
         end
     end
-    %% Functions to retrieve state information
+
+    %% Functions to generate GUI elements
     methods (Access = private)
         function regionRawImage = generateRegionalRawImage(obj)
             fullRawImage = obj.fullRawImage;
@@ -46,12 +50,15 @@ classdef RegionLinker < PreprocessorLinker
         end
     end
 
-    %% Functions to update GUI and state information
+    %% Functions to set state of GUI
     methods
         function setVisible(obj, visible)
-            obj.gui.setVisible(visible);
+            gl = obj.gui.getGridLayout();
+            set(gl, "Visible", visible);
         end
     end
+
+    %% Functions to update GUI and state information
     methods (Access = protected)
         function thresholdSliderChanging(obj, source, event)
             thresholds = event.Value;
@@ -82,8 +89,6 @@ classdef RegionLinker < PreprocessorLinker
         end
     end
 end
-
-
 
 
 

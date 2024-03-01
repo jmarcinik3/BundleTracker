@@ -1,6 +1,6 @@
 classdef RegionPreviewer < RegionDrawer & RegionVisibler
     properties (Access = private)
-        getRawImage;
+        imageLinker;
     end
 
     methods
@@ -10,11 +10,8 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             obj@RegionVisibler(imageLinker, regionGuiParent);
             obj@RegionDrawer(ax, @imageGui.getRegionUserData);
 
-            % inherited functions
-            obj.getRawImage = @imageGui.getRawImage;
-
-            iIm = imageGui.getInteractiveImage();
-            set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
+            configureInteractiveImage(obj, imageGui);
+            obj.imageLinker = imageLinker;
         end
     end
 
@@ -24,30 +21,21 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             regions  = getRegions@RegionVisibler(obj);
         end
     end
-
-    %% Functions to generate GUI elements
     methods (Access = private)
-        function regionLinker = generateRegionLinker(obj, region)
-            fullRawImage = obj.getRawImage();
-            regionGui = obj.generateRegionGui();
-            regionLinker = RegionLinker(regionGui, region, fullRawImage);
-            obj.addRegionEntry(regionLinker);
+        function im = getRawImage(obj)
+            im = obj.imageLinker.getRawImage();
         end
     end
-
+    
     %% Functions to update state of GUI
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
                 region = obj.generateRegion(source, event);
-                obj.generateRegionLinker(region);
-                obj.addListeners(region);
+                generateRegionLinker(obj, region);
+                configureRegion(obj, region);
                 obj.previewRegion(region);
             end
-        end
-        function addListeners(obj, region)
-            addlistener(region, "ROIClicked", @obj.regionClicked);
-            addlistener(region, "DeletingROI", @obj.setPreviousRegionVisible);
         end
 
         function regionClicked(obj, source, event)
@@ -59,6 +47,23 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 end
 
 
+
+function configureInteractiveImage(obj, imageGui)
+iIm = imageGui.getInteractiveImage();
+set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
+end
+
+function configureRegion(obj, region)
+addlistener(region, "ROIClicked", @obj.regionClicked);
+addlistener(region, "DeletingROI", @obj.setPreviousRegionVisible);
+end
+
+function regionLinker = generateRegionLinker(obj, region)
+fullRawImage = obj.getRawImage();
+regionGui = obj.generateRegionGui();
+regionLinker = RegionLinker(regionGui, region, fullRawImage);
+obj.addRegionEntry(regionLinker);
+end
 
 function is = isLeftClick(event)
 name = event.EventName;

@@ -1,4 +1,5 @@
 classdef TrackingGui < RegionTracker & DirectorySelector
+
     properties (Constant)
         rowHeight = 25;
     end
@@ -39,14 +40,17 @@ classdef TrackingGui < RegionTracker & DirectorySelector
         function obj = TrackingGui(varargin)
             p = inputParser;
             addOptional(p, "StartingDirectory", "");
-            addOptional(p, "EnableZoom", true);
             parse(p, varargin{:});
             startingDirpath = p.Results.StartingDirectory;
-            enableZoom = p.Results.EnableZoom;
 
             [fig, gl] = generateGridLayout([2, 2]);
             rgl = generateRightGridLayout(gl);
-            imageGui = ImageGui(gl, {2, 1}, "EnableZoom", enableZoom);
+            
+            imageGl = ImageGui.generateGridLayout(gl);
+            imageGl.Layout.Row = 2;
+            imageGl.Layout.Column = 1;
+            imageGui = ImageGui(imageGl);
+            
             regionGuiPanel = uipanel(rgl, ...
                 "Title", "Region Editor", ...
                 "TitlePosition", "centertop" ...
@@ -210,8 +214,8 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             end
         end
         function trackAndSaveRegions(obj)
-            [results, completed] = obj.trackAndProcess();
-            if completed
+            results = obj.trackAndProcess();
+            if obj.trackingWasCompleted()
                 obj.trackingCompleted(results);
             else
                 obj.throwAlertMessage("Tracking Canceled!", "Start Tracking");
@@ -222,10 +226,10 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             displayTrackingCompleted(results, filepath);
             obj.exportImageIfPossible();
         end
-        function [results, completed] = trackAndProcess(obj)
+        function results = trackAndProcess(obj)
             obj.prepareTracking();
             regions = obj.getRegions();
-            [results, completed] = obj.trackAndProcessRegions(regions);
+            results= obj.trackAndProcessRegions(regions);
         end
         function prepareTracking(obj)
             filepaths = obj.getFilepaths();
@@ -257,7 +261,6 @@ classdef TrackingGui < RegionTracker & DirectorySelector
             im = obj.getFirstImage();
             obj.changeFullImage(im);
         end
-
         function throwAlertMessage(obj, message, title)
             fig = obj.getFigure();
             uialert(fig, message, title);
