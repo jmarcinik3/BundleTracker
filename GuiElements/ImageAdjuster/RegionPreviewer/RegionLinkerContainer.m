@@ -6,18 +6,13 @@ classdef RegionLinkerContainer < handle
     properties (Access = private)
         tagCounter = 0;
         tag2linker = dictionary;
-        
         parent;
-        changeImage;
     end    
 
     methods
         function obj = RegionLinkerContainer(imageLinker, regionGuiParent)
             imageGui = imageLinker.getGui();
-            % inherited functions
             obj.getAxis = @imageGui.getAxis;
-            obj.changeImage = @imageLinker.changeImage;
-
             obj.parent = regionGuiParent;
         end
     end
@@ -54,25 +49,9 @@ classdef RegionLinkerContainer < handle
             parent = obj.parent;
         end
     end
-    
-    %% Functions to update state of GUI
-    methods
-        function changeFullImage(obj, im)
-            obj.clearRegions();
-            obj.changeImage(im);
-        end
-    end
-    methods (Access = private)
-        function clearRegions(obj)
-            % Removes currently drawn regions on image
-            regions = obj.getRegions();
-            arrayfun(@(region) region.notify("DeletingROI"), regions);
-            delete(regions);
-        end
-    end
 
     %% Functions to update state information
-    methods
+    methods (Access = protected)
         function addRegionEntry(obj, regionLinker)
             region = regionLinker.getRegion();
             addlistener(region, "DeletingROI", @obj.deletingRegion);

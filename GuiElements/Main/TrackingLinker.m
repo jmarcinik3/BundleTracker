@@ -125,13 +125,10 @@ classdef TrackingLinker < RegionTracker
         function prepareTracking(obj)
             filepaths = obj.directorySelector.getFilepaths();
             trackingMode = obj.gui.getTrackingSelection();
-            initialResult = obj.generateInitialResult();
+            initialResult = obj.gui.generateInitialResult();
             obj.setFilepaths(filepaths);
             obj.setTrackingMode(trackingMode);
             obj.setInitialResult(initialResult);
-        end
-        function result = generateInitialResult(obj)
-            result = obj.gui.generateInitialResult();
         end
         function filepath = saveResults(obj, results)
             filepath = obj.gui.generateSaveFilepath();
@@ -146,7 +143,7 @@ classdef TrackingLinker < RegionTracker
             obj.changeFullImage(im);
         end
         function throwAlertMessage(obj, message, title)
-            fig = obj.getFigure();
+            fig = obj.gui.getFigure();
             uialert(fig, message, title);
         end
     end

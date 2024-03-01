@@ -8,21 +8,6 @@ classdef RegionVisibler < ActiveRegionOrderer & RegionLinkerContainer
         end
     end
 
-    %% Functions to retrieve GUI elements
-    methods (Access = private)
-        function previousRegion = getPreviousRegion(obj)
-            previousRegion = obj.getAdjacentRegion(-1);
-        end
-        function nextRegion = getNextRegion(obj)
-            nextRegion = obj.getAdjacentRegion(1);
-        end
-        function adjacentRegion = getAdjacentRegion(obj, distance)
-            regions = obj.getRegions();
-            adjacentTag = obj.getAdjacentTag(distance);
-            adjacentRegion = findobj(regions, "Tag", adjacentTag);
-        end
-    end
-
     %% Functions to retrieve state information
     methods (Access = private)
         function adjacentTag = getAdjacentTag(obj, distance)
@@ -47,8 +32,14 @@ classdef RegionVisibler < ActiveRegionOrderer & RegionLinkerContainer
         end
     end
     methods (Access = protected)
+        function clearRegions(obj)
+            % Removes currently drawn regions on image
+            regions = obj.getRegions();
+            arrayfun(@(region) region.notify("DeletingROI"), regions);
+            delete(regions);
+        end
         function previewRegion(obj, region)
-            obj.updateRegionGuiVisible(region);
+            updateRegionGuiVisible(obj, region);
             RegionDrawer.updateSelected(region);
         end
     end
@@ -56,23 +47,12 @@ classdef RegionVisibler < ActiveRegionOrderer & RegionLinkerContainer
         function setAdjacentRegionVisible(obj, distance)
             activeRegion = obj.getActiveRegion();
             if objectIsValid(activeRegion)
-                adjacentRegion = obj.getAdjacentRegion(distance);
+                adjacentRegion = getAdjacentRegion(obj, distance);
                 obj.previewRegion(adjacentRegion);
             elseif obj.regionExists()
-                obj.setFirstRegionVisible();
+                firstRegion = getRegionByIndex(obj, 1);
+                obj.previewRegion(firstRegion);
             end
-        end
-
-        function updateRegionGuiVisible(obj, activeRegion)
-            regionLinker = obj.getRegionLinker(activeRegion);
-            regionLinkers = obj.getRegionLinkers();
-            arrayfun(@(gui) gui.setVisible(false), regionLinkers);
-            regionLinker.setVisible(true);
-        end
-        function setFirstRegionVisible(obj)
-            regions = obj.getRegions();
-            firstRegion = regions(1);
-            obj.previewRegion(firstRegion);
         end
     end
 end
@@ -81,6 +61,29 @@ end
 
 function isValid = objectIsValid(obj)
 isValid = ~isempty(obj) && isvalid(obj);
+end
+
+function region = getRegionByIndex(obj, index)
+regions = obj.getRegions();
+count = numel(regions);
+index = mod(index, count);
+if index == 0
+    index = count;
+end
+region = regions(index);
+end
+
+function adjacentRegion = getAdjacentRegion(obj, distance)
+regions = obj.getRegions();
+adjacentTag = obj.getAdjacentTag(distance);
+adjacentRegion = findobj(regions, "Tag", adjacentTag);
+end
+
+function updateRegionGuiVisible(obj, activeRegion)
+regionLinker = obj.getRegionLinker(activeRegion);
+regionLinkers = obj.getRegionLinkers();
+arrayfun(@(linker) linker.setVisible(false), regionLinkers);
+regionLinker.setVisible(true);
 end
 
 function adjacentFloat = getAdjacentFloatCyclic(array, number, distance)

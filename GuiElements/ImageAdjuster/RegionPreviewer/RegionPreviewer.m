@@ -26,13 +26,20 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             im = obj.imageLinker.getRawImage();
         end
     end
-    
+
     %% Functions to update state of GUI
+    methods
+        function changeFullImage(obj, im)
+            obj.clearRegions();
+            obj.imageLinker.changeImage(im);
+        end
+    end
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
                 region = obj.generateRegion(source, event);
-                generateRegionLinker(obj, region);
+                regionLinker = generateRegionLinker(obj, region);
+                obj.addRegionEntry(regionLinker);
                 configureRegion(obj, region);
                 obj.previewRegion(region);
             end
@@ -62,7 +69,6 @@ function regionLinker = generateRegionLinker(obj, region)
 fullRawImage = obj.getRawImage();
 regionGui = obj.generateRegionGui();
 regionLinker = RegionLinker(regionGui, region, fullRawImage);
-obj.addRegionEntry(regionLinker);
 end
 
 function is = isLeftClick(event)

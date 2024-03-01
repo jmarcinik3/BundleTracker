@@ -1,5 +1,7 @@
-function keyPressed(trackingGui, source, event)
-activeRegion = trackingGui.getActiveRegion();
+function keyPressed(trackingLinker, source, event)
+activeRegion = trackingLinker.getActiveRegion();
+directorySelector = trackingLinker.getDirectorySelector();
+
 key = event.Key;
 modifiers = event.Modifier;
 modKey = ModifierKey(modifiers);
@@ -11,9 +13,9 @@ if objectExists(activeRegion) && RegionAdjustKey.is(key)
         if ArrowKey.isVertical(key)
             RegionOrderer.byKey(activeRegion, event);
         elseif ArrowKey.isLeft(key)
-            trackingGui.setPreviousRegionVisible();
+            trackingLinker.setPreviousRegionVisible();
         elseif ArrowKey.isRight(key)
-            trackingGui.setNextRegionVisible();
+            trackingLinker.setNextRegionVisible();
         end
     elseif modKey.hasZeroModifiers
         RegionMover.byKey(activeRegion, event);
@@ -28,13 +30,13 @@ if objectExists(activeRegion) && RegionAdjustKey.is(key)
     end
 elseif modKey.isPureCtrl
     if strcmp(key, "i")
-        trackingGui.chooseDirectory(source, event);
+        directorySelector.chooseDirectory(source, event);
     elseif strcmp(key, "o")
-        trackingGui.openDirectory();
+        directorySelector.openDirectory();
     elseif strcmp(key, "s")
-        trackingGui.exportImageIfPossible(source, event);
+        trackingLinker.exportImageIfPossible(source, event);
     elseif strcmp(key, "return")
-        trackingGui.trackButtonPushed(source, event)
+        trackingLinker.trackButtonPushed(source, event)
     end
 end
 end
