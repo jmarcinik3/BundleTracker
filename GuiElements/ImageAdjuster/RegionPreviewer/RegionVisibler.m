@@ -66,7 +66,6 @@ classdef RegionVisibler < ActiveRegionOrderer & RegionLinkerContainer
         function updateRegionGuiVisible(obj, activeRegion)
             regionLinker = obj.getRegionLinker(activeRegion);
             regionLinkers = obj.getRegionLinkers();
-            disp(ancestor(regionLinker, "RegionLinker"));
             arrayfun(@(gui) gui.setVisible(false), regionLinkers);
             regionLinker.setVisible(true);
         end
