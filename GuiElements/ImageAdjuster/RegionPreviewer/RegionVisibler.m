@@ -39,6 +39,7 @@ classdef RegionVisibler < ActiveRegionOrderer & RegionLinkerContainer
             delete(regions);
         end
         function previewRegion(obj, region)
+            obj.setActiveRegion(region);
             updateRegionGuiVisible(obj, region);
             RegionDrawer.updateSelected(region);
         end
@@ -80,8 +81,8 @@ adjacentRegion = findobj(regions, "Tag", adjacentTag);
 end
 
 function updateRegionGuiVisible(obj, activeRegion)
-regionLinker = obj.getRegionLinker(activeRegion);
 regionLinkers = obj.getRegionLinkers();
+regionLinker = obj.getRegionLinker(activeRegion);
 arrayfun(@(linker) linker.setVisible(false), regionLinkers);
 regionLinker.setVisible(true);
 end

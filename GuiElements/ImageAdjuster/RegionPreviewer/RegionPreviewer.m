@@ -50,6 +50,13 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
                 obj.previewRegion(source);
             end
         end
+
+        function deletingRegion(obj, source, ~)
+            activeRegion = obj.getActiveRegion();
+            if activeRegion == source
+                obj.setPreviousRegionVisible();
+            end
+        end
     end
 end
 
@@ -62,7 +69,7 @@ end
 
 function configureRegion(obj, region)
 addlistener(region, "ROIClicked", @obj.regionClicked);
-addlistener(region, "DeletingROI", @obj.setPreviousRegionVisible);
+addlistener(region, "DeletingROI", @obj.deletingRegion);
 end
 
 function regionLinker = generateRegionLinker(obj, region)

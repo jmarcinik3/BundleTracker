@@ -1,6 +1,7 @@
 classdef ActiveRegionOrderer < handle
     properties (Access = private)
         axis;
+        activeRegion;
     end
 
     methods
@@ -12,8 +13,7 @@ classdef ActiveRegionOrderer < handle
     %% Functions to retrieve GUI elements or state information
     methods
         function activeRegion = getActiveRegion(obj)
-            regions = obj.getRegions();
-            activeRegion = findobj(regions, "Selected", true);
+            activeRegion = obj.activeRegion();
         end
     end
     methods (Access = protected)
@@ -70,6 +70,11 @@ classdef ActiveRegionOrderer < handle
                 regionOrderer = RegionOrderer(activeRegion);
                 regionOrderer.sendToBack();
             end
+        end
+    end
+    methods (Access = protected)
+        function setActiveRegion(obj, region)
+            obj.activeRegion = region;
         end
     end
 end

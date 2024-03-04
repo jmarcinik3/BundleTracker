@@ -62,7 +62,7 @@ classdef RegionMover
 
         function deleteRegion(obj, ~, ~)
             region = obj.region;
-            deleteRegion(region)
+            deleteRegion(region);
         end
 
         function moveUpLeft(obj, ~, ~)

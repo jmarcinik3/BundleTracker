@@ -77,10 +77,9 @@ classdef RegionDrawer < handle
     %% Functions to update GUI and state information
     methods (Static)
         function updateSelected(activeRegion)
-            regions = RegionDrawer.getRegions(activeRegion);
-            set(regions, "Selected", false);
-            set(activeRegion, "Selected", true);
+            updateRegionSelected(activeRegion);
             updateRegionColors(activeRegion);
+            updateRegionLabels(activeRegion);
         end
     end
     methods (Access = protected)
@@ -88,7 +87,6 @@ classdef RegionDrawer < handle
             ax = obj.getAxis();
             keyword = obj.getRegionShape();
             region = drawRegionByKeyword(ax, point, keyword);
-            updateRegionLabels(ax);
             RegionDrawer.updateSelected(region);
         end
     end
@@ -117,9 +115,14 @@ end
 beginDrawingFromPoint(region, point);
 end
 
+function updateRegionSelected(activeRegion)
+regions = RegionDrawer.getRegions(activeRegion);
+set(regions, "Selected", false);
+set(activeRegion, "Selected", true);
+end
+
 function updateRegionColors(activeRegion)
-ax = ancestor(activeRegion, "axes");
-regions = RegionDrawer.getRegions(ax);
+regions = RegionDrawer.getRegions(activeRegion);
 set(regions, "Color", RegionColor.unprocessedColor);
 set(activeRegion, "Color", RegionColor.workingColor);
 end

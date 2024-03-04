@@ -7,7 +7,7 @@ classdef RegionLinkerContainer < handle
         tagCounter = 0;
         tag2linker = dictionary;
         parent;
-    end    
+    end
 
     methods
         function obj = RegionLinkerContainer(imageLinker, regionGuiParent)
@@ -55,7 +55,7 @@ classdef RegionLinkerContainer < handle
         function addRegionEntry(obj, regionLinker)
             region = regionLinker.getRegion();
             addlistener(region, "DeletingROI", @obj.deletingRegion);
-            
+
             tag = obj.iterateTag();
             set(region, "Tag", tag);
             obj.tag2linker(tag) = regionLinker;
@@ -76,4 +76,3 @@ classdef RegionLinkerContainer < handle
         end
     end
 end
-
