@@ -1,6 +1,5 @@
 classdef ImageImporter < handle
     properties (Access = private)
-        %#ok<*PROP>
         filepaths;
         index2image;
         imported;
