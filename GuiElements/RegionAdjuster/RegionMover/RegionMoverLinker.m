@@ -16,5 +16,5 @@ callbacks = {
     @mover.moveLeft, @mover.deleteRegion, @mover.moveRight, ...
     @mover.moveDownLeft, @mover.moveDown, @mover.moveDownRight ...
     };
-callbacks = reshape(callbacks, 3, 3);
+callbacks = reshape(callbacks, 3, 3)';
 end

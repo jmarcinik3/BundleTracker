@@ -16,5 +16,5 @@ callbacks = {
     @expander.expandLeft, @expander.expandOut, @expander.expandRight, ...
     @expander.expandDownLeft, @expander.expandDown, @expander.expandDownRight ...
     };
-callbacks = reshape(callbacks, 3, 3);
+callbacks = reshape(callbacks, 3, 3)';
 end
