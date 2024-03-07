@@ -1,8 +1,6 @@
 classdef ImageImporter < handle
     properties (Access = private)
         filepaths;
-        index2image;
-        imported;
     end
 
     methods
