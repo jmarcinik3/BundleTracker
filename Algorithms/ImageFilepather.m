@@ -29,7 +29,11 @@ classdef ImageFilepather
     methods
         function filepaths = getFilepaths(obj)
             count = obj.getFilecount();
-            filepaths = arrayfun(@obj.getFilepath, 1:count);
+            filepaths = strings(1, count);
+            for index = 1:count
+                filepath = obj.getFilepath(index);
+                filepaths(index) = filepath;
+            end
         end
         function filepath = getFilepath(obj, index)
             rootpath = sprintf("%s\\%s", obj.directory, obj.rootname);
