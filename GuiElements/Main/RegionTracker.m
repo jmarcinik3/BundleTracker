@@ -38,59 +38,52 @@ classdef RegionTracker < ImageImporter
             obj.initialResult = result;
         end
         function results = trackAndProcessRegions(obj, regions)
-            obj.continueCalculation = true;
-            results = [];
-            count = numel(regions);
+            results = {};
+            regionCount = numel(regions);
             set(regions, "Color", RegionColor.queueColor);
-
-            for index = 1:count
-                if obj.continueCalculation
-                    region = regions(index);
-                    result = obj.trackAndProcessRegion(region);
-                    results = [results, result];
-                else
-                    break;
-                end
+            
+            for index = 1:regionCount
+                region = regions(index);
+                result = obj.trackAndProcessRegion(region, index);
+                results{index} = result;
             end
 
+            results = cell2mat(results);
             set(regions, "Color", RegionColor.unprocessedColor);
         end
     end
 
     %% Functions to perform tracking
     methods (Access = private)
-        function result = trackAndProcessRegion(obj, region)
+        function result = trackAndProcessRegion(obj, region, regionIndex)
             set(region, "Color", RegionColor.workingColor); % color region as in-process
             initialResult = obj.initialResult;
-            centers = obj.trackRegion(region);
+            centers = obj.trackRegion(region, regionIndex);
             result = processResult(region, centers, initialResult);
             set(region, "Color", RegionColor.finishedColor); % color region as finished
         end
-        function centers = trackRegion(obj, region)
-            preprocessor = Preprocessor.fromRegion(region);
-            count = obj.getImageCount();
-            centers = PointStructurer.preallocate(count);
-            progress = ProgressTracker(count);
 
-            for index = 1:count
-                continueCalculation = progress.updateIfValid(index);
-                if continueCalculation
-                    center = obj.trackFrame(index, region, preprocessor);
-                    centers(index) = center;
-                else
-                    break;
-                end
+        function centers = trackRegion(obj, region, regionIndex)
+            frameCount = obj.getImageCount();
+            centers = PointStructurer.preallocate(frameCount);
+            ims = obj.getPreprocessedImage3d(region);
+            trackingMode = obj.trackingMode;
+            
+            taskName = sprintf("Region %d", regionIndex);
+            progress = ProgressBar(frameCount, taskName);
+            parfor index = 1:frameCount
+                im = squeeze(ims(index, :, :));
+                centers(index) = TrackingAlgorithms.byKeyword(im, trackingMode);
+                count(progress);
             end
 
-            delete(progress);
-            obj.continueCalculation = continueCalculation;
             centers = PointStructurer.mergePoints(centers);
         end
-        function center = trackFrame(obj, index, region, preprocessor)
-            im = obj.getImageInRegion(index, region);
-            im = preprocessor.preprocess(im);
-            trackingMode = obj.trackingMode;
-            center = TrackingAlgorithms.byKeyword(im, trackingMode);
+
+        function ims = getPreprocessedImage3d(obj, region)
+            ims = obj.getImage3dInRegion(region);
+            preprocessor = Preprocessor.fromRegion(region);
+            ims = preprocessor.preprocess(ims);
         end
     end
 end
