@@ -12,6 +12,7 @@ classdef TrackingGui
         imageGui;
         regionGuiPanel;
         trackingSelection;
+        angleSelection;
         positiveDirection;
         scaleFactorInputElement;
         fpsInputElement;
@@ -38,6 +39,7 @@ classdef TrackingGui
             obj.directoryGui = DirectoryGui(gl, {1, [1, 2]});
 
             obj.trackingSelection = generateTrackingSelection(rgl);
+            obj.angleSelection = generateAngleSelection(rgl);
             obj.positiveDirection = DirectionGui(rgl);
             obj.scaleFactorInputElement = generateScaleFactorElement(rgl);
             obj.fpsInputElement = generateFpsInputElement(rgl);
@@ -80,6 +82,9 @@ classdef TrackingGui
         function elem = getTrackingSelectionElement(obj)
             elem = obj.trackingSelection;
         end
+        function elem = getAngleSelectionElement(obj)
+            elem = obj.angleSelection;
+        end
         function elem = getPositiveDirectionElement(obj)
             elem = obj.positiveDirection.getGridLayout();
         end
@@ -101,8 +106,11 @@ classdef TrackingGui
         function path = getDirectoryPath(obj)
             path = obj.directoryGui.getDirectoryPath();
         end
-        function val = getTrackingSelection(obj)
+        function val = getTrackingMode(obj)
             val = string(obj.trackingSelection.Value);
+        end
+        function val = getAngleMode(obj)
+            val = string(obj.angleSelection.Value);
         end
 
         % ...for postprocessing
@@ -140,7 +148,8 @@ classdef TrackingGui
         function result = generateInitialResult(obj)
             result = struct( ...
                 "DirectoryPath", obj.directoryGui.getDirectoryPath(), ...
-                "TrackingMode", obj.getTrackingSelection(), ...
+                "TrackingMode", obj.getTrackingMode(), ...
+                "AngleMode", obj.getAngleMode(), ...
                 "Direction", obj.getPositiveDirection(), ...
                 "ScaleFactor", obj.getScaleFactor(), ...
                 "ScaleFactorError", obj.getScaleFactorError(), ...
@@ -185,15 +194,17 @@ positiveDirectionGroup = gui.getPositiveDirectionElement();
 scaleFactorElement = gui.getScaleFactorInputElement();
 fpsInputElement = gui.getFpsInputElement();
 trackingDropdown = gui.getTrackingSelectionElement();
+angleDropdown = gui.getAngleSelectionElement();
 saveFilestemElement = gui.getSaveFilestemElement();
 regionGuiPanel = gui.getRegionGuiPanel();
 
 trackingDropdown.Layout.Row = 1;
-positiveDirectionGroup.Layout.Row = 2;
-scaleFactorElement.Layout.Row = 3;
-fpsInputElement.Layout.Row = 4;
-saveFilestemElement.Layout.Row = 5;
-regionGuiPanel.Layout.Row = 6;
+angleDropdown.Layout.Row = 2;
+positiveDirectionGroup.Layout.Row = 3;
+scaleFactorElement.Layout.Row = 4;
+fpsInputElement.Layout.Row = 5;
+saveFilestemElement.Layout.Row = 6;
+regionGuiPanel.Layout.Row = 7;
 
 set(scaleFactorElement, ...
     "RowHeight", rowHeight, ...
@@ -209,8 +220,8 @@ set(saveFilestemElement, ...
     );
 
 rgl.RowHeight = num2cell(rowHeight * ones(1, 6));
-rgl.RowHeight{2} = 'fit';
-rgl.RowHeight{6} = '1x';
+rgl.RowHeight{3} = 'fit';
+rgl.RowHeight{7} = '1x';
 end
 
 function gl = generateGridLayout(size)
@@ -224,7 +235,7 @@ gl = uigridlayout(fig, size);
 end
 
 function rgl = generateRightGridLayout(gl)
-rgl = uigridlayout(gl, [6, 1]);
+rgl = uigridlayout(gl, [7, 1]);
 rgl.Layout.Row = 2;
 rgl.Layout.Column = 2;
 end
@@ -241,6 +252,20 @@ end
 function dropdown = generateTrackingSelection(gl)
 dropdown = uidropdown(gl);
 dropdown.Items = TrackingAlgorithms.keywords;
+end
+
+%% Function to generate angle method dropdown
+% Generates dropdown menu allowing user to select tracking method (e.g.
+% "Centroid")
+%
+% Arguments
+%
+% * uigridlayout |gl|: layout to add dropdown in
+%
+% Returns uiddropdown
+function dropdown = generateAngleSelection(gl)
+dropdown = uidropdown(gl);
+dropdown.Items = AngleAlgorithms.keywords;
 end
 
 %% Function to generate FPS input

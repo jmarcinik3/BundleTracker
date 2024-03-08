@@ -21,7 +21,6 @@ classdef TrackingAlgorithms
         function center = byGaussianFit(im)
             center = gaussian(im);
         end
-
         function center = byCenterOfMass(im)
             center = centroid(im);
         end
@@ -61,7 +60,7 @@ end
 function [xerr, yerr] = bootstrapCentroid(x, y, weights)
 [rows, columns] = size(x);
 
-bootstrapCount = round(sqrt(rows * columns));
+bootstrapCount = min(round(sqrt(rows * columns)), 16);
 xmeans = 0 * ones(1, bootstrapCount);
 ymeans = 0 * ones(1, bootstrapCount);
 xstds = 0 * ones(1, bootstrapCount);

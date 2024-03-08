@@ -124,7 +124,7 @@ classdef TrackingLinker < RegionTracker
         end
         function prepareTracking(obj)
             filepaths = obj.directorySelector.getFilepaths();
-            trackingMode = obj.gui.getTrackingSelection();
+            trackingMode = obj.gui.getTrackingMode();
             initialResult = obj.gui.generateInitialResult();
             obj.setFilepaths(filepaths);
             obj.setTrackingMode(trackingMode);

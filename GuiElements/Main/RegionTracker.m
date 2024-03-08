@@ -71,7 +71,7 @@ classdef RegionTracker < ImageImporter
             
             taskName = sprintf("Region %d", regionIndex);
             progress = ProgressBar(frameCount, taskName);
-            parfor index = 1:frameCount
+            for index = 1:frameCount
                 im = squeeze(ims(index, :, :));
                 centers(index) = TrackingAlgorithms.byKeyword(im, trackingMode);
                 count(progress);

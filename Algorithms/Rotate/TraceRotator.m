@@ -6,10 +6,6 @@ classdef TraceRotator
             xyRotated = xy * rotationMatrix; % rotate xy about origin
             xRotated = xyRotated(:, 1)';
             yRotated = xyRotated(:, 2)';
-
-            % comment rotates about center, doesn't match error
-            % xyCenter = mean(xy, 1);
-            % xyRotated = (xy - xyCenter)*rotationMatrix + xyCenter;
         end
 
         function [xRotatedError, yRotatedError] ...
@@ -17,7 +13,7 @@ classdef TraceRotator
             cas = cos(angle)^2;
             sas = sin(angle)^2;
             asError = angleError^2;
-            
+
             xs = x.^2;
             ys = y.^2;
             xsError = xError.^2;
@@ -31,14 +27,6 @@ classdef TraceRotator
                 cas*ysError + sas*xsError ...
                 + asError*(sas*ys + cas*xs) ...
                 );
-        end
-
-        function [angle, angleError, fitInfo] = byLinearFit(x, y)
-            fitInfo = fitlm(x, y);
-            slope = fitInfo.Coefficients.Estimate(2);
-            slopeError = fitInfo.Coefficients.SE(2);
-            angle = atan(slope);
-            angleError = slopeError / (1+slope^2);
         end
 
         function matrix = rotationMatrix(angle)
