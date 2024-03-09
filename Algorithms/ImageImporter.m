@@ -1,6 +1,6 @@
 classdef ImageImporter < handle
     properties (Access = private, Constant)
-        parallelThreshold = 5000;
+        parallelThreshold = 3000;
     end
 
     properties (Access = private)
@@ -22,16 +22,17 @@ classdef ImageImporter < handle
         function ims = getImage3dInRegion(obj, region)
             imageCount = obj.getImageCount();
             ims = obj.preallocate3dImage(region);
-
+            
+            progress = ProgressBar(imageCount, "Loading Images");
             if imageCount > obj.parallelThreshold
-                progress = ProgressBar(imageCount, "Loading Images");
-                parfor index = 2:imageCount
+                parfor index = 1:imageCount
                     ims(index, :, :) = obj.getImageInRegion(index, region);
                     count(progress);
                 end
             else
-                for index = 2:imageCount
+                for index = 1:imageCount
                     ims(index, :, :) = obj.getImageInRegion(index, region);
+                    count(progress);
                 end
             end
         end
