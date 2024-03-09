@@ -46,7 +46,7 @@ classdef RegionLinker < PreprocessorLinker
         function regionRawImage = generateRegionalRawImage(obj)
             fullRawImage = obj.fullRawImage;
             region = obj.regionParser.getRegion();
-            regionRawImage = unpaddedMatrixInRegion(region, fullRawImage);
+            regionRawImage = MatrixUnpadder.byRegion2d(region, fullRawImage);
         end
     end
 

@@ -1,8 +1,4 @@
 classdef ImageImporter < handle
-    properties (Access = private, Constant)
-        parallelThreshold = 3000;
-    end
-
     properties (Access = private)
         filepaths;
     end
@@ -15,25 +11,16 @@ classdef ImageImporter < handle
 
     %% Functions to retrieve state information
     methods (Access = protected)
-        function im = getImageInRegion(obj, index, region)
-            fullImage = obj.getFullImage(index);
-            im = unpaddedMatrixInRegion(region, fullImage);
-        end
         function ims = getImage3dInRegion(obj, region)
             imageCount = obj.getImageCount();
             ims = obj.preallocate3dImage(region);
+            filepaths = obj.filepaths;
+            pixelRegion = MatrixUnpadder.pixelsByRegion(region, filepaths(1));
             
             progress = ProgressBar(imageCount, "Loading Images");
-            if imageCount > obj.parallelThreshold
-                parfor index = 1:imageCount
-                    ims(index, :, :) = obj.getImageInRegion(index, region);
-                    count(progress);
-                end
-            else
-                for index = 1:imageCount
-                    ims(index, :, :) = obj.getImageInRegion(index, region);
-                    count(progress);
-                end
+            parfor index = 2:imageCount
+                ims(:, :, index) = imread(filepaths(index), "PixelRegion", pixelRegion);;
+                count(progress);
             end
         end
 
@@ -46,16 +33,13 @@ classdef ImageImporter < handle
         end
     end
     methods (Access = private)
-        function im = getFullImage(obj, index)
-            filepath = obj.getFilepath(index);
-            im = imread(filepath);
-        end
         function ims = preallocate3dImage(obj, region)
             count = obj.getImageCount();
-            im = obj.getImageInRegion(1, region);
+            filepath = obj.getFilepath(1);
+            im = MatrixUnpadder.byRegion2d(region, filepath);
             [w, h] = size(im);
-            ims = zeros(count, w, h);
-            ims(1, :, :) = im;
+            ims = zeros(w, h, count);
+            ims(:, :, 1) = im;
         end
     end
 
