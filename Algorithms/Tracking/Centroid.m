@@ -1,74 +1,63 @@
 classdef Centroid
     properties (Access = private)
-        x;
-        y;
         weights;
+        rows;
+        columns;
 
-        wx;
-        wy;
-        wxx;
-        wyy;
+        wx; % weights.*x
+        wy; % weights.*y
+        wxx; % weights.*x.^2
+        wyy; % weights.*y.^2
     end
 
     methods
         function obj = Centroid(im)
-            [x, y] = calculateXY(im);
+            [rows, columns] = size(im);
+            [x, y] = calculateXY(rows, columns);
             weights = calculateWeights(im);
 
             wx = weights .* x;
             wy = weights .* y;
+
+            obj.rows = rows;
+            obj.columns = columns;
             obj.wxx = wx .* x;
             obj.wyy = wy .* y;
-            
-            obj.x = x;
-            obj.y = y;
             obj.weights = weights;
             obj.wx = wx;
             obj.wy = wy;
         end
 
         function center = withError(obj)
+            rows = obj.rows;
+            columns = obj.columns;
+            bootstrapCount = min(round(sqrt(rows * columns)), 8);
+
             xmean = sum(obj.wx, "all");
             ymean = sum(obj.wy, "all");
-            [xerr, yerr] = obj.bootstrapError();
+            [xerr, yerr] = obj.bootstrapError(bootstrapCount);
             center = PointStructurer.asPoint(xmean, ymean, xerr, yerr);
         end
     end
 
     methods (Access = private)
-        function [xerr, yerr] = bootstrapError(obj)
-            x = obj.x;
-            y = obj.y;
-            [rows, columns] = size(x);
-
-            count = min(round(sqrt(rows * columns)), 16);
-            xmeans = 0 * ones(1, count);
-            ymeans = 0 * ones(1, count);
-            xstds = 0 * ones(1, count);
-            ystds = 0 * ones(1, count);
-            
-            wxFull = obj.wx;
-            wyFull = obj.wy;
-            wxxFull = obj.wxx;
-            wyyFull = obj.wyy;
+        function [xerr, yerr] = bootstrapError(obj, count)
+            xy = zeros(4, count);
 
             for index = 1:count
-                [newMask, newArea] = obj.generateWeights();
-                xnew = sum(wxFull(newMask), "all") / newArea;
-                ynew = sum(wyFull(newMask), "all") / newArea;
-
-                xmeans(index) = xnew;
-                ymeans(index) = ynew;
-                xstds(index) = sqrt(sum(wxxFull(newMask), "all") / newArea - xnew^2);
-                ystds(index) = sqrt(sum(wyyFull(newMask), "all") / newArea - ynew^2);
+                [xmean, ymean, xstd, ystd] = obj.bootstrap();
+                xy(:, index) = [xmean, ymean, xstd, ystd];
             end
-
-            xerr = std(xmeans, 1 ./ (xstds.^2));
-            yerr = std(ymeans, 1 ./ (ystds.^2));
+            
+            xymeans = xy(1:2, :);
+            xystds = xy(3:4, :);
+            xerr = std(xymeans(1), 1 ./ (xystds(1).^2));
+            yerr = std(xymeans(2), 1 ./ (xystds(2).^2));
         end
 
         function [randomMask, newArea] = generateWeights(obj)
-            [rows, columns] = size(obj.x);
+            rows = obj.rows;
+            columns = obj.columns;
             weights = obj.weights;
             newArea = 0;
 
@@ -78,13 +67,20 @@ classdef Centroid
                 newArea = sum(weights, "all");
             end
         end
+
+        function [xmean, ymean, xstd, ystd] = bootstrap(obj)
+            [mask, area] = obj.generateWeights();
+            xmean = sum(obj.wx(mask), "all") / area;
+            ymean = sum(obj.wy(mask), "all") / area;
+            xstd = sqrt(sum(obj.wxx(mask), "all") / area - xmean^2);
+            ystd = sqrt(sum(obj.wyy(mask), "all") / area - ymean^2);
+        end
     end
 end
 
 
 
-function [x, y] = calculateXY(im)
-[rows, columns] = size(im);
+function [x, y] = calculateXY(rows, columns)
 x = ones(rows, 1) * (1:columns); % 2D matrix of x indicies
 y = (1:rows)' * ones(1, columns); % 2D matrix of y indicies
 end
