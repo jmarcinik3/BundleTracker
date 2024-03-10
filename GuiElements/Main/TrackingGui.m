@@ -15,7 +15,6 @@ classdef TrackingGui
         angleSelection;
         positiveDirection;
         scaleFactorInputElement;
-        fpsInputElement;
 
         % components related to files
         directoryGui;
@@ -25,7 +24,9 @@ classdef TrackingGui
     methods
         function obj = TrackingGui()
             gl = generateGridLayout([2, 2]);
-            rgl = generateRightGridLayout(gl);
+            rgl = uigridlayout(gl, [6, 1]);
+            rgl.Layout.Row = 2;
+            rgl.Layout.Column = 2;
 
             imageGl = ImageGui.generateGridLayout(gl);
             imageGl.Layout.Row = 2;
@@ -36,13 +37,12 @@ classdef TrackingGui
                 "Title", "Region Editor", ...
                 "TitlePosition", "centertop" ...
                 );
-            obj.directoryGui = DirectoryGui(gl, {1, [1, 2]});
+            obj.directoryGui = VideoGui(gl, {1, [1, 2]});
 
             obj.trackingSelection = generateTrackingSelection(rgl);
             obj.angleSelection = generateAngleSelection(rgl);
             obj.positiveDirection = DirectionGui(rgl);
             obj.scaleFactorInputElement = generateScaleFactorElement(rgl);
-            obj.fpsInputElement = generateFpsInputElement(rgl);
             obj.saveFilestemElement = generateSaveFilestemElement(rgl);
 
             obj.gridLayout = gl;
@@ -91,9 +91,6 @@ classdef TrackingGui
         function elem = getScaleFactorInputElement(obj)
             elem = obj.scaleFactorInputElement;
         end
-        function elem = getFpsInputElement(obj)
-            elem = obj.fpsInputElement;
-        end
 
         % components related to files
         function elem = getSaveFilestemElement(obj)
@@ -127,11 +124,6 @@ classdef TrackingGui
             textbox = gl.Children(4);
             err = textbox.Value;
         end
-        function fps = getFps(obj)
-            gl = obj.fpsInputElement;
-            textbox = gl.Children(2);
-            fps = textbox.Value;
-        end
         function stem = getSaveFilestem(obj)
             gl = obj.saveFilestemElement;
             textbox = gl.Children(2);
@@ -144,17 +136,6 @@ classdef TrackingGui
             filestem = obj.getSaveFilestem();
             filename = sprintf("%s%s.mat", filestem);
             filepath = fullfile(directoryPath, filename);
-        end
-        function result = generateInitialResult(obj)
-            result = struct( ...
-                "DirectoryPath", obj.directoryGui.getDirectoryPath(), ...
-                "TrackingMode", obj.getTrackingMode(), ...
-                "AngleMode", obj.getAngleMode(), ...
-                "Direction", obj.getPositiveDirection(), ...
-                "ScaleFactor", obj.getScaleFactor(), ...
-                "ScaleFactorError", obj.getScaleFactorError(), ...
-                "Fps", obj.getFps() ...
-                );
         end
     end
 end
@@ -192,7 +173,6 @@ rgl = gui.getRightGridLayout();
 
 positiveDirectionGroup = gui.getPositiveDirectionElement();
 scaleFactorElement = gui.getScaleFactorInputElement();
-fpsInputElement = gui.getFpsInputElement();
 trackingDropdown = gui.getTrackingSelectionElement();
 angleDropdown = gui.getAngleSelectionElement();
 saveFilestemElement = gui.getSaveFilestemElement();
@@ -202,17 +182,12 @@ trackingDropdown.Layout.Row = 1;
 angleDropdown.Layout.Row = 2;
 positiveDirectionGroup.Layout.Row = 3;
 scaleFactorElement.Layout.Row = 4;
-fpsInputElement.Layout.Row = 5;
-saveFilestemElement.Layout.Row = 6;
-regionGuiPanel.Layout.Row = 7;
+saveFilestemElement.Layout.Row = 5;
+regionGuiPanel.Layout.Row = 6;
 
 set(scaleFactorElement, ...
     "RowHeight", rowHeight, ...
     "ColumnWidth", {'3x', '3x', '1x', '2x'} ...
-    );
-set(fpsInputElement, ...
-    "RowHeight", rowHeight, ...
-    "ColumnWidth", {'1x', '2x'} ...
     );
 set(saveFilestemElement, ...
     "RowHeight", rowHeight, ...
@@ -221,7 +196,7 @@ set(saveFilestemElement, ...
 
 rgl.RowHeight = num2cell(rowHeight * ones(1, 6));
 rgl.RowHeight{3} = 'fit';
-rgl.RowHeight{7} = '1x';
+rgl.RowHeight{6} = '1x';
 end
 
 function gl = generateGridLayout(size)
@@ -232,12 +207,6 @@ set(fig, ...
     "Position", position ...
     );
 gl = uigridlayout(fig, size);
-end
-
-function rgl = generateRightGridLayout(gl)
-rgl = uigridlayout(gl, [7, 1]);
-rgl.Layout.Row = 2;
-rgl.Layout.Column = 2;
 end
 
 %% Function to generate tracking method dropdown
@@ -266,27 +235,6 @@ end
 function dropdown = generateAngleSelection(gl)
 dropdown = uidropdown(gl);
 dropdown.Items = AngleAlgorithms.keywords;
-end
-
-%% Function to generate FPS input
-% Generates edit field (with label) allowing user to set FPS
-%
-% Arguments
-%
-% * uigridlayout |parent|: layout to add edit fields in
-%
-% Returns uigridlayout composed of [uilabel, uieditfield("numeric")]
-function gl = generateFpsInputElement(parent)
-gl = uigridlayout(parent, [1 2]);
-gl.Padding = [0 0 0 0];
-
-lbl = uilabel(gl);
-lbl.Text = "FPS:"; % label
-tb = uieditfield(gl, "numeric");
-tb.Value = 1000; % default FPS
-
-lbl.Layout.Column = 1;
-tb.Layout.Column = 2;
 end
 
 %% Function to generate scale factor input

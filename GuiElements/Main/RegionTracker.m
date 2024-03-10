@@ -1,4 +1,4 @@
-classdef RegionTracker < ImageImporter
+classdef RegionTracker < VideoImporter
     properties (Access = private)
         trackingMode;
         initialResult;
@@ -16,7 +16,7 @@ classdef RegionTracker < ImageImporter
             trackingMode = p.Results.TrackingMode;
             initialResult = p.Results.InitialResult;
 
-            obj@ImageImporter(filepaths);
+            obj@VideoImporter(filepaths);
             obj.trackingMode = trackingMode;
             obj.initialResult = initialResult;
         end
@@ -44,7 +44,7 @@ classdef RegionTracker < ImageImporter
             
             for index = 1:regionCount
                 region = regions(index);
-                result = obj.trackAndProcessRegion(region, index);
+                result = obj.trackAndProcessRegion(region);
                 results{index} = result;
             end
 
@@ -55,32 +55,32 @@ classdef RegionTracker < ImageImporter
 
     %% Functions to perform tracking
     methods (Access = private)
-        function result = trackAndProcessRegion(obj, region, regionIndex)
+        function result = trackAndProcessRegion(obj, region)
             set(region, "Color", RegionColor.workingColor); % color region as in-process
             initialResult = obj.initialResult;
-            centers = obj.trackRegion(region, regionIndex);
+            ims = obj.getPreprocessedVideo(region);
+            centers = obj.trackRegion(ims);
             result = processResult(region, centers, initialResult);
             set(region, "Color", RegionColor.finishedColor); % color region as finished
         end
 
-        function centers = trackRegion(obj, region, regionIndex)
-            frameCount = obj.getImageCount();
+        function centers = trackRegion(obj, ims)
+            frameCount = obj.getFrameCount();
             centers = PointStructurer.preallocate(frameCount);
-            ims = obj.getPreprocessedImage3d(region);
             trackingMode = obj.trackingMode;
             
-            taskName = sprintf("Region %d", regionIndex);
-            progress = ProgressBar(frameCount, taskName);
+            progress = ProgressBar(frameCount, "Tracking Region");
+            trackFrame = TrackingAlgorithms.handleByKeyword(trackingMode);
             for index = 1:frameCount
-                centers(index) = TrackingAlgorithms.byKeyword(ims(:, :, index), trackingMode);
+                centers(index) = trackFrame(ims(:, :, index));
                 count(progress);
             end
 
             centers = PointStructurer.mergePoints(centers);
         end
 
-        function ims = getPreprocessedImage3d(obj, region)
-            ims = obj.getImage3dInRegion(region);
+        function ims = getPreprocessedVideo(obj, region)
+            ims = obj.getVideoInRegion(region);
             preprocessor = Preprocessor.fromRegion(region);
             ims = preprocessor.preprocess(ims);
         end

@@ -10,12 +10,25 @@ classdef TrackingAlgorithms
 
     methods (Static)
         function center = byKeyword(im, keyword)
+            handle = TrackingAlgorithms.handleByKeyword(keyword);
+            center = handle(im);
+        end
+        function handle = handleByKeyword(keyword)
             switch keyword
                 case TrackingAlgorithms.centerOfMass
-                    center = Centroid(im).withError();
+                    handle = @TrackingAlgorithms.byCenterOfMass;
                 case TrackingAlgorithms.gaussianFit
-                    center = gaussian(im);
+                    handle = @TrackingAlgorithms.byGaussianFit;
             end
+        end
+    end
+
+    methods (Access = private, Static)
+        function center = byCenterOfMass(im)
+            center = Centroid(im).withError();
+        end
+        function center = byGaussianFit(im)
+            center = gaussian(im);
         end
     end
 end

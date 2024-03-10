@@ -13,7 +13,7 @@ classdef TrackingLinker < RegionTracker
     properties (Access = private)
         % GUI components
         gui;
-        directorySelector;
+        videoSelector;
         imageLinker;
 
         % inherited functions
@@ -24,9 +24,9 @@ classdef TrackingLinker < RegionTracker
     methods
         function obj = TrackingLinker(trackingGui, varargin)
             p = inputParser;
-            addOptional(p, "StartingDirectory", "");
+            addOptional(p, "StartingFilepath", "");
             parse(p, varargin{:});
-            startingDirpath = p.Results.StartingDirectory;
+            startingFilepath = p.Results.StartingFilepath;
 
             directoryGui = trackingGui.getDirectoryGui();
             imageGui = trackingGui.getImageGui();
@@ -35,9 +35,9 @@ classdef TrackingLinker < RegionTracker
             regionPreviewer = RegionPreviewer(imageLinker, regionGuiPanel);
 
             obj@RegionTracker();
-            obj.directorySelector = DirectorySelector( ...
+            obj.videoSelector = VideoSelector( ...
                 directoryGui, ...
-                @obj.directoryValueChanged ...
+                @obj.videoFilepathChanged ...
                 );
 
             % inherited getters
@@ -63,14 +63,14 @@ classdef TrackingLinker < RegionTracker
             figureKeyPressFcn = @(src, ev) keyPressed(obj, src, ev);
             set(fig, "WindowKeyPressFcn", figureKeyPressFcn);
 
-            obj.directorySelector.setDirectory(startingDirpath);
+            obj.videoSelector.setFilepathIfChosen(startingFilepath);
         end
     end
 
     %% Functions to retrieve GUI elements
     methods
-        function selector = getDirectorySelector(obj)
-            selector = obj.directorySelector;
+        function selector = getVideoSelector(obj)
+            selector = obj.videoSelector;
         end
     end
     methods (Access = private)
@@ -98,10 +98,7 @@ classdef TrackingLinker < RegionTracker
             count = numel(regions);
             exists = count >= 1;
             if ~exists
-                obj.throwAlertMessage( ...
-                    "No cells selected!", ...
-                    "Start Tracking" ...
-                    );
+                obj.throwAlertMessage("No cells selected!", "Start Tracking");
             end
         end
         function trackAndSaveRegions(obj)
@@ -120,13 +117,11 @@ classdef TrackingLinker < RegionTracker
         function results = trackAndProcess(obj)
             obj.prepareTracking();
             regions = obj.getRegions();
-            results= obj.trackAndProcessRegions(regions);
+            results = obj.trackAndProcessRegions(regions);
         end
         function prepareTracking(obj)
-            filepaths = obj.directorySelector.getFilepaths();
             trackingMode = obj.gui.getTrackingMode();
-            initialResult = obj.gui.generateInitialResult();
-            obj.setFilepaths(filepaths);
+            initialResult = obj.generateInitialResult();
             obj.setTrackingMode(trackingMode);
             obj.setInitialResult(initialResult);
         end
@@ -134,20 +129,35 @@ classdef TrackingLinker < RegionTracker
             filepath = obj.gui.generateSaveFilepath();
             save(filepath, "results");
         end
+        function result = generateInitialResult(obj)
+            gui = obj.gui;
+            result = struct( ...
+                "DirectoryPath", gui.getDirectoryPath(), ...
+                "TrackingMode", gui.getTrackingMode(), ...
+                "AngleMode", gui.getAngleMode(), ...
+                "Direction", gui.getPositiveDirection(), ...
+                "ScaleFactor", gui.getScaleFactor(), ...
+                "ScaleFactorError", gui.getScaleFactorError(), ...
+                "Fps", obj.getFps() ...
+                );
+        end
 
-        function directoryValueChanged(obj, ~, ~)
-            obj.updateImageForDirectory();
+        function videoFilepathChanged(obj, ~, ~)
+            videoSelector = obj.videoSelector;
+            filepath = videoSelector.getFilepath();
+            updateDisplayFrame(obj, videoSelector);
+            obj.setFilepath(filepath); % must come before updating frame label
+            updateFrameLabel(obj, videoSelector);
         end
-        function updateImageForDirectory(obj)
-            im = obj.directorySelector.getFirstImage();
-            obj.changeFullImage(im);
-        end
+
         function throwAlertMessage(obj, message, title)
             fig = obj.gui.getFigure();
             uialert(fig, message, title);
         end
     end
 end
+
+
 
 function displayTrackingCompleted(results, filepath)
 resultsParser = ResultsParser(results);
@@ -170,4 +180,20 @@ modeMsg = sprintf("Tracking Algorithm: %s", trackingMode);
 fpsMsg = sprintf("FPS: %d", fps);
 directionMsg = sprintf("Positive Direction: %s", positiveDirection);
 message = [savedMsg, countMsg, modeMsg, directionMsg, fpsMsg];
+end
+
+function updateFrameLabel(obj, videoSelector)
+label = generateFrameLabel(obj);
+videoSelector.setFrameLabel(label);
+end
+
+function label = generateFrameLabel(obj)
+frameCount = obj.getFrameCount();
+fps = obj.getFps();
+label = sprintf("%d Frames (%d FPS)", frameCount, fps);
+end
+
+function updateDisplayFrame(obj, videoSelector)
+firstFrame = videoSelector.getFirstFrame();
+obj.changeFullImage(firstFrame);
 end

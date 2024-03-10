@@ -1,25 +1,23 @@
-classdef DirectoryGui < handle
-    properties (Constant)
-        chooseTitle = "Import Directory";
-        openTitle = "Open Directory";
-    end
-
+classdef VideoGui < handle
     properties (Access = private)
         gridLayout;
-        directoryPathField;
-        filecountField;
+        filepathField;
+        frameElement;
     end
 
     methods
-        function obj = DirectoryGui(parent, location, varargin)
+        function obj = VideoGui(parent, location, varargin)
             p = inputParser;
             addOptional(p, "ValueChangedFcn", []);
             parse(p, varargin{:});
             valueChangedFcn = p.Results.ValueChangedFcn;
 
             gl = generateGridLayout(parent, location);
-            obj.directoryPathField = generateDirpathField(gl, valueChangedFcn);
-            obj.filecountField = generateFilecountField(gl);
+            obj.filepathField = generateFilepathField(gl, valueChangedFcn);
+            obj.frameElement = uilabel(gl, "Text", "");
+            
+            obj.filepathField.Layout.Column = 1;
+            obj.frameElement.Layout.Column = 2;
             obj.gridLayout = gl;
         end 
     end
@@ -29,11 +27,11 @@ classdef DirectoryGui < handle
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
         end
-        function ta = getDirectoryPathField(obj)
-            ta = obj.directoryPathField;
+        function ta = getFilepathField(obj)
+            ta = obj.filepathField;
         end
-        function lbl = getFilecountField(obj)
-            lbl = obj.filecountField;
+        function elem = getFrameLabel(obj)
+            elem = obj.frameElement;
         end
         function fig = getFigure(obj)
             gl = obj.getGridLayout();
@@ -43,9 +41,13 @@ classdef DirectoryGui < handle
 
     %% Functions to retrieve state information
     methods
-        function text = getDirectoryPath(obj)
-            ta = obj.getDirectoryPathField();
-            text = ta.Value;
+        function filepath = getFilepath(obj)
+            filepathField = obj.getFilepathField();
+            filepath = filepathField.Value;
+        end
+        function directoryPath = getDirectoryPath(obj)
+            filepath = obj.getFilepath();
+            directoryPath = fileparts(filepath);
         end
     end
 end
@@ -53,29 +55,21 @@ end
 
 
 function gl = generateGridLayout(parent, location)
-rowHeight = TrackingGui.rowHeight;
-
-gl = uigridlayout(parent, [1, 2]);
+gl = uigridlayout(parent, [1, 3]);
 gl.Layout.Row = location{1};
 gl.Layout.Column = location{2};
 
 set(gl, ...
     "Padding", [0, 0, 0, 0], ...
-    "ColumnWidth", {'1x', 3 * rowHeight} ...
+    "ColumnWidth", {'3x', '1x'} ...
     );
 end
 
-function editfield = generateDirpathField(gl, valueChangedFcn)
+function editfield = generateFilepathField(gl, valueChangedFcn)
 editfield = uieditfield(gl);
 set(editfield, ...
     "Enable", false, ...
     "ValueChangedFcn", valueChangedFcn ...
     );
 editfield.Layout.Column = 1;
-end
-
-function editfield = generateFilecountField(gl)
-editfield = uilabel(gl);
-set(editfield, "Text", num2str(0));
-editfield.Layout.Column = 2;
 end
