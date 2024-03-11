@@ -1,5 +1,5 @@
 classdef ResultsParser
-    properties (Access = private)
+    properties
         results;
     end
 
