@@ -28,11 +28,12 @@ classdef TrackingToolbar < handle
 
     %% Functions to generate tools
     methods (Access = private)
-        function tools = generateRegionShapeSection(obj, toolbar, trackingLinker)
-            tools = generateRegionShapeTools(toolbar);
-            set(tools, "ClickedCallback", @obj.shapeToolClicked);
-            
-            firstTool = tools(1);
+        function regionShapeTools = generateRegionShapeSection(obj, toolbar, trackingLinker)
+            regionShapeTools = generateRegionShapeTools(toolbar);
+            blobDetectionTool = generateBlobDetectionTool(toolbar, trackingLinker);
+
+            set(regionShapeTools, "ClickedCallback", @obj.shapeToolClicked);
+            firstTool = regionShapeTools(1);
             trackingLinker.setRegionShape(firstTool.UserData);
             setToogleToolState(firstTool, true);
         end
@@ -59,6 +60,15 @@ end
 function updateToggleToolState(activeTool, otherTools)
 setToogleToolState(otherTools, false);
 setToogleToolState(activeTool, true);
+end
+
+function tool = generateBlobDetectionTool(toolbar, trackingLinker)
+[icon, ~, ~] = imread("img/detect_blobs.png");
+tool = uipushtool(toolbar, ...
+    "Icon", icon, ...
+    "ClickedCallback", @trackingLinker.blobDetectionButtonPushed, ...
+    "Tooltip", BlobDetectorGui.title ...
+    );
 end
 
 function tools = generateExplorerSection(toolbar, trackingLinker)

@@ -24,7 +24,7 @@ classdef RegionDrawer < handle
     methods (Access = protected)
         function region = generateRegion(obj, ~, event)
             point = event.IntersectionPoint(1:2);
-            region = obj.drawRegion(point);
+            region = obj.byPoint(point);
             obj.addMetadataToRegion(region);
         end
     end
@@ -83,11 +83,16 @@ classdef RegionDrawer < handle
         end
     end
     methods (Access = protected)
-        function region = drawRegion(obj, point)
+        function region = byPoint(obj, point)
             ax = obj.getAxis();
             keyword = obj.getRegionShape();
             region = drawRegionByKeyword(ax, point, keyword);
             RegionDrawer.updateSelected(region);
+        end
+        function rect = rectangleByPosition(obj, position)
+            ax = obj.getAxis();
+            rect = images.roi.Rectangle(ax, "Position", position);
+            obj.addMetadataToRegion(rect);
         end
     end
     methods (Access = private)

@@ -1,24 +1,7 @@
-classdef TrackingLinker < RegionTracker
-    properties
-        getActiveRegion;
-        setPreviousRegionVisible;
-        setNextRegionVisible;
-        setRegionShape;
-        bringRegionToFront;
-        bringRegionForward;
-        sendRegionBackward;
-        sendRegionToBack;
-    end
-
+classdef TrackingLinker < RegionTracker & RegionPreviewer
     properties (Access = private)
-        % GUI components
         gui;
         videoSelector;
-        imageLinker;
-
-        % inherited functions
-        getRegions;
-        changeFullImage;
     end
 
     methods
@@ -32,31 +15,15 @@ classdef TrackingLinker < RegionTracker
             imageGui = trackingGui.getImageGui();
             regionGuiPanel = trackingGui.getRegionGuiPanel();
             imageLinker = ImageLinker(imageGui);
-            regionPreviewer = RegionPreviewer(imageLinker, regionGuiPanel);
 
+            obj@RegionPreviewer(imageLinker, regionGuiPanel);
             obj@RegionTracker();
             obj.videoSelector = VideoSelector( ...
                 directoryGui, ...
                 @obj.videoFilepathChanged ...
                 );
 
-            % inherited getters
-            obj.getActiveRegion = @regionPreviewer.getActiveRegion;
-            obj.getRegions = @regionPreviewer.getRegions;
-
-            % inherited setters
-            obj.changeFullImage = @regionPreviewer.changeFullImage;
-            obj.setPreviousRegionVisible = @regionPreviewer.setPreviousRegionVisible;
-            obj.setNextRegionVisible = @regionPreviewer.setNextRegionVisible;
-            obj.setRegionShape = @regionPreviewer.setRegionShape;
-
-            obj.bringRegionToFront = @regionPreviewer.bringRegionToFront;
-            obj.bringRegionForward = @regionPreviewer.bringRegionForward;
-            obj.sendRegionBackward = @regionPreviewer.sendRegionBackward;
-            obj.sendRegionToBack = @regionPreviewer.sendRegionToBack;
-
             obj.gui = trackingGui;
-            obj.imageLinker = imageLinker;
 
             fig = trackingGui.getFigure();
             TrackingToolbar(fig, obj);
@@ -73,23 +40,22 @@ classdef TrackingLinker < RegionTracker
             selector = obj.videoSelector;
         end
     end
-    methods (Access = private)
-        function linker = getImageLinker(obj)
-            linker = obj.imageLinker;
-        end
-    end
 
     %% Functions to update state of GUI
     methods
         function exportImageIfPossible(obj, ~, ~)
-            imageLinker = obj.getImageLinker();
             directoryPath = obj.gui.getDirectoryPath();
-            imageLinker.exportImageIfPossible(directoryPath);
+            obj.imageLinker.exportImageIfPossible(directoryPath);
         end
         function trackButtonPushed(obj, ~, ~)
             if obj.regionExists()
                 obj.trackAndSaveRegions();
             end
+        end
+        function blobDetectionButtonPushed(obj, ~, ~)
+            im = obj.videoSelector.getFirstFrame();
+            rectanglePositions = BlobDetectorLinker.openFigure(im);
+            obj.appendRectanglesByPositions(rectanglePositions);
         end
     end
     methods (Access = private)

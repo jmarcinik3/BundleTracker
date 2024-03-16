@@ -1,5 +1,5 @@
 classdef RegionPreviewer < RegionDrawer & RegionVisibler
-    properties (Access = private)
+    properties (Access = protected)
         imageLinker;
     end
 
@@ -29,6 +29,14 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 
     %% Functions to update state of GUI
     methods
+        function appendRectanglesByPositions(obj, positions)
+            rectCount = size(positions, 1);
+            for index = 1:rectCount
+                position = positions(index, :);
+                rect = obj.rectangleByPosition(position);
+                obj.generateRegionLinker(rect);
+            end
+        end
         function changeFullImage(obj, im)
             obj.clearRegions();
             obj.imageLinker.changeImage(im);
@@ -38,11 +46,14 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
                 region = obj.generateRegion(source, event);
-                regionLinker = generateRegionLinker(obj, region);
-                obj.addRegionEntry(regionLinker);
-                configureRegion(obj, region);
-                obj.previewRegion(region);
+                obj.generateRegionLinker(region);
             end
+        end
+        function generateRegionLinker(obj, region)
+            regionLinker = generateRegionLinker(obj, region);
+            obj.addRegionEntry(regionLinker);
+            configureRegion(obj, region);
+            obj.previewRegion(region);
         end
 
         function regionClicked(obj, source, event)

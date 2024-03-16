@@ -16,6 +16,7 @@ classdef AxisResizer
                 "CData", "PostSet", ...
                 @obj.resizeAxis ...
                 );
+            obj.resizeAxis();
         end
     end
 
