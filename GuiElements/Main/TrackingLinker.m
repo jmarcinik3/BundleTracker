@@ -102,7 +102,7 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
             results = {};
             for index = 1:numel(regions)
                 region = regions(index);
-                result = trackRegion(obj, region);
+                result = trackAndProcessRegion(obj, region);
                 results{index} = result;
             end
             results = cell2mat(results);

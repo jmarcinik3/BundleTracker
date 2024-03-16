@@ -1,24 +1,27 @@
 classdef Postprocessor < handle
     properties (Access = private)
-        results;
+        result;
+        parser;
     end
 
     methods
-        function obj = Postprocessor(results)
-            postResults = results;
-            postResults.xProcessed = results.x;
-            postResults.yProcessed = results.y;
-            postResults.xProcessedError = results.xError;
-            postResults.yProcessedError = results.yError;
-            obj.results = postResults;
+        function obj = Postprocessor(result)
+            postResult = result;
+            postResult.xProcessed = result.x;
+            postResult.yProcessed = result.y;
+            postResult.xProcessedError = result.xError;
+            postResult.yProcessedError = result.yError;
+
+            obj.parser = ResultsParser(result);
+            obj.result = postResult;
         end
 
         function reset(obj)
             % reset processed traces to redo postprocessing from raw traces
-            obj.results.xProcessed = x;
-            obj.results.yProcessed = y;
-            obj.results.xProcessedError = xError;
-            obj.results.yProcessedError = yError;
+            obj.result.xProcessed = x;
+            obj.result.yProcessed = y;
+            obj.result.xProcessedError = xError;
+            obj.result.yProcessedError = yError;
         end
         function process(obj)
             % shift first to reduce error and to rotate about mean
@@ -27,49 +30,51 @@ classdef Postprocessor < handle
             obj.scale(); % scale traces nm/px and add time from FPS
             obj.rotate(); % rotate trace to direction of maximal movement
         end
-        function results = getPostprocessedResults(obj)
-            results = obj.results;
+        function results = getPostprocessedResult(obj)
+            results = obj.result;
         end
 
         function direct(obj)
-            results = obj.results;
-            positiveDirection = results.Direction;
+            result = obj.result;
+            parser = obj.parser;
+            positiveDirection = parser.getPositiveDirection();
 
             % process trace direction based on given diagonal
             switch positiveDirection
                 case DirectionGui.upperLeft
-                    x = -results.xProcessed;
-                    y = -results.yProcessed;
+                    x = -result.xProcessed;
+                    y = -result.yProcessed;
                 case DirectionGui.upperRight
-                    x = results.xProcessed;
-                    y = -results.yProcessed;
+                    x = result.xProcessed;
+                    y = -result.yProcessed;
                 case DirectionGui.lowerLeft
-                    x = -results.xProcessed;
-                    y = results.yProcessed;
+                    x = -result.xProcessed;
+                    y = result.yProcessed;
                 case DirectionGui.lowerRight
-                    x = results.xProcessed;
-                    y = results.yProcessed;
+                    x = result.xProcessed;
+                    y = result.yProcessed;
             end
 
             % update processed traces
-            postResults = results;
-            postResults.xProcessed = x;
-            postResults.yProcessed = y;
-            obj.results = postResults;
+            postResult = result;
+            postResult.xProcessed = x;
+            postResult.yProcessed = y;
+            obj.result = postResult;
         end
         function scale(obj)
-            results = obj.results;
+            result = obj.result;
+            parser = obj.parser;
 
             % retrieve necessary data for scaling
-            positionScale = results.ScaleFactor;
-            scaleError = results.ScaleFactorError;
+            positionScale = parser.getScaleFactor();
+            scaleError = parser.getScaleFactorError();
+            fps = parser.getFps();
             scaleErrorFactor = (scaleError / positionScale) ^ 2;
-            fps = results.Fps;
 
-            x = results.xProcessed;
-            y = results.yProcessed;
-            xError = results.xProcessedError;
-            yError = results.yProcessedError;
+            x = result.xProcessed;
+            y = result.yProcessed;
+            xError = result.xProcessedError;
+            yError = result.yProcessedError;
 
             % scale traces
             xScaled = positionScale * x;
@@ -78,22 +83,22 @@ classdef Postprocessor < handle
             yScaledError = yScaled .* sqrt((yError./y).^2 + scaleErrorFactor);
 
             % update processed traces
-            postResults = results;
-            postResults.xProcessed = xScaled;
-            postResults.yProcessed = yScaled;
-            postResults.xProcessedError = xScaledError;
-            postResults.yProcessedError = yScaledError;
-            postResults.t = (1:numel(x)) / fps; % add time values
-            obj.results = postResults;
+            postResult = result;
+            postResult.xProcessed = xScaled;
+            postResult.yProcessed = yScaled;
+            postResult.xProcessedError = xScaledError;
+            postResult.yProcessedError = yScaledError;
+            postResult.t = (1:numel(x)) / fps; % add time values
+            obj.result = postResult;
         end
         function shift(obj)
-            results = obj.results;
+            result = obj.result;
 
             % retrieve necessary data for shifting
-            x = results.xProcessed;
-            y = results.yProcessed;
-            xErrorOld = results.xProcessedError;
-            yErrorOld = results.yProcessedError;
+            x = result.xProcessed;
+            y = result.yProcessed;
+            xErrorOld = result.xProcessedError;
+            yErrorOld = result.yProcessedError;
 
             % tare traces to zero mean
             xsize = numel(x);
@@ -105,22 +110,23 @@ classdef Postprocessor < handle
             yErrorTotal = sqrt(yErrorOld.^2 + yErrorFromMean^2);
 
             % update processed traces
-            postResults = results;
-            postResults.xProcessed = xShifted;
-            postResults.yProcessed = yShifted;
-            postResults.xProcessedError = xErrorTotal;
-            postResults.yProcessedError = yErrorTotal;
-            obj.results = postResults;
+            postResult = result;
+            postResult.xProcessed = xShifted;
+            postResult.yProcessed = yShifted;
+            postResult.xProcessedError = xErrorTotal;
+            postResult.yProcessedError = yErrorTotal;
+            obj.result = postResult;
         end
         function rotate(obj)
-            results = obj.results;
+            result = obj.result;
+            parser = obj.parser;
 
             % retrieve necessary data for rotating
-            angleMode = results.AngleMode;
-            x = results.xProcessed;
-            y = results.yProcessed;
-            xError = results.xProcessedError;
-            yError = results.yProcessedError;
+            angleMode = parser.getAngleMode();
+            x = result.xProcessed;
+            y = result.yProcessed;
+            xError = result.xProcessedError;
+            yError = result.yProcessedError;
 
             % find angle based on linear regression and rotate by it
             [angle, angleError, angleInfo] = AngleAlgorithms.byKeyword(x, y, angleMode);
@@ -129,18 +135,18 @@ classdef Postprocessor < handle
                 x, y, xError, yError, angle, angleError ...
                 );
 
-            postResults = results;
+            postResult = result;
             % add information pertaining to best-fit angle
-            postResults.angle = angle;
-            postResults.angleError = angleError;
-            postResults.angleInfo = angleInfo;
+            postResult.angle = angle;
+            postResult.angleError = angleError;
+            postResult.angleInfo = angleInfo;
 
             % update processed traces
-            postResults.xProcessed = xRotated;
-            postResults.yProcessed = yRotated;
-            postResults.xProcessedError = xRotatedError;
-            postResults.yProcessedError = yRotatedError;
-            obj.results = postResults;
+            postResult.xProcessed = xRotated;
+            postResult.yProcessed = yRotated;
+            postResult.xProcessedError = xRotatedError;
+            postResult.yProcessedError = yRotatedError;
+            obj.result = postResult;
         end
     end
 end

@@ -71,6 +71,10 @@ classdef DirectionGui
 
     %% Functions to retrieve state information
     methods (Static)
+        function location = buttonToLocation(button)
+            buttonTag = get(button, "Tag");
+            location = DirectionGui.tagToLocation(buttonTag);
+        end
         function location = tagToLocation(tag)
             location = tag;
         end

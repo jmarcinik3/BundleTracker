@@ -89,7 +89,8 @@ classdef RegionLinker < PreprocessorLinker
             obj.regionParser.setAngleMode(angleMode);
         end
         function directionChanged(obj, source, ~)
-            direction = source.Value;
+            selectedButton = get(source, "SelectedObject");
+            direction = DirectionGui.buttonToLocation(selectedButton);
             obj.regionParser.setPositiveDirection(direction);
         end
     end

@@ -66,6 +66,9 @@ classdef ResultsParser
         function trackingMode = getTrackingMode(obj)
             trackingMode = vertcat(obj.results.TrackingMode);
         end
+        function angleMode = getAngleMode(obj)
+            angleMode = vertcat(obj.results.AngleMode);
+        end
         function location = getPositiveDirection(obj)
             location = vertcat(obj.results.Direction);
         end
@@ -77,6 +80,13 @@ classdef ResultsParser
         end
         function intensities = getIntensityRange(obj)
             intensities = vertcat(obj.results.IntensityRange);
+        end
+
+        function scaleFactor = getScaleFactor(obj)
+            scaleFactor = obj.results.ScaleFactor;
+        end
+        function scaleFactor = getScaleFactorError(obj)
+            scaleFactor = obj.results.ScaleFactorError;
         end
     end
 end
