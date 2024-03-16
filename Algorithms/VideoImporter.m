@@ -14,12 +14,14 @@ classdef VideoImporter < handle
     end
 
     %% Functions to retrieve state information
-    methods (Access = protected)
+    methods
         function ims = getVideoInRegion(obj, region)
             im1 = obj.ims(:, :, 1);
             [rowsSlice, columnsSlice] = MatrixUnpadder.slicesByRegion(region, im1);
             ims = obj.ims(rowsSlice, columnsSlice, :);
         end
+    end
+    methods (Access = protected)
         function im = getFrameInRegion(obj, frameNumber, region)
             im1 = obj.ims(:, :, 1);
             [rowsSlice, columnsSlice] = MatrixUnpadder.slicesByRegion(region, im1);

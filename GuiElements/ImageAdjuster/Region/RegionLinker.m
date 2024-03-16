@@ -8,6 +8,7 @@ classdef RegionLinker < PreprocessorLinker
     methods
         function obj = RegionLinker(regionGui, region, fullRawImage)
             preprocessorGui = regionGui.getPreprocessorGui();
+            postprocessorGui = regionGui.getPostprocessorGui();
             regionMoverGui = regionGui.getRegionMoverGui();
             regionCompressorGui = regionGui.getRegionCompressorGui();
             regionExpanderGui = regionGui.getRegionExpanderGui();
@@ -30,6 +31,9 @@ classdef RegionLinker < PreprocessorLinker
             configureRegion(obj, region);
             configureThresholdSlider(obj, preprocessorGui, regionParser);
             configureInvertCheckbox(obj, preprocessorGui, regionParser);
+            configureTrackingSelection(obj, postprocessorGui, regionParser);
+            configureAngleSelection(obj, postprocessorGui, regionParser);
+            configureDirection(obj, postprocessorGui.getDirectionGui(), regionParser);
             obj.updateRegionalRawImage();
         end
     end
@@ -75,6 +79,19 @@ classdef RegionLinker < PreprocessorLinker
             obj.regionParser.setInvert(invert);
             invertCheckboxChanged@PreprocessorLinker(obj, source, event);
         end
+
+        function trackingModeChanged(obj, source, ~)
+            trackingMode = source.Value;
+            obj.regionParser.setTrackingMode(trackingMode);
+        end
+        function angleModeChanged(obj, source, ~)
+            angleMode = source.Value;
+            obj.regionParser.setAngleMode(angleMode);
+        end
+        function directionChanged(obj, source, ~)
+            direction = source.Value;
+            obj.regionParser.setPositiveDirection(direction);
+        end
     end
     methods (Access = private)
         function regionMoving(obj, ~, ~)
@@ -110,6 +127,31 @@ set(invertCheckbox, ...
     "ValueChangedFcn", @obj.invertCheckboxChanged, ...
     "Value", invert ...
     );
+end
+
+function configureTrackingSelection(obj, gui, regionParser)
+trackingMode = regionParser.getTrackingMode();
+trackingSelection = gui.getTrackingSelectionElement();
+set(trackingSelection, ...
+    "ValueChangedFcn", @obj.trackingModeChanged, ...
+    "Value", trackingMode ...
+    );
+end
+
+function configureAngleSelection(obj, gui, regionParser)
+angleMode = regionParser.getAngleMode();
+angleSelection = gui.getAngleSelectionElement();
+set(angleSelection, ...
+    "ValueChangedFcn", @obj.angleModeChanged, ...
+    "Value", angleMode ...
+    );
+end
+
+function configureDirection(obj, directionGui, regionParser)
+direction = regionParser.getPositiveDirection();
+directionElement = directionGui.getRadioGroup();
+set(directionElement, "SelectionChangedFcn", @obj.directionChanged);
+directionGui.setLocation(direction);
 end
 
 function configureRegion(obj, region)

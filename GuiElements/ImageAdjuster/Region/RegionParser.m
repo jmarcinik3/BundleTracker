@@ -3,6 +3,17 @@ classdef RegionParser
         labelKeyword = "Label";
         intensityKeyword = "IntensityRange";
         invertKeyword = "IsInverted";
+        trackingKeyword = "TrackingMode";
+        angleKeyword = "AngleMode";
+        directionKeyword = "Direction";
+        keywords = [ ...
+            RegionParser.labelKeyword, ...
+            RegionParser.intensityKeyword, ...
+            RegionParser.invertKeyword, ...
+            RegionParser.trackingKeyword, ...
+            RegionParser.angleKeyword, ...
+            RegionParser.directionKeyword, ...
+            ]
     end
 
     properties (Access = private)
@@ -29,15 +40,34 @@ classdef RegionParser
         function region = getRegion(obj)
             region = obj.region;
         end
-        function thresholds = getThresholds(obj)
+        function val = getByKeyword(obj, keyword)
             region = obj.getRegion();
+            if keyword == RegionParser.labelKeyword
+                val = obj.getLabel();
+            else
+                val = region.UserData.(keyword);
+            end
+        end
+
+        function thresholds = getThresholds(obj)
             keyword = RegionParser.intensityKeyword;
-            thresholds = region.UserData.(keyword);
+            thresholds = obj.getByKeyword(keyword);
         end
         function invert = getInvert(obj)
-            region = obj.getRegion();
             keyword = RegionParser.invertKeyword;
-            invert = region.UserData.(keyword);
+            invert = obj.getByKeyword(keyword);
+        end
+        function trackingMode = getTrackingMode(obj)
+            keyword = RegionParser.trackingKeyword;
+            trackingMode = obj.getByKeyword(keyword);
+        end
+        function angleMode = getAngleMode(obj)
+            keyword = RegionParser.angleKeyword;
+            angleMode = obj.getByKeyword(keyword);
+        end
+        function direction = getPositiveDirection(obj)
+            keyword = RegionParser.directionKeyword;
+            direction = obj.getByKeyword(keyword);
         end
         function label = getLabel(obj)
             region = obj.getRegion();
@@ -47,21 +77,39 @@ classdef RegionParser
 
     %% Functions to set state information
     methods
-        function setThresholds(obj, thresholds)
+        function setByKeyword(obj, val, keyword)
             region = obj.getRegion();
+            region.UserData.(keyword) = val;
+        end
+
+        function setThresholds(obj, thresholds)
             keyword = RegionParser.intensityKeyword;
-            region.UserData.(keyword) = thresholds;
+            obj.setByKeyword(thresholds, keyword);
         end
         function setInvert(obj, invert)
-            region = obj.getRegion();
             keyword = RegionParser.invertKeyword;
-            region.UserData.(keyword) = invert;
+            obj.setByKeyword(invert, keyword);
         end
+        function setTrackingMode(obj, trackingMode)
+            keyword = RegionParser.trackingKeyword;
+            obj.setByKeyword(trackingMode, keyword);
+        end
+        function setAngleMode(obj, angleMode)
+            keyword = RegionParser.angleKeyword;
+            obj.setByKeyword(angleMode, keyword);
+        end
+        function setPositiveDirection(obj, direction)
+            keyword = RegionParser.directionKeyword;
+            obj.setByKeyword(direction, keyword);
+        end
+
         function results = appendMetadata(obj, results)
-            results.(RegionParser.labelKeyword) = obj.getLabel();
+            keywords = RegionParser.keywords;
+            for index = 1:numel(keywords)
+                keyword = keywords(index);
+                results.(keyword) = obj.getByKeyword(keyword);
+            end
             results.Region = obj.getRegion();
-            results.(RegionParser.intensityKeyword) = obj.getThresholds();
-            results.(RegionParser.invertKeyword) = obj.getInvert();
         end
     end
 end

@@ -1,4 +1,8 @@
 classdef RegionAdjusterGui
+    properties (Constant)
+        length = 48;
+    end
+
     properties (Access = private)
         gridLayout;
         imageElements;

@@ -27,7 +27,7 @@ classdef DirectionGui
         function obj = DirectionGui(parent)
             gl = uigridlayout(parent, [1, 2]);
             gl.Padding = [0, 0, 0, 0];
-            
+
             obj.label = generateLabel(gl);
             group = uibuttongroup(gl, "BorderType", "none");
 
@@ -36,37 +36,73 @@ classdef DirectionGui
             obj.lowerLeftButton = generateLowerLeftButton(group);
             obj.lowerRightButton = generateLowerRightButton(group);
             obj.radioGroup = group;
-            
+
             obj.gridLayout = gl;
             layoutElements(obj);
         end
     end
 
-    %% Functions to retreive GUI elements and state information
-    methods (Static)
-        function location = tagToLocation(tag)
-            location = tag;
-        end
-    end
+
+    %% Functions to retrieve GUI elements
     methods
         function elem = getGridLayout(obj)
             elem = obj.gridLayout;
         end
-        function text = getLocation(obj)
-            button = obj.getSelectedButton();
-            buttonTag = get(button, "Tag");
-            text = obj.tagToLocation(buttonTag);
+        function group = getRadioGroup(obj)
+            group = obj.radioGroup;
         end
     end
     methods (Access = private)
         function button = getSelectedButton(obj)
             button = obj.radioGroup.SelectedObject;
         end
-        function group = getRadioGroup(obj)
-            group = obj.radioGroup;
-        end
         function label = getLabel(obj)
             label = obj.label;
+        end
+        function buttons = getButtons(obj)
+            buttons = [ ...
+                obj.upperLeftButton, ...
+                obj.upperRightButton, ...
+                obj.lowerLeftButton, ...
+                obj.lowerRightButton ...
+                ];
+        end
+    end
+
+    %% Functions to retrieve state information
+    methods (Static)
+        function location = tagToLocation(tag)
+            location = tag;
+        end
+    end
+    methods
+        function text = getLocation(obj)
+            button = obj.getSelectedButton();
+            buttonTag = get(button, "Tag");
+            text = obj.tagToLocation(buttonTag);
+        end
+    end
+
+    %% Functions to set state information
+    methods
+        function setLocation(obj, location)
+            switch location
+                case DirectionGui.upperLeft
+                    button = obj.upperLeftButton;
+                case DirectionGui.upperRight
+                    button = obj.upperRightButton;
+                case DirectionGui.lowerLeft
+                    button = obj.lowerLeftButton;
+                case DirectionGui.lowerRight
+                    button = obj.lowerRightButton;
+            end
+            obj.setSelectedButton(button);
+        end
+    end
+    methods (Access = private)
+        function setSelectedButton(obj, button)
+            group = obj.getRadioGroup();
+            set(group, "SelectedObject", button);
         end
     end
 end

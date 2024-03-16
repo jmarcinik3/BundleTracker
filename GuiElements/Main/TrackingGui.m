@@ -11,9 +11,6 @@ classdef TrackingGui
         % components to set processing and tracking methods
         imageGui;
         regionGuiPanel;
-        trackingSelection;
-        angleSelection;
-        positiveDirection;
         scaleFactorInputElement;
 
         % components related to files
@@ -24,7 +21,7 @@ classdef TrackingGui
     methods
         function obj = TrackingGui()
             gl = generateGridLayout([2, 2]);
-            rgl = uigridlayout(gl, [6, 1]);
+            rgl = uigridlayout(gl, [3, 1]);
             rgl.Layout.Row = 2;
             rgl.Layout.Column = 2;
 
@@ -39,9 +36,6 @@ classdef TrackingGui
                 );
             obj.directoryGui = VideoGui(gl, {1, [1, 2]});
 
-            obj.trackingSelection = generateTrackingSelection(rgl);
-            obj.angleSelection = generateAngleSelection(rgl);
-            obj.positiveDirection = DirectionGui(rgl);
             obj.scaleFactorInputElement = generateScaleFactorElement(rgl);
             obj.saveFilestemElement = generateSaveFilestemElement(rgl);
 
@@ -79,15 +73,6 @@ classdef TrackingGui
         end
 
         % components for processing
-        function elem = getTrackingSelectionElement(obj)
-            elem = obj.trackingSelection;
-        end
-        function elem = getAngleSelectionElement(obj)
-            elem = obj.angleSelection;
-        end
-        function elem = getPositiveDirectionElement(obj)
-            elem = obj.positiveDirection.getGridLayout();
-        end
         function elem = getScaleFactorInputElement(obj)
             elem = obj.scaleFactorInputElement;
         end
@@ -103,17 +88,8 @@ classdef TrackingGui
         function path = getDirectoryPath(obj)
             path = obj.directoryGui.getDirectoryPath();
         end
-        function val = getTrackingMode(obj)
-            val = string(obj.trackingSelection.Value);
-        end
-        function val = getAngleMode(obj)
-            val = string(obj.angleSelection.Value);
-        end
 
         % ...for postprocessing
-        function loc = getPositiveDirection(obj)
-            loc = obj.positiveDirection.getLocation();
-        end
         function factor = getScaleFactor(obj)
             gl = obj.scaleFactorInputElement;
             textbox = gl.Children(2);
@@ -129,7 +105,6 @@ classdef TrackingGui
             textbox = gl.Children(2);
             stem = textbox.Value;
         end
-
 
         function filepath = generateSaveFilepath(obj)
             directoryPath = obj.getDirectoryPath();
@@ -171,19 +146,13 @@ function layoutRightsideElements(gui)
 rowHeight = TrackingGui.rowHeight;
 rgl = gui.getRightGridLayout();
 
-positiveDirectionGroup = gui.getPositiveDirectionElement();
 scaleFactorElement = gui.getScaleFactorInputElement();
-trackingDropdown = gui.getTrackingSelectionElement();
-angleDropdown = gui.getAngleSelectionElement();
 saveFilestemElement = gui.getSaveFilestemElement();
 regionGuiPanel = gui.getRegionGuiPanel();
 
-trackingDropdown.Layout.Row = 1;
-angleDropdown.Layout.Row = 2;
-positiveDirectionGroup.Layout.Row = 3;
-scaleFactorElement.Layout.Row = 4;
-saveFilestemElement.Layout.Row = 5;
-regionGuiPanel.Layout.Row = 6;
+scaleFactorElement.Layout.Row = 1;
+saveFilestemElement.Layout.Row = 2;
+regionGuiPanel.Layout.Row = 3;
 
 set(scaleFactorElement, ...
     "RowHeight", rowHeight, ...
@@ -194,9 +163,7 @@ set(saveFilestemElement, ...
     "ColumnWidth", {'1x', '2x'} ...
     );
 
-rgl.RowHeight = num2cell(rowHeight * ones(1, 6));
-rgl.RowHeight{3} = 'fit';
-rgl.RowHeight{6} = '1x';
+set(rgl, "RowHeight", {rowHeight, rowHeight, '1x'});
 end
 
 function gl = generateGridLayout(size)
@@ -207,34 +174,6 @@ set(fig, ...
     "Position", position ...
     );
 gl = uigridlayout(fig, size);
-end
-
-%% Function to generate tracking method dropdown
-% Generates dropdown menu allowing user to select tracking method (e.g.
-% "Centroid")
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add dropdown in
-%
-% Returns uiddropdown
-function dropdown = generateTrackingSelection(gl)
-dropdown = uidropdown(gl);
-dropdown.Items = TrackingAlgorithms.keywords;
-end
-
-%% Function to generate angle method dropdown
-% Generates dropdown menu allowing user to select tracking method (e.g.
-% "Centroid")
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add dropdown in
-%
-% Returns uiddropdown
-function dropdown = generateAngleSelection(gl)
-dropdown = uidropdown(gl);
-dropdown.Items = AngleAlgorithms.keywords;
 end
 
 %% Function to generate scale factor input

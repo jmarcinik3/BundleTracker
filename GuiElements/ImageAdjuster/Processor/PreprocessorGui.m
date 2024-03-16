@@ -1,4 +1,4 @@
-classdef PreprocessorGui < handle
+classdef PreprocessorGui
     properties (Access = private)
         gridLayout;
         interactiveImage;

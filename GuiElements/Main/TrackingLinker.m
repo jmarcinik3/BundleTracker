@@ -1,4 +1,4 @@
-classdef TrackingLinker < RegionTracker & RegionPreviewer
+classdef TrackingLinker < VideoImporter & RegionPreviewer
     properties (Access = private)
         gui;
         videoSelector;
@@ -17,7 +17,7 @@ classdef TrackingLinker < RegionTracker & RegionPreviewer
             imageLinker = ImageLinker(imageGui);
 
             obj@RegionPreviewer(imageLinker, regionGuiPanel);
-            obj@RegionTracker();
+            obj@VideoImporter([]);
             obj.videoSelector = VideoSelector( ...
                 directoryGui, ...
                 @obj.videoFilepathChanged ...
@@ -58,6 +58,20 @@ classdef TrackingLinker < RegionTracker & RegionPreviewer
             obj.appendRectanglesByPositions(rectanglePositions);
         end
     end
+
+    %% Functions to generate state information
+    methods
+        function result = generateInitialResult(obj)
+            gui = obj.gui;
+            result = struct( ...
+                "DirectoryPath", gui.getDirectoryPath(), ...
+                "ScaleFactor", gui.getScaleFactor(), ...
+                "ScaleFactorError", gui.getScaleFactorError(), ...
+                "Fps", obj.getFps() ...
+                );
+        end
+    end
+
     methods (Access = private)
         function exists = regionExists(obj)
             regions = obj.getRegions();
@@ -69,7 +83,9 @@ classdef TrackingLinker < RegionTracker & RegionPreviewer
         end
         function trackAndSaveRegions(obj)
             results = obj.trackAndProcess();
-            if obj.trackingWasCompleted()
+            trackingWasCompleted = true;
+
+            if trackingWasCompleted
                 obj.trackingCompleted(results);
             else
                 obj.throwAlertMessage("Tracking Canceled!", "Start Tracking");
@@ -81,31 +97,19 @@ classdef TrackingLinker < RegionTracker & RegionPreviewer
             obj.exportImageIfPossible();
         end
         function results = trackAndProcess(obj)
-            obj.prepareTracking();
             regions = obj.getRegions();
-            results = obj.trackAndProcessRegions(regions);
-        end
-        function prepareTracking(obj)
-            trackingMode = obj.gui.getTrackingMode();
-            initialResult = obj.generateInitialResult();
-            obj.setTrackingMode(trackingMode);
-            obj.setInitialResult(initialResult);
+
+            results = {};
+            for index = 1:numel(regions)
+                region = regions(index);
+                result = trackRegion(obj, region);
+                results{index} = result;
+            end
+            results = cell2mat(results);
         end
         function filepath = saveResults(obj, results)
             filepath = obj.gui.generateSaveFilepath();
             save(filepath, "results");
-        end
-        function result = generateInitialResult(obj)
-            gui = obj.gui;
-            result = struct( ...
-                "DirectoryPath", gui.getDirectoryPath(), ...
-                "TrackingMode", gui.getTrackingMode(), ...
-                "AngleMode", gui.getAngleMode(), ...
-                "Direction", gui.getPositiveDirection(), ...
-                "ScaleFactor", gui.getScaleFactor(), ...
-                "ScaleFactorError", gui.getScaleFactorError(), ...
-                "Fps", obj.getFps() ...
-                );
         end
 
         function videoFilepathChanged(obj, ~, ~)
@@ -136,16 +140,11 @@ end
 function message = trackingCompletedMessage(results, filepath)
 resultsParser = ResultsParser(results);
 count = resultsParser.getRegionCount();
-trackingMode = resultsParser.getTrackingMode();
-positiveDirection = resultsParser.getPositiveDirection();
 fps = resultsParser.getFps();
-
 savedMsg = sprintf("Results saved to %s", filepath);
 countMsg = sprintf("Cell Count: %d", count);
-modeMsg = sprintf("Tracking Algorithm: %s", trackingMode);
 fpsMsg = sprintf("FPS: %d", fps);
-directionMsg = sprintf("Positive Direction: %s", positiveDirection);
-message = [savedMsg, countMsg, modeMsg, directionMsg, fpsMsg];
+message = [savedMsg, countMsg, fpsMsg];
 end
 
 function updateFrameLabel(obj, videoSelector)
