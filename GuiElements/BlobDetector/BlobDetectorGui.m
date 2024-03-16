@@ -1,14 +1,14 @@
 classdef BlobDetectorGui
     properties (Constant)
         title = "Add Regions by Blob Detection";
-        applyText = "Apply";
-        cancelText = "Cancel";
     end
 
     properties (Constant, Access = private)
         rows = 6;
         columns = 4;
         size = [BlobDetectorGui.rows, BlobDetectorGui.columns];
+        applyText = "Apply";
+        cancelText = "Cancel";
     end
 
     properties (Access = private)
