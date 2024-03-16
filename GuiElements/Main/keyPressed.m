@@ -7,8 +7,12 @@ modifiers = event.Modifier;
 modKey = ModifierKey(modifiers);
 
 if objectExists(activeRegion) && RegionAdjustKey.is(key)
-    if modKey.isCtrlShiftAlt && ArrowKey.isVertical(key)
-        RegionOrderer.byKey(activeRegion, event);
+    if modKey.isCtrlShiftAlt
+        if ArrowKey.isVertical(key)
+            RegionOrderer.byKey(activeRegion, event);
+        elseif RegionAdjustKey.isDelete(key)
+            trackingLinker.clearRegions();
+        end
     elseif modKey.isPureAlt
         if ArrowKey.isVertical(key)
             RegionOrderer.byKey(activeRegion, event);

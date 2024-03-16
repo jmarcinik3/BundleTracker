@@ -31,6 +31,7 @@ classdef TrackingToolbar < handle
         function regionShapeTools = generateRegionShapeSection(obj, toolbar, trackingLinker)
             regionShapeTools = generateRegionShapeTools(toolbar);
             blobDetectionTool = generateBlobDetectionTool(toolbar, trackingLinker);
+            removeRegionsTool = generateRemoveRegionsTool(toolbar, trackingLinker);
 
             set(regionShapeTools, "ClickedCallback", @obj.shapeToolClicked);
             firstTool = regionShapeTools(1);
@@ -63,11 +64,19 @@ setToogleToolState(activeTool, true);
 end
 
 function tool = generateBlobDetectionTool(toolbar, trackingLinker)
-[icon, ~, ~] = imread("img/detect_blobs.png");
+[icon, ~, ~] = imread("img/detect-blobs.png");
 tool = uipushtool(toolbar, ...
     "Icon", icon, ...
     "ClickedCallback", @trackingLinker.blobDetectionButtonPushed, ...
     "Tooltip", BlobDetectorGui.title ...
+    );
+end
+function tool = generateRemoveRegionsTool(toolbar, trackingLinker)
+[icon, ~, ~] = imread("img/remove-all.png");
+tool = uipushtool(toolbar, ...
+    "Icon", icon, ...
+    "ClickedCallback", @trackingLinker.clearRegions, ...
+    "Tooltip", "Remove All Regions (Ctrl+Shift+Alt+Del)" ...
     );
 end
 
