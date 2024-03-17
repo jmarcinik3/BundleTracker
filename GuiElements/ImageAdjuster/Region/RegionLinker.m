@@ -7,8 +7,6 @@ classdef RegionLinker < PreprocessorLinker
 
     methods
         function obj = RegionLinker(regionGui, region, fullRawImage)
-            preprocessorGui = regionGui.getPreprocessorGui();
-            postprocessorGui = regionGui.getPostprocessorGui();
             regionMoverGui = regionGui.getRegionMoverGui();
             regionCompressorGui = regionGui.getRegionCompressorGui();
             regionExpanderGui = regionGui.getRegionExpanderGui();
@@ -17,10 +15,12 @@ classdef RegionLinker < PreprocessorLinker
             RegionCompressorLinker(regionCompressorGui, region);
             RegionExpanderLinker(regionExpanderGui, region);
             regionParser = RegionParser(region);
-            obj@PreprocessorLinker(preprocessorGui);
+            obj@PreprocessorLinker(regionGui);
 
-            iIm = preprocessorGui.getInteractiveImage();
+            iIm = regionGui.getInteractiveImage();
             AxisResizer(iIm, "FitToContent", true);
+
+            addlistener(region, "UserData", "PostSet", @obj.regionUserDataChanged);
 
             % own properties
             obj.gui = regionGui;
@@ -29,11 +29,11 @@ classdef RegionLinker < PreprocessorLinker
 
             % configure GUI elements, must come last
             configureRegion(obj, region);
-            configureThresholdSlider(obj, preprocessorGui, regionParser);
-            configureInvertCheckbox(obj, preprocessorGui, regionParser);
-            configureTrackingSelection(obj, postprocessorGui, regionParser);
-            configureAngleSelection(obj, postprocessorGui, regionParser);
-            configureDirection(obj, postprocessorGui.getDirectionGui(), regionParser);
+            configureThresholdSlider(obj, regionGui, regionParser);
+            configureInvertCheckbox(obj, regionGui, regionParser);
+            configureTrackingSelection(obj, regionGui, regionParser);
+            configureAngleSelection(obj, regionGui, regionParser);
+            configureDirection(obj, regionGui.getDirectionGui(), regionParser);
             obj.updateRegionalRawImage();
         end
     end
@@ -64,28 +64,21 @@ classdef RegionLinker < PreprocessorLinker
 
     %% Functions to update GUI and state information
     methods (Access = protected)
-        function thresholdSliderChanging(obj, source, event)
+        function thresholdSliderChanged(obj, ~, event)
             thresholds = event.Value;
             obj.regionParser.setThresholds(thresholds);
-            thresholdSliderChanging@PreprocessorLinker(obj, source, event);
         end
-        function thresholdSliderChanged(obj, source, event)
-            thresholds = source.Value;
-            obj.regionParser.setThresholds(thresholds);
-            thresholdSliderChanged@PreprocessorLinker(obj, source, event);
-        end
-        function invertCheckboxChanged(obj, source, event)
-            invert = source.Value;
+        function invertCheckboxChanged(obj, ~, event)
+            invert = event.Value;
             obj.regionParser.setInvert(invert);
-            invertCheckboxChanged@PreprocessorLinker(obj, source, event);
         end
 
-        function trackingModeChanged(obj, source, ~)
-            trackingMode = source.Value;
+        function trackingModeChanged(obj, ~, event)
+            trackingMode = event.Value;
             obj.regionParser.setTrackingMode(trackingMode);
         end
-        function angleModeChanged(obj, source, ~)
-            angleMode = source.Value;
+        function angleModeChanged(obj, ~, event)
+            angleMode = event.Value;
             obj.regionParser.setAngleMode(angleMode);
         end
         function directionChanged(obj, source, ~)
@@ -93,6 +86,16 @@ classdef RegionLinker < PreprocessorLinker
             direction = DirectionGui.buttonToLocation(selectedButton);
             obj.regionParser.setPositiveDirection(direction);
         end
+
+        function regionUserDataChanged(obj, ~, ~)
+            regionParser = obj.regionParser;
+            gui = obj.gui;
+
+            thresholds = regionParser.getThresholds();
+            linkParserIntoGui(regionParser, gui);
+            obj.updateFromRawImage(thresholds);
+        end
+        
     end
     methods (Access = private)
         function regionMoving(obj, ~, ~)
@@ -110,12 +113,18 @@ end
 
 
 
+function linkParserIntoGui(regionParser, regionGui)
+thresholds = regionParser.getThresholds();
+invert = regionParser.getInvert();
+set(regionGui.getThresholdSlider(), "Value", thresholds);
+end
+
+
 %% Functions to configure GUI elements
 function configureThresholdSlider(obj, gui, regionParser)
 thresholds = regionParser.getThresholds();
 thresholdSlider = gui.getThresholdSlider();
 set(thresholdSlider, ...
-    "ValueChangingFcn", @obj.thresholdSliderChanging, ...
     "ValueChangedFcn", @obj.thresholdSliderChanged, ...
     "Value", thresholds ...
     );

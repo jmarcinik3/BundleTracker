@@ -1,4 +1,4 @@
-classdef RegionGui
+classdef RegionGui < ProcessorGui
     properties (Constant, Access = private)
         rows = 7;
         columns = 5;
@@ -7,8 +7,6 @@ classdef RegionGui
 
     properties (Access = private)
         gridLayout;
-        preprocessorGui;
-        postprocessorGui;
         regionMoverGui;
         regionCompressorGui;
         regionExpanderGui;
@@ -16,23 +14,19 @@ classdef RegionGui
 
     methods
         function obj = RegionGui(gl)
-            preprocessorGui = PreprocessorGui(gl);
-            postprocessorGui = PostprocessorGui(gl);
+            obj@ProcessorGui(gl);
             regionMoverGui = RegionMoverGui(gl);
             regionCompressorGui = RegionCompressorGui(gl);
             regionExpanderGui = RegionExpanderGui(gl);
-
+            
+            obj.gridLayout = gl;
             layoutElements( ...
-                preprocessorGui, ...
-                postprocessorGui, ...
+                obj, ...
                 regionMoverGui, ...
                 regionCompressorGui, ...
                 regionExpanderGui ...
                 );
 
-            obj.gridLayout = gl;
-            obj.preprocessorGui = preprocessorGui;
-            obj.postprocessorGui = postprocessorGui;
             obj.regionMoverGui = regionMoverGui;
             obj.regionCompressorGui = regionCompressorGui;
             obj.regionExpanderGui = regionExpanderGui;
@@ -55,12 +49,6 @@ classdef RegionGui
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
         end
-        function gui = getPreprocessorGui(obj)
-            gui = obj.preprocessorGui;
-        end
-        function gui = getPostprocessorGui(obj)
-            gui = obj.postprocessorGui;
-        end
         function gui = getRegionMoverGui(obj)
             gui = obj.regionMoverGui;
         end
@@ -76,8 +64,7 @@ end
 
 
 function layoutElements( ...
-    preprocessorGui, ...
-    postprocessorGui, ...
+    obj, ...
     regionMoverGui, ...
     regionCompressorGui, ...
     regionExpanderGui ...
@@ -89,18 +76,17 @@ columnCount = RegionGui.columns;
 adjusterLength = RegionAdjusterGui.length;
 
 % Retrieve components
-gl = preprocessorGui.getGridLayout();
-
-ax = preprocessorGui.getAxis();
-thresholdSlider = preprocessorGui.getThresholdSlider();
-invertCheckbox = preprocessorGui.getInvertCheckbox();
-trackingSelection = postprocessorGui.getTrackingSelectionElement();
-angleSelection = postprocessorGui.getAngleSelectionElement();
-directionElement = postprocessorGui.getPositiveDirectionElement();
-
+gl = obj.getGridLayout();
 regionMoverElement = regionMoverGui.getGridLayout();
 regionCompressorElement = regionCompressorGui.getGridLayout();
 regionExpanderElement = regionExpanderGui.getGridLayout();
+
+ax = obj.getAxis();
+thresholdSlider = obj.getThresholdSlider();
+invertCheckbox = obj.getInvertCheckbox();
+trackingSelection = obj.getTrackingSelectionElement();
+angleSelection = obj.getAngleSelectionElement();
+directionElement = obj.getPositiveDirectionElement();
 
 % lay out full-row elements across all columns
 rowElements = [ ...
@@ -116,7 +102,6 @@ for index = 1:numel(rowElements)
     elem.Layout.Row = index;
     elem.Layout.Column = [1, columnCount];
 end
-
 % lay out region adjuster elements in same row
 adjustElements = [ ...
     regionMoverElement, ...

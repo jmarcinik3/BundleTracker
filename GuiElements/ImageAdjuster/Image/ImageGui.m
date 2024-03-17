@@ -1,4 +1,4 @@
-classdef ImageGui < PreprocessorGui & PostprocessorGui
+classdef ImageGui < ProcessorGui
     properties (Constant, Access = private)
         rows = 3;
         columns = 6;
@@ -7,8 +7,7 @@ classdef ImageGui < PreprocessorGui & PostprocessorGui
 
     methods
         function obj = ImageGui(gl)
-            obj@PreprocessorGui(gl);
-            obj@PostprocessorGui(gl);
+            obj@ProcessorGui(gl);
             layoutElements(obj);
         end
     end
@@ -17,18 +16,6 @@ classdef ImageGui < PreprocessorGui & PostprocessorGui
     methods (Static)
         function gl = generateGridLayout(parent)
             gl = uigridlayout(parent, ImageGui.size);
-        end
-    end
-
-    %% Functions to retreive state information
-    methods
-        function userData = getRegionUserData(obj)
-            preUserData = getRegionUserData@PreprocessorGui(obj);
-            postUserData = getRegionUserData@PostprocessorGui(obj);
-            userData = table2struct([ ...
-                struct2table(preUserData), ...
-                struct2table(postUserData) ...
-                ]);
         end
     end
 end
