@@ -1,4 +1,4 @@
-classdef RegionParser
+classdef RegionParser < handle
     properties (Constant)
         labelKeyword = "Label";
         intensityKeyword = "IntensityRange";
@@ -18,6 +18,13 @@ classdef RegionParser
 
     properties (Access = private)
         region;
+    end
+    properties (SetObservable, Access = protected)
+        Thresholds;
+        Invert;
+        TrackingMode;
+        AngleMode;
+        PositiveDirection;
     end
 
     methods
@@ -85,22 +92,27 @@ classdef RegionParser
         function setThresholds(obj, thresholds)
             keyword = RegionParser.intensityKeyword;
             obj.setByKeyword(thresholds, keyword);
+            obj.Thresholds = thresholds;
         end
         function setInvert(obj, invert)
             keyword = RegionParser.invertKeyword;
             obj.setByKeyword(invert, keyword);
+            obj.Invert = invert;
         end
         function setTrackingMode(obj, trackingMode)
             keyword = RegionParser.trackingKeyword;
             obj.setByKeyword(trackingMode, keyword);
+            obj.TrackingMode = trackingMode;
         end
         function setAngleMode(obj, angleMode)
             keyword = RegionParser.angleKeyword;
             obj.setByKeyword(angleMode, keyword);
+            obj.AngleMode = angleMode;
         end
-        function setPositiveDirection(obj, direction)
+        function setPositiveDirection(obj, positiveDirection)
             keyword = RegionParser.directionKeyword;
-            obj.setByKeyword(direction, keyword);
+            obj.setByKeyword(positiveDirection, keyword);
+            obj.PositiveDirection = positiveDirection;
         end
 
         function results = appendMetadata(obj, results)
