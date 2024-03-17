@@ -1,11 +1,7 @@
-classdef RegionExpander
-    properties (Access = private)
-        region;
-    end
-
+classdef RegionExpander < RegionAdjuster
     methods
         function obj = RegionExpander(region)
-            obj.region = region;
+            obj@RegionAdjuster(region);
         end
     end
 
@@ -39,51 +35,33 @@ classdef RegionExpander
 
     methods
         function expandUp(obj, ~, ~)
-            region = obj.region;
-            expandUp(region);
-            region.notify("ROIMoved");
+            obj.performAction(@expandUp);
         end
         function expandDown(obj, ~, ~)
-            region = obj.region;
-            expandDown(region);
-            region.notify("ROIMoved");
+            obj.performAction(@expandDown);
         end
         function expandLeft(obj, ~, ~)
-            region = obj.region;
-            expandLeft(region);
-            region.notify("ROIMoved");
+            obj.performAction(@expandLeft);
         end
         function expandRight(obj, ~, ~)
-            region = obj.region;
-            expandRight(region);
-            region.notify("ROIMoved");
+            obj.performAction(@expandRight);
         end
 
         function expandOut(obj, ~, ~)
-            region = obj.region;
-            expandOut(region);
-            region.notify("ROIMoved");
+            obj.performAction(@expandOut);
         end
 
         function expandUpLeft(obj, ~, ~)
-            region = obj.region;
-            expandUpLeft(region);
-            region.notify("ROIMoved");
+            obj.performAction(@expandUpLeft);
         end
         function expandUpRight(obj, ~, ~)
-            region = obj.region;
-            expandUpRight(region);
-            region.notify("ROIMoved");
+            obj.performAction(@expandUpRight);
         end
         function expandDownLeft(obj, ~, ~)
-            region = obj.region;
-            expandDownLeft(region);
-            region.notify("ROIMoved");
+            obj.performAction(@expandDownLeft);
         end
         function expandDownRight(obj, ~, ~)
-            region = obj.region;
-            expandDownRight(region);
-            region.notify("ROIMoved");
+            obj.performAction(@expandDownRight);
         end
     end
 end

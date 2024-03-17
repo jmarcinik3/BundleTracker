@@ -1,11 +1,7 @@
-classdef RegionCompressor
-    properties (Access = private)
-        region;
-    end
-
+classdef RegionCompressor < RegionAdjuster
     methods
         function obj = RegionCompressor(region)
-            obj.region = region;
+            obj@RegionAdjuster(region);
         end
     end
 
@@ -39,51 +35,33 @@ classdef RegionCompressor
 
     methods
         function compressUp(obj, ~, ~)
-            region = obj.region;
-            compressUp(region);
-            region.notify("ROIMoved");
+            obj.performAction(@compressUp);
         end
         function compressDown(obj, ~, ~)
-            region = obj.region;
-            compressDown(region);
-            region.notify("ROIMoved");
+            obj.performAction(@compressDown);
         end
         function compressLeft(obj, ~, ~)
-            region = obj.region;
-            compressLeft(region);
-            region.notify("ROIMoved");
+            obj.performAction(@compressLeft);
         end
         function compressRight(obj, ~, ~)
-            region = obj.region;
-            compressRight(region);
-            region.notify("ROIMoved");
+            obj.performAction(@compressRight);
         end
 
         function compressIn(obj, ~, ~)
-            region = obj.region;
-            compressIn(region);
-            region.notify("ROIMoved");
+            obj.performAction(@compressIn);
         end
 
         function compressUpLeft(obj, ~, ~)
-            region = obj.region;
-            compressUpLeft(region);
-            region.notify("ROIMoved");
+            obj.performAction(@compressUpLeft);
         end
         function compressUpRight(obj, ~, ~)
-            region = obj.region;
-            compressUpRight(region);
-            region.notify("ROIMoved");
+            obj.performAction(@compressUpRight);
         end
         function compressDownLeft(obj, ~, ~)
-            region = obj.region;
-            compressDownLeft(region);
-            region.notify("ROIMoved");
+            obj.performAction(@compressDownLeft);
         end
         function compressDownRight(obj, ~, ~)
-            region = obj.region;
-            compressDownRight(region);
-            region.notify("ROIMoved");
+            obj.performAction(@compressDownRight);
         end
     end
 end

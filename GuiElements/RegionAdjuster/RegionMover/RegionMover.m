@@ -1,11 +1,7 @@
-classdef RegionMover
-    properties (Access = private)
-        region;
-    end
-
+classdef RegionMover < RegionAdjuster
     methods
         function obj = RegionMover(region)
-            obj.region = region;
+            obj@RegionAdjuster(region);
         end
     end
 
@@ -37,63 +33,43 @@ classdef RegionMover
             end
         end
     end
-    
+
     methods
         function moveUp(obj, ~, ~)
-            region = obj.region;
-            moveUp(region);
-            region.notify("ROIMoved");
+            obj.performAction(@moveUp);
         end
         function moveDown(obj, ~, ~)
-            region = obj.region;
-            moveDown(region);
-            region.notify("ROIMoved");
+            obj.performAction(@moveDown);
         end
         function moveLeft(obj, ~, ~)
-            region = obj.region;
-            moveLeft(region);
-            region.notify("ROIMoved");
+            obj.performAction(@moveLeft);
         end
         function moveRight(obj, ~, ~)
-            region = obj.region;
-            moveRight(region);
-            region.notify("ROIMoved");
+            obj.performAction(@moveRight);
         end
 
         function deleteRegion(obj, ~, ~)
-            region = obj.region;
-            deleteRegion(region);
+            region = obj.getRegion();
+            region.notify("DeletingROI");
+            delete(region);
         end
 
         function moveUpLeft(obj, ~, ~)
-            region = obj.region;
-            moveUpLeft(region);
-            region.notify("ROIMoved");
+            obj.performAction(@moveUpLeft);
         end
         function moveUpRight(obj, ~, ~)
-            region = obj.region;
-            moveUpRight(region);
-            region.notify("ROIMoved");
+            obj.performAction(@moveUpRight);
         end
         function moveDownLeft(obj, ~, ~)
-            region = obj.region;
-            moveDownLeft(region);
-            region.notify("ROIMoved");
+            obj.performAction(@moveDownLeft);
         end
         function moveDownRight(obj, ~, ~)
-            region = obj.region;
-            moveDownRight(region);
-            region.notify("ROIMoved");
+            obj.performAction(@moveDownRight);
         end
     end
 end
 
 
-
-function deleteRegion(region)
-region.notify("DeletingROI");
-delete(region);
-end
 
 function moveUp(region)
 if RegionType.hasPointPosition(region)
@@ -139,7 +115,6 @@ function positionRight(rect)
 rect.Position(1) = rect.Position(1) + 1;
 end
 
-
 function vertexUp(polygon)
 polygon.Position(:, 2) = polygon.Position(:, 2) - 1;
 end
@@ -152,6 +127,7 @@ end
 function vertexRight(polygon)
 polygon.Position(:, 1) = polygon.Position(:, 1) + 1;
 end
+
 
 
 function moveUpLeft(region)
