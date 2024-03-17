@@ -34,7 +34,7 @@ classdef PreprocessorLinker < ImagePreprocessor
             set(gl, "Visible", visible);
         end
     end
-    methods (Access = protected)
+    methods (Access = ?RegionChanger)
         function invertCheckboxChanged(obj, ~, ~)
             thresholds = obj.gui.getThresholds();
             obj.updateFromRawImage(thresholds);

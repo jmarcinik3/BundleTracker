@@ -1,18 +1,33 @@
-classdef RegionChanger < RegionLinker
-    methods (Static)
-        function threshold(linker, source, event)
+classdef RegionChanger
+    properties (Access = private)
+        linker;
+    end
+
+    methods
+        function obj = RegionChanger(linker)
+            obj.linker = linker;
+        end
+    end
+
+    methods
+        function threshold(obj, source, event)
+            linker = obj.linker;
             thresholdChanged(linker, source, event);
         end
-        function invert(linker, source, event)
+        function invert(obj, source, event)
+            linker = obj.linker;
             invertChanged(linker, source, event);
         end
-        function trackingMode(linker, source, event)
+        function trackingMode(obj, source, event)
+            linker = obj.linker;
             trackingModeChanged(linker, source, event);
         end
-        function angleMode(linker, source, event)
+        function angleMode(obj, source, event)
+            linker = obj.linker;
             angleModeChanged(linker, source, event);
         end
-        function positiveDirection(linker, source, event)
+        function positiveDirection(obj, source, event)
+            linker = obj.linker;
             positiveDirectionChanged(linker, source, event);
         end
     end
@@ -20,94 +35,94 @@ end
 
 
 
-function thresholdChanged(obj, source, event)
+function thresholdChanged(linker, source, event)
 switch event.EventName
     case "ValueChanged"
-        thresholdSliderChanged(obj, source, event)
+        thresholdSliderChanged(linker, source, event)
     case "PostSet"
-        thresholdParserChanged(obj, source, event);
+        thresholdParserChanged(linker, source, event);
 end
 end
-function thresholdSliderChanged(obj, ~, event)
+function thresholdSliderChanged(linker, ~, event)
 thresholds = event.Value;
-obj.setThresholds(thresholds);
+linker.setThresholds(thresholds);
 end
-function thresholdParserChanged(obj, ~, ~)
-thresholds = obj.getThresholds();
-thresholdSlider = obj.gui.getThresholdSlider();
+function thresholdParserChanged(linker, ~, ~)
+thresholds = linker.getThresholds();
+thresholdSlider = linker.gui.getThresholdSlider();
 set(thresholdSlider, "Value", thresholds);
 end
 
-function invertChanged(obj, source, event)
+function invertChanged(linker, source, event)
 switch event.EventName
     case "ValueChanged"
-        invertCheckboxChanged(obj, source, event);
+        invertCheckboxChanged(linker, source, event);
     case "PostSet"
-        invertParserChanged(obj, source, event);
+        invertParserChanged(linker, source, event);
 end
 end
-function invertCheckboxChanged(obj, source, event)
+function invertCheckboxChanged(linker, source, event)
 invert = event.Value;
-obj.setInvert(invert);
-invertCheckboxChanged@PreprocessorLinker(obj, source, event);
+linker.setInvert(invert);
+linker.invertCheckboxChanged(source, event);
 end
-function invertParserChanged(obj, ~, ~)
-thresholds = obj.getInvert();
-invertCheckbox = obj.gui.getInvertCheckbox();
+function invertParserChanged(linker, ~, ~)
+thresholds = linker.getInvert();
+invertCheckbox = linker.gui.getInvertCheckbox();
 set(invertCheckbox, "Value", thresholds);
 end
 
-function trackingModeChanged(obj, source, event)
+function trackingModeChanged(linker, source, event)
 switch event.EventName
     case "ValueChanged"
-        trackingModeElementChanged(obj, source, event);
+        trackingModeElementChanged(linker, source, event);
     case "PostSet"
-        trackingModeParserChanged(obj, source, event);
+        trackingModeParserChanged(linker, source, event);
 end
 end
-function trackingModeElementChanged(obj, ~, event)
+function trackingModeElementChanged(linker, ~, event)
 trackingMode = event.Value;
-obj.setTrackingMode(trackingMode);
+linker.setTrackingMode(trackingMode);
 end
-function trackingModeParserChanged(obj, ~, ~)
-trackingMode = obj.getTrackingMode();
-trackingSelection = obj.gui.getTrackingSelectionElement();
+function trackingModeParserChanged(linker, ~, ~)
+trackingMode = linker.getTrackingMode();
+trackingSelection = linker.gui.getTrackingSelectionElement();
 set(trackingSelection, "Value", trackingMode);
 end
 
-function angleModeChanged(obj, source, event)
+function angleModeChanged(linker, source, event)
 switch event.EventName
     case "ValueChanged"
-        angleModeElementChanged(obj, source, event);
+        angleModeElementChanged(linker, source, event);
     case "PostSet"
-        angleModeParserChanged(obj, source, event);
+        angleModeParserChanged(linker, source, event);
 end
 end
-function angleModeElementChanged(obj, ~, event)
+function angleModeElementChanged(linker, ~, event)
 angleMode = event.Value;
-obj.setAngleMode(angleMode);
+linker.setAngleMode(angleMode);
 end
-function angleModeParserChanged(obj, ~, ~)
-angleMode = obj.getAngleMode();
-angleSelection = obj.gui.getAngleSelectionElement();
+function angleModeParserChanged(linker, ~, ~)
+angleMode = linker.getAngleMode();
+angleSelection = linker.gui.getAngleSelectionElement();
 set(angleSelection, "Value", angleMode);
 end
 
-function positiveDirectionChanged(obj, source, event)
+function positiveDirectionChanged(linker, source, event)
 switch event.EventName
     case "SelectionChanged"
-        directionElementChanged(obj, source, event);
+        directionElementChanged(linker, source, event);
     case "PostSet"
-        directionParserChanged(obj, source, event);
+        directionParserChanged(linker, source, event);
 end
 end
-function directionElementChanged(obj, source, ~)
+function directionElementChanged(linker, source, ~)
 selectedButton = get(source, "SelectedObject");
 direction = DirectionGui.buttonToLocation(selectedButton);
-obj.setPositiveDirection(direction);
+linker.setPositiveDirection(direction);
 end
-function directionParserChanged(obj, ~, ~)
-direction = obj.getPositiveDirection();
-directionGui = obj.gui.getDirectionGui();
+function directionParserChanged(linker, ~, ~)
+direction = linker.getPositiveDirection();
+directionGui = linker.gui.getDirectionGui();
 directionGui.setLocation(direction);
 end

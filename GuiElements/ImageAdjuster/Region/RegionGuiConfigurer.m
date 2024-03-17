@@ -1,4 +1,4 @@
-classdef RegionGuiConfigurer < RegionLinker
+classdef RegionGuiConfigurer
     methods (Static, Access = ?RegionLinker)
         function configure(linker, gui, parser)
             configureRegionGui(linker, gui, parser);
@@ -11,61 +11,62 @@ end
 function configureRegionGui(linker, gui, parser)
 directionGui = gui.getDirectionGui();
 region = parser.getRegion();
+changer = RegionChanger(linker);
 
 configureRegion(linker, region);
-configureThreshold(linker, gui, parser);
-configureInvert(linker, gui, parser);
-configureTrackingMode(linker, gui, parser);
-configureAngleMode(linker, gui, parser);
-configurePositiveDirection(linker, directionGui, parser);
+configureThreshold(changer, gui, parser);
+configureInvert(changer, gui, parser);
+configureTrackingMode(changer, gui, parser);
+configureAngleMode(changer, gui, parser);
+configurePositiveDirection(changer, directionGui, parser);
 end
 
-function configureThreshold(obj, gui, regionParser)
-thresholds = regionParser.getThresholds();
+function configureThreshold(changer, gui, parser)
+thresholds = parser.getThresholds();
 thresholdSlider = gui.getThresholdSlider();
 set(thresholdSlider, ...
-    "ValueChangedFcn", @obj.thresholdChanged, ...
+    "ValueChangedFcn", @changer.threshold, ...
     "Value", thresholds ...
     );
-addlistener(regionParser, "Thresholds", "PostSet", @obj.thresholdChanged);
+addlistener(parser, "Thresholds", "PostSet", @changer.threshold);
 end
 
-function configureInvert(obj, gui, regionParser)
-invert = regionParser.getInvert();
+function configureInvert(changer, gui, parser)
+invert = parser.getInvert();
 invertCheckbox = gui.getInvertCheckbox();
 set(invertCheckbox, ...
-    "ValueChangedFcn", @obj.invertChanged, ...
+    "ValueChangedFcn", @changer.invert, ...
     "Value", invert ...
     );
-addlistener(regionParser, "Invert", "PostSet", @obj.invertChanged);
+addlistener(parser, "Invert", "PostSet", @changer.invert);
 end
 
-function configureTrackingMode(obj, gui, regionParser)
-trackingMode = regionParser.getTrackingMode();
+function configureTrackingMode(changer, gui, parser)
+trackingMode = parser.getTrackingMode();
 trackingSelection = gui.getTrackingSelectionElement();
 set(trackingSelection, ...
-    "ValueChangedFcn", @obj.trackingModeChanged, ...
+    "ValueChangedFcn", @changer.trackingMode, ...
     "Value", trackingMode ...
     );
-addlistener(regionParser, "TrackingMode", "PostSet", @obj.trackingModeChanged);
+addlistener(parser, "TrackingMode", "PostSet", @changer.trackingMode);
 end
 
-function configureAngleMode(obj, gui, regionParser)
-angleMode = regionParser.getAngleMode();
+function configureAngleMode(changer, gui, parser)
+angleMode = parser.getAngleMode();
 angleSelection = gui.getAngleSelectionElement();
 set(angleSelection, ...
-    "ValueChangedFcn", @obj.angleModeChanged, ...
+    "ValueChangedFcn", @changer.angleMode, ...
     "Value", angleMode ...
     );
-addlistener(regionParser, "AngleMode", "PostSet", @obj.angleModeChanged);
+addlistener(parser, "AngleMode", "PostSet", @changer.angleMode);
 end
 
-function configurePositiveDirection(obj, directionGui, regionParser)
-direction = regionParser.getPositiveDirection();
+function configurePositiveDirection(changer, directionGui, parser)
+direction = parser.getPositiveDirection();
 directionElement = directionGui.getRadioGroup();
-set(directionElement, "SelectionChangedFcn", @obj.positiveDirectionChanged);
+set(directionElement, "SelectionChangedFcn", @changer.positiveDirection);
 directionGui.setLocation(direction);
-addlistener(regionParser, "PositiveDirection", "PostSet", @obj.positiveDirectionChanged);
+addlistener(parser, "PositiveDirection", "PostSet", @changer.positiveDirection);
 end
 
 function configureRegion(obj, region)
