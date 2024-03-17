@@ -1,0 +1,13 @@
+function tools = generateTrackingTools(toolbar, trackingLinker)
+trackTool = generateTrackTool(toolbar, trackingLinker);
+tools = trackTool;
+end
+
+function tool = generateTrackTool(toolbar, trackingLinker)
+[playIcon, ~, ~] = imread("img/play.png");
+tool = uipushtool(toolbar, ...
+    "Icon", playIcon, ...
+    "ClickedCallback", @trackingLinker.trackButtonPushed, ...
+    "Tooltip", "Start Tracking (Ctrl+↵)" ...
+    );
+end
