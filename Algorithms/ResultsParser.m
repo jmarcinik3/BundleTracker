@@ -5,7 +5,7 @@ classdef ResultsParser
 
     methods
         function obj = ResultsParser(results)
-            if isstring(results)
+            if isstring(results) || ischar(results)
                 obj.results = load(results, "results").results;
             elseif isstruct(results)
                 obj.results = results;
