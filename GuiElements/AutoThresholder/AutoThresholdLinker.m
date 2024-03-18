@@ -49,7 +49,6 @@ classdef AutoThresholdLinker < handle
             if obj.applyThresholds
                 regionCount = obj.getRegionCount();
                 regionsThreshold = arrayfun(@obj.getCurrentThreshold, 1:regionCount);
-                regionsThreshold = 2^16 * regionsThreshold;
             else
                 regionsThreshold = [];
             end
@@ -170,7 +169,6 @@ iIm = generateInteractiveImage(ax, regionalImage);
 end
 function regionalImage = generateRegionalImage(region, im)
 regionalImage = MatrixUnpadder.byRegion2d(region, im);
-regionalImage = mat2gray(regionalImage);
 end
 function iIm = generateInteractiveImage(ax, im)
 fig = ancestor(ax, "figure");
@@ -193,10 +191,15 @@ thresholds = multithresh(im, levelCount);
 end
 
 function im = thresholdMatrix(im, thresholds, levelThreshold)
-if levelThreshold > 0
-    threshold = thresholds(levelThreshold);
-    noiseRemover = NoiseRemover(threshold, Inf);
-    im = noiseRemover.get(im);
+threshold = getThresholdFromLevel(levelThreshold, thresholds);
+noiseRemover = NoiseRemover(threshold, Inf);
+im = noiseRemover.get(im);
+end
+function threshold = getThresholdFromLevel(level, thresholds)
+if level == 0
+    threshold = 0;
+else
+    threshold = thresholds(level);
 end
 end
 
