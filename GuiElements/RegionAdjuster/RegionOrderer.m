@@ -9,7 +9,7 @@ classdef RegionOrderer
         end
     end
 
-    %% Functions to move or delete region
+    %% Functions to z-order of region
     methods (Static)
         function byKey(region, event)
             key = event.Key;
@@ -55,6 +55,10 @@ end
 
 
 
+function bringToFront(region)
+deltaZ = getTopRegionDelta(region);
+uistack(region, "up", deltaZ);
+end
 function bringForward(region)
 deltaZ = getNextRegionDelta(region);
 uistack(region, "up", deltaZ);
@@ -80,19 +84,27 @@ z = find(children==region);
 end
 function z = getRegionsZ(region)
 regions = RegionDrawer.getRegions(region);
-z = arrayfun(@(region) getRegionZ(region), regions);
+z = arrayfun(@getRegionZ, regions);
 end
 
+
+
+function deltaZ = getTopRegionDelta(region)
+regionZ = getRegionZ(region);
+regionsZ = getRegionsZ(region);
+topRegionZ = min(regionsZ);
+deltaZ = regionZ - topRegionZ;
+end
 function deltaZ = getNextRegionDelta(region)
 regionZ = getRegionZ(region);
 regionsZ = getRegionsZ(region);
-nextRegionZ = getPreviousFloatBounded(regionsZ, regionZ);
+nextRegionZ = AdjacentFloat.boundedPrevious(regionsZ, regionZ);
 deltaZ = regionZ - nextRegionZ;
 end
 function deltaZ = getPreviousRegionDelta(region)
 regionZ = getRegionZ(region);
 regionsZ = getRegionsZ(region);
-previousRegionZ = getNextFloatBounded(regionsZ, regionZ);
+previousRegionZ = AdjacentFloat.boundedNext(regionsZ, regionZ);
 deltaZ = previousRegionZ - regionZ;
 end
 function deltaZ = getBottomRegionDelta(region)
@@ -100,23 +112,4 @@ regionZ = getRegionZ(region);
 regionsZ = getRegionsZ(region);
 bottomRegionZ = max(regionsZ);
 deltaZ = bottomRegionZ - regionZ;
-end
-
-function nextFloat = getNextFloatBounded(array, number)
-greaterFloats = array(array > number);
-existsGreaterFloat = numel(greaterFloats) >= 1;
-if existsGreaterFloat
-    nextFloat = min(greaterFloats);
-else
-    nextFloat = number;
-end
-end
-function previousFloat = getPreviousFloatBounded(array, number)
-lesserFloats = array(array < number);
-existsLesserFloat = numel(lesserFloats) >= 1;
-if existsLesserFloat
-    previousFloat = max(lesserFloats);
-else
-    previousFloat = number;
-end
 end

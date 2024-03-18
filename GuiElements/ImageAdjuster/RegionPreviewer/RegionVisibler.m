@@ -13,11 +13,7 @@ classdef RegionVisibler < ActiveRegionOrderer & RegionLinkerContainer
         function adjacentTag = getAdjacentTag(obj, distance)
             regionIndices = obj.getRegionIndices();
             activeIndex = obj.getActiveIndex();
-            adjacentIndex = getAdjacentFloatCyclic( ...
-                regionIndices, ...
-                activeIndex, ...
-                distance ...
-                );
+            adjacentIndex = AdjacentFloat.cyclic(regionIndices, activeIndex, distance);
             adjacentTag = num2str(adjacentIndex);
         end
     end
@@ -85,15 +81,4 @@ regionLinkers = obj.getRegionLinkers();
 regionLinker = obj.getRegionLinker(activeRegion);
 arrayfun(@(linker) linker.setVisible(false), regionLinkers);
 regionLinker.setVisible(true);
-end
-
-function adjacentFloat = getAdjacentFloatCyclic(array, number, distance)
-array = sort(array);
-arraySize = numel(array);
-numberIndex = find(array == number);
-nextIndex = mod(numberIndex + distance, arraySize);
-if nextIndex == 0
-    nextIndex = arraySize;
-end
-adjacentFloat = array(nextIndex);
 end
