@@ -42,13 +42,12 @@ classdef PreprocessorGui
 
     %% Functions to retrieve state information
     methods
-        function data = getRegionUserData(obj)
+        function regionUserData = getRegionUserData(obj)
             thresholds = obj.getThresholds();
             isInverted = obj.getInvert();
-            data = struct( ...
-                RegionParser.intensityKeyword, thresholds, ...
-                RegionParser.invertKeyword, isInverted ...
-                );
+            regionUserData = RegionUserData();
+            regionUserData.setThresholds(thresholds);
+            regionUserData.setInvert(isInverted);
         end
         function thresholds = getThresholds(obj)
             thresholds = obj.thresholdSlider.Value;
@@ -141,7 +140,7 @@ im = image(ax, gray2rgb([], fig)); % display RGB image
 end
 
 function rgb = gray2rgb(im, fig)
-cmap = colormap(fig, "turbo");
+cmap = colormap(fig);
 cmap(1, :) = 0; % set dark pixels as black
 cmap(end, :) = 1; % set saturated pixels as white
 rgb = ind2rgb(im2uint8(im), cmap);

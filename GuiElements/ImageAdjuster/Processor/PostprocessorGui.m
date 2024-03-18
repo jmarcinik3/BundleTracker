@@ -33,15 +33,15 @@ classdef PostprocessorGui
 
     %% Functions to retrieve state information
     methods
-        function data = getRegionUserData(obj)
+        function regionUserData = getRegionUserData(obj)
             trackingMode = obj.getTrackingMode();
             angleMode = obj.getAngleMode();
             direction = obj.getPositiveDirection();
-            data = struct( ...
-                RegionParser.trackingKeyword, trackingMode, ...
-                RegionParser.angleKeyword, angleMode, ...
-                RegionParser.directionKeyword, direction ...
-                );
+            
+            regionUserData = RegionUserData();
+            regionUserData.setTrackingMode(trackingMode);
+            regionUserData.setAngleMode(angleMode);
+            regionUserData.setPositiveDirection(direction);
         end
     end
     methods (Access = private)

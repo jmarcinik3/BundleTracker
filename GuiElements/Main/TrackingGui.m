@@ -168,6 +168,7 @@ end
 
 function gl = generateGridLayout(size)
 fig = uifigure();
+colormap(fig, "turbo");
 position = [300, 200, 1000, 700];
 set(fig, ...
     "Name", "Hair-Bundle Tracking", ...

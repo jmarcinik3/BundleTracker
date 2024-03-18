@@ -8,8 +8,8 @@ end
 
 function centers = trackCenters(trackingLinker, region)
 ims = getPreprocessedVideoInRegion(trackingLinker, region);
-regionParser = RegionParser(region);
-trackingMode = regionParser.getTrackingMode();
+regionUserData = RegionUserData.fromRegion(region);
+trackingMode = regionUserData.getTrackingMode();
 regionTracker = RegionTracker("TrackingMode", trackingMode);
 centers = regionTracker.track(ims);
 end
@@ -30,8 +30,8 @@ result = postprocessResults(result);
 end
 
 function result = appendRegionalMetadata(region, result)
-regionParser = RegionParser(region);
-result = regionParser.appendMetadata(result);
+regionUserData = RegionUserData.fromRegion(region);
+result = regionUserData.appendMetadata(result);
 end
 
 

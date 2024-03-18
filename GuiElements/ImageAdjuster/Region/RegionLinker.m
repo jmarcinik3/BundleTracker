@@ -1,6 +1,7 @@
-classdef RegionLinker < PreprocessorLinker & RegionParser
+classdef RegionLinker < PreprocessorLinker
     properties (Access = private)
         fullRawImage;
+        region;
     end
     properties (Access = ?RegionChanger)
         gui;
@@ -15,7 +16,6 @@ classdef RegionLinker < PreprocessorLinker & RegionParser
             RegionMoverLinker(regionMoverGui, region);
             RegionCompressorLinker(regionCompressorGui, region);
             RegionExpanderLinker(regionExpanderGui, region);
-            obj@RegionParser(region);
             obj@PreprocessorLinker(regionGui);
 
             iIm = regionGui.getInteractiveImage();
@@ -23,15 +23,21 @@ classdef RegionLinker < PreprocessorLinker & RegionParser
 
             % own properties
             obj.gui = regionGui;
+            obj.region = region;
             obj.fullRawImage = fullRawImage;
 
             % configure GUI elements, must come last
-            RegionGuiConfigurer.configure(obj, regionGui, obj);
+            RegionGuiConfigurer.configure(obj, regionGui, region);
             obj.updateRegionalRawImage();
         end
     end
 
-    %% Functions to generate GUI elements
+    %% Functions to get/generate GUI elements
+    methods
+        function region = getRegion(obj)
+            region = obj.region;
+        end
+    end
     methods (Access = private)
         function regionRawImage = generateRegionalRawImage(obj)
             fullRawImage = obj.fullRawImage;

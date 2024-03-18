@@ -11,13 +11,22 @@ classdef ProcessorGui < PreprocessorGui & PostprocessorGui
         function gl = getGridLayout(obj)
             gl = getGridLayout@PreprocessorGui(obj);
         end
-        function userData = getRegionUserData(obj)
+        function regionUserData = getRegionUserData(obj)
             preUserData = getRegionUserData@PreprocessorGui(obj);
             postUserData = getRegionUserData@PostprocessorGui(obj);
-            userData = table2struct([ ...
-                struct2table(preUserData), ...
-                struct2table(postUserData) ...
-                ]);
+
+            thresholds = preUserData.getThresholds();
+            invert = preUserData.getInvert();
+            trackingMode = postUserData.getTrackingMode();
+            angleMode = postUserData.getAngleMode();
+            positiveDirection = postUserData.getPositiveDirection();
+
+            regionUserData = RegionUserData();
+            regionUserData.setThresholds(thresholds);
+            regionUserData.setInvert(invert);
+            regionUserData.setTrackingMode(trackingMode);
+            regionUserData.setAngleMode(angleMode);
+            regionUserData.setPositiveDirection(positiveDirection);
         end
     end
 end

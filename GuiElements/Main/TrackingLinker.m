@@ -57,6 +57,27 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
             rectanglePositions = BlobDetectorLinker.openFigure(im);
             obj.appendRectanglesByPositions(rectanglePositions);
         end
+        function regionThresholdButtonPushed(obj, ~, ~)
+            regions = obj.getRegions();
+            regionCount = numel(regions);
+            im = obj.videoSelector.getFirstFrame();
+
+            fig = uifigure;
+            colormap(fig, "turbo");
+            gui = AutoThresholdGui(fig, regionCount);
+            linker = AutoThresholdLinker(gui, im, regions);
+            uiwait(fig);
+            newThresholds = 2^16 * linker.getCurrentThresholds();
+
+            for i = 1:regionCount
+                region = regions(i);
+                regionUserData = RegionUserData.fromRegion(region);
+                oldThreshold = regionUserData.getThresholds();
+                newThreshold = [newThresholds(i), oldThreshold(2)];
+                regionUserData.setThresholds(newThreshold);
+            end
+
+        end
     end
 
     %% Functions to generate state information
@@ -75,8 +96,8 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
     methods (Access = private)
         function exists = regionExists(obj)
             regions = obj.getRegions();
-            count = numel(regions);
-            exists = count >= 1;
+            regionCount = numel(regions);
+            exists = regionCount >= 1;
             if ~exists
                 obj.throwAlertMessage("No cells selected!", "Start Tracking");
             end
@@ -131,18 +152,18 @@ end
 
 function displayTrackingCompleted(results, filepath)
 resultsParser = ResultsParser(results);
-count = resultsParser.getRegionCount();
-title = sprintf("Tracking Completed (%d)", count);
+regionCount = resultsParser.getRegionCount();
+title = sprintf("Tracking Completed (%d)", regionCount);
 message = trackingCompletedMessage(results, filepath);
 msgbox(message, title);
 end
 
 function message = trackingCompletedMessage(results, filepath)
 resultsParser = ResultsParser(results);
-count = resultsParser.getRegionCount();
+regionCount = resultsParser.getRegionCount();
 fps = resultsParser.getFps();
 savedMsg = sprintf("Results saved to %s", filepath);
-countMsg = sprintf("Cell Count: %d", count);
+countMsg = sprintf("Cell Count: %d", regionCount);
 fpsMsg = sprintf("FPS: %d", fps);
 message = [savedMsg, countMsg, fpsMsg];
 end

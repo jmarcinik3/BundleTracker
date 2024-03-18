@@ -45,12 +45,15 @@ end
 end
 function thresholdSliderChanged(linker, ~, event)
 thresholds = event.Value;
-linker.setThresholds(thresholds);
+regionUserData = RegionUserData.fromRegionLinker(linker);
+regionUserData.setThresholds(thresholds);
 end
-function thresholdParserChanged(linker, ~, ~)
-thresholds = linker.getThresholds();
+function thresholdParserChanged(linker, ~, event)
+regionUserData = RegionUserData.fromRegionLinker(linker);
+thresholds = regionUserData.getThresholds();
 thresholdSlider = linker.gui.getThresholdSlider();
 set(thresholdSlider, "Value", thresholds);
+linker.thresholdSliderChanged(thresholdSlider, event);
 end
 
 function invertChanged(linker, source, event)
@@ -62,14 +65,17 @@ switch event.EventName
 end
 end
 function invertCheckboxChanged(linker, source, event)
+regionUserData = RegionUserData.fromRegionLinker(linker);
 invert = event.Value;
-linker.setInvert(invert);
+regionUserData.setInvert(invert);
 linker.invertCheckboxChanged(source, event);
 end
-function invertParserChanged(linker, ~, ~)
-thresholds = linker.getInvert();
+function invertParserChanged(linker, ~, event)
+regionUserData = RegionUserData.fromRegionLinker(linker);
+invert = regionUserData.getInvert();
 invertCheckbox = linker.gui.getInvertCheckbox();
-set(invertCheckbox, "Value", thresholds);
+set(invertCheckbox, "Value", invert);
+linker.invertCheckboxChanged(invertCheckbox, event);
 end
 
 function trackingModeChanged(linker, source, event)
@@ -81,11 +87,13 @@ switch event.EventName
 end
 end
 function trackingModeElementChanged(linker, ~, event)
+regionUserData = RegionUserData.fromRegionLinker(linker);
 trackingMode = event.Value;
-linker.setTrackingMode(trackingMode);
+regionUserData.setTrackingMode(trackingMode);
 end
 function trackingModeParserChanged(linker, ~, ~)
-trackingMode = linker.getTrackingMode();
+regionUserData = RegionUserData.fromRegionLinker(linker);
+trackingMode = regionUserData.getTrackingMode();
 trackingSelection = linker.gui.getTrackingSelectionElement();
 set(trackingSelection, "Value", trackingMode);
 end
@@ -99,11 +107,13 @@ switch event.EventName
 end
 end
 function angleModeElementChanged(linker, ~, event)
+regionUserData = RegionUserData.fromRegionLinker(linker);
 angleMode = event.Value;
-linker.setAngleMode(angleMode);
+regionUserData.setAngleMode(angleMode);
 end
 function angleModeParserChanged(linker, ~, ~)
-angleMode = linker.getAngleMode();
+regionUserData = RegionUserData.fromRegionLinker(linker);
+angleMode = regionUserData.getAngleMode();
 angleSelection = linker.gui.getAngleSelectionElement();
 set(angleSelection, "Value", angleMode);
 end
@@ -117,12 +127,14 @@ switch event.EventName
 end
 end
 function directionElementChanged(linker, source, ~)
+regionUserData = RegionUserData.fromRegionLinker(linker);
 selectedButton = get(source, "SelectedObject");
 direction = DirectionGui.buttonToLocation(selectedButton);
-linker.setPositiveDirection(direction);
+regionUserData.setPositiveDirection(direction);
 end
 function directionParserChanged(linker, ~, ~)
-direction = linker.getPositiveDirection();
+regionUserData = RegionUserData.fromRegionLinker(linker);
+direction = regionUserData.getPositiveDirection();
 directionGui = linker.gui.getDirectionGui();
 directionGui.setLocation(direction);
 end

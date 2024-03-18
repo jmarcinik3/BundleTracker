@@ -33,6 +33,7 @@ classdef BlobDetectorLinker < handle
     methods (Static)
         function rectanglePositions = openFigure(im)
             fig = uifigure;
+            colormap(fig, "turbo");
             gui = BlobDetectorGui(fig);
             linker = BlobDetectorLinker(gui, im);
             uiwait(fig);
@@ -194,7 +195,7 @@ imPreprocessed = mat2gray(imPreprocessed);
 end
 
 function rgb = gray2rgb(im, fig)
-cmap = colormap(fig, "turbo");
+cmap = colormap(fig);
 cmap(1, :) = 0; % set dark pixels as black
 cmap(end, :) = 1; % set saturated pixels as white
 rgb = ind2rgb(im2uint8(im), cmap);
