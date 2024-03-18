@@ -25,6 +25,11 @@ classdef ActiveRegionOrderer < handle
             regions = obj.getRegions();
             indices = getRegionIndices(regions);
         end
+        function exists = regionExists(obj)
+            regions = obj.getRegions();
+            count = numel(regions);
+            exists = count >= 1;
+        end
     end
     methods (Access = private)
         function ax = getAxis(obj)
@@ -33,11 +38,6 @@ classdef ActiveRegionOrderer < handle
         function regions = getRegions(obj)
             ax = obj.getAxis();
             regions = RegionDrawer.getRegions(ax);
-        end
-        function exists = regionExists(obj)
-            regions = obj.getRegions();
-            count = numel(regions);
-            exists = count >= 1;
         end
     end
 

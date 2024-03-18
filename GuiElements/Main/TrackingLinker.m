@@ -48,7 +48,7 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
             obj.imageLinker.exportImageIfPossible(directoryPath);
         end
         function trackButtonPushed(obj, ~, ~)
-            if obj.regionExists()
+            if obj.regionExists("Start Tracking")
                 obj.trackAndSaveRegions();
             end
         end
@@ -57,26 +57,22 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
             rectanglePositions = BlobDetectorLinker.openFigure(im);
             obj.appendRectanglesByPositions(rectanglePositions);
         end
+
         function regionThresholdButtonPushed(obj, ~, ~)
-            regions = obj.getRegions();
-            regionCount = numel(regions);
-            im = obj.videoSelector.getFirstFrame();
-
-            fig = uifigure;
-            colormap(fig, "turbo");
-            gui = AutoThresholdGui(fig, regionCount);
-            linker = AutoThresholdLinker(gui, im, regions);
-            uiwait(fig);
-            newThresholds = 2^16 * linker.getCurrentThresholds();
-
-            for i = 1:regionCount
-                region = regions(i);
-                regionUserData = RegionUserData.fromRegion(region);
-                oldThreshold = regionUserData.getThresholds();
-                newThreshold = [newThresholds(i), oldThreshold(2)];
-                regionUserData.setThresholds(newThreshold);
+            if obj.regionExists(AutoThresholdGui.title)
+                regions = obj.getRegions();
+                obj.autothresholdRegions(regions);
             end
-
+        end
+        function autothresholdRegions(obj, regions)
+            im = obj.videoSelector.getFirstFrame();
+            newThresholds = AutoThresholdLinker.openFigure(im, regions);
+            thresholdCount = numel(newThresholds);
+            for i = 1:thresholdCount
+                region = regions(i);
+                newThreshold = newThresholds(i);
+                setLowerThreshold(region, newThreshold);
+            end
         end
     end
 
@@ -93,15 +89,15 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
         end
     end
 
-    methods (Access = private)
-        function exists = regionExists(obj)
-            regions = obj.getRegions();
-            regionCount = numel(regions);
-            exists = regionCount >= 1;
+    methods (Access = protected)
+        function exists = regionExists(obj, title)
+            exists = regionExists@ActiveRegionOrderer(obj);
             if ~exists
-                obj.throwAlertMessage("No cells selected!", "Start Tracking");
+                obj.throwAlertMessage("No cells selected!", title);
             end
         end
+    end
+    methods (Access = private)
         function trackAndSaveRegions(obj)
             results = obj.trackAndProcess();
             trackingWasCompleted = true;
@@ -182,4 +178,9 @@ end
 function updateDisplayFrame(obj, videoSelector)
 firstFrame = videoSelector.getFirstFrame();
 obj.changeFullImage(firstFrame);
+end
+
+function setLowerThreshold(region, threshold)
+regionUserData = RegionUserData.fromRegion(region);
+regionUserData.setLowerThreshold(threshold);
 end

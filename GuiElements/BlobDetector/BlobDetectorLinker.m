@@ -37,6 +37,7 @@ classdef BlobDetectorLinker < handle
             gui = BlobDetectorGui(fig);
             linker = BlobDetectorLinker(gui, im);
             uiwait(fig);
+
             rectanglePositions = linker.getRectanglePositions();
         end
     end

@@ -123,7 +123,7 @@ end
 
 function layoutElements(gui)
 % set default row height for GUI elements
-rowHeight = 30;
+rowHeight = TrackingGui.rowHeight;
 
 % retrieve GUI elements
 gl = gui.getGridLayout();
@@ -183,6 +183,7 @@ applyButton.Layout.Column = [1, 2];
 cancelButton.Layout.Row = 6;
 cancelButton.Layout.Column = [3, 4];
 
+% set grid sizes
 gl.RowHeight = num2cell(rowHeight * ones(1, 6));
 gl.RowHeight{1} = '1x';
 gl.ColumnWidth = {128, '1x', 128, '1x'};

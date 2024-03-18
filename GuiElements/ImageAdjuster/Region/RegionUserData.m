@@ -57,6 +57,13 @@ classdef RegionUserData < handle
         function setThresholds(obj, thresholds)
             obj.IntensityRange = thresholds;
         end
+        function setLowerThreshold(obj, threshold)
+             obj.IntensityRange(1) = threshold;
+        end
+        function setUpperThreshold(obj, threshold)
+             obj.IntensityRange(2) = threshold;
+        end
+
         function setInvert(obj, invert)
             obj.IsInverted = invert;
         end
