@@ -77,7 +77,6 @@ classdef RegionDrawer < handle
     %% Functions to update GUI and state information
     methods (Static)
         function updateSelected(activeRegion)
-            updateRegionSelected(activeRegion);
             updateRegionColors(activeRegion);
             updateRegionLabels(activeRegion);
         end
@@ -118,12 +117,6 @@ switch keyword
 end
 
 beginDrawingFromPoint(region, point);
-end
-
-function updateRegionSelected(activeRegion)
-regions = RegionDrawer.getRegions(activeRegion);
-set(regions, "Selected", false);
-set(activeRegion, "Selected", true);
 end
 
 function updateRegionColors(activeRegion)
