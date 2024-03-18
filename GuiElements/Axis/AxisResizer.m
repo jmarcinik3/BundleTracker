@@ -8,14 +8,15 @@ classdef AxisResizer
         function obj = AxisResizer(interactiveImage, varargin)
             p = inputParser;
             addOptional(p, "FitToContent", true);
+            addOptional(p, "AddListener", true);
             parse(p, varargin{:});
             obj.fitToContent = p.Results.FitToContent;
+            addListener = p.Results.AddListener;
 
             obj.interactiveImage = interactiveImage;
-            addlistener(interactiveImage, ...
-                "CData", "PostSet", ...
-                @obj.resizeAxis ...
-                );
+            if addListener
+                addlistener(interactiveImage, "CData", "PostSet", @obj.resizeAxis);
+            end
             obj.resizeAxis();
         end
     end

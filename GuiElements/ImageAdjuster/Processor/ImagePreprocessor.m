@@ -53,7 +53,8 @@ end
 
 
 function showImage(obj, im)
-imRgb = obj.gui.gray2rgb(im);
+fig = obj.gui.getFigure();
+imRgb = gray2rgb(im, fig);
 iIm = obj.gui.getInteractiveImage();
 set(iIm, "CData", imRgb);
 end

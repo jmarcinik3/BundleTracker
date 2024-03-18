@@ -56,14 +56,6 @@ classdef PreprocessorGui
             invert = obj.invertCheckbox.Value;
         end
     end
-
-    %% Functions to generate objects
-    methods
-        function imRgb = gray2rgb(obj, im)
-            fig = obj.getFigure();
-            imRgb = gray2rgb(im, fig);
-        end
-    end
 end
 
 
@@ -137,11 +129,4 @@ end
 function im = generateInteractiveImage(ax)
 fig = ancestor(ax, "figure");
 im = image(ax, gray2rgb([], fig)); % display RGB image
-end
-
-function rgb = gray2rgb(im, fig)
-cmap = colormap(fig);
-cmap(1, :) = 0; % set dark pixels as black
-cmap(end, :) = 1; % set saturated pixels as white
-rgb = ind2rgb(im2uint8(im), cmap);
 end

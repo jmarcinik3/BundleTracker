@@ -172,9 +172,8 @@ regionalImage = MatrixUnpadder.byRegion2d(region, im);
 end
 function iIm = generateInteractiveImage(ax, im)
 fig = ancestor(ax, "figure");
-iIm = image(ax, []); % display RGB image
-AxisResizer(iIm, "FitToContent", true);
-set(iIm, "CData", gray2rgb(im, fig));
+iIm = image(ax, gray2rgb(im, fig));
+AxisResizer(iIm, "FitToContent", true, "AddListener", false);
 end
 
 function matrix = preallocateRegionThresholds(regionCount)
@@ -201,11 +200,4 @@ if level == 0
 else
     threshold = thresholds(level);
 end
-end
-
-function rgb = gray2rgb(im, fig)
-cmap = colormap(fig);
-cmap(1, :) = 0; % set dark pixels as black
-cmap(end, :) = 1; % set saturated pixels as white
-rgb = ind2rgb(im2uint8(im), cmap);
 end
