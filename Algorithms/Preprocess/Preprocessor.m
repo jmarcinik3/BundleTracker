@@ -27,9 +27,7 @@ classdef Preprocessor
 end
 
 function processor = generateNoiseRemover(thresholds)
-minThreshold = thresholds(1);
-maxThreshold = thresholds(2);
-noiseRemover = NoiseRemover(minThreshold, maxThreshold);
+noiseRemover = NoiseRemover(thresholds);
 processor = @noiseRemover.get;
 end
 

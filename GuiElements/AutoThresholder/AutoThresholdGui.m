@@ -1,15 +1,12 @@
 classdef AutoThresholdGui
     properties (Constant)
         title = "Threshold Regions by Otsu's Method";
-    end
-
-    properties (Constant, Access = ?AutoThresholdLinker)
         maxLevelCount = 20;
     end
 
     properties (Constant, Access = private)
         rows = 3;
-        columns = 2;
+        columns = 4;
         size = [AutoThresholdGui.rows, AutoThresholdGui.columns];
         applyText = "Apply";
         cancelText = "Cancel";
@@ -18,7 +15,8 @@ classdef AutoThresholdGui
     properties (Access = private)
         gridLayout;
         axisGridLayout;
-        levelSlider;
+        levelsSlider;
+        countSpinner;
         actionButtons;
     end
 
@@ -26,18 +24,16 @@ classdef AutoThresholdGui
         function obj = AutoThresholdGui(fig, regionCount)
             set(fig, "Name", AutoThresholdGui.title);
             gl = uigridlayout(fig, AutoThresholdGui.size);
-            agl = generateAxes(gl, regionCount);
-            slider = generateLevelsSlider(gl);
-
-            obj.gridLayout = gl;
-            obj.axisGridLayout = agl;
-            obj.levelSlider = slider;
+            
+            obj.axisGridLayout = generateAxes(gl, regionCount);
+            obj.levelsSlider = generateLevelsSlider(gl);
             obj.actionButtons = generateActionButtons(gl);
+            obj.countSpinner = generateLevelCountSpinner(gl);
+            obj.gridLayout = gl;
             layoutElements(obj);
         end
     end
     
-    %% 
     %% Functions to retrieve GUI elements
     methods
         function fig = getFigure(obj)
@@ -54,8 +50,11 @@ classdef AutoThresholdGui
             agl = obj.axisGridLayout;
             axes = findobj(agl, "Type", "axes");
         end
-        function slider = getLevelSlider(obj)
-            slider = obj.levelSlider;
+        function slider = getLevelsSlider(obj)
+            slider = obj.levelsSlider;
+        end
+        function spinner = getCountSpinner(obj)
+            spinner = obj.countSpinner;
         end
 
         function buttons = getActionButtons(obj)
@@ -66,6 +65,18 @@ classdef AutoThresholdGui
         end
         function button = getCancelButton(obj)
             button = obj.actionButtons(2);
+        end
+    end
+
+    %% Functions to retrieve state information
+    methods
+        function levels = getLevels(obj)
+            levelsSlider = obj.getLevelsSlider();
+            levels = get(levelsSlider, "Value");
+        end
+        function levelCount = getLevelCount(obj)
+            levelSpinner = obj.getCountSpinner();
+            levelCount = get(levelSpinner, "Value");
         end
     end
 end
@@ -81,24 +92,36 @@ columns = AutoThresholdGui.columns;
 % retrieve GUI elements
 gl = gui.getGridLayout();
 agl = gui.getAxisGridLayout();
-slider = gui.getLevelSlider();
+levelsSlider = gui.getLevelsSlider();
+countSpinner = gui.getCountSpinner();
 applyButton = gui.getApplyButton();
 cancelButton = gui.getCancelButton();
 
-% lay out full-row elements
+% generate labels for appropriate elements
+levelsLabel = uilabel(gl, "Text", "Pixel Intensity:");
+countLabel = uilabel(gl, "Text", "Intensity Levels:");
+
+% lay out axis elements
 agl.Layout.Row = 1;
-slider.Layout.Row = 2;
 agl.Layout.Column = [1, columns];
-slider.Layout.Column = [1, columns];
+
+% lay out level-based elements
+levelElements = [levelsLabel, levelsSlider, countLabel, countSpinner];
+for index = 1:numel(levelElements)
+    elem = levelElements(index);
+    elem.Layout.Row = 2;
+    elem.Layout.Column = index;
+end
 
 % lay out apply/cancel buttons
 applyButton.Layout.Row = 3;
 cancelButton.Layout.Row = 3;
-applyButton.Layout.Column = 1;
-cancelButton.Layout.Column = 2;
+applyButton.Layout.Column = [1, 2];
+cancelButton.Layout.Column = [3, 4];
 
 % set grid sizes
 gl.RowHeight = {'1x', rowHeight, rowHeight};
+gl.ColumnWidth = {96, '4x', 96, '1x'};
 end
 
 
@@ -153,13 +176,17 @@ end
 function slider = generateLevelsSlider(gl)
 slider = uislider(gl, "range");
 maxLevelCount = AutoThresholdGui.maxLevelCount;
-
-set(slider, ...
-    "Limits", [0, maxLevelCount], ...
-    "Value", [0, maxLevelCount], ...
-    "MajorTicks", 0:5:maxLevelCount, ...
-    "MinorTicks", 0:maxLevelCount ...
-    );
+sliderLimits = [0, maxLevelCount+1];
+set(slider, "Limits", sliderLimits, "Value", sliderLimits);
 end
 
+function spinner = generateLevelCountSpinner(gl)
+spinner = uispinner(gl);
+maxLevelCount = AutoThresholdGui.maxLevelCount;
 
+set(spinner, ...
+    "Limits", [1, maxLevelCount], ...
+    "Value", maxLevelCount, ...
+    "Step", 1 ...
+    );
+end

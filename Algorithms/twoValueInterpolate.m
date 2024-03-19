@@ -1,17 +1,12 @@
 function yinterp = twoValueInterpolate(array, index, zeroValue)
 indexFloor = floor(index);
 isExact = indexFloor == index;
-
-if indexFloor <= 0
-    yFloor = zeroValue;
-else
-    yFloor = array(indexFloor);
-end
+yFloor = array(indexFloor);
 
 if isExact
     yinterp = yFloor;
 else
-    indexCeiling = min(ceil(index), numel(array));
+    indexCeiling = ceil(index);
     indexProportion = index - indexFloor;
     yCeiling = array(indexCeiling);
     y = [yFloor, yCeiling];

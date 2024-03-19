@@ -5,9 +5,9 @@ classdef NoiseRemover
     end
     
     methods
-        function obj = NoiseRemover(minThresh, maxThresh)
-            obj.minimumIntensity = minThresh;
-            obj.maximumIntensity = maxThresh;
+        function obj = NoiseRemover(thresholds)
+            obj.minimumIntensity = thresholds(1);
+            obj.maximumIntensity = thresholds(2);
         end
 
         function im = get(obj, im)

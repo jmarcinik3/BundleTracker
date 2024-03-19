@@ -67,11 +67,12 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
         function autothresholdRegions(obj, regions)
             im = obj.videoSelector.getFirstFrame();
             newThresholds = AutoThresholdLinker.openFigure(im, regions);
-            thresholdCount = numel(newThresholds);
-            for i = 1:thresholdCount
-                region = regions(i);
-                newThreshold = newThresholds(i);
-                setLowerThreshold(region, newThreshold);
+            thresholdCount = size(newThresholds, 1);
+            for index = 1:thresholdCount
+                region = regions(index);
+                newThreshold = newThresholds(index, :);
+                regionUserData = RegionUserData.fromRegion(region);
+                regionUserData.setThresholds(newThreshold);
             end
         end
     end
@@ -181,9 +182,4 @@ end
 function updateDisplayFrame(obj, videoSelector)
 firstFrame = videoSelector.getFirstFrame();
 obj.changeFullImage(firstFrame);
-end
-
-function setLowerThreshold(region, threshold)
-regionUserData = RegionUserData.fromRegion(region);
-regionUserData.setLowerThreshold(threshold);
 end

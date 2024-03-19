@@ -1,28 +1,25 @@
-classdef AutoThresholdLinker < handle
+classdef AutoThresholdLinker < AutoThresholder
     properties (Access = private)
         gui;
-        regionalImages;
         interactiveImages;
-        regionThresholds;
+        regionsThreshold;
         applyThresholds = false;
     end
 
     methods
         function obj = AutoThresholdLinker(gui, im, regions)
+            obj@AutoThresholder(im, regions);
             axs = gui.getAxes();
-            [regionalImages, iIms] = generateInteractiveImages(regions, axs, im);
-
-            regionCount = numel(regions);
-            obj.regionThresholds = preallocateRegionThresholds(regionCount);
+            iIms = generateInteractiveImages(axs, obj.regionalImages);
             obj.interactiveImages = iIms;
-            obj.regionalImages = regionalImages;
 
-            levelSlider = gui.getLevelSlider();
-            set(levelSlider, "ValueChangingFcn", @obj.levelChanging);
+            levelsSlider = gui.getLevelsSlider();
+            set(levelsSlider, "ValueChangingFcn", @obj.levelsChanging);
             set(gui.getActionButtons(), "ButtonPushedFcn", @obj.actionButtonPushed);
+            set(gui.getCountSpinner(), "ValueChangingFcn", @obj.countSpinnerChanging);
 
             obj.gui = gui;
-            obj.levelChanged(levelSlider.Value);
+            obj.levelsChanged(levelsSlider.Value);
         end
     end
 
@@ -37,88 +34,44 @@ classdef AutoThresholdLinker < handle
             linker = AutoThresholdLinker(gui, im, regions);
             uiwait(fig);
 
-            regionsThreshold = linker.getCurrentThresholds();
+            regionsThreshold = linker.regionsThreshold;
         end
     end
 
     %% Functions to retrive state information
-    methods
+    methods (Access = private)
         function regionsThreshold = getCurrentThresholds(obj)
             if obj.applyThresholds
                 regionCount = obj.getRegionCount();
-                regionsThreshold = arrayfun(@obj.getCurrentThreshold, 1:regionCount);
+                levels = obj.gui.getLevels();
+                levelCount = obj.gui.getLevelCount();
+                regionsThreshold = zeros(regionCount, 2);
+                for index = 1:regionCount
+                    regionThreshold = obj.generateRegionThreshold(index, levels, levelCount);
+                    regionsThreshold(index, :) = regionThreshold;
+                end
             else
                 regionsThreshold = [];
             end
-        end
-        function regionThreshold = getCurrentThreshold(obj, index)
-            levelThreshold = levels(1);
-            levelCount = levels(2);
-
-            regionThresholds = obj.getRegionThresholds(index, levelCount);
-            regionThreshold = interpolateThreshold(levelThreshold, regionThresholds);
-        end
-    end
-
-
-    methods (Access = private)
-        function regionCount = getRegionCount(obj)
-            regionCount = numel(obj.interactiveImages);
-        end
-        function im = getRegionalImage(obj, index)
-            im = obj.regionalImages{index};
-        end
-        function thresholds = getRegionThresholds(obj, index, levelCount)
-            thresholds = obj.regionThresholds(index, levelCount, 1:levelCount);
-            thresholds = squeeze(thresholds);
-        end
-
-        function thresholds = generateThresholds(obj, regionIndex, levelCount)
-            if levelCount == 0
-                thresholds = 0;
-            elseif obj.thresholdsExist(regionIndex, levelCount)
-                
-                thresholds = obj.getRegionThresholds(regionIndex, levelCount);
-                
-            else
-                im = obj.getRegionalImage(regionIndex);
-                thresholds = generateThresholds(im, levelCount);
-                obj.setRegionThresholds(regionIndex, levelCount, thresholds);
-            end
-        end
-        function is = thresholdsExist(obj, index, levelCount)
-            minRegionThresholds = obj.regionThresholds(index, levelCount, 1);
-            is = minRegionThresholds > 0;
-        end
-    end
-
-    %% Functions to set state information
-    methods (Access = private)
-        function setRegionThresholds(obj, index, levelCount, thresholds)
-            obj.regionThresholds(index, levelCount, 1:levelCount) = thresholds;
         end
     end
 
     %% Functions to update state of GUI
     methods (Access = private)
-        function levelChanging(obj, ~, event)
-            levels = levelsFromEvent(event);
-            obj.levelChanged(levels);
+        function levelsChanging(obj, ~, event)
+            levels = event.Value;
+            obj.levelsChanged(levels);
         end
-        function levelChanged(obj, levels)
+        function levelsChanged(obj, levels, levelCount)
+            if nargin == 2
+                levelCount = obj.gui.getLevelCount();
+            end
+
             regionCount = obj.getRegionCount();
             for index = 1:regionCount
-                obj.rethresholdRegion(index, levels);
+                im = obj.rethresholdRegion(index, levels, levelCount);
+                obj.displayRegionalImage(index, im);
             end
-        end
-
-        function rethresholdRegion(obj, index, levels)
-            im = obj.regionalImages{index};
-            levelThreshold = levels(1);
-            levelCount = levels(2);
-            thresholds = obj.generateThresholds(index, levelCount);
-            im = thresholdMatrix(im, thresholds, levelThreshold);
-            obj.displayRegionalImage(index, im);
         end
         function displayRegionalImage(obj, index, im)
             fig = obj.gui.getFigure();
@@ -127,10 +80,21 @@ classdef AutoThresholdLinker < handle
             set(iIm, "CData", im);
         end
 
+        function countSpinnerChanging(obj, ~, event)
+            levelCount = event.Value;
+            obj.rerangeLevelsSlider(levelCount);
+        end
+        function rerangeLevelsSlider(obj, levelCount)
+            levelsSlider = obj.gui.getLevelsSlider();
+            newLevels = rerangeLevelsSlider(levelsSlider, levelCount);
+            obj.levelsChanged(newLevels, levelCount);
+        end
+
         function actionButtonPushed(obj, source, ~)
             gui = obj.gui;
             fig = gui.getFigure();
             obj.applyThresholds = source == gui.getApplyButton();
+            obj.regionsThreshold = obj.getCurrentThresholds();
             close(fig);
         end
     end
@@ -138,53 +102,36 @@ end
 
 
 
-function [regionalImages, iIms] = generateInteractiveImages(regions, axs, im)
+function iIms = generateInteractiveImages(axs, regionalImages)
 iIms = [];
-regionalImages = {};
-regionCount = numel(regions);
+regionCount = numel(regionalImages);
 
 for index = regionCount:-1:1
-    region = regions(index);
+    regionalImage = regionalImages{index};
     ax = axs(index);
-    [regionalImage, iIm] = generateRegionalInteractiveImage(region, ax, im);
-    regionalImages{index} = regionalImage;
+    iIm = generateInteractiveImage(ax, regionalImage);
     iIms(index) = iIm;
 end
 end
 
-function [regionalImage, iIm] = generateRegionalInteractiveImage(region, ax, im)
-regionalImage = generateRegionalImage(region, im);
-iIm = generateInteractiveImage(ax, regionalImage);
-end
-function regionalImage = generateRegionalImage(region, im)
-regionalImage = MatrixUnpadder.byRegion2d(region, im);
-end
 function iIm = generateInteractiveImage(ax, im)
 fig = ancestor(ax, "figure");
 iIm = image(ax, gray2rgb(im, fig));
 AxisResizer(iIm, "FitToContent", true, "AddListener", false);
 end
 
-function matrix = preallocateRegionThresholds(regionCount)
-maxLevelCount = AutoThresholdGui.maxLevelCount;
-matrix = zeros(regionCount, maxLevelCount, maxLevelCount);
-end
+function newLevels = rerangeLevelsSlider(slider, levelCount)
+previousLevels = get(slider, "Value");
+previousLimits = get(slider, "Limits");
+previousLevelCount = previousLimits(2) - 1;
 
-function levels = levelsFromEvent(event)
-levels = event.Value;
-levels(2) = ceil(levels(2));
-end
+scaleFactor = (levelCount + 1) / (previousLevelCount + 1);
+newLevels = previousLevels * scaleFactor;
+newLimits = [0, levelCount+1];
 
-function thresholds = generateThresholds(im, levelCount)
-thresholds = multithresh(im, levelCount);
-end
-
-function im = thresholdMatrix(im, thresholds, levelThreshold)
-threshold = getThresholdFromLevel(levelThreshold, thresholds);
-noiseRemover = NoiseRemover(threshold, Inf);
-im = noiseRemover.get(im);
-end
-
-function threshold = getThresholdFromLevel(level, thresholds)
-threshold = uint16(twoValueInterpolate(double(thresholds), level, 0));
+set(slider, ...
+    "Limits", newLimits, ...
+    "Value", newLevels, ...
+    "MinorTicks", 0:1:levelCount+1 ...
+    );
 end
