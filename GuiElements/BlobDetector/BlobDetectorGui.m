@@ -3,8 +3,8 @@ classdef BlobDetectorGui
         title = "Add Regions by Blob Detection";
     end
 
-    properties (Constant, Access = private)
-        rows = 6;
+    properties (Constant)
+        rows = 7;
         columns = 4;
         size = [BlobDetectorGui.rows, BlobDetectorGui.columns];
         applyText = "Apply";
@@ -19,6 +19,7 @@ classdef BlobDetectorGui
         countSpinner;
         connectivityElement;
         sizeSpinners;
+        excludeBorderBlobsCheckbox;
         actionButtons;
     end
 
@@ -34,6 +35,7 @@ classdef BlobDetectorGui
             obj.connectivityElement = generateConnectivityElement(gl);
             obj.countSpinner = generateCountSpinner(gl);
             obj.sizeSpinners = generateSizeElements(gl);
+            obj.excludeBorderBlobsCheckbox = generateExcludeBorderBlobsCheckbox(gl);
             obj.actionButtons = generateActionButtons(gl);
             layoutElements(obj);
         end
@@ -63,7 +65,10 @@ classdef BlobDetectorGui
         function spinner = getCountSpinner(obj)
             spinner = obj.countSpinner;
         end
-        
+        function checkbox = getExcludeBorderBlobsCheckbox(obj)
+            checkbox = obj.excludeBorderBlobsCheckbox;
+        end
+
         function spinners = getSizeSpinners(obj)
             spinners = obj.sizeSpinners;
         end
@@ -103,6 +108,10 @@ classdef BlobDetectorGui
             spinner = obj.getCountSpinner();
             maxCount = spinner.Value;
         end
+        function exclude = getExcludeBorderBlob(obj)
+            checkbox = obj.getExcludeBorderBlobsCheckbox();
+            exclude = checkbox.Value;
+        end
 
         function h = getRectangleHeight(obj)
             heightSpinner = obj.getHeightSpinner();
@@ -124,6 +133,8 @@ end
 function layoutElements(gui)
 % set default row height for GUI elements
 rowHeight = TrackingGui.rowHeight;
+rows = BlobDetectorGui.rows;
+columns = BlobDetectorGui.columns;
 
 % retrieve GUI elements
 gl = gui.getGridLayout();
@@ -134,6 +145,7 @@ connectivityElement = gui.getConnectivityElement();
 countSpinner = gui.getCountSpinner();
 heightSpinner = gui.getHeightSpinner();
 widthSpinner = gui.getWidthSpinner();
+excludeBorderBlobsCheckbox = gui.getExcludeBorderBlobsCheckbox();
 applyButton = gui.getApplyButton();
 cancelButton = gui.getCancelButton();
 
@@ -147,7 +159,7 @@ widthLabel = uilabel(gl, "Text", "Width:");
 
 % lay out axis showing image and blobs
 axis.Layout.Row = 1;
-axis.Layout.Column = [1, 4];
+axis.Layout.Column = [1, columns];
 
 % lay out slider elements
 sliders = [thresholdSlider, areaSlider];
@@ -159,7 +171,7 @@ for index = 1:numel(sliderLabels)
     label.Layout.Row = index + 1;
     slider.Layout.Row = index + 1;
     label.Layout.Column = 1;
-    slider.Layout.Column = [2, 4];
+    slider.Layout.Column = [2, columns];
 end
 
 % lay out some elements to choose blob detection inputs
@@ -178,13 +190,18 @@ for index = 1:numel(sizeElements)
     elem.Layout.Row = 5;
 end
 
-applyButton.Layout.Row = 6;
+% lay out checkbox to exclude blobs along border
+excludeBorderBlobsCheckbox.Layout.Row = 6;
+excludeBorderBlobsCheckbox.Layout.Column = [1, columns];
+
+% lay out button to close window
+applyButton.Layout.Row = rows;
 applyButton.Layout.Column = [1, 2];
-cancelButton.Layout.Row = 6;
+cancelButton.Layout.Row = rows;
 cancelButton.Layout.Column = [3, 4];
 
 % set grid sizes
-gl.RowHeight = num2cell(rowHeight * ones(1, 6));
+gl.RowHeight = num2cell(rowHeight * ones(1, 7));
 gl.RowHeight{1} = '1x';
 gl.ColumnWidth = {128, '1x', 128, '1x'};
 end
@@ -230,6 +247,14 @@ set(spinner, ...
     "Limits", [0, Inf], ...
     "Value", 100, ...
     "Step", 1 ...
+    );
+end
+
+function checkbox = generateExcludeBorderBlobsCheckbox(gl)
+checkbox = uicheckbox(gl);
+set(checkbox, ...
+    "Text", "Exclude Border Blobs", ...
+    "Value", 1 ...
     );
 end
 

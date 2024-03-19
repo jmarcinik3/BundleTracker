@@ -20,6 +20,7 @@ classdef BlobDetectorLinker < handle
             set(gui.getConnectivityElement(), "ValueChangedFcn", @obj.connectivityChanged);
             set(gui.getCountSpinner(), "ValueChangingFcn", @obj.maximumCountChanging);
             set(gui.getSizeSpinners(), "ValueChangingFcn", @obj.rectangleSizeChanging);
+            set(gui.getExcludeBorderBlobsCheckbox(), "ValueChangedFcn", @obj.excludeBorderBlobsChanged);
             set(gui.getActionButtons(), "ButtonPushedFcn", @obj.actionButtonPushed);
 
             obj.gui = gui;
@@ -73,6 +74,12 @@ classdef BlobDetectorLinker < handle
 
     %% Functions to update state of GUI
     methods (Access = private)
+        function setBlobAnalyzer(obj, varargin)
+            blobAnalyzer = obj.blobAnalyzer;
+            release(blobAnalyzer);
+            set(blobAnalyzer, varargin{:});
+            obj.redetectBlobs();
+        end
         function redetectBlobs(obj, thresholds)
             gui = obj.gui;
             if nargin == 1
@@ -109,29 +116,22 @@ classdef BlobDetectorLinker < handle
         end
         function blobAreaChanging(obj, ~, event)
             areas = uint16(event.Value);
-            blobAnalyzer = obj.blobAnalyzer;
-            release(blobAnalyzer);
-            set(blobAnalyzer, ...
+            obj.setBlobAnalyzer( ...
                 "MinimumBlobArea", areas(1), ...
                 "MaximumBlobArea", areas(2) ...
                 );
-            obj.redetectBlobs();
         end
         function connectivityChanged(obj, ~, event)
             connectivity = event.Value;
-            blobAnalyzer = obj.blobAnalyzer;
-
-            release(blobAnalyzer);
-            set(blobAnalyzer, "Connectivity", connectivity);
-            obj.redetectBlobs();
+            obj.setBlobAnalyzer("Connectivity", connectivity);
         end
         function maximumCountChanging(obj, ~, event)
             maxCount = event.Value;
-            blobAnalyzer = obj.blobAnalyzer;
-
-            release(blobAnalyzer);
-            set(blobAnalyzer, "MaximumCount", maxCount);
-            obj.redetectBlobs();
+            obj.setBlobAnalyzer("MaximumCount", maxCount);
+        end
+        function excludeBorderBlobsChanged(obj, ~, event)
+            excludeBorderBlobs = event.Value;
+            obj.setBlobAnalyzer("ExcludeBorderBlobs", excludeBorderBlobs);
         end
         function rectangleSizeChanging(obj, source, event)
             gui = obj.gui;
@@ -153,13 +153,16 @@ function blobAnalyzer = generateBlobAnalyzer(gui)
 areas = gui.getAreas();
 connectivity = gui.getConnectivity();
 maxCount = gui.getMaximumCount();
+excludeBorderBlobs = gui.getExcludeBorderBlob();
+
 blobAnalyzer = vision.BlobAnalysis( ...
     "AreaOutputPort", false, ...
     "BoundingBoxOutputPort", false, ...
     "MinimumBlobArea", areas(1), ...
     "MaximumBlobArea", areas(2), ...
     "Connectivity", connectivity, ...
-    "MaximumCount", maxCount ...
+    "MaximumCount", maxCount, ...
+    "ExcludeBorderBlobs", excludeBorderBlobs ...
     );
 end
 
