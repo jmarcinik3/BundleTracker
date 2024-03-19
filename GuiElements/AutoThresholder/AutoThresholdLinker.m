@@ -3,8 +3,6 @@ classdef AutoThresholdLinker < handle
         gui;
         regionalImages;
         interactiveImages;
-
-        previousLevels = [-1, -1];
         regionThresholds;
         applyThresholds = false;
     end
@@ -24,7 +22,7 @@ classdef AutoThresholdLinker < handle
             set(gui.getActionButtons(), "ButtonPushedFcn", @obj.actionButtonPushed);
 
             obj.gui = gui;
-            obj.levelChangedNew(levelSlider.Value);
+            obj.levelChanged(levelSlider.Value);
         end
     end
 
@@ -32,7 +30,7 @@ classdef AutoThresholdLinker < handle
     methods (Static)
         function regionsThreshold = openFigure(im, regions)
             regionCount = numel(regions);
-            
+
             fig = uifigure;
             colormap(fig, "turbo");
             gui = AutoThresholdGui(fig, regionCount);
@@ -54,12 +52,11 @@ classdef AutoThresholdLinker < handle
             end
         end
         function regionThreshold = getCurrentThreshold(obj, index)
-            levels = obj.previousLevels;
             levelThreshold = levels(1);
             levelCount = levels(2);
 
             regionThresholds = obj.getRegionThresholds(index, levelCount);
-            regionThreshold = regionThresholds(levelThreshold);
+            regionThreshold = interpolateThreshold(levelThreshold, regionThresholds);
         end
     end
 
@@ -68,25 +65,21 @@ classdef AutoThresholdLinker < handle
         function regionCount = getRegionCount(obj)
             regionCount = numel(obj.interactiveImages);
         end
-        function is = isNewLevels(obj, levels)
-            levelThreshold = levels(1);
-            levelCount = levels(2);
-            previousLevels = obj.previousLevels;
-            is = levelThreshold ~= previousLevels(1) ...
-                || levelCount ~= previousLevels(2);
-        end
         function im = getRegionalImage(obj, index)
             im = obj.regionalImages{index};
         end
         function thresholds = getRegionThresholds(obj, index, levelCount)
             thresholds = obj.regionThresholds(index, levelCount, 1:levelCount);
+            thresholds = squeeze(thresholds);
         end
 
         function thresholds = generateThresholds(obj, regionIndex, levelCount)
             if levelCount == 0
                 thresholds = 0;
             elseif obj.thresholdsExist(regionIndex, levelCount)
+                
                 thresholds = obj.getRegionThresholds(regionIndex, levelCount);
+                
             else
                 im = obj.getRegionalImage(regionIndex);
                 thresholds = generateThresholds(im, levelCount);
@@ -110,23 +103,19 @@ classdef AutoThresholdLinker < handle
     methods (Access = private)
         function levelChanging(obj, ~, event)
             levels = levelsFromEvent(event);
-            if obj.isNewLevels(levels)
-                obj.levelChangedNew(levels);
-            end
+            obj.levelChanged(levels);
         end
-        function levelChangedNew(obj, levels)
+        function levelChanged(obj, levels)
             regionCount = obj.getRegionCount();
             for index = 1:regionCount
                 obj.rethresholdRegion(index, levels);
             end
-            obj.previousLevels = levels;
         end
 
         function rethresholdRegion(obj, index, levels)
             im = obj.regionalImages{index};
             levelThreshold = levels(1);
             levelCount = levels(2);
-
             thresholds = obj.generateThresholds(index, levelCount);
             im = thresholdMatrix(im, thresholds, levelThreshold);
             obj.displayRegionalImage(index, im);
@@ -182,7 +171,8 @@ matrix = zeros(regionCount, maxLevelCount, maxLevelCount);
 end
 
 function levels = levelsFromEvent(event)
-levels = round(event.Value);
+levels = event.Value;
+levels(2) = ceil(levels(2));
 end
 
 function thresholds = generateThresholds(im, levelCount)
@@ -194,10 +184,7 @@ threshold = getThresholdFromLevel(levelThreshold, thresholds);
 noiseRemover = NoiseRemover(threshold, Inf);
 im = noiseRemover.get(im);
 end
+
 function threshold = getThresholdFromLevel(level, thresholds)
-if level == 0
-    threshold = 0;
-else
-    threshold = thresholds(level);
-end
+threshold = uint16(twoValueInterpolate(double(thresholds), level, 0));
 end
