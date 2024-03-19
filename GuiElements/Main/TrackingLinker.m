@@ -115,14 +115,17 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
         end
         function results = trackAndProcess(obj)
             regions = obj.getRegions();
-
             results = {};
+            set(regions, "Color", RegionColor.queueColor); % color regions as queued
+
             for index = 1:numel(regions)
                 region = regions(index);
                 result = trackAndProcessRegion(obj, region);
                 results{index} = result;
             end
+
             results = cell2mat(results);
+            set(regions, "Color", RegionColor.unprocessedColor); % color regions as unprocessed
         end
         function filepath = saveResults(obj, results)
             filepath = obj.gui.generateSaveFilepath();
