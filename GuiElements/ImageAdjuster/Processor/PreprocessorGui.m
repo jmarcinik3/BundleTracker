@@ -8,7 +8,7 @@ classdef PreprocessorGui
 
     methods
         function obj = PreprocessorGui(gl)
-            ax = generateAxis(gl);
+            ax = generateEmptyAxis(gl);
             obj.interactiveImage = generateInteractiveImage(ax);
             obj.thresholdSlider = generateThresholdSlider(gl);
             obj.invertCheckbox = generateInvertCheckbox(gl);
@@ -59,24 +59,6 @@ classdef PreprocessorGui
 end
 
 
-
-%% Function to generate plotting axis
-% Generates axis on which hair cell image is plotted
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add axis in
-%
-% Returns uiaxes
-function ax = generateAxis(gl)
-ax = uiaxes(gl);
-ax.Toolbar.Visible = "off";
-ax.set( ...
-    "Visible", "off", ...
-    "XtickLabel", [], ...
-    "YTickLabel", [] ...
-    );
-end
 
 %% Function to generate intensity bound input
 % Generates two-value slider allowing user to set lower and upper bounds on

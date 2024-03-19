@@ -1,10 +1,9 @@
 classdef ImageLinker < PreprocessorLinker & ImageAxis
     methods
         function obj = ImageLinker(imageGui)
-            ax = imageGui.getAxis();
             iIm = imageGui.getInteractiveImage();
             obj@PreprocessorLinker(imageGui);
-            obj@ImageAxis(ax, iIm);
+            obj@ImageAxis(iIm);
         end
     end
 

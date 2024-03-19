@@ -42,9 +42,10 @@ classdef AutoThresholdLinker < AutoThresholder
     methods (Access = private)
         function regionsThreshold = getCurrentThresholds(obj)
             if obj.applyThresholds
+                gui = obj.gui;
                 regionCount = obj.getRegionCount();
-                levels = obj.gui.getLevels();
-                levelCount = obj.gui.getLevelCount();
+                levels = gui.getLevels();
+                levelCount = gui.getLevelCount();
                 regionsThreshold = zeros(regionCount, 2);
                 for index = 1:regionCount
                     regionThreshold = obj.generateRegionThreshold(index, levels, levelCount);

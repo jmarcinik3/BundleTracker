@@ -72,9 +72,6 @@ classdef AxisAdjuster < handle
             set(ax, "Ylim", ylim);
         end
 
-        function cDataChanged(obj, ~, ~)
-            obj.setBoundsToCurrent();
-        end
         function setBoundsToCurrent(obj)
             ax = obj.getAxis();
             xlim = get(ax, "XLim");

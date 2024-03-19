@@ -1,10 +1,10 @@
 classdef ImageAxis < AxisExporter & AxisPanZoomer
     methods
-        function obj = ImageAxis(ax, iIm)            
+        function obj = ImageAxis(iIm)      
+            ax = ancestor(iIm, "axes");
             obj@AxisExporter(ax);
             obj@AxisPanZoomer(ax);
             AxisResizer(iIm);
-            configureInteractiveImage(obj, iIm);
         end
     end
 
@@ -17,10 +17,4 @@ classdef ImageAxis < AxisExporter & AxisPanZoomer
             ax = getAxis@AxisPanZoomer(obj);
         end
     end
-end
-
-
-
-function configureInteractiveImage(obj, iIm)
-addlistener(iIm, "CData", "PostSet", @obj.cDataChanged);
 end

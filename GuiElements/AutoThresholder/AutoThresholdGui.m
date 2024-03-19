@@ -134,7 +134,7 @@ agl = uigridlayout(gl, [rowCount, columnCount]);
 axisCreatedCount = 0;
 for rowIndex = 1:rowCount
     for columnIndex = 1:columnCount
-        ax = generateAxis(agl);
+        ax = generateEmptyAxis(agl);
         ax.Layout.Row = rowIndex;
         ax.Layout.Column = columnIndex;
         axisCreatedCount = axisCreatedCount + 1;
@@ -147,24 +147,6 @@ for rowIndex = 1:rowCount
         break;
     end
 end
-end
-
-%% Function to generate plotting axis
-% Generates axis on which hair cell image is plotted
-%
-% Arguments
-%
-% * uigridlayout |gl|: layout to add axis in
-%
-% Returns uiaxes
-function ax = generateAxis(gl)
-ax = uiaxes(gl);
-ax.Toolbar.Visible = "off";
-ax.set( ...
-    "Visible", "off", ...
-    "XtickLabel", [], ...
-    "YTickLabel", [] ...
-    );
 end
 
 function buttons = generateActionButtons(gl)

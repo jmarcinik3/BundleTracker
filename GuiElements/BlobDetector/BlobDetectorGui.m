@@ -28,7 +28,7 @@ classdef BlobDetectorGui
             gl = uigridlayout(fig, BlobDetectorGui.size);
             
             obj.gridLayout = gl;
-            obj.axis = generateAxis(gl);
+            obj.axis = generateEmptyAxis(gl);
             obj.thresholdSlider = generateThresholdSlider(gl);
             obj.areaSlider = generateAreaSlider(gl);
             obj.connectivityElement = generateConnectivityElement(gl);
@@ -190,16 +190,6 @@ gl.ColumnWidth = {128, '1x', 128, '1x'};
 end
 
 
-
-function ax = generateAxis(gl)
-ax = uiaxes(gl);
-ax.Toolbar.Visible = "off";
-ax.set( ...
-    "Visible", "off", ...
-    "XtickLabel", [], ...
-    "YTickLabel", [] ...
-    );
-end
 
 function buttons = generateActionButtons(gl)
 applyButton = uibutton(gl, "Text", BlobDetectorGui.applyText);
