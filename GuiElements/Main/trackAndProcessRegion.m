@@ -31,6 +31,8 @@ end
 
 function result = appendRegionalMetadata(region, result)
 regionUserData = RegionUserData.fromRegion(region);
+result.Label = region.Label;
+result.Region = region;
 result = regionUserData.appendMetadata(result);
 end
 
