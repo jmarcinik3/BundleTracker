@@ -70,5 +70,5 @@ function ims = preallocateVideo(videoReader)
 w = get(videoReader, "Width");
 h = get(videoReader, "Height");
 frameCount = get(videoReader, "NumFrames");
-ims = zeros(w, h, frameCount, "uint16");
+ims = zeros(h, w, frameCount, "uint16");
 end
