@@ -126,13 +126,16 @@ previousLevels = get(slider, "Value");
 previousLimits = get(slider, "Limits");
 previousLevelCount = previousLimits(2) - 1;
 
-scaleFactor = (levelCount + 1) / (previousLevelCount + 1);
+newMax = levelCount + 1;
+scaleFactor = newMax / (previousLevelCount + 1);
 newLevels = previousLevels * scaleFactor;
-newLimits = [0, levelCount+1];
+newLimits = [0, newMax];
+majorTickInterval = ceil(sqrt(newMax));
 
 set(slider, ...
     "Limits", newLimits, ...
     "Value", newLevels, ...
-    "MinorTicks", 0:1:levelCount+1 ...
+    "MinorTicks", 0:1:newMax, ...
+    "MajorTicks", 0:majorTickInterval:newMax ...
     );
 end
