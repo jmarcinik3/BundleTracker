@@ -1,7 +1,5 @@
 function keyPressed(trackingLinker, source, event)
 activeRegion = trackingLinker.getActiveRegion();
-videoSelector = trackingLinker.getVideoSelector();
-
 key = event.Key;
 modKey = ModifierKey(event);
 
@@ -33,9 +31,9 @@ if objectExists(activeRegion) && RegionAdjustKey.is(key)
     end
 elseif modKey.isPureCtrl
     if strcmp(key, "i")
-        videoSelector.importVideo(source, event);
+        trackingLinker.importVideo(source, event);
     elseif strcmp(key, "o")
-        videoSelector.openDirectory();
+        trackingLinker.openDirectory();
     elseif strcmp(key, "s")
         trackingLinker.exportImageIfPossible(source, event);
     elseif strcmp(key, "return")

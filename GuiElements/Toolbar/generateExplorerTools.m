@@ -1,8 +1,7 @@
 function tools = generateExplorerTools(toolbar, trackingLinker)
-videoSelector = trackingLinker.getVideoSelector();
 saveImageTool = generateSaveImageTool(toolbar, trackingLinker);
-importVideoTool = generateImportVideoTool(toolbar, videoSelector);
-openDirectoryTool = generateOpenDirectoryTool(toolbar, videoSelector);
+importVideoTool = generateImportVideoTool(toolbar, trackingLinker);
+openDirectoryTool = generateOpenDirectoryTool(toolbar, trackingLinker);
 tools = [saveImageTool, importVideoTool, openDirectoryTool];
 end
 

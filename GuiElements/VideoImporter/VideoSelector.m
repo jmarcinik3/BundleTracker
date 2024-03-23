@@ -14,18 +14,15 @@ classdef VideoSelector < handle
     end
 
     methods
-        function obj = VideoSelector(videoGui, valueChangedFcn)
+        function obj = VideoSelector(videoGui)
             filepathField = videoGui.getFilepathField();
-            set(filepathField, "ValueChangedFcn", valueChangedFcn);
+            set(filepathField, "ValueChangedFcn", []);
             obj.gui = videoGui;
         end
     end
 
     %% Functions to retrieve state information
-    methods
-        function filepath = getFilepath(obj)
-            filepath = obj.gui.getFilepath();
-        end
+    methods (Access = protected)
         function im = getFirstFrame(obj)
             filepath = obj.gui.getFilepath();
             videoReader = VideoReader(filepath);

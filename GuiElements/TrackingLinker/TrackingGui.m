@@ -14,7 +14,7 @@ classdef TrackingGui
         scaleFactorInputElement;
 
         % components related to files
-        directoryGui;
+        videoGui;
         saveFilestemElement;
     end
 
@@ -34,7 +34,7 @@ classdef TrackingGui
                 "Title", "Region Editor", ...
                 "TitlePosition", "centertop" ...
                 );
-            obj.directoryGui = VideoGui(gl, {1, [1, 2]});
+            obj.videoGui = VideoGui(gl, {1, [1, 2]});
 
             obj.scaleFactorInputElement = generateScaleFactorElement(rgl);
             obj.saveFilestemElement = generateSaveFilestemElement(rgl);
@@ -62,8 +62,8 @@ classdef TrackingGui
         function rgl = getRightGridLayout(obj)
             rgl = obj.rightGridLayout;
         end
-        function gui = getDirectoryGui(obj)
-            gui = obj.directoryGui;
+        function gui = getVideoGui(obj)
+            gui = obj.videoGui;
         end
         function gui = getImageGui(obj)
             gui = obj.imageGui;
@@ -86,7 +86,7 @@ classdef TrackingGui
     %% Functions to retrieve state information
     methods
         function path = getDirectoryPath(obj)
-            path = obj.directoryGui.getDirectoryPath();
+            path = obj.videoGui.getDirectoryPath();
         end
 
         % ...for postprocessing
@@ -137,8 +137,8 @@ end
 
 function layoutTopElements(gui)
 rowHeight = TrackingGui.rowHeight;
-directoryGui = gui.getDirectoryGui();
-gl = directoryGui.getGridLayout();
+videoGui = gui.getVideoGui();
+gl = videoGui.getGridLayout();
 set(gl, "RowHeight", rowHeight);
 end
 

@@ -1,7 +1,6 @@
-classdef TrackingLinker < VideoImporter & RegionPreviewer
+classdef TrackingLinker < VideoLinker & RegionPreviewer
     properties (Access = private)
         gui;
-        videoSelector;
     end
 
     methods
@@ -11,17 +10,13 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
             parse(p, varargin{:});
             startingFilepath = p.Results.StartingFilepath;
 
-            directoryGui = trackingGui.getDirectoryGui();
+            videoGui = trackingGui.getVideoGui();
             imageGui = trackingGui.getImageGui();
             regionGuiPanel = trackingGui.getRegionGuiPanel();
             imageLinker = ImageLinker(imageGui);
 
             obj@RegionPreviewer(imageLinker, regionGuiPanel);
-            obj@VideoImporter([]);
-            obj.videoSelector = VideoSelector( ...
-                directoryGui, ...
-                @obj.videoFilepathChanged ...
-                );
+            obj@VideoLinker(videoGui);
 
             obj.gui = trackingGui;
 
@@ -30,14 +25,7 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
             figureKeyPressFcn = @(src, ev) keyPressed(obj, src, ev);
             set(fig, "WindowKeyPressFcn", figureKeyPressFcn);
 
-            obj.videoSelector.setFilepathIfChosen(startingFilepath);
-        end
-    end
-
-    %% Functions to retrieve GUI elements
-    methods
-        function selector = getVideoSelector(obj)
-            selector = obj.videoSelector;
+            obj.setFilepathIfChosen(startingFilepath);
         end
     end
 
@@ -53,7 +41,7 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
             end
         end
         function blobDetectionButtonPushed(obj, ~, ~)
-            im = obj.videoSelector.getFirstFrame();
+            im = obj.getFirstFrame();
             rectanglePositions = BlobDetectorLinker.openFigure(im);
             obj.drawRectanglesByPositions(rectanglePositions);
         end
@@ -65,7 +53,7 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
             end
         end
         function autothresholdRegions(obj, regions)
-            im = obj.videoSelector.getFirstFrame();
+            im = obj.getFirstFrame();
             newThresholds = AutoThresholdLinker.openFigure(im, regions);
             thresholdCount = size(newThresholds, 1);
             for index = 1:thresholdCount
@@ -142,14 +130,6 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
             save(filepath, "results");
         end
 
-        function videoFilepathChanged(obj, ~, ~)
-            videoSelector = obj.videoSelector;
-            filepath = videoSelector.getFilepath();
-            updateDisplayFrame(obj, videoSelector);
-            obj.setFilepath(filepath); % must come before updating frame label
-            updateFrameLabel(obj, videoSelector);
-        end
-
         function throwAlertMessage(obj, message, title)
             fig = obj.gui.getFigure();
             uialert(fig, message, title);
@@ -175,20 +155,4 @@ savedMsg = sprintf("Results saved to %s", filepath);
 countMsg = sprintf("Cell Count: %d", regionCount);
 fpsMsg = sprintf("FPS: %d", fps);
 message = [savedMsg, countMsg, fpsMsg];
-end
-
-function updateFrameLabel(obj, videoSelector)
-label = generateFrameLabel(obj);
-videoSelector.setFrameLabel(label);
-end
-
-function label = generateFrameLabel(obj)
-frameCount = obj.getFrameCount();
-fps = obj.getFps();
-label = sprintf("%d Frames (%d FPS)", frameCount, fps);
-end
-
-function updateDisplayFrame(obj, videoSelector)
-firstFrame = videoSelector.getFirstFrame();
-obj.changeFullImage(firstFrame);
 end
