@@ -37,6 +37,14 @@ classdef TrackingLinker < RegionPreviewer ...
 
     %% Functions to update state of GUI
     methods
+        function resetRegionsButtonPushed(obj, source, ~)
+            if obj.regionExists(RegionPreviewer.resetTitle)
+                resetKeyword = source.UserData;
+                regions = obj.getRegions();
+                obj.resetRegionsToDefaults(regions, resetKeyword);
+            end
+        end
+
         function exportImageIfPossible(obj, ~, ~)
             directoryPath = obj.gui.getDirectoryPath();
             obj.imageLinker.exportImageIfPossible(directoryPath);
@@ -107,7 +115,7 @@ classdef TrackingLinker < RegionPreviewer ...
     methods (Access = protected)
         function exists = regionExists(obj, title)
             exists = regionExists@ActiveRegionOrderer(obj);
-            if ~exists
+            if ~exists && nargin >= 2
                 obj.throwAlertMessage("No cells selected!", title);
             end
         end

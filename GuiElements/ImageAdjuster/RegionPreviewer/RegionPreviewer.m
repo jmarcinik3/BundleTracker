@@ -1,4 +1,8 @@
 classdef RegionPreviewer < RegionDrawer & RegionVisibler
+    properties (Constant)
+        resetTitle = "Reset to Default";
+    end
+
     properties (Access = protected)
         imageLinker;
     end
@@ -15,7 +19,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         end
     end
 
-    %% Functions to retrieve GUI elements
+    %% Functions to retrieve GUI elements and state information
     methods
         function regions = getRegions(obj)
             regions  = getRegions@RegionVisibler(obj);
@@ -34,6 +38,14 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 
     %% Functions to update state of GUI
     methods
+        function resetRegionsToDefaults(obj, regions, keyword)
+            if nargin == 1
+                keyword = RegionUserData.allKeyword;
+            end
+            if obj.regionExists()
+                arrayfun(@(region) resetRegionToDefaults(region, keyword), regions);
+            end
+        end
         function drawRectanglesByPositions(obj, positions)
             drawRectanglesByPositions(obj, positions);
         end
@@ -58,8 +70,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 
         function regionClicked(obj, source, event)
             if isDoubleClick(event)
-                regionUserData = RegionUserData.fromRegion(source);
-                regionUserData.resetToDefaults();
+               obj.resetRegionsToDefaults(source);
             end
             obj.previewRegion(source);
         end
@@ -89,6 +100,11 @@ function regionLinker = generateRegionLinker(obj, region)
 fullRawImage = obj.getRawImage();
 regionGui = obj.generateRegionGui();
 regionLinker = RegionLinker(regionGui, region, fullRawImage);
+end
+
+function resetRegionToDefaults(region, keyword)
+regionUserData = RegionUserData.fromRegion(region);
+regionUserData.resetToDefaults(keyword);
 end
 
 function drawRectanglesByPositions(obj, positions)

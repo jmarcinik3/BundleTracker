@@ -1,4 +1,21 @@
 classdef RegionUserData < handle
+    properties (Constant)
+        allKeyword = "All",
+        angleModeKeyword = "Angle Mode";
+        invertKeyword = "Invert";
+        positiveDirectionKeyword = "Positive Direction";
+        thresholdsKeyword = "Thresholds";
+        trackingModeKeyword = "Tracking Mode";
+        keywords = [ ...
+            RegionUserData.allKeyword, ...
+            RegionUserData.angleModeKeyword, ...
+            RegionUserData.invertKeyword, ...
+            RegionUserData.positiveDirectionKeyword, ...
+            RegionUserData.thresholdsKeyword, ...
+            RegionUserData.trackingModeKeyword ...
+            ];
+    end
+
     properties (SetObservable)
         IntensityRange;
         IsInverted;
@@ -58,14 +75,7 @@ classdef RegionUserData < handle
             if ~RegionType.isRegion(regions)
                 regions = regions.getRegions();
             end
-
-            thresholdCount = size(thresholds, 1);
-            for index = 1:thresholdCount
-                region = regions(index);
-                newThreshold = thresholds(index, :);
-                regionUserData = RegionUserData.fromRegion(region);
-                regionUserData.setThresholds(newThreshold);
-            end
+            setRegionsThresholds(regions, thresholds);
         end
     end
     methods
@@ -95,12 +105,11 @@ classdef RegionUserData < handle
 
     %% Functions to reset to default state information
     methods
-        function resetToDefaults(obj)
-            obj.resetToDefaultAngleMode();
-            obj.resetToDefaultInvert();
-            obj.resetToDefaultPositiveDirection();
-            obj.resetToDefaultThresholds();
-            obj.resetToDefaultTrackingMode();
+        function resetToDefaults(obj, keyword)
+            if nargin == 1
+                keyword = RegionUserData.allKeyword;
+            end
+            resetByKeyword(obj, keyword);
         end
         function resetToDefaultAngleMode(obj)
             defaultAngleMode = SettingsParser.getDefaultAngleMode();
@@ -123,4 +132,40 @@ classdef RegionUserData < handle
             obj.setTrackingMode(defaultTrackingMode);
         end
     end
+end
+
+
+function setRegionsThresholds(regions, thresholds)
+thresholdCount = size(thresholds, 1);
+for index = 1:thresholdCount
+    region = regions(index);
+    newThreshold = thresholds(index, :);
+    regionUserData = RegionUserData.fromRegion(region);
+    regionUserData.setThresholds(newThreshold);
+end
+end
+
+function resetByKeyword(obj, keyword)
+switch keyword
+    case RegionUserData.angleModeKeyword
+        obj.resetToDefaultAngleMode();
+    case RegionUserData.invertKeyword
+        obj.resetToDefaultInvert();
+    case RegionUserData.positiveDirectionKeyword
+        obj.resetToDefaultPositiveDirection();
+    case RegionUserData.thresholdsKeyword
+        obj.resetToDefaultThresholds();
+    case RegionUserData.trackingModeKeyword
+        obj.resetToDefaultTrackingMode();
+    case RegionUserData.allKeyword
+        resetToDefaultAll(obj);
+end
+end
+
+function resetToDefaultAll(obj)
+obj.resetToDefaultAngleMode();
+obj.resetToDefaultInvert();
+obj.resetToDefaultPositiveDirection();
+obj.resetToDefaultThresholds();
+obj.resetToDefaultTrackingMode();
 end
