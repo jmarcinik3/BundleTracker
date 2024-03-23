@@ -29,6 +29,8 @@ classdef TrackingLinker < RegionPreviewer ...
             figureKeyPressFcn = @(src, ev) keyPressed(obj, src, ev);
             set(fig, "WindowKeyPressFcn", figureKeyPressFcn);
 
+            TrackingMenu(fig, obj);
+
             obj.setFilepathIfChosen(startingFilepath);
         end
     end
@@ -50,23 +52,33 @@ classdef TrackingLinker < RegionPreviewer ...
             obj.drawRectanglesByPositions(rectanglePositions);
         end
 
-        function regionThresholdButtonPushed(obj, ~, ~)
+        function otsuThresholdsPushed(obj, source, event)
             if obj.regionExists(OtsuThresholdsGui.title)
                 regions = obj.getRegions();
-                obj.autothresholdRegions(regions);
+                obj.otsuThresholdRegions(regions);
             end
         end
-        function autothresholdRegions(obj, regions)
+        function otsuThresholdRegions(obj, regions)
             im = obj.getFirstFrame();
             regionalImages = generateRegionalImages(regions, im);
             newThresholds = OtsuThresholdsLinker.openFigure(regionalImages);
-            thresholdCount = size(newThresholds, 1);
+            RegionUserData.setRegionsThresholds(regions, newThresholds);
+        end
 
-            for index = 1:thresholdCount
-                region = regions(index);
-                newThreshold = newThresholds(index, :);
-                regionUserData = RegionUserData.fromRegion(region);
-                regionUserData.setThresholds(newThreshold);
+        function regionThresholdButtonPushed(obj, ~, ~)
+            if obj.regionExists(AutoThresholdGui.title)
+                regions = obj.getRegions();
+                im = obj.getFirstFrame();
+                regionalImages = generateRegionalImages(regions, im);
+                newThresholds = AutoThresholdLinker.openFigure(regionalImages);
+                thresholdCount = size(newThresholds, 1);
+                
+                for index = 1:thresholdCount
+                    region = regions(index);
+                    newThreshold = newThresholds(index, :);
+                    regionUserData = RegionUserData.fromRegion(region);
+                    regionUserData.setThresholds(newThreshold);
+                end
             end
         end
     end

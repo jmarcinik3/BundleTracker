@@ -1,15 +1,23 @@
 classdef AutoThresholder < handle
     properties (Access = protected)
-        regionalImages
+        regionalImages;
+        isSingleThreshold;
     end
 
     properties (Access = private)
         regionsThresholds;
+        calculateThresholds;
     end
 
     methods
-        function obj = AutoThresholder(regionalImages, maxLevelCount)
+        function obj = AutoThresholder(regionalImages, thresholdFcn, maxLevelCount)
+            if nargin == 2
+                maxLevelCount = 1;
+            end
+            obj.isSingleThreshold = maxLevelCount == 1;
             regionCount = numel(regionalImages);
+
+            obj.calculateThresholds = thresholdFcn;
             obj.regionalImages = regionalImages;
             obj.regionsThresholds = preallocateRegionThresholds(regionCount, maxLevelCount);
         end
@@ -23,46 +31,58 @@ classdef AutoThresholder < handle
         function im = getRegionalImage(obj, index)
             im = obj.regionalImages{index};
         end
-        function thresholds = getRegionThresholds(obj, index, levelCount)
-            thresholds = obj.regionsThresholds(index, levelCount, :);
-            thresholds = squeeze(thresholds);
-        end
 
-        function thresholds = generateThresholds(obj, regionIndex, levelCount)
+        function thresholds = generateRegionThreshold(obj, regionIndex, levelCount)
             if levelCount == 0
                 thresholds = 0;
             elseif obj.thresholdsExist(regionIndex, levelCount)
                 thresholds = obj.getRegionThresholds(regionIndex, levelCount);
             else
-                im = obj.getRegionalImage(regionIndex);
-                thresholds = [0, multithresh(im, levelCount), Inf];
+                thresholds = obj.calculateRegionThresholds(regionIndex, levelCount);
                 obj.setRegionThresholds(regionIndex, levelCount, thresholds);
             end
         end
-        function is = thresholdsExist(obj, index, levelCount)
-            minRegionThresholds = obj.regionsThresholds(index, levelCount, 2);
-            is = minRegionThresholds > 0;
-        end
+    end
+    methods (Access = private)
+
     end
 
-    %% Functions to set state information
+    %% Functions to perform thresholding on region
     methods (Access = protected)
-        function setRegionThresholds(obj, index, levelCount, thresholds)
-            obj.regionsThresholds(index, levelCount, 1:levelCount+2) = thresholds;
-        end
-    end
-
-    %% Functions to update state of GUI
-    methods (Access = protected)
-        function im = rethresholdRegion(obj, index, levels, levelCount)
-            im = obj.regionalImages{index};
-            thresholdRange = obj.generateRegionThreshold(index, levels, levelCount);
+        function im = rethresholdRegion(obj, regionIndex, levels, levelCount)
+            im = obj.getRegionalImage(regionIndex);
+            thresholdRange = obj.generateThresholdRange(regionIndex, levels, levelCount);
             noiseRemover = NoiseRemover(thresholdRange);
             im = noiseRemover.get(im);
         end
-        function thresholdRange = generateRegionThreshold(obj, index, levels, levelCount)
-            thresholds = obj.generateThresholds(index, levelCount);
+        function thresholdRange = generateThresholdRange(obj, regionIndex, levels, levelCount)
+            thresholds = obj.generateRegionThreshold(regionIndex, levelCount);
             thresholdRange = getThresholdsFromLevels(levels, thresholds);
+        end
+    end
+
+    %% Functions to memoize thresholds
+    methods (Access = private)
+        function paddedThresholds = calculateRegionThresholds(obj, regionIndex, levelCount)
+            im = obj.getRegionalImage(regionIndex);
+            if obj.isSingleThreshold
+                thresholds = obj.calculateThresholds(im);
+            else
+                thresholds = obj.calculateThresholds(im, levelCount);
+            end
+            paddedThresholds = [0, thresholds, Inf];
+        end
+
+        function is = thresholdsExist(obj, regionIndex, levelCount)
+            minRegionThresholds = obj.regionsThresholds(regionIndex, levelCount, 2);
+            is = minRegionThresholds > 0;
+        end
+        function thresholds = getRegionThresholds(obj, regionIndex, levelCount)
+            thresholds = obj.regionsThresholds(regionIndex, levelCount, :);
+            thresholds = squeeze(thresholds);
+        end
+        function setRegionThresholds(obj, regionIndex, levelCount, thresholds)
+            obj.regionsThresholds(regionIndex, levelCount, 1:levelCount+2) = thresholds;
         end
     end
 end

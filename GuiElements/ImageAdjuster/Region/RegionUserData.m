@@ -53,6 +53,17 @@ classdef RegionUserData < handle
     end
 
     %% Functions to set state information
+    methods (Static)
+        function setRegionsThresholds(regions, thresholds)
+            thresholdCount = size(thresholds, 1);
+            for index = 1:thresholdCount
+                region = regions(index);
+                newThreshold = thresholds(index, :);
+                regionUserData = RegionUserData.fromRegion(region);
+                regionUserData.setThresholds(newThreshold);
+            end
+        end
+    end
     methods
         function setThresholds(obj, thresholds)
             obj.IntensityRange = thresholds;
