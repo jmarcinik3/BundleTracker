@@ -1,9 +1,8 @@
 classdef VideoImporter < handle
-    properties (Access = protected)
+    properties (Access = private)
         ims; % stored 3D matrix of grayscale video (uint16)
     end
     properties (Access = private)
-        filepath; % video filepath
         videoReader; % object to read video
     end
 
@@ -34,15 +33,11 @@ classdef VideoImporter < handle
         function frameCount = getFrameCount(obj)
             frameCount = get(obj.videoReader, "NumFrames");
         end
-        function filepath = getFilepath(obj)
-            filepath = obj.filepath;
-        end
     end
 
     %% Functions to set state information
     methods (Access = protected)
         function setFilepath(obj, filepath)
-            obj.filepath = filepath;
             obj.ims = [];
             fileCount = numel(filepath);
             if fileCount >= 1 && isfile(filepath)

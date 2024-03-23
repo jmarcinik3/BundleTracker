@@ -88,6 +88,9 @@ classdef TrackingGui
         function path = getDirectoryPath(obj)
             path = obj.videoGui.getDirectoryPath();
         end
+        function filepath = getVideoFilepath(obj)
+            filepath = obj.videoGui.getFilepath();
+        end
 
         % ...for postprocessing
         function factor = getScaleFactor(obj)

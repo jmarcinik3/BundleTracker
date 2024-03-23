@@ -1,4 +1,6 @@
-classdef TrackingLinker < VideoLinker & RegionPreviewer
+classdef TrackingLinker < RegionPreviewer ...
+        & VideoImporter ...
+        & VideoSelector
     properties (Access = private)
         gui;
     end
@@ -16,8 +18,10 @@ classdef TrackingLinker < VideoLinker & RegionPreviewer
             imageLinker = ImageLinker(imageGui);
 
             obj@RegionPreviewer(imageLinker, regionGuiPanel);
-            obj@VideoLinker(videoGui);
+            obj@VideoImporter([]);
+            obj@VideoSelector(videoGui);
 
+            set(videoGui.getFilepathField(), "ValueChangedFcn", @obj.videoFilepathChanged);
             obj.gui = trackingGui;
 
             fig = trackingGui.getFigure();
@@ -66,6 +70,16 @@ classdef TrackingLinker < VideoLinker & RegionPreviewer
             end
         end
     end
+    methods (Access = private)
+        function videoFilepathChanged(obj, ~, ~)
+            filepath = obj.gui.getVideoFilepath();
+            firstFrame = obj.getFirstFrame();
+
+            obj.changeFullImage(firstFrame);
+            obj.setFilepath(filepath); % must come before updating frame label
+            updateFrameLabel(obj);
+        end
+    end
 
     %% Functions to generate state information
     methods
@@ -104,7 +118,7 @@ classdef TrackingLinker < VideoLinker & RegionPreviewer
         function [cancel, results] = trackAndProcess(obj)
             taskName = 'Tracking Regions';
             regions = obj.getRegions();
-            
+
             multiWaitbar(taskName, 0, 'CanCancel', 'on');
             regionCount = numel(regions);
             results = [];
@@ -156,4 +170,15 @@ savedMsg = sprintf("Results saved to %s", filepath);
 countMsg = sprintf("Cell Count: %d", regionCount);
 fpsMsg = sprintf("FPS: %d", fps);
 message = [savedMsg, countMsg, fpsMsg];
+end
+
+function updateFrameLabel(obj)
+label = generateFrameLabel(obj);
+obj.setFrameLabel(label);
+end
+
+function label = generateFrameLabel(obj)
+frameCount = obj.getFrameCount();
+fps = obj.getFps();
+label = sprintf("%d Frames (%d FPS)", frameCount, fps);
 end
