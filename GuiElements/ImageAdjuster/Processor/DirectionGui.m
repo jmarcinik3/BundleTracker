@@ -38,6 +38,7 @@ classdef DirectionGui
             obj.radioGroup = group;
 
             obj.gridLayout = gl;
+            obj.setLocation(SettingsParser.getDefaultPositiveDirection());
             layoutElements(obj);
         end
     end

@@ -69,7 +69,10 @@ end
 % Returns uiddropdown
 function dropdown = generateTrackingSelection(gl)
 dropdown = uidropdown(gl);
-dropdown.Items = TrackingAlgorithms.keywords;
+set(dropdown, ...
+    "Items", TrackingAlgorithms.keywords, ...
+    "Value", SettingsParser.getDefaultTrackingMode() ...
+    );
 end
 
 %% Function to generate angle method dropdown
@@ -83,5 +86,8 @@ end
 % Returns uiddropdown
 function dropdown = generateAngleSelection(gl)
 dropdown = uidropdown(gl);
-dropdown.Items = AngleAlgorithms.keywords;
+set(dropdown, ...
+    "Items", AngleAlgorithms.keywords, ...
+    "Value", SettingsParser.getDefaultAngleMode() ...
+    );
 end

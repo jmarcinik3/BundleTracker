@@ -1,0 +1,10 @@
+{
+    "Defaults":
+    {
+        "AngleMode": "Elliptical Regression",
+        "InvertCheckbox": false,
+        "PositiveDirection": "Upper Left",
+        "Thresholds": [0, 65536],
+        "TrackingMode": "Centroid"
+    }
+}
