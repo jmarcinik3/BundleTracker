@@ -57,12 +57,11 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         end
 
         function regionClicked(obj, source, event)
-            if isLeftClick(event)
-                obj.previewRegion(source);
-            elseif isDoubleClick(event)
+            if isDoubleClick(event)
                 regionUserData = RegionUserData.fromRegion(source);
                 regionUserData.resetToDefaults();
             end
+            obj.previewRegion(source);
         end
 
         function deletingRegion(obj, source, ~)
