@@ -15,14 +15,12 @@ classdef RegionDrawer < RegionShaper
         function region = drawRegionOnClick(obj, ~, event)
             point = event.IntersectionPoint(1:2);
             region = obj.byPoint(point);
-            obj.addMetadataToRegion(region);
-            configureRegion(region);
+            configureRegion(obj, region);
         end
         function rect = drawRectangleByPosition(obj, position)
             ax = obj.getAxis();
             rect = images.roi.Rectangle(ax, "Position", position);
-            obj.addMetadataToRegion(rect);
-            configureRegion(rect);
+            configureRegion(obj, rect);
         end
     end
     methods (Access = private)
@@ -36,7 +34,7 @@ classdef RegionDrawer < RegionShaper
     %% Functions to retrieve GUI elements and state information
     methods (Static)
         function regions = getRegions(obj)
-            if strcmp(get(obj, 'type'), 'axes')
+            if isa(obj, "matlab.ui.control.UIAxes")
                 children = obj.Children;
                 regions = findobj(children, "Type", "images.roi");
                 regions = flip(regions);
@@ -50,42 +48,20 @@ classdef RegionDrawer < RegionShaper
     %% Functions to update GUI and state information
     methods (Static)
         function updateSelected(activeRegion)
-            updateRegionSelected(activeRegion);
-            updateRegionLabels(activeRegion);
-        end
-    end
-    methods (Access = private)
-        function addMetadataToRegion(obj, region)
-            userData = obj.userDataFcn();
-            set(region, "UserData", userData);
+            RegionUpdater.selected(activeRegion);
+            RegionUpdater.labels(activeRegion);
         end
     end
 end
 
 
 
-
-
-function configureRegion(region)
+function configureRegion(obj, region)
 set(region, "SelectedColor", RegionColor.workingColor);
+addMetadataToRegion(obj, region);
 end
 
-function updateRegionSelected(activeRegion)
-regions = RegionDrawer.getRegions(activeRegion);
-set(regions, "Selected", false);
-set(activeRegion, "Selected", true);
-end
-
-function updateRegionLabels(ax)
-regions = RegionDrawer.getRegions(ax);
-count = numel(regions);
-for index = 1:count
-    region = regions(index);
-    updateRegionLabel(region, index);
-end
-end
-
-function updateRegionLabel(region, index)
-label = num2str(index);
-set(region, "Label", label);
+function addMetadataToRegion(obj, region)
+userData = obj.userDataFcn();
+set(region, "UserData", userData);
 end

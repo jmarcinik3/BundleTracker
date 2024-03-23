@@ -34,26 +34,8 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 
     %% Functions to update state of GUI
     methods
-        function appendRectanglesByPositions(obj, positions)
-            taskName = 'Drawing Rectangles';
-
-            multiWaitbar(taskName, 0, 'CanCancel', 'on');
-            rectCount = size(positions, 1);
-            rects = {};
-
-            for index = 1:rectCount
-                position = positions(index, :);
-                rect = appendRectangleByPosition(obj, position);
-                rects{index} = rect; %#ok<AGROW>
-
-                proportionComplete = index / rectCount;
-                if multiWaitbar(taskName, proportionComplete)
-                    deleteRegions(rects);
-                    break;
-                end
-            end
-
-            multiWaitbar(taskName, 'Close');
+        function drawRectanglesByPositions(obj, positions)
+            drawRectanglesByPositions(obj, positions);
         end
         function changeFullImage(obj, im)
             obj.clearRegions();
@@ -75,9 +57,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         end
 
         function regionClicked(obj, source, event)
-            if isLeftClick(event)
-                obj.previewRegion(source);
-            end
+            obj.previewRegion(source);
         end
 
         function deletingRegion(obj, source, ~)
@@ -107,7 +87,29 @@ regionGui = obj.generateRegionGui();
 regionLinker = RegionLinker(regionGui, region, fullRawImage);
 end
 
-function rect = appendRectangleByPosition(obj, position)
+function drawRectanglesByPositions(obj, positions)
+taskName = 'Drawing Rectangles';
+
+multiWaitbar(taskName, 0, 'CanCancel', 'on');
+rectCount = size(positions, 1);
+rects = {};
+
+for index = 1:rectCount
+    position = positions(index, :);
+    rect = drawRectangleByPosition(obj, position);
+    rects{index} = rect; %#ok<AGROW>
+
+    proportionComplete = index / rectCount;
+    if multiWaitbar(taskName, proportionComplete)
+        deleteRegions(rects);
+        break;
+    end
+end
+
+multiWaitbar(taskName, 'Close');
+end
+
+function rect = drawRectangleByPosition(obj, position)
 rect = obj.drawRectangleByPosition(position);
 obj.generateRegionLinker(rect);
 drawnow();
@@ -116,9 +118,7 @@ end
 
 function is = isLeftClick(event)
 name = event.EventName;
-if name == "ROIClicked"
-    is = event.SelectionType == "left";
-elseif name == "Hit"
+if name == "Hit"
     is = event.Button == 1;
 end
 end

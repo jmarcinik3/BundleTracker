@@ -55,7 +55,7 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
         function blobDetectionButtonPushed(obj, ~, ~)
             im = obj.videoSelector.getFirstFrame();
             rectanglePositions = BlobDetectorLinker.openFigure(im);
-            obj.appendRectanglesByPositions(rectanglePositions);
+            obj.drawRectanglesByPositions(rectanglePositions);
         end
 
         function regionThresholdButtonPushed(obj, ~, ~)
