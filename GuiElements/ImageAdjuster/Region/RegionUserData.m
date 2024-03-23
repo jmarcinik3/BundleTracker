@@ -73,10 +73,10 @@ classdef RegionUserData < handle
             obj.IntensityRange = thresholds;
         end
         function setLowerThreshold(obj, threshold)
-             obj.IntensityRange(1) = threshold;
+            obj.IntensityRange(1) = threshold;
         end
         function setUpperThreshold(obj, threshold)
-             obj.IntensityRange(2) = threshold;
+            obj.IntensityRange(2) = threshold;
         end
 
         function setInvert(obj, invert)
@@ -90,6 +90,37 @@ classdef RegionUserData < handle
         end
         function setPositiveDirection(obj, positiveDirection)
             obj.Direction = positiveDirection;
+        end
+    end
+
+    %% Functions to reset to default state information
+    methods
+        function resetToDefaults(obj)
+            obj.resetToDefaultAngleMode();
+            obj.resetToDefaultInvert();
+            obj.resetToDefaultPositiveDirection();
+            obj.resetToDefaultThresholds();
+            obj.resetToDefaultTrackingMode();
+        end
+        function resetToDefaultAngleMode(obj)
+            defaultAngleMode = SettingsParser.getDefaultAngleMode();
+            obj.setAngleMode(defaultAngleMode);
+        end
+        function resetToDefaultInvert(obj)
+            defaultInvert = SettingsParser.getDefaultInvert();
+            obj.setInvert(defaultInvert);
+        end
+        function resetToDefaultPositiveDirection(obj)
+            defaultPositiveDirection = SettingsParser.getDefaultPositiveDirection();
+            obj.setPositiveDirection(defaultPositiveDirection);
+        end
+        function resetToDefaultThresholds(obj)
+            defaultThresholds = SettingsParser.getDefaultThresholds();
+            obj.setThresholds(defaultThresholds);
+        end
+        function resetToDefaultTrackingMode(obj)
+            defaultTrackingMode = SettingsParser.getDefaultTrackingMode();
+            obj.setTrackingMode(defaultTrackingMode);
         end
     end
 end

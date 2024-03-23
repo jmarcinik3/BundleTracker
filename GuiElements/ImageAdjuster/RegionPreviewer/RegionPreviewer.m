@@ -57,7 +57,12 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         end
 
         function regionClicked(obj, source, event)
-            obj.previewRegion(source);
+            if isLeftClick(event)
+                obj.previewRegion(source);
+            elseif isDoubleClick(event)
+                regionUserData = RegionUserData.fromRegion(source);
+                regionUserData.resetToDefaults();
+            end
         end
 
         function deletingRegion(obj, source, ~)
@@ -116,9 +121,20 @@ drawnow();
 pause(0.1);
 end
 
+function is = isDoubleClick(event)
+selectionType = event.SelectionType;
+is = selectionType == "double";
+end
+
 function is = isLeftClick(event)
 name = event.EventName;
-if name == "Hit"
-    is = event.Button == 1;
+switch name
+    case "ROIClicked"
+        selectionType = event.SelectionType;
+        is = selectionType == "left" ...
+            || selectionType == "shift" ...
+            || selectionType == "ctrl";
+    case "Hit"
+        is = event.Button == 1;
 end
 end
