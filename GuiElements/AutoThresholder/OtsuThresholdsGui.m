@@ -8,8 +8,6 @@ classdef OtsuThresholdsGui
         rows = 3;
         columns = 4;
         size = [OtsuThresholdsGui.rows, OtsuThresholdsGui.columns];
-        applyText = "Apply";
-        cancelText = "Cancel";
     end
 
     properties (Access = private)
@@ -147,12 +145,6 @@ for rowIndex = 1:rowCount
         break;
     end
 end
-end
-
-function buttons = generateActionButtons(gl)
-applyButton = uibutton(gl, "Text", OtsuThresholdsGui.applyText);
-cancelButton = uibutton(gl, "Text", OtsuThresholdsGui.cancelText);
-buttons = [applyButton, cancelButton];
 end
 
 function slider = generateLevelsSlider(gl)

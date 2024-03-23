@@ -7,8 +7,6 @@ classdef AutoThresholdGui
         rows = 3;
         columns = 4;
         size = [AutoThresholdGui.rows, AutoThresholdGui.columns];
-        applyText = "Apply";
-        cancelText = "Cancel";
     end
 
     properties (Access = private)
@@ -116,10 +114,4 @@ for rowIndex = 1:rowCount
         break;
     end
 end
-end
-
-function buttons = generateActionButtons(gl)
-applyButton = uibutton(gl, "Text", AutoThresholdGui.applyText);
-cancelButton = uibutton(gl, "Text", AutoThresholdGui.cancelText);
-buttons = [applyButton, cancelButton];
 end

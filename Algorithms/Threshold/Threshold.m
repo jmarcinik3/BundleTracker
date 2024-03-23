@@ -25,7 +25,7 @@ classdef Threshold
                     thresholdFcn = @Threshold.byKittlerIllingworth;
                 case Threshold.crossEntropyKeyword
                     thresholdFcn = @Threshold.byMinimumCrossEntropy;
-                case Threshold.triangleKeyowrd
+                case Threshold.triangleKeyword
                     thresholdFcn = @Threshold.byTriangle;
             end
         end

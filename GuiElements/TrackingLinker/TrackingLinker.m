@@ -58,21 +58,11 @@ classdef TrackingLinker < RegionPreviewer ...
                 obj.otsuThresholdRegions(regions);
             end
         end
-        function otsuThresholdRegions(obj, regions)
-            im = obj.getFirstFrame();
-            regionalImages = generateRegionalImages(regions, im);
-            fig = generateFigure();
-            newThresholds = OtsuThresholdsLinker.openGui(fig, regionalImages);
-            RegionUserData.setRegionsThresholds(regions, newThresholds);
-        end
-
         function regionThresholdButtonPushed(obj, source, ~)
             thresholdKeyword = source.UserData;
             if obj.regionExists(thresholdKeyword)
-                regionalImages = obj.generateRegionalImages();
-                fig = generateFigure();
-                newThresholds = AutoThresholdOpener.byKeyword(fig, regionalImages, thresholdKeyword);
-                RegionUserData.setRegionsThresholds(obj, newThresholds);
+                regions = obj.getRegions();
+                obj.thresholdRegions(regions, thresholdKeyword);
             end
         end
     end
@@ -85,9 +75,22 @@ classdef TrackingLinker < RegionPreviewer ...
             obj.setFilepath(filepath); % must come before updating frame label
             updateFrameLabel(obj);
         end
+
+        function otsuThresholdRegions(obj, regions)
+            im = obj.getFirstFrame();
+            regionalImages = generateRegionalImages(regions, im);
+            fig = generateFigure(OtsuThresholdsGui.title);
+            newThresholds = OtsuThresholdsLinker.openGui(fig, regionalImages);
+            RegionUserData.setRegionsThresholds(regions, newThresholds);
+        end
+        function thresholdRegions(obj, regions, thresholdKeyword)
+            im = obj.getFirstFrame();
+            regionalImages = generateRegionalImages(regions, im);
+            fig = generateFigure(thresholdKeyword);
+            newThresholds = AutoThresholdOpener.byKeyword(fig, regionalImages, thresholdKeyword);
+            RegionUserData.setRegionsThresholds(obj, newThresholds);
+        end
     end
-
-
 
     %% Functions to generate state information
     methods
@@ -157,12 +160,6 @@ classdef TrackingLinker < RegionPreviewer ...
             fig = obj.gui.getFigure();
             uialert(fig, message, title);
         end
-
-        function regionalImages = generateRegionalImages(obj)
-            regions = obj.getRegions();
-            im = obj.getFirstFrame();
-            regionalImages = generateRegionalImages(regions, im);
-        end
     end
 end
 
@@ -197,7 +194,7 @@ fps = obj.getFps();
 label = sprintf("%d Frames (%d FPS)", frameCount, fps);
 end
 
-function fig = generateFigure()
-fig = uifigure();
+function fig = generateFigure(title)
+fig = uifigure("Name", title);
 colormap(fig, "turbo");
 end
