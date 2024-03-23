@@ -3,8 +3,7 @@ activeRegion = trackingLinker.getActiveRegion();
 videoSelector = trackingLinker.getVideoSelector();
 
 key = event.Key;
-modifiers = event.Modifier;
-modKey = ModifierKey(modifiers);
+modKey = ModifierKey(event);
 
 if objectExists(activeRegion) && RegionAdjustKey.is(key)
     if modKey.isCtrlShiftAlt

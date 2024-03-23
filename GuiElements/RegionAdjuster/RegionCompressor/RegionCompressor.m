@@ -9,8 +9,7 @@ classdef RegionCompressor < RegionAdjuster
     methods (Static)
         function  byKey(region, event)
             key = event.Key;
-            modifiers = event.Modifier;
-            modKey = ModifierKey(modifiers);
+            modKey = ModifierKey(event);
             if modKey.isPureCtrl
                 RegionCompressor.byKeyUnchecked(region, key)
             end

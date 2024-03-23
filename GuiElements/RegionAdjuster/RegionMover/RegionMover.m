@@ -9,8 +9,7 @@ classdef RegionMover < RegionAdjuster
     methods (Static)
         function byKey(region, event)
             key = event.Key;
-            modifiers = event.Modifier;
-            modKey = ModifierKey(modifiers);
+            modKey = ModifierKey(event);
             if modKey.hasZeroModifiers
                 RegionMover.byKeyUnmodified(region, key)
             elseif modKey.isPureCtrl && RegionAdjustKey.isDelete(key)

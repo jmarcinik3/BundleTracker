@@ -13,8 +13,7 @@ classdef RegionOrderer
     methods (Static)
         function byKey(region, event)
             key = event.Key;
-            modifiers = event.Modifier;
-            modKey = ModifierKey(modifiers);
+            modKey = ModifierKey(event);
             regionOrderer = RegionOrderer(region);
 
             if modKey.isCtrlShiftAlt

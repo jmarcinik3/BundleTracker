@@ -14,6 +14,10 @@ classdef ModifierKey
 
     methods
         function obj = ModifierKey(modifiers)
+            if isa(modifiers, "matlab.ui.eventdata.KeyData")
+                modifiers = modifiers.Modifier;
+            end
+
             modifierCount = numel(modifiers);
             obj.hasZeroModifiers = modifierCount == 0;
             hasOneModifier = modifierCount == 1;
