@@ -57,7 +57,7 @@ classdef TrackingLinker < VideoLinker & RegionPreviewer
             regionalImages = generateRegionalImages(regions, im);
             newThresholds = AutoThresholdLinker.openFigure(regionalImages);
             thresholdCount = size(newThresholds, 1);
-            
+
             for index = 1:thresholdCount
                 region = regions(index);
                 newThreshold = newThresholds(index, :);
@@ -79,7 +79,6 @@ classdef TrackingLinker < VideoLinker & RegionPreviewer
                 );
         end
     end
-
     methods (Access = protected)
         function exists = regionExists(obj, title)
             exists = regionExists@ActiveRegionOrderer(obj);
