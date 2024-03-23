@@ -1,5 +1,5 @@
 function result = trackAndProcessRegion(trackingLinker, region)
-set(region, "Color", RegionColor.workingColor); % color region as in-process
+trackingLinker.previewRegion(region);
 centers = trackCenters(trackingLinker, region);
 initialResult = trackingLinker.generateInitialResult();
 result = processResult(region, centers, initialResult);

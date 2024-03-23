@@ -35,11 +35,25 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
     %% Functions to update state of GUI
     methods
         function appendRectanglesByPositions(obj, positions)
+            taskName = 'Drawing Rectangles';
+
+            multiWaitbar(taskName, 0, 'CanCancel', 'on');
             rectCount = size(positions, 1);
+            rects = {};
+
             for index = 1:rectCount
                 position = positions(index, :);
-                appendRectangleByPosition(obj, position);
+                rect = appendRectangleByPosition(obj, position);
+                rects{index} = rect; %#ok<AGROW>
+
+                proportionComplete = index / rectCount;
+                if multiWaitbar(taskName, proportionComplete)
+                    deleteRegions(rects);
+                    break;
+                end
             end
+
+            multiWaitbar(taskName, 'Close');
         end
         function changeFullImage(obj, im)
             obj.clearRegions();
@@ -93,7 +107,7 @@ regionGui = obj.generateRegionGui();
 regionLinker = RegionLinker(regionGui, region, fullRawImage);
 end
 
-function appendRectangleByPosition(obj, position)
+function rect = appendRectangleByPosition(obj, position)
 rect = obj.drawRectangleByPosition(position);
 obj.generateRegionLinker(rect);
 drawnow();

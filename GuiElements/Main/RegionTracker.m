@@ -25,18 +25,22 @@ classdef RegionTracker
     %% Functions to perform tracking
     methods
         function centers = track(obj, ims)
-            frameCount = size(ims, 3);
-            centers = PointStructurer.preallocate(frameCount);
+            taskName = 'Tracking Region';
             trackingMode = obj.trackingMode;
             
-            progress = ProgressBar(frameCount, "Tracking Region");
+            multiWaitbar(taskName, 0);
+            frameCount = size(ims, 3);
+            centers = PointStructurer.preallocate(frameCount);
             trackFrame = TrackingAlgorithms.handleByKeyword(trackingMode);
+
             for index = 1:frameCount
                 centers(index) = trackFrame(ims(:, :, index));
-                count(progress);
+                proportionComplete = index / frameCount;
+                multiWaitbar(taskName, proportionComplete);
             end
 
             centers = PointStructurer.mergePoints(centers);
+            multiWaitbar(taskName, 'Close');
         end
     end
 end

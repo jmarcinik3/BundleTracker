@@ -19,10 +19,8 @@ classdef RegionVisibler < ActiveRegionOrderer & RegionLinkerContainer
     %% Functions to update state of GUI
     methods
         function clearRegions(obj, ~, ~)
-            % Removes currently drawn regions on image
             regions = obj.getRegions();
-            arrayfun(@(region) region.notify("DeletingROI"), regions);
-            delete(regions);
+            deleteRegions(regions);
         end
         function setPreviousRegionVisible(obj, ~, ~)
             obj.setAdjacentRegionVisible(-1);
@@ -30,8 +28,6 @@ classdef RegionVisibler < ActiveRegionOrderer & RegionLinkerContainer
         function setNextRegionVisible(obj, ~, ~)
             obj.setAdjacentRegionVisible(1);
         end
-    end
-    methods (Access = protected)
         function previewRegion(obj, region)
             obj.setActiveRegion(region);
             updateRegionGuiVisible(obj, region);

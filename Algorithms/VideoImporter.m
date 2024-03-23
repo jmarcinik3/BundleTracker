@@ -56,14 +56,19 @@ end
 
 
 function ims = readVideo(videoReader)
-frameCount = get(videoReader, "NumFrames");
+taskName = 'Importing Frames';
 
-progress = ProgressBar(frameCount, "Importing Frames");
+multiWaitbar(taskName, 0);
+frameCount = get(videoReader, "NumFrames");
 ims = preallocateVideo(videoReader);
+
 for index = 1:frameCount
     ims(:, :, index) = read(videoReader, index);
-    count(progress);
+    proportionComplete = index / frameCount;
+    multiWaitbar(taskName, proportionComplete);
 end
+
+multiWaitbar(taskName, 'Close');
 end
 
 function ims = preallocateVideo(videoReader)

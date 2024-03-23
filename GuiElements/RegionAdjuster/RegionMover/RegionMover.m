@@ -49,8 +49,7 @@ classdef RegionMover < RegionAdjuster
 
         function deleteRegion(obj, ~, ~)
             region = obj.getRegion();
-            region.notify("DeletingROI");
-            delete(region);
+            deleteRegions(region);
         end
 
         function moveUpLeft(obj, ~, ~)

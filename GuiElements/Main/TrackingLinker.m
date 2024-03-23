@@ -100,10 +100,8 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
     end
     methods (Access = private)
         function trackAndSaveRegions(obj)
-            results = obj.trackAndProcess();
-            trackingWasCompleted = true;
-
-            if trackingWasCompleted
+            [cancel, results] = obj.trackAndProcess();
+            if ~cancel
                 obj.trackingCompleted(results);
             else
                 obj.throwAlertMessage("Tracking Canceled!", "Start Tracking");
@@ -114,19 +112,30 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
             displayTrackingCompleted(results, filepath);
             obj.exportImageIfPossible();
         end
-        function results = trackAndProcess(obj)
+        function [cancel, results] = trackAndProcess(obj)
+            taskName = 'Tracking Regions';
             regions = obj.getRegions();
+            
+            multiWaitbar(taskName, 0, 'CanCancel', 'on');
+            regionCount = numel(regions);
             results = {};
             set(regions, "Color", RegionColor.queueColor); % color regions as queued
 
-            for index = 1:numel(regions)
+            for index = 1:regionCount
                 region = regions(index);
                 result = trackAndProcessRegion(obj, region);
                 results{index} = result;
+
+                proportionComplete = index / regionCount;
+                cancel = multiWaitbar(taskName, proportionComplete);
+                if cancel
+                    break;
+                end
             end
 
             results = cell2mat(results);
             set(regions, "Color", RegionColor.unprocessedColor); % color regions as unprocessed
+            multiWaitbar(taskName,'Close');
         end
         function filepath = saveResults(obj, results)
             filepath = obj.gui.generateSaveFilepath();
