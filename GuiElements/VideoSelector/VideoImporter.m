@@ -44,8 +44,9 @@ classdef VideoImporter < handle
         function setFilepath(obj, filepath)
             obj.filepath = filepath;
             obj.ims = [];
-            if numel(filepath) >= 1 && isfile(filepath)
-                videoReader = VideoReader(obj.filepath);
+            fileCount = numel(filepath);
+            if fileCount >= 1 && isfile(filepath)
+                videoReader = VideoReader(filepath);
                 obj.videoReader = videoReader;
                 obj.ims = readVideo(videoReader);
             end

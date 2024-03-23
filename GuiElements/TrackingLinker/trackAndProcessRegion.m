@@ -26,7 +26,7 @@ result = table2struct([ ...
     struct2table(initialResult) ...
     ]);
 result = appendRegionalMetadata(region, result);
-result = postprocessResults(result);
+result = postprocessResult(result);
 end
 
 function result = appendRegionalMetadata(region, result)
@@ -34,21 +34,6 @@ regionUserData = RegionUserData.fromRegion(region);
 result.Label = region.Label;
 result.Region = region;
 result = regionUserData.appendMetadata(result);
-end
-
-
-
-function results = postprocessResults(results)
-resultCount = ResultsParser(results).getRegionCount();
-if resultCount == 1
-    results = postprocessResult(results);
-else
-    for index = 1:resultCount
-        result = results(index);
-        postResult = postprocessResult(result);
-        results(index) = postResult;
-    end
-end
 end
 
 function postResult = postprocessResult(result)

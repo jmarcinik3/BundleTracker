@@ -118,13 +118,13 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
             
             multiWaitbar(taskName, 0, 'CanCancel', 'on');
             regionCount = numel(regions);
-            results = {};
+            results = [];
             set(regions, "Color", RegionColor.queueColor); % color regions as queued
 
             for index = 1:regionCount
                 region = regions(index);
                 result = trackAndProcessRegion(obj, region);
-                results{index} = result;
+                results = [results, result];
 
                 proportionComplete = index / regionCount;
                 cancel = multiWaitbar(taskName, proportionComplete);
@@ -133,8 +133,8 @@ classdef TrackingLinker < VideoImporter & RegionPreviewer
                 end
             end
 
-            results = cell2mat(results);
-            set(regions, "Color", RegionColor.unprocessedColor); % color regions as unprocessed
+            activeRegion = obj.getActiveRegion();
+            RegionUpdater.selected(activeRegion);
             multiWaitbar(taskName,'Close');
         end
         function filepath = saveResults(obj, results)
