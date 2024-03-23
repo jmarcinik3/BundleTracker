@@ -1,18 +1,14 @@
 classdef RegionLinkerContainer < handle
-    properties
-        getAxis;
-    end
-
     properties (Access = private)
+        axis;
         tagCounter = 0;
         tag2linker = dictionary;
         parent;
     end
 
     methods
-        function obj = RegionLinkerContainer(imageLinker, regionGuiParent)
-            imageGui = imageLinker.getGui();
-            obj.getAxis = @imageGui.getAxis;
+        function obj = RegionLinkerContainer(ax, regionGuiParent)
+            obj.axis = ax;
             obj.parent = regionGuiParent;
         end
     end
@@ -45,6 +41,9 @@ classdef RegionLinkerContainer < handle
         end
     end
     methods (Access = private)
+        function ax = getAxis(obj)
+            ax = obj.axis;
+        end
         function parent = getRegionGuiParent(obj)
             parent = obj.parent;
         end

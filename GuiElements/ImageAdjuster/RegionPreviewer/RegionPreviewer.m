@@ -7,7 +7,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         function obj = RegionPreviewer(imageLinker, regionGuiParent)
             imageGui = imageLinker.getGui();
             ax = imageGui.getAxis();
-            obj@RegionVisibler(imageLinker, regionGuiParent);
+            obj@RegionVisibler(ax, regionGuiParent);
             obj@RegionDrawer(ax, @imageGui.getRegionUserData);
 
             configureInteractiveImage(obj, imageGui);
@@ -19,6 +19,11 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
     methods
         function regions = getRegions(obj)
             regions  = getRegions@RegionVisibler(obj);
+        end
+    end
+    methods (Access = protected)
+        function ax = getAxis(obj)
+            ax = getAxis@RegionDrawer(obj);
         end
     end
     methods (Access = private)
@@ -37,7 +42,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             rectCount = size(positions, 1);
             for index = 1:rectCount
                 position = positions(index, :);
-                rect = obj.generateRectangleByPosition(position);
+                rect = obj.drawRectangleByPosition(position);
                 obj.generateRegionLinker(rect);
                 if lazyLoad
                     drawnow();
@@ -53,7 +58,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
-                region = obj.generateRegionOnClick(source, event);
+                region = obj.drawRegionOnClick(source, event);
                 obj.generateRegionLinker(region);
             end
         end
