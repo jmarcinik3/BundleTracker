@@ -54,8 +54,10 @@ classdef TrackingLinker < VideoLinker & RegionPreviewer
         end
         function autothresholdRegions(obj, regions)
             im = obj.getFirstFrame();
-            newThresholds = AutoThresholdLinker.openFigure(im, regions);
+            regionalImages = generateRegionalImages(regions, im);
+            newThresholds = AutoThresholdLinker.openFigure(regionalImages);
             thresholdCount = size(newThresholds, 1);
+            
             for index = 1:thresholdCount
                 region = regions(index);
                 newThreshold = newThresholds(index, :);

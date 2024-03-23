@@ -2,16 +2,15 @@ classdef AutoThresholdLinker < AutoThresholder
     properties (Access = private)
         gui;
         interactiveImages;
-        regionsThreshold;
+        regionsThreshold = 0;
         applyThresholds = false;
     end
 
     methods
-        function obj = AutoThresholdLinker(gui, im, regions)
-            obj@AutoThresholder(im, regions);
+        function obj = AutoThresholdLinker(gui, regionalImages)
+            obj@AutoThresholder(regionalImages);
             axs = gui.getAxes();
             iIms = generateInteractiveImages(axs, obj.regionalImages);
-            obj.interactiveImages = iIms;
 
             levelsSlider = gui.getLevelsSlider();
             set(levelsSlider, "ValueChangingFcn", @obj.levelsChanging);
@@ -19,19 +18,22 @@ classdef AutoThresholdLinker < AutoThresholder
             set(gui.getCountSpinner(), "ValueChangingFcn", @obj.countSpinnerChanging);
 
             obj.gui = gui;
-            obj.levelsChanged(levelsSlider.Value);
+            obj.interactiveImages = iIms;
+            
+            initialLevels = get(levelsSlider, "Value");
+            obj.levelsChanged(initialLevels);
         end
     end
 
     %% Functions to generate thresholds
     methods (Static)
-        function regionsThreshold = openFigure(im, regions)
-            regionCount = numel(regions);
+        function regionsThreshold = openFigure(regionalImages)
+            regionCount = numel(regionalImages);
 
             fig = uifigure;
             colormap(fig, "turbo");
             gui = AutoThresholdGui(fig, regionCount);
-            linker = AutoThresholdLinker(gui, im, regions);
+            linker = AutoThresholdLinker(gui, regionalImages);
             uiwait(fig);
 
             regionsThreshold = linker.regionsThreshold;

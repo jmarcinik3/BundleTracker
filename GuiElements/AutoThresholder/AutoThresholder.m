@@ -5,15 +5,12 @@ classdef AutoThresholder < handle
 
     properties (Access = private)
         regionsThresholds;
-        regionCount;
     end
 
     methods
-        function [obj, regionalImages] = AutoThresholder(im, regions)
-            regionalImages = generateRegionalImages(regions, im);
-            regionCount = numel(regions);
+        function obj = AutoThresholder(regionalImages)
+            regionCount = numel(regionalImages);
             obj.regionalImages = regionalImages;
-            obj.regionCount = regionCount;
             obj.regionsThresholds = preallocateRegionThresholds(regionCount);
         end
     end
@@ -21,7 +18,7 @@ classdef AutoThresholder < handle
     %% Functions to retrieve state information
     methods (Access = protected)
         function regionCount = getRegionCount(obj)
-            regionCount = obj.regionCount;
+            regionCount = numel(obj.regionalImages);
         end
         function im = getRegionalImage(obj, index)
             im = obj.regionalImages{index};
@@ -71,15 +68,6 @@ classdef AutoThresholder < handle
 end
 
 
-
-function regionalImages = generateRegionalImages(regions, im)
-regionCount = numel(regions);
-for index = regionCount:-1:1
-    region = regions(index);
-    regionalImage = MatrixUnpadder.byRegion2d(region, im);
-    regionalImages{index} = regionalImage;
-end
-end
 
 function matrix = preallocateRegionThresholds(regionCount)
 maxLevelCount = AutoThresholdGui.maxLevelCount;
