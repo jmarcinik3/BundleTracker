@@ -22,10 +22,25 @@ classdef RegionDrawer < handle
 
     %% Functions to generate GUI elements
     methods (Access = protected)
-        function region = generateRegion(obj, ~, event)
+        function region = generateRegionOnClick(obj, ~, event)
             point = event.IntersectionPoint(1:2);
             region = obj.byPoint(point);
             obj.addMetadataToRegion(region);
+        end
+        function rect = generateRectangleByPosition(obj, position)
+            ax = obj.getAxis();
+            rect = images.roi.Rectangle(ax, "Position", position);
+            obj.addMetadataToRegion(rect);
+            configureRegion(rect);
+        end
+    end
+    methods (Access = private)
+        function region = byPoint(obj, point)
+            ax = obj.getAxis();
+            keyword = obj.getRegionShape();
+            region = drawRegionByKeyword(ax, point, keyword);
+            RegionDrawer.updateSelected(region);
+            configureRegion(region);
         end
     end
 
@@ -77,21 +92,8 @@ classdef RegionDrawer < handle
     %% Functions to update GUI and state information
     methods (Static)
         function updateSelected(activeRegion)
-            updateRegionColors(activeRegion);
+            updateRegionSelected(activeRegion);
             updateRegionLabels(activeRegion);
-        end
-    end
-    methods (Access = protected)
-        function region = byPoint(obj, point)
-            ax = obj.getAxis();
-            keyword = obj.getRegionShape();
-            region = drawRegionByKeyword(ax, point, keyword);
-            RegionDrawer.updateSelected(region);
-        end
-        function rect = rectangleByPosition(obj, position)
-            ax = obj.getAxis();
-            rect = images.roi.Rectangle(ax, "Position", position);
-            obj.addMetadataToRegion(rect);
         end
     end
     methods (Access = private)
@@ -103,6 +105,10 @@ classdef RegionDrawer < handle
 end
 
 
+
+function configureRegion(region)
+set(region, "SelectedColor", RegionColor.workingColor);
+end
 
 function region = drawRegionByKeyword(ax, point, keyword)
 switch keyword
@@ -119,10 +125,10 @@ end
 beginDrawingFromPoint(region, point);
 end
 
-function updateRegionColors(activeRegion)
+function updateRegionSelected(activeRegion)
 regions = RegionDrawer.getRegions(activeRegion);
-set(regions, "Color", RegionColor.unprocessedColor);
-set(activeRegion, "Color", RegionColor.workingColor);
+set(regions, "Selected", false);
+set(activeRegion, "Selected", true);
 end
 
 function updateRegionLabels(ax)

@@ -37,7 +37,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             rectCount = size(positions, 1);
             for index = 1:rectCount
                 position = positions(index, :);
-                rect = obj.rectangleByPosition(position);
+                rect = obj.generateRectangleByPosition(position);
                 obj.generateRegionLinker(rect);
                 if lazyLoad
                     drawnow();
@@ -53,7 +53,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
-                region = obj.generateRegion(source, event);
+                region = obj.generateRegionOnClick(source, event);
                 obj.generateRegionLinker(region);
             end
         end
