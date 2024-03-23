@@ -32,17 +32,13 @@ classdef AutoThresholdLinker < AutoThresholder
         end
     end
 
-    %% Functions to generate thresholds
+    %% Functions to open GUI
     methods (Static)
-        function thresholdRanges = openFigure(regionalImages)
+        function thresholdRanges = openGui(fig, regionalImages, thresholdFcn)
             regionCount = numel(regionalImages);
-
-            fig = uifigure;
-            colormap(fig, "turbo");
             gui = AutoThresholdGui(fig, regionCount);
-            linker = AutoThresholdLinker(gui, regionalImages, @ridlerCalvard);
+            linker = AutoThresholdLinker(gui, regionalImages, thresholdFcn);
             uiwait(fig);
-
             thresholdRanges = linker.thresholdRanges;
         end
     end

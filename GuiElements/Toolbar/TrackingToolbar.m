@@ -30,8 +30,6 @@ classdef TrackingToolbar < handle
     methods (Access = private)
         function regionShapeTools = generateRegionShapeTools(obj, toolbar, trackingLinker)
             regionShapeTools = generateRegionShapeTools(toolbar);
-            blobDetectionTool = generateBlobDetectionTool(toolbar, trackingLinker);
-            regionsThresholdTool = generateRegionsThresholdTool(toolbar, trackingLinker);
             removeRegionsTool = generateRemoveRegionsTool(toolbar, trackingLinker);
 
             set(regionShapeTools, "ClickedCallback", @obj.shapeToolClicked);
@@ -62,24 +60,6 @@ end
 function updateToggleToolState(activeTool, otherTools)
 setToogleToolState(otherTools, false);
 setToogleToolState(activeTool, true);
-end
-
-function tool = generateBlobDetectionTool(toolbar, trackingLinker)
-[icon, ~, ~] = imread("img/detect-blobs.png");
-tool = uipushtool(toolbar, ...
-    "Icon", icon, ...
-    "ClickedCallback", @trackingLinker.blobDetectionButtonPushed, ...
-    "Tooltip", BlobDetectorGui.title ...
-    );
-end
-
-function tool = generateRegionsThresholdTool(toolbar, trackingLinker)
-[icon, ~, ~] = imread("img/autothreshold.png");
-tool = uipushtool(toolbar, ...
-    "Icon", icon, ...
-    "ClickedCallback", @trackingLinker.otsuThresholdsPushed, ...
-    "Tooltip", OtsuThresholdsGui.title ...
-    );
 end
 
 function tool = generateRemoveRegionsTool(toolbar, trackingLinker)

@@ -16,15 +16,11 @@ classdef OtsuThresholdsLinker < AutoThresholdLinker
 
     %% Functions to generate thresholds
     methods (Static)
-        function thresholdRanges = openFigure(regionalImages)
+        function thresholdRanges = openGui(fig, regionalImages)
             regionCount = numel(regionalImages);
-
-            fig = uifigure;
-            colormap(fig, "turbo");
             gui = OtsuThresholdsGui(fig, regionCount);
             linker = OtsuThresholdsLinker(gui, regionalImages);
             uiwait(fig);
-
             thresholdRanges = linker.thresholdRanges;
         end
     end

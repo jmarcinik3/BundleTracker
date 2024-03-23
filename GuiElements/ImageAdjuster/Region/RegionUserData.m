@@ -55,6 +55,10 @@ classdef RegionUserData < handle
     %% Functions to set state information
     methods (Static)
         function setRegionsThresholds(regions, thresholds)
+            if ~RegionType.isRegion(regions)
+                regions = regions.getRegions();
+            end
+
             thresholdCount = size(thresholds, 1);
             for index = 1:thresholdCount
                 region = regions(index);
