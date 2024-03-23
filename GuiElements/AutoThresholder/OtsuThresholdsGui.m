@@ -1,4 +1,4 @@
-classdef AutoThresholdGui
+classdef OtsuThresholdsGui
     properties (Constant)
         title = "Threshold Regions by Otsu's Method";
         maxLevelCount = 20;
@@ -7,7 +7,7 @@ classdef AutoThresholdGui
     properties (Constant, Access = private)
         rows = 3;
         columns = 4;
-        size = [AutoThresholdGui.rows, AutoThresholdGui.columns];
+        size = [OtsuThresholdsGui.rows, OtsuThresholdsGui.columns];
         applyText = "Apply";
         cancelText = "Cancel";
     end
@@ -21,9 +21,9 @@ classdef AutoThresholdGui
     end
 
     methods
-        function obj = AutoThresholdGui(fig, regionCount)
-            set(fig, "Name", AutoThresholdGui.title);
-            gl = uigridlayout(fig, AutoThresholdGui.size);
+        function obj = OtsuThresholdsGui(fig, regionCount)
+            set(fig, "Name", OtsuThresholdsGui.title);
+            gl = uigridlayout(fig, OtsuThresholdsGui.size);
             
             obj.axisGridLayout = generateAxes(gl, regionCount);
             obj.levelsSlider = generateLevelsSlider(gl);
@@ -87,7 +87,7 @@ end
 function layoutElements(gui)
 % set default row height for GUI elements
 rowHeight = TrackingGui.rowHeight;
-columns = AutoThresholdGui.columns;
+columns = OtsuThresholdsGui.columns;
 
 % retrieve GUI elements
 gl = gui.getGridLayout();
@@ -150,21 +150,21 @@ end
 end
 
 function buttons = generateActionButtons(gl)
-applyButton = uibutton(gl, "Text", AutoThresholdGui.applyText);
-cancelButton = uibutton(gl, "Text", AutoThresholdGui.cancelText);
+applyButton = uibutton(gl, "Text", OtsuThresholdsGui.applyText);
+cancelButton = uibutton(gl, "Text", OtsuThresholdsGui.cancelText);
 buttons = [applyButton, cancelButton];
 end
 
 function slider = generateLevelsSlider(gl)
 slider = uislider(gl, "range");
-maxLevelCount = AutoThresholdGui.maxLevelCount;
+maxLevelCount = OtsuThresholdsGui.maxLevelCount;
 sliderLimits = [0, maxLevelCount+1];
 set(slider, "Limits", sliderLimits, "Value", sliderLimits);
 end
 
 function spinner = generateLevelCountSpinner(gl)
 spinner = uispinner(gl);
-maxLevelCount = AutoThresholdGui.maxLevelCount;
+maxLevelCount = OtsuThresholdsGui.maxLevelCount;
 
 set(spinner, ...
     "Limits", [1, maxLevelCount], ...

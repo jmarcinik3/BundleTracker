@@ -51,7 +51,7 @@ classdef TrackingLinker < RegionPreviewer ...
         end
 
         function regionThresholdButtonPushed(obj, ~, ~)
-            if obj.regionExists(AutoThresholdGui.title)
+            if obj.regionExists(OtsuThresholdsGui.title)
                 regions = obj.getRegions();
                 obj.autothresholdRegions(regions);
             end
@@ -59,7 +59,7 @@ classdef TrackingLinker < RegionPreviewer ...
         function autothresholdRegions(obj, regions)
             im = obj.getFirstFrame();
             regionalImages = generateRegionalImages(regions, im);
-            newThresholds = AutoThresholdLinker.openFigure(regionalImages);
+            newThresholds = OtsuThresholdsLinker.openFigure(regionalImages);
             thresholdCount = size(newThresholds, 1);
 
             for index = 1:thresholdCount

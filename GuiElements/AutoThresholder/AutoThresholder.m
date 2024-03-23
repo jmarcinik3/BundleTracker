@@ -8,10 +8,10 @@ classdef AutoThresholder < handle
     end
 
     methods
-        function obj = AutoThresholder(regionalImages)
+        function obj = AutoThresholder(regionalImages, maxLevelCount)
             regionCount = numel(regionalImages);
             obj.regionalImages = regionalImages;
-            obj.regionsThresholds = preallocateRegionThresholds(regionCount);
+            obj.regionsThresholds = preallocateRegionThresholds(regionCount, maxLevelCount);
         end
     end
 
@@ -69,8 +69,7 @@ end
 
 
 
-function matrix = preallocateRegionThresholds(regionCount)
-maxLevelCount = AutoThresholdGui.maxLevelCount;
+function matrix = preallocateRegionThresholds(regionCount, maxLevelCount)
 % (number of regions; max number of levels; threshold levels < max number)
 % +2 for threshold=0->0 and threshold=max_number+1->Inf; used to interpolate
 matrix = zeros(regionCount, maxLevelCount, maxLevelCount+2);

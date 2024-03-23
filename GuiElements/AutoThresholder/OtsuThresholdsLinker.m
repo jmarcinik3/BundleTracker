@@ -1,4 +1,4 @@
-classdef AutoThresholdLinker < AutoThresholder
+classdef OtsuThresholdsLinker < AutoThresholder
     properties (Access = private)
         gui;
         interactiveImages;
@@ -7,10 +7,11 @@ classdef AutoThresholdLinker < AutoThresholder
     end
 
     methods
-        function obj = AutoThresholdLinker(gui, regionalImages)
-            obj@AutoThresholder(regionalImages);
+        function obj = OtsuThresholdsLinker(gui, regionalImages)
+            maxLevelCount = OtsuThresholdsGui.maxLevelCount;
+            obj@AutoThresholder(regionalImages, maxLevelCount);
             axs = gui.getAxes();
-            iIms = generateInteractiveImages(axs, obj.regionalImages);
+            iIms = generateInteractiveImages(axs, regionalImages);
 
             levelsSlider = gui.getLevelsSlider();
             set(levelsSlider, "ValueChangingFcn", @obj.levelsChanging);
@@ -32,8 +33,8 @@ classdef AutoThresholdLinker < AutoThresholder
 
             fig = uifigure;
             colormap(fig, "turbo");
-            gui = AutoThresholdGui(fig, regionCount);
-            linker = AutoThresholdLinker(gui, regionalImages);
+            gui = OtsuThresholdsGui(fig, regionCount);
+            linker = OtsuThresholdsLinker(gui, regionalImages);
             uiwait(fig);
 
             regionsThreshold = linker.regionsThreshold;
