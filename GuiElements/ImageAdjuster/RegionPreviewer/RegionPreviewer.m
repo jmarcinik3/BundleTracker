@@ -34,20 +34,11 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 
     %% Functions to update state of GUI
     methods
-        function appendRectanglesByPositions(obj, positions, lazyLoad)
-            if nargin == 2
-                lazyLoad = true;
-            end
-
+        function appendRectanglesByPositions(obj, positions)
             rectCount = size(positions, 1);
             for index = 1:rectCount
                 position = positions(index, :);
-                rect = obj.drawRectangleByPosition(position);
-                obj.generateRegionLinker(rect);
-                if lazyLoad
-                    drawnow();
-                    pause(0.1);
-                end
+                appendRectangleByPosition(obj, position);
             end
         end
         function changeFullImage(obj, im)
@@ -100,6 +91,13 @@ function regionLinker = generateRegionLinker(obj, region)
 fullRawImage = obj.getRawImage();
 regionGui = obj.generateRegionGui();
 regionLinker = RegionLinker(regionGui, region, fullRawImage);
+end
+
+function appendRectangleByPosition(obj, position)
+rect = obj.drawRectangleByPosition(position);
+obj.generateRegionLinker(rect);
+drawnow();
+pause(0.1);
 end
 
 function is = isLeftClick(event)
