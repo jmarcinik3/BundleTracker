@@ -30,13 +30,13 @@ if objectExists(activeRegion) && RegionAdjustKey.is(key)
         RegionExpander.byKey(activeRegion, event);
     end
 elseif modKey.isPureCtrl
-    if strcmp(key, "i")
-        trackingLinker.importVideo(source, event);
-    elseif strcmp(key, "o")
-        trackingLinker.openDirectory();
-    elseif strcmp(key, "s")
-        trackingLinker.exportImageIfPossible(source, event);
-    elseif strcmp(key, "return")
+    % if strcmp(key, "i")
+    %     trackingLinker.importVideo(source, event);
+    % elseif strcmp(key, "o")
+    %     trackingLinker.openDirectory();
+    % elseif strcmp(key, "s")
+    %     trackingLinker.exportImageIfPossible(source, event);
+    if strcmp(key, "return")
         trackingLinker.trackButtonPushed(source, event)
     end
 end

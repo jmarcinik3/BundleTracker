@@ -9,17 +9,11 @@ classdef TrackingToolbar < handle
             toolbar = uitoolbar(fig);
 
             obj.regionShapeTools = obj.generateRegionShapeTools(toolbar, trackingLinker);
-            explorerTools = generateExplorerTools(toolbar, trackingLinker);
             trackingTools = generateTrackingTools(toolbar, trackingLinker);
             regionOrderTools = generateRegionOrderTools(toolbar, trackingLinker);
             websiteTools = generateWebsiteTools(toolbar);
 
-            separatedTools = [
-                explorerTools(1), ...
-                trackingTools(1), ...
-                regionOrderTools(1), ...
-                websiteTools(1) ...
-                ];
+            separatedTools = [trackingTools(1), regionOrderTools(1), websiteTools(1)];
             set(separatedTools, "Separator", true);
 
             obj.trackingLinker = trackingLinker;

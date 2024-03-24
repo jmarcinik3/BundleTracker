@@ -1,21 +1,13 @@
-function TrackingMenu(fig, trackingLinker)
+function generateRegionMenu(fig, trackingLinker)
 m = uimenu(fig, "Text", "Region");
-generateRegionMenu(m, trackingLinker);
-end
-
-
-
-function generateRegionMenu(m, trackingLinker)
 uimenu(m, ...
     "Text", BlobDetectorGui.title, ...
     "MenuSelectedFcn", @trackingLinker.blobDetectionButtonPushed ...
     );
-
 generateThresholdsMenu(m, trackingLinker);
 generateThresholdMenu(m, trackingLinker);
 generateResetMenu(m, trackingLinker);
 end
-
 
 function generateResetMenu(parentMenu, trackingLinker)
 resetKeywords = RegionUserData.keywords;

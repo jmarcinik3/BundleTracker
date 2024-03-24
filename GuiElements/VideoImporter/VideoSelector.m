@@ -1,7 +1,7 @@
 classdef VideoSelector < handle
     properties (Constant)
-        importTitle = "Import Video";
-        openTitle = "Open Directory";
+        importTitle = "&Import Video";
+        openTitle = "&Open Directory";
     end
     properties (Access = private, Constant)
         extensions = { ...

@@ -1,6 +1,6 @@
 classdef AxisExporter < handle
     properties (Constant)
-        title = "Export Image";
+        title = "Export Axi&s as Image";
     end
     properties (Access = private, Constant)
         extensions = { ...
