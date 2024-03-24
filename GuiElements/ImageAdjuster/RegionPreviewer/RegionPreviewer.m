@@ -39,7 +39,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
     %% Functions to update state of GUI
     methods
         function resetRegionsToDefaults(obj, regions, keyword)
-            if nargin == 1
+            if nargin == 2
                 keyword = RegionUserData.allKeyword;
             end
             if obj.regionExists()
