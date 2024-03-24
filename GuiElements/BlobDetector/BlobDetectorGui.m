@@ -7,8 +7,6 @@ classdef BlobDetectorGui
         rows = 7;
         columns = 4;
         size = [BlobDetectorGui.rows, BlobDetectorGui.columns];
-        applyText = "Apply";
-        cancelText = "Cancel";
     end
 
     properties (Access = private)
@@ -18,23 +16,24 @@ classdef BlobDetectorGui
         areaSlider;
         countSpinner;
         connectivityElement;
-        sizeSpinners;
         excludeBorderBlobsCheckbox;
         actionButtons;
+        blobShapeGui;
     end
 
     methods
         function obj = BlobDetectorGui(fig)
             set(fig, "Name", BlobDetectorGui.title);
             gl = uigridlayout(fig, BlobDetectorGui.size);
-            
+            shapeGl = uigridlayout(gl);
+
             obj.gridLayout = gl;
             obj.axis = generateEmptyAxis(gl);
             obj.thresholdSlider = generateThresholdSlider(gl);
             obj.areaSlider = generateAreaSlider(gl);
             obj.connectivityElement = generateConnectivityElement(gl);
             obj.countSpinner = generateCountSpinner(gl);
-            obj.sizeSpinners = generateSizeElements(gl);
+            obj.blobShapeGui = BlobShapeGui(shapeGl);
             obj.excludeBorderBlobsCheckbox = generateExcludeBorderBlobsCheckbox(gl);
             obj.actionButtons = generateActionButtons(gl);
             layoutElements(obj);
@@ -69,16 +68,19 @@ classdef BlobDetectorGui
             checkbox = obj.excludeBorderBlobsCheckbox;
         end
 
+        function dropdown = getShapeDropdown(obj)
+            dropdown = obj.blobShapeGui.getShapeDropdown();
+        end
         function spinners = getSizeSpinners(obj)
-            spinners = obj.sizeSpinners;
+            spinners = obj.blobShapeGui.getSizeSpinners();
         end
         function spinner = getHeightSpinner(obj)
-            spinner = obj.sizeSpinners(1);
+            spinner = obj.blobShapeGui.getHeightSpinner();
         end
         function spinner = getWidthSpinner(obj)
-            spinner = obj.sizeSpinners(2);
+            spinner = obj.blobShapeGui.getWidthSpinner();
         end
-        
+
         function buttons = getActionButtons(obj)
             buttons = obj.actionButtons;
         end
@@ -113,17 +115,17 @@ classdef BlobDetectorGui
             exclude = checkbox.Value;
         end
 
-        function h = getRectangleHeight(obj)
-            heightSpinner = obj.getHeightSpinner();
-            h = get(heightSpinner, "Value");
+        function shape = getBlobShape(obj)
+            shape = obj.blobShapeGui.getBlobShape();
         end
-        function w = getRectangleWidth(obj)
-            widthSpinner = obj.getWidthSpinner();
-            w = get(widthSpinner, "Value");
+        function h = getBlobHeight(obj)
+            h = obj.blobShapeGui.getBlobHeight();
+        end
+        function w = getBlobWidth(obj)
+            w = obj.blobShapeGui.getBlobWidth();
         end
         function [h, w] = getRectangleSize(obj)
-            h = obj.getRectangleHeight();
-            w = obj.getRectangleWidth();
+            [h, w] = obj.blobShapeGui.getRectangleSize();
         end
     end
 end
@@ -143,8 +145,7 @@ thresholdSlider = gui.getThresholdSlider();
 areaSlider = gui.getAreaSlider();
 connectivityElement = gui.getConnectivityElement();
 countSpinner = gui.getCountSpinner();
-heightSpinner = gui.getHeightSpinner();
-widthSpinner = gui.getWidthSpinner();
+shapeGridLayout = gui.blobShapeGui.getGridLayout();
 excludeBorderBlobsCheckbox = gui.getExcludeBorderBlobsCheckbox();
 applyButton = gui.getApplyButton();
 cancelButton = gui.getCancelButton();
@@ -154,8 +155,6 @@ thresholdLabel = uilabel(gl, "Text", "Pixel Intensity:");
 areaLabel = uilabel(gl, "Text", "Blob Area:");
 connectivityLabel = uilabel(gl, "Text", "Connectivity:");
 countLabel = uilabel(gl, "Text", "Maximum Blob Count:");
-heightLabel = uilabel(gl, "Text", "Height:");
-widthLabel = uilabel(gl, "Text", "Width:");
 
 % lay out axis showing image and blobs
 axis.Layout.Row = 1;
@@ -182,13 +181,10 @@ for index = 1:numel(blobElements)
     elem.Layout.Row = 4;
 end
 
-% lay out elements to choose rectangle height/width
-sizeElements = [heightLabel, heightSpinner, widthLabel, widthSpinner];
-for index = 1:numel(sizeElements)
-    elem = sizeElements(index);
-    elem.Layout.Column = index;
-    elem.Layout.Row = 5;
-end
+% lay out elements to choose blob shape
+shapeGridLayout.Layout.Column = [1, columns];
+shapeGridLayout.Layout.Row = 5;
+
 
 % lay out checkbox to exclude blobs along border
 excludeBorderBlobsCheckbox.Layout.Row = 6;
@@ -203,15 +199,13 @@ cancelButton.Layout.Column = [3, 4];
 % set grid sizes
 gl.RowHeight = num2cell(rowHeight * ones(1, 7));
 gl.RowHeight{1} = '1x';
-gl.ColumnWidth = {128, '1x', 128, '1x'};
-end
+gl.ColumnWidth = {144, '1x', 144, '1x'};
 
-
-
-function buttons = generateActionButtons(gl)
-applyButton = uibutton(gl, "Text", BlobDetectorGui.applyText);
-cancelButton = uibutton(gl, "Text", BlobDetectorGui.cancelText);
-buttons = [applyButton, cancelButton];
+set(shapeGridLayout, ...
+    "Padding", [0, 0, 0, 0], ...
+    "RowHeight", rowHeight, ...
+    "ColumnWidth", {48, '1x', 48, '1x', 48, '1x'} ...
+    );
 end
 
 function slider = generateThresholdSlider(gl)
@@ -256,11 +250,4 @@ set(checkbox, ...
     "Text", "Exclude Border Blobs", ...
     "Value", 1 ...
     );
-end
-
-function spinners = generateSizeElements(gl)
-varargin = {"Limits", [0, Inf], "Value", 32, "Step", 1};
-heightSpinner = uispinner(gl, varargin{:});
-widthSpinner = uispinner(gl, varargin{:});
-spinners = [heightSpinner, widthSpinner];
 end

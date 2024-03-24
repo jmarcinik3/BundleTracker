@@ -56,8 +56,14 @@ classdef TrackingLinker < RegionPreviewer ...
         end
         function blobDetectionButtonPushed(obj, ~, ~)
             im = obj.getFirstFrame();
-            rectanglePositions = BlobDetectorLinker.openFigure(im);
-            obj.drawRectanglesByPositions(rectanglePositions);
+            [blobParameters, blobShape] = BlobDetectorLinker.openFigure(im);
+            switch blobShape
+                case BlobShapeGui.ellipseKeyword
+                    obj.drawEllipsesByParameters(blobParameters);
+                case BlobShapeGui.rectangleKeyword
+                    obj.drawRectanglesByPositions(blobParameters);
+            end
+            
         end
 
         function otsuThresholdsPushed(obj, ~, ~)

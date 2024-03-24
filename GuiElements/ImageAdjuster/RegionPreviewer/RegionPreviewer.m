@@ -46,8 +46,13 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
                 arrayfun(@(region) resetRegionToDefaults(region, keyword), regions);
             end
         end
+
+        
         function drawRectanglesByPositions(obj, positions)
             drawRectanglesByPositions(obj, positions);
+        end
+        function drawEllipsesByParameters(obj, parameters)
+            drawEllipsesByParameters(obj, parameters);
         end
         function changeFullImage(obj, im)
             obj.clearRegions();
@@ -135,6 +140,36 @@ obj.generateRegionLinker(rect);
 drawnow();
 pause(0.1);
 end
+
+function drawEllipsesByParameters(obj, parameters)
+taskName = 'Drawing Ellipses';
+
+multiWaitbar(taskName, 0, 'CanCancel', 'on');
+ellipseCount = size(parameters, 1);
+ells = {};
+
+for index = 1:ellipseCount
+    parameter = parameters(index, :);
+    ell = drawEllipseByParameters(obj, parameter);
+    ells{index} = ell; %#ok<AGROW>
+
+    proportionComplete = index / ellipseCount;
+    if multiWaitbar(taskName, proportionComplete)
+        deleteRegions(ells);
+        break;
+    end
+end
+
+multiWaitbar(taskName, 'Close');
+end
+
+function ell = drawEllipseByParameters(obj, parameters)
+ell = obj.drawEllipseByParameters(parameters);
+obj.generateRegionLinker(ell);
+drawnow();
+pause(0.1);
+end
+
 
 function is = isDoubleClick(event)
 selectionType = event.SelectionType;
