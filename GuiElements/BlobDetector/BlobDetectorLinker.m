@@ -24,16 +24,18 @@ classdef BlobDetectorLinker < handle
             iIm = image(ax, gray2rgb(mat2gray(im), fig)); % display RGB image
             AxisResizer(iIm, "FitToContent", true);
 
+            blobShapeDropdown = gui.getShapeDropdown();
             set(gui.getThresholdSlider(), "ValueChangingFcn", @obj.thresholdsChanging);
             set(gui.getAreaSlider(), "ValueChangingFcn", @obj.blobAreaChanging );
             set(gui.getConnectivityElement(), "ValueChangedFcn", @obj.connectivityChanged);
             set(gui.getCountSpinner(), "ValueChangingFcn", @obj.maximumCountChanging);
-            set(gui.getShapeDropdown(), "ValueChangedFcn", @obj.blobShapeChanged);
+            set(blobShapeDropdown, "ValueChangedFcn", @obj.blobShapeChanged);
             set(gui.getSizeSpinners(), "ValueChangingFcn", @obj.blobSizeChanging);
             set(gui.getExcludeBorderBlobsCheckbox(), "ValueChangedFcn", @obj.excludeBorderBlobsChanged);
             set(gui.getActionButtons(), "ButtonPushedFcn", @obj.actionButtonPushed);
 
             obj.gui = gui;
+            obj.blobShape = get(blobShapeDropdown, "Value");
             obj.blobAnalyzer = generateBlobAnalyzer(gui);
             obj.imPreprocessed = detrendMatrix(im);
             obj.redetectBlobs();
@@ -55,12 +57,12 @@ classdef BlobDetectorLinker < handle
     end
 
     %% Functions to retrieve state information
-    methods
+    methods (Access = private)
         function parameters = getBlobParameters(obj)
             switch obj.blobShape
-                case BlobShapeGui.ellipseKeyword
+                case BlobDrawer.ellipseKeyword
                     parameters = obj.getEllipseParameters();
-                case BlobShapeGui.rectangleKeyword
+                case BlobDrawer.rectangleKeyword
                     parameters = obj.getRectanglePositions();
             end
         end
@@ -86,6 +88,14 @@ classdef BlobDetectorLinker < handle
             im = im > thresholds(1) & im < thresholds(2);
         end
 
+        function parameters = generateBlobParameters(obj, h, w)
+            switch obj.blobShape
+                case BlobDrawer.ellipseKeyword
+                    parameters = obj.generateEllipseParameters(h, w);
+                case BlobDrawer.rectangleKeyword
+                    parameters = obj.generateRectanglePositions(h, w);
+            end
+        end
         function rectPositions = generateRectanglePositions(obj, h, w)
             blobCenters = obj.blobCenters;
             rectPositions = generateRectanglePositions(blobCenters, [w, h]);
@@ -138,14 +148,8 @@ classdef BlobDetectorLinker < handle
             ax = gui.getAxis();
 
             blobShape = gui.getBlobShape();
-            switch blobShape
-                case BlobShapeGui.ellipseKeyword
-                    ellipseParameters = obj.generateEllipseParameters(h, w);
-                    redrawEllipses(ax, ellipseParameters);
-                case BlobShapeGui.rectangleKeyword
-                    rectPositions = obj.generateRectanglePositions(h, w);
-                    redrawRectangles(ax, rectPositions);
-            end
+            blobParameters = obj.generateBlobParameters(h, w);
+            BlobDrawer.byKeyword(ax, blobParameters, blobShape);
         end
 
         function actionButtonPushed(obj, source, ~)
@@ -233,60 +237,6 @@ function parameters = generateEllipseParameters(centers, sizes, angles)
 ellipseCount = size(centers, 1);
 lengths = repmat(sizes, [ellipseCount, 1]);
 parameters = [centers, lengths, angles];
-end
-
-
-
-function redrawRectangles(ax, positions)
-clearAxis(ax);
-blobCount = size(positions, 1);
-for blobIndex = 1:blobCount
-    position = positions(blobIndex, :);
-    drawRectangle(ax, position);
-end
-end
-
-function rect = drawRectangle(ax, position)
-rect = rectangle(ax, ...
-    "Position", position, ...
-    "EdgeColor", "black", ...
-    "LineWidth", 2 ...
-    );
-end
-
-function redrawEllipses(ax, parameters)
-clearAxis(ax);
-blobCount = size(parameters, 1);
-for blobIndex = 1:blobCount
-    parameter = parameters(blobIndex, :);
-    drawEllipse(ax, parameter);
-end
-end
-
-function clearAxis(ax)
-conditions = { ...
-    {"Type", "rectangle"}, ...
-    "-or", ...
-    {"Type", "Line"} ...
-    };
-blobs = findobj(ax.Children, conditions);
-delete(blobs);
-end
-
-function ell = drawEllipse(ax, parameters)
-center = parameters(1:2);
-radii = parameters(3:4);
-angle = parameters(5);
-
-ell = ellipse(ax, ...
-    "Center", center, ...
-    "RotationAngle", -angle, ...
-    "SemiAxes", radii ...
-    );
-set(ell, ...
-    "Color", "black", ...
-    "LineWidth", 2 ...
-    );
 end
 
 function imPreprocessed = detrendMatrix(im)

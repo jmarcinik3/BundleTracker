@@ -17,15 +17,11 @@ classdef RegionDrawer < RegionShaper
             region = obj.byPoint(point);
             configureRegion(obj, region);
         end
-        function rect = drawRectangleByPosition(obj, position)
+
+        function region = drawRegionByParameters(obj, parameters, keyword)
             ax = obj.getAxis();
-            rect = images.roi.Rectangle(ax, "Position", position);
-            configureRegion(obj, rect);
-        end
-        function ell = drawEllipseByParameters(obj, parameters)
-            ax = obj.getAxis();
-            ell = drawEllipseByParameters(ax, parameters);
-            configureRegion(obj, ell);
+            region = drawRegionByParameters(ax, parameters, keyword);
+            configureRegion(obj, region);
         end
     end
     methods (Access = private)
@@ -69,16 +65,4 @@ end
 function addMetadataToRegion(obj, region)
 userData = obj.userDataFcn();
 set(region, "UserData", userData);
-end
-
-function ell = drawEllipseByParameters(ax, parameters)
-center = parameters(1:2);
-radii = parameters(3:4);
-angle = parameters(5);
-
-ell = images.roi.Ellipse(ax, ...
-    "Center", center, ...
-    "RotationAngle", rad2deg(angle), ...
-    "SemiAxes", radii ...
-    );
 end

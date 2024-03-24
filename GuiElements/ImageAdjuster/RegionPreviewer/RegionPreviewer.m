@@ -47,12 +47,8 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             end
         end
 
-        
-        function drawRectanglesByPositions(obj, positions)
-            drawRectanglesByPositions(obj, positions);
-        end
-        function drawEllipsesByParameters(obj, parameters)
-            drawEllipsesByParameters(obj, parameters);
+        function drawRegionsByParameters(obj, parameters, blobShape)
+            drawRegionsByParameters(obj, parameters, blobShape);
         end
         function changeFullImage(obj, im)
             obj.clearRegions();
@@ -75,7 +71,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 
         function regionClicked(obj, source, event)
             if isDoubleClick(event)
-               obj.resetRegionsToDefaults(source);
+                obj.resetRegionsToDefaults(source);
             end
             obj.previewRegion(source);
         end
@@ -112,50 +108,22 @@ regionUserData = RegionUserData.fromRegion(region);
 regionUserData.resetToDefaults(keyword);
 end
 
-function drawRectanglesByPositions(obj, positions)
-taskName = 'Drawing Rectangles';
 
+
+function drawRegionsByParameters(obj, parameters, blobShape)
+taskName = ['Drawing ', blobShape];
 multiWaitbar(taskName, 0, 'CanCancel', 'on');
-rectCount = size(positions, 1);
-rects = {};
+regionCount = size(parameters, 1);
+regions = {};
 
-for index = 1:rectCount
-    position = positions(index, :);
-    rect = drawRectangleByPosition(obj, position);
-    rects{index} = rect; %#ok<AGROW>
-
-    proportionComplete = index / rectCount;
-    if multiWaitbar(taskName, proportionComplete)
-        deleteRegions(rects);
-        break;
-    end
-end
-
-multiWaitbar(taskName, 'Close');
-end
-
-function rect = drawRectangleByPosition(obj, position)
-rect = obj.drawRectangleByPosition(position);
-obj.generateRegionLinker(rect);
-drawnow();
-pause(0.1);
-end
-
-function drawEllipsesByParameters(obj, parameters)
-taskName = 'Drawing Ellipses';
-
-multiWaitbar(taskName, 0, 'CanCancel', 'on');
-ellipseCount = size(parameters, 1);
-ells = {};
-
-for index = 1:ellipseCount
+for index = 1:regionCount
     parameter = parameters(index, :);
-    ell = drawEllipseByParameters(obj, parameter);
-    ells{index} = ell; %#ok<AGROW>
+    region = drawRegionByParameters(obj, parameter, blobShape);
+    regions{index} = region; %#ok<AGROW>
 
-    proportionComplete = index / ellipseCount;
+    proportionComplete = index / regionCount;
     if multiWaitbar(taskName, proportionComplete)
-        deleteRegions(ells);
+        deleteRegions(regions);
         break;
     end
 end
@@ -163,13 +131,12 @@ end
 multiWaitbar(taskName, 'Close');
 end
 
-function ell = drawEllipseByParameters(obj, parameters)
-ell = obj.drawEllipseByParameters(parameters);
-obj.generateRegionLinker(ell);
+function region = drawRegionByParameters(obj, parameters, blobShape)
+region = obj.drawRegionByParameters(parameters, blobShape);
+obj.generateRegionLinker(region);
 drawnow();
 pause(0.1);
 end
-
 
 function is = isDoubleClick(event)
 selectionType = event.SelectionType;
