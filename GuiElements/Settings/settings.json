@@ -41,7 +41,7 @@
             "FontAngle": "normal",
             "FontColor": [0, 0, 0],
             "BackgroundColor": [0.96, 0.96, 0.96],
-            "Tooltip": "Postprocess: Choose method to track center of trace"
+            "Tooltip": "Postprocess: Choose method to track center of region"
         }
     },
     "Aesthetics":
