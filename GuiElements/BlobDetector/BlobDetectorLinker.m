@@ -183,11 +183,11 @@ classdef BlobDetectorLinker < handle
         end
 
         function blobShapeChanged(obj, ~, event)
+            obj.blobShape = event.Value;
             gui = obj.gui;
             h = gui.getBlobHeight();
             w = gui.getBlobWidth();
             obj.redrawBlobs(h, w);
-            obj.blobShape = event.Value;
         end
         function blobSizeChanging(obj, source, event)
             gui = obj.gui;

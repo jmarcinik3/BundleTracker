@@ -20,7 +20,7 @@ classdef ResultsParser
         end
 
         function time = getTime(obj)
-            time = vertcat(obj.results.t);
+            time = obj.results.t;
         end
         function trace = getProcessedTrace(obj)
             trace = vertcat(obj.results.xProcessed);
@@ -61,6 +61,9 @@ classdef ResultsParser
         function error = getAngleErrorDegrees(obj)
             errorRad = obj.getAngleErrorRadians();
             error = rad2deg(errorRad);
+        end
+        function info = getAngleInfo(obj)
+            info = obj.results.angleInfo;
         end
 
         function trackingMode = getTrackingMode(obj)
