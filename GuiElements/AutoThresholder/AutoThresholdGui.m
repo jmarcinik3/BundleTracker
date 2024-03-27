@@ -11,7 +11,7 @@ classdef AutoThresholdGui
 
     properties (Access = private)
         gridLayout;
-        axisGridLayout;
+        axesGrid;
         actionButtons;
     end
 
@@ -20,7 +20,7 @@ classdef AutoThresholdGui
             set(fig, "Name", AutoThresholdGui.title);
             gl = uigridlayout(fig, AutoThresholdGui.size);
 
-            obj.axisGridLayout = generateAxes(gl, regionCount);
+            obj.axesGrid = generateAxesGrid(gl, regionCount);
             obj.actionButtons = generateActionButtons(gl);
             obj.gridLayout = gl;
             layoutElements(obj);
@@ -30,17 +30,17 @@ classdef AutoThresholdGui
     %% Functions to retrieve GUI elements
     methods
         function fig = getFigure(obj)
-            agl = obj.axisGridLayout;
+            agl = obj.axesGrid;
             fig = ancestor(agl, "figure");
         end
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
         end
-        function agl = getAxisGridLayout(obj)
-            agl = obj.axisGridLayout;
+        function agl = getAxesGrid(obj)
+            agl = obj.axesGrid;
         end
         function axes = getAxes(obj)
-            agl = obj.axisGridLayout;
+            agl = obj.axesGrid;
             axes = findobj(agl, "Type", "axes");
         end
 
@@ -70,7 +70,7 @@ columns = AutoThresholdGui.columns;
 
 % retrieve GUI elements
 gl = gui.getGridLayout();
-agl = gui.getAxisGridLayout();
+agl = gui.getAxesGrid();
 applyButton = gui.getApplyButton();
 cancelButton = gui.getCancelButton();
 
@@ -89,29 +89,4 @@ cancelButton.Layout.Column = [3, 4];
 % set grid sizes
 gl.RowHeight = {'1x', rowHeight, rowHeight};
 gl.ColumnWidth = {96, '4x', 96, '1x'};
-end
-
-
-%% Function to generate grid of plotting axes
-function agl = generateAxes(gl, axisCount)
-rowCount = ceil(sqrt(axisCount));
-columnCount = ceil(axisCount / rowCount);
-
-agl = uigridlayout(gl, [rowCount, columnCount]);
-axisCreatedCount = 0;
-for rowIndex = 1:rowCount
-    for columnIndex = 1:columnCount
-        ax = generateEmptyAxis(agl);
-        ax.Layout.Row = rowIndex;
-        ax.Layout.Column = columnIndex;
-        axisCreatedCount = axisCreatedCount + 1;
-
-        if axisCreatedCount == axisCount
-            break;
-        end
-    end
-    if axisCreatedCount == axisCount
-        break;
-    end
-end
 end

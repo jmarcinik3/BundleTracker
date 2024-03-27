@@ -12,7 +12,7 @@ classdef OtsuThresholdsGui
 
     properties (Access = private)
         gridLayout;
-        axisGridLayout;
+        axesGrid;
         levelsSlider;
         countSpinner;
         actionButtons;
@@ -22,8 +22,8 @@ classdef OtsuThresholdsGui
         function obj = OtsuThresholdsGui(fig, regionCount)
             set(fig, "Name", OtsuThresholdsGui.title);
             gl = uigridlayout(fig, OtsuThresholdsGui.size);
-            
-            obj.axisGridLayout = generateAxes(gl, regionCount);
+
+            obj.axesGrid = generateAxesGrid(gl, regionCount);
             obj.levelsSlider = generateLevelsSlider(gl);
             obj.actionButtons = generateActionButtons(gl);
             obj.countSpinner = generateLevelCountSpinner(gl);
@@ -31,21 +31,21 @@ classdef OtsuThresholdsGui
             layoutElements(obj);
         end
     end
-    
+
     %% Functions to retrieve GUI elements
     methods
         function fig = getFigure(obj)
-            agl = obj.axisGridLayout;
+            agl = obj.axesGrid;
             fig = ancestor(agl, "figure");
         end
         function gl = getGridLayout(obj)
             gl = obj.gridLayout;
         end
-        function agl = getAxisGridLayout(obj)
-            agl = obj.axisGridLayout;
+        function agl = getAxesGrid(obj)
+            agl = obj.axesGrid;
         end
         function axes = getAxes(obj)
-            agl = obj.axisGridLayout;
+            agl = obj.axesGrid;
             axes = findobj(agl, "Type", "axes");
         end
         function slider = getLevelsSlider(obj)
@@ -81,7 +81,6 @@ end
 
 
 
-
 function layoutElements(gui)
 % set default row height for GUI elements
 rowHeight = TrackingGui.rowHeight;
@@ -89,7 +88,7 @@ columns = OtsuThresholdsGui.columns;
 
 % retrieve GUI elements
 gl = gui.getGridLayout();
-agl = gui.getAxisGridLayout();
+agl = gui.getAxesGrid();
 levelsSlider = gui.getLevelsSlider();
 countSpinner = gui.getCountSpinner();
 applyButton = gui.getApplyButton();
@@ -120,31 +119,6 @@ cancelButton.Layout.Column = [3, 4];
 % set grid sizes
 gl.RowHeight = {'1x', rowHeight, rowHeight};
 gl.ColumnWidth = {96, '4x', 96, '1x'};
-end
-
-
-%% Function to generate grid of plotting axes
-function agl = generateAxes(gl, axisCount)
-rowCount = ceil(sqrt(axisCount));
-columnCount = ceil(axisCount / rowCount);
-
-agl = uigridlayout(gl, [rowCount, columnCount]);
-axisCreatedCount = 0;
-for rowIndex = 1:rowCount
-    for columnIndex = 1:columnCount
-        ax = generateEmptyAxis(agl);
-        ax.Layout.Row = rowIndex;
-        ax.Layout.Column = columnIndex;
-        axisCreatedCount = axisCreatedCount + 1;
-
-        if axisCreatedCount == axisCount
-            break;
-        end
-    end
-    if axisCreatedCount == axisCount
-        break;
-    end
-end
 end
 
 function slider = generateLevelsSlider(gl)
