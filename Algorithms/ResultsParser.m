@@ -63,7 +63,7 @@ classdef ResultsParser
             error = rad2deg(errorRad);
         end
         function info = getAngleInfo(obj)
-            info = obj.results.angleInfo;
+            info = vertcat(obj.results.angleInfo);
         end
 
         function trackingMode = getTrackingMode(obj)
