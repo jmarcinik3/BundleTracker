@@ -1,17 +1,19 @@
-function result = trackAndProcessRegion(trackingLinker, region)
+function [cancel, result] = trackAndProcessRegion(trackingLinker, region)
 trackingLinker.previewRegion(region);
-centers = trackCenters(trackingLinker, region);
+[cancel, centers] = trackCenters(trackingLinker, region);
 initialResult = trackingLinker.generateInitialResult();
 result = processResult(region, centers, initialResult);
-set(region, "Color", RegionColor.finishedColor); % color region as finished
+if ~cancel
+    set(region, "Color", RegionColor.finishedColor); % color region as finished
+end
 end
 
-function centers = trackCenters(trackingLinker, region)
+function [cancel, centers] = trackCenters(trackingLinker, region)
 ims = getPreprocessedVideoInRegion(trackingLinker, region);
 regionUserData = RegionUserData.fromRegion(region);
 trackingMode = regionUserData.getTrackingMode();
 regionTracker = RegionTracker("TrackingMode", trackingMode);
-centers = regionTracker.track(ims);
+[cancel, centers] = regionTracker.track(ims);
 end
 
 function ims = getPreprocessedVideoInRegion(obj, region)

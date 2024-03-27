@@ -145,11 +145,11 @@ classdef TrackingLinker < RegionPreviewer ...
 
             for index = 1:regionCount
                 region = regions(index);
-                result = trackAndProcessRegion(obj, region);
+                [cancel, result] = trackAndProcessRegion(obj, region);
                 results = [results, result];
 
                 proportionComplete = index / regionCount;
-                cancel = multiWaitbar(taskName, proportionComplete);
+                cancel = multiWaitbar(taskName, proportionComplete) || cancel;
                 if cancel
                     break;
                 end
