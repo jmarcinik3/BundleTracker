@@ -235,7 +235,7 @@ end
 
 function parameters = generateEllipseParameters(centers, sizes, angles)
 ellipseCount = size(centers, 1);
-lengths = repmat(sizes, [ellipseCount, 1]);
+lengths = repmat(0.5 * sizes, [ellipseCount, 1]);
 parameters = [centers, lengths, angles];
 end
 

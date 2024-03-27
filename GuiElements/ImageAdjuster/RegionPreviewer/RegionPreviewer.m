@@ -111,7 +111,7 @@ end
 
 
 function drawRegionsByParameters(obj, parameters, blobShape)
-taskName = ['Drawing ', blobShape];
+taskName = ['Drawing ', blobShape, 's'];
 multiWaitbar(taskName, 0, 'CanCancel', 'on');
 regionCount = size(parameters, 1);
 regions = {};
