@@ -1,18 +1,53 @@
 {
     "Defaults":
     {
-        "AngleMode": "Elliptical Regression",
-        "InvertCheckbox": false,
+        "AngleDropdown": {
+            "Value": "Elliptical Regression",
+            "FontWeight": "normal",
+            "FontAngle": "normal",
+            "FontColor": [0, 0, 0],
+            "BackgroundColor": [0.96, 0.96, 0.96],
+            "Tooltip": "Postprocess: Choose method to rotate trace"
+        },
+        "InvertCheckbox": {
+            "Value": false,
+            "Text": "Invert",
+            "FontWeight": "normal",
+            "FontAngle": "normal",
+            "FontColor": [0, 0, 0],
+            "Tooltip": "Preprocess: Check to invert image"
+        },
         "PositiveDirection": "Upper Left",
-        "Thresholds": [0, 65536],
-        "TrackingMode": "Centroid"
+        "Region":
+        {
+            "Color": [0, 0.4470, 0.7410],
+            "FaceAlpha": 0.2,
+            "LabelAlpha": 1,
+            "LabelTextColor": [0, 0, 0],
+            "LabelVisible": "on",
+            "SelectedColor": [1, 1, 0],
+            "StripeColor": "none"
+        },
+        "ThresholdSlider": {
+            "FontSize": 8,
+            "FontWeight": "normal",
+            "FontAngle": "normal",
+            "FontColor": [0, 0, 0],
+            "Tooltip": "Preprocess: Set range of pixel intensities to keep in image"
+        },
+        "TrackingDropdown": {
+            "Value": "Centroid",
+            "FontWeight": "normal",
+            "FontAngle": "normal",
+            "FontColor": [0, 0, 0],
+            "BackgroundColor": [0.96, 0.96, 0.96],
+            "Tooltip": "Postprocess: Choose method to track center of trace"
+        }
     },
     "Aesthetics":
     {
         "Region":
         {
-            "ActiveColor": [1, 1, 0],
-            "LabelColor": [0, 0, 0],
             "TrackedColor": [0, 1, 0],
             "QueueColor": [1, 0, 0]
         }

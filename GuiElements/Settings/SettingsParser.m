@@ -4,27 +4,27 @@ classdef SettingsParser
     end
 
     methods (Static)
-        function angleMode = getDefaultAngleMode()
-            angleMode = getDefaults().AngleMode;
+        function angleMode = getAngleModeDefaults()
+            angleMode = namedargs2cell(getDefaults().AngleDropdown);
         end
-        function invert = getDefaultInvert()
-            invert = getDefaults().InvertCheckbox;
+        function invert = getInvertCheckboxDefaults()
+            invert = namedargs2cell(getDefaults().InvertCheckbox);
         end
         function positiveDirection = getDefaultPositiveDirection()
             positiveDirection = getDefaults().PositiveDirection;
         end
-        function thresholds = getDefaultThresholds()
-            thresholds = getDefaults().Thresholds';
+        function thresholds = getThresholdSliderDefaults()
+            thresholds = namedargs2cell(getDefaults().ThresholdSlider);
         end
-        function trackingMode = getDefaultTrackingMode()
-            trackingMode = getDefaults().TrackingMode;
+        function trackingMode = getTrackingModeDefaults()
+            trackingMode = namedargs2cell(getDefaults().TrackingDropdown);
         end
 
-        function color = getRegionLabelColor()
-            color = getAesthetics().Region.LabelColor;
+        function color = getRegionDefaults()
+            color = namedargs2cell(getDefaults().Region);
         end
         function color = getRegionActiveColor()
-            color = getAesthetics().Region.ActiveColor;
+            color = getDefaults().Region.SelectedColor;
         end
         function color = getRegionQueueColor()
             color = getAesthetics().Region.QueueColor;
