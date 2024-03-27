@@ -6,5 +6,15 @@
         "PositiveDirection": "Upper Left",
         "Thresholds": [0, 65536],
         "TrackingMode": "Centroid"
+    },
+    "Aesthetics":
+    {
+        "Region":
+        {
+            "ActiveColor": [1, 1, 0],
+            "LabelColor": [0, 0, 0],
+            "TrackedColor": [0, 1, 0],
+            "QueueColor": [1, 0, 0]
+        }
     }
 }

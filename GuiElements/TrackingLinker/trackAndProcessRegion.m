@@ -4,7 +4,7 @@ trackingLinker.previewRegion(region);
 initialResult = trackingLinker.generateInitialResult();
 result = processResult(region, centers, initialResult);
 if ~cancel
-    set(region, "Color", RegionColor.finishedColor); % color region as finished
+    set(region, "Color", SettingsParser.getRegionTrackedColor());
 end
 end
 

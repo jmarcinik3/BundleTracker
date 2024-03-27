@@ -141,7 +141,7 @@ classdef TrackingLinker < RegionPreviewer ...
             multiWaitbar(taskName, 0, 'CanCancel', 'on');
             regionCount = numel(regions);
             results = [];
-            set(regions, "Color", RegionColor.queueColor); % color regions as queued
+            set(regions, "Color", SettingsParser.getRegionQueueColor());
 
             for index = 1:regionCount
                 region = regions(index);

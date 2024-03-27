@@ -58,7 +58,8 @@ end
 
 
 function configureRegion(obj, region)
-set(region, "SelectedColor", RegionColor.workingColor);
+set(region, "SelectedColor", SettingsParser.getRegionActiveColor());
+set(region, "LabelTextColor", SettingsParser.getRegionLabelColor());
 addMetadataToRegion(obj, region);
 end
 
