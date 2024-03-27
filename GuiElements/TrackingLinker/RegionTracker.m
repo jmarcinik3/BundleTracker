@@ -1,7 +1,6 @@
 classdef RegionTracker
     properties (Access = private)
         trackingMode;
-        continueCalculation = true;
     end
 
     methods
@@ -12,13 +11,6 @@ classdef RegionTracker
             trackingMode = p.Results.TrackingMode;
 
             obj.trackingMode = trackingMode;
-        end
-    end
-
-    %% Functions to retrieve state information
-    methods (Access = protected)
-        function was = trackingWasCompleted(obj)
-            was = obj.continueCalculation;
         end
     end
 
@@ -33,10 +25,14 @@ classdef RegionTracker
             centers = PointStructurer.preallocate(frameCount);
             trackFrame = TrackingAlgorithms.handleByKeyword(trackingMode);
 
+            cancel = false;
+            proportionDelta = 1 / frameCount;
             for index = 1:frameCount
                 centers(index) = trackFrame(ims(:, :, index));
                 proportionComplete = index / frameCount;
-                cancel = multiWaitbar(taskName, proportionComplete);
+                if mod(proportionComplete, 0.01) < proportionDelta
+                    cancel = multiWaitbar(taskName, proportionComplete);
+                end
                 if cancel
                     break;
                 end
