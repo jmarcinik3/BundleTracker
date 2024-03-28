@@ -15,9 +15,23 @@ classdef SettingsParser
         end
         function thresholds = getThresholdSliderDefaults()
             thresholds = namedargs2cell(getDefaults().ThresholdSlider);
+            thresholds{2} = thresholds{2}';
         end
         function trackingMode = getTrackingModeDefaults()
             trackingMode = namedargs2cell(getDefaults().TrackingDropdown);
+        end
+
+        function angleMode = getDefaultAngleMode()
+            angleMode = getDefaults().AngleDropdown.Value;
+        end
+        function invert = getDefaultInvert()
+            invert = getDefaults().InvertCheckbox.Value;
+        end
+        function thresholds = getDefaultThresholds()
+            thresholds = getDefaults().ThresholdSlider.Value';
+        end
+        function trackingMode = getDefaultTrackingMode()
+            trackingMode = getDefaults().TrackingDropdown.Value;
         end
 
         function color = getRegionDefaults()

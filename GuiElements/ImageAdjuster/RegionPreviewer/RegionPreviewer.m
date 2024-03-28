@@ -3,26 +3,31 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         resetTitle = "Reset to Default";
     end
 
-    properties (Access = protected)
+    properties (Access = private)
         imageLinker;
+        regionLinker;
+        regionCounter = 1;
     end
 
     methods
-        function obj = RegionPreviewer(imageLinker, regionGuiParent)
-            imageGui = imageLinker.getGui();
+        function obj = RegionPreviewer(regionGui, imageGui)
+            imageLinker = ImageLinker(imageGui);
             ax = imageGui.getAxis();
-            obj@RegionVisibler(ax, regionGuiParent);
+            fullRawImage = imageLinker.getRawImage();
+
+            obj@RegionVisibler(ax, regionGui);
             obj@RegionDrawer(ax, @imageGui.getRegionUserData);
+            obj.imageLinker = ImageLinker(imageGui);
+            obj.regionLinker = RegionLinker(regionGui, fullRawImage);
 
             configureInteractiveImage(obj, imageGui);
-            obj.imageLinker = imageLinker;
         end
     end
 
-    %% Functions to retrieve GUI elements and state information
+    %% Functions to retrieve GUI elements
     methods
         function regions = getRegions(obj)
-            regions  = getRegions@RegionVisibler(obj);
+            regions = getRegions@RegionVisibler(obj);
         end
     end
     methods (Access = protected)
@@ -30,9 +35,9 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             ax = getAxis@RegionDrawer(obj);
         end
     end
-    methods (Access = private)
-        function im = getRawImage(obj)
-            im = obj.imageLinker.getRawImage();
+    methods (Access = ?RegionChanger)
+        function gui = getRegionGui(obj)
+            gui = obj.regionLinker.getRegionGui();
         end
     end
 
@@ -50,37 +55,47 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         function drawRegionsByParameters(obj, parameters, blobShape)
             drawRegionsByParameters(obj, parameters, blobShape);
         end
-        function changeFullImage(obj, im)
+        
+        function changeImage(obj, im)
             obj.clearRegions();
             obj.imageLinker.changeImage(im);
+            obj.regionLinker.changeImage(im);
+        end
+        function previewRegion(obj, region)
+            previewRegion@RegionVisibler(obj, region);
+            RegionChanger.region(obj);
+            obj.regionLinker.updateRegionalRawImage(region);
         end
     end
-    methods (Access = private)
+    methods (Access = ?RegionGuiConfigurer)
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
                 region = obj.drawRegionOnClick(source, event);
-                obj.generateRegionLinker(region);
+                configureRegion(obj, region);
             end
         end
-        function generateRegionLinker(obj, region)
-            regionLinker = generateRegionLinker(obj, region);
-            obj.addRegionEntry(regionLinker);
-            configureRegion(obj, region);
-            obj.previewRegion(region);
-        end
-
         function regionClicked(obj, source, event)
             if isDoubleClick(event)
                 obj.resetRegionsToDefaults(source);
             end
             obj.previewRegion(source);
         end
-
+        function regionMoving(obj, source, ~)
+            obj.regionLinker.updateRegionalRawImage(source);
+        end
         function deletingRegion(obj, source, ~)
             activeRegion = obj.getActiveRegion();
             if activeRegion == source
                 obj.setPreviousRegionVisible();
             end
+        end
+    end
+    methods (Access = ?RegionChanger)
+        function thresholdSliderChanged(obj, source, event)
+            obj.regionLinker.thresholdSliderChanged(source, event)
+        end
+        function invertCheckboxChanged(obj, source, event)
+            obj.regionLinker.invertCheckboxChanged(source, event)
         end
     end
 end
@@ -89,18 +104,13 @@ end
 
 function configureInteractiveImage(obj, imageGui)
 iIm = imageGui.getInteractiveImage();
-set(iIm, "ButtonDownFcn", @obj.buttonDownFcn); % draw rectangles on image
+set(iIm, "ButtonDownFcn", @obj.buttonDownFcn);
 end
 
 function configureRegion(obj, region)
-addlistener(region, "ROIClicked", @obj.regionClicked);
-addlistener(region, "DeletingROI", @obj.deletingRegion);
-end
-
-function regionLinker = generateRegionLinker(obj, region)
-fullRawImage = obj.getRawImage();
-regionGui = obj.generateRegionGui();
-regionLinker = RegionLinker(regionGui, region, fullRawImage);
+regionGui = obj.getRegionGui();
+RegionGuiConfigurer.configure(obj, regionGui, region);
+obj.previewRegion(region);
 end
 
 function resetRegionToDefaults(region, keyword)
@@ -133,9 +143,7 @@ end
 
 function region = drawRegionByParameters(obj, parameters, blobShape)
 region = obj.drawRegionByParameters(parameters, blobShape);
-obj.generateRegionLinker(region);
-drawnow();
-pause(0.1);
+configureRegion(obj, region);
 end
 
 function is = isDoubleClick(event)

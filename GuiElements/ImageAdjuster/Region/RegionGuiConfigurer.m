@@ -1,19 +1,19 @@
 classdef RegionGuiConfigurer
-    methods (Static, Access = ?RegionLinker)
-        function configure(linker, gui, region)
-            configureRegionGui(linker, gui, region);
+    methods (Static, Access = ?RegionPreviewer)
+        function configure(previewer, gui, region)
+            configureRegionGui(previewer, gui, region);
         end
     end
 end
 
 
 
-function configureRegionGui(linker, gui, region)
+function configureRegionGui(previewer, gui, region)
 directionGui = gui.getDirectionGui();
-changer = RegionChanger(linker);
+changer = RegionChanger(previewer);
 regionUserData = RegionUserData.fromRegion(region);
 
-configureRegion(linker, region);
+configureRegion(previewer, region);
 configureThreshold(changer, gui, regionUserData);
 configureInvert(changer, gui, regionUserData);
 configureTrackingMode(changer, gui, regionUserData);
@@ -28,7 +28,10 @@ set(thresholdSlider, ...
     "ValueChangedFcn", @changer.threshold, ...
     "Value", thresholds ...
     );
-addlistener(regionUserData, "IntensityRange", "PostSet", @changer.threshold);
+addlistener(regionUserData, ...
+    "IntensityRange", "PostSet", ...
+    @changer.threshold ...
+    );
 end
 
 function configureInvert(changer, gui, regionUserData)
@@ -38,7 +41,10 @@ set(invertCheckbox, ...
     "ValueChangedFcn", @changer.invert, ...
     "Value", invert ...
     );
-addlistener(regionUserData, "IsInverted", "PostSet", @changer.invert);
+addlistener(regionUserData, ...
+    "IsInverted", "PostSet", ...
+    @changer.invert ...
+    );
 end
 
 function configureTrackingMode(changer, gui, regionUserData)
@@ -48,7 +54,10 @@ set(trackingSelection, ...
     "ValueChangedFcn", @changer.trackingMode, ...
     "Value", trackingMode ...
     );
-addlistener(regionUserData, "TrackingMode", "PostSet", @changer.trackingMode);
+addlistener(regionUserData, ...
+    "TrackingMode", "PostSet", ...
+    @changer.trackingMode ...
+    );
 end
 
 function configureAngleMode(changer, gui, regionUserData)
@@ -58,7 +67,10 @@ set(angleSelection, ...
     "ValueChangedFcn", @changer.angleMode, ...
     "Value", angleMode ...
     );
-addlistener(regionUserData, "AngleMode", "PostSet", @changer.angleMode);
+addlistener(regionUserData, ...
+    "AngleMode", "PostSet", ...
+    @changer.angleMode ...
+    );
 end
 
 function configurePositiveDirection(changer, directionGui, regionUserData)
@@ -66,11 +78,15 @@ direction = regionUserData.getPositiveDirection();
 directionElement = directionGui.getRadioGroup();
 set(directionElement, "SelectionChangedFcn", @changer.positiveDirection);
 directionGui.setLocation(direction);
-addlistener(regionUserData, "Direction", "PostSet", @changer.positiveDirection);
+addlistener(regionUserData, ...
+    "Direction", "PostSet", ...
+    @changer.positiveDirection ...
+    );
 end
 
-function configureRegion(obj, region)
-addlistener(region, "MovingROI", @obj.regionMoving);
-addlistener(region, "ROIMoved", @obj.regionMoving);
-addlistener(region, "DeletingROI", @obj.deletingRegion);
+function configureRegion(previewer, region)
+addlistener(region, "MovingROI", @previewer.regionMoving);
+addlistener(region, "ROIMoved", @previewer.regionMoving);
+addlistener(region, "ROIClicked", @previewer.regionClicked);
+addlistener(region, "DeletingROI", @previewer.deletingRegion);
 end

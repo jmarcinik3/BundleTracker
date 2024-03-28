@@ -1,8 +1,12 @@
-classdef RegionVisibler < ActiveRegionOrderer & RegionLinkerContainer
+classdef RegionVisibler < ActiveRegionOrderer
+    properties (Access = private)
+        gui;
+    end
+
     methods
-        function obj = RegionVisibler(ax, regionGuiParent)
+        function obj = RegionVisibler(ax, regionGui)
             obj@ActiveRegionOrderer(ax);
-            obj@RegionLinkerContainer(ax, regionGuiParent)
+            obj.gui = regionGui;
         end
     end
 
@@ -30,7 +34,6 @@ classdef RegionVisibler < ActiveRegionOrderer & RegionLinkerContainer
         end
         function previewRegion(obj, region)
             obj.setActiveRegion(region);
-            updateRegionGuiVisible(obj, region);
             RegionDrawer.updateSelected(region);
         end
     end
@@ -67,12 +70,5 @@ end
 function adjacentRegion = getAdjacentRegion(obj, distance)
 regions = obj.getRegions();
 adjacentTag = obj.getAdjacentTag(distance);
-adjacentRegion = findobj(regions, "Tag", adjacentTag);
-end
-
-function updateRegionGuiVisible(obj, activeRegion)
-regionLinkers = obj.getRegionLinkers();
-regionLinker = obj.getRegionLinker(activeRegion);
-arrayfun(@(linker) linker.setVisible(false), regionLinkers);
-regionLinker.setVisible(true);
+adjacentRegion = findobj(regions, "Label", adjacentTag);
 end

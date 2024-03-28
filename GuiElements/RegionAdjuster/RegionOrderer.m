@@ -16,16 +16,16 @@ classdef RegionOrderer
             modKey = ModifierKey(event);
             regionOrderer = RegionOrderer(region);
 
-            if modKey.isCtrlShiftAlt
-                if ArrowKey.isUp(key)
+            if modKey.isPureCtrlShift
+                if BracketKey.isRightBracket(key)
                     regionOrderer.bringToFront();
-                elseif ArrowKey.isDown(key)
+                elseif BracketKey.isLeftBracket(key)
                     regionOrderer.sendToBack();
                 end
-            elseif modKey.isPureAlt
-                if ArrowKey.isUp(key)
+            elseif modKey.isPureCtrl
+                if BracketKey.isRightBracket(key)
                     regionOrderer.bringForward();
-                elseif ArrowKey.isDown(key)
+                elseif BracketKey.isLeftBracket(key)
                     regionOrderer.sendBackward();
                 end
             end

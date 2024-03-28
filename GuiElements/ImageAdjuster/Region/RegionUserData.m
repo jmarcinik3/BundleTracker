@@ -33,8 +33,8 @@ classdef RegionUserData < handle
         function obj = fromRegion(region)
             obj = region.UserData;
         end
-        function obj = fromRegionLinker(regionLinker)
-            region = regionLinker.getRegion();
+        function obj = fromRegionPreviewer(previewer)
+            region = previewer.getActiveRegion();
             obj = RegionUserData.fromRegion(region);
         end
     end

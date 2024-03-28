@@ -5,6 +5,8 @@ classdef ImagePreprocessor < handle
 
     methods
         function obj = ImagePreprocessor(gui)
+            iIm = gui.getInteractiveImage();
+            iIm.UserData.rawImage = [];
             obj.gui = gui;
         end
     end

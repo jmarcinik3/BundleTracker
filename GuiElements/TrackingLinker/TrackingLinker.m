@@ -14,10 +14,9 @@ classdef TrackingLinker < RegionPreviewer ...
 
             videoGui = trackingGui.getVideoGui();
             imageGui = trackingGui.getImageGui();
-            regionGuiPanel = trackingGui.getRegionGuiPanel();
-            imageLinker = ImageLinker(imageGui);
+            regionGui = trackingGui.getRegionGui();
 
-            obj@RegionPreviewer(imageLinker, regionGuiPanel);
+            obj@RegionPreviewer(regionGui, imageGui);
             obj@VideoImporter([]);
             obj@VideoSelector(videoGui);
 
@@ -79,7 +78,7 @@ classdef TrackingLinker < RegionPreviewer ...
             filepath = obj.gui.getVideoFilepath();
             firstFrame = obj.getFirstFrame();
 
-            obj.changeFullImage(firstFrame);
+            obj.changeImage(firstFrame);
             obj.setFilepath(filepath); % must come before updating frame label
             updateFrameLabel(obj);
         end

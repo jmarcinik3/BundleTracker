@@ -5,11 +5,6 @@ classdef RegionAdjustKey < ArrowKey
     end
     
     methods (Static)
-        function isRegionAdjustKey = is(key)
-            isRegionAdjustKey = ArrowKey.is(key) ...
-                || RegionAdjustKey.isSpace(key) ...
-                || RegionAdjustKey.isDelete(key);
-        end
         function is = isStandard(key)
             is = ArrowKey.is(key) || RegionAdjustKey.isSpace(key);
         end

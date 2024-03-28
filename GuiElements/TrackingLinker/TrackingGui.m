@@ -8,13 +8,11 @@ classdef TrackingGui
         gridLayout; % uigridlayout containing GUI components
         rightGridLayout % uigridlayout for rightside column
 
-        % components to set processing and tracking methods
         imageGui;
-        regionGuiPanel;
+        regionPanel;
+        regionGui;
+        videoGui
         scaleFactorInputElement;
-
-        % components related to files
-        videoGui;
         saveFilestemElement;
     end
 
@@ -25,15 +23,8 @@ classdef TrackingGui
             rgl.Layout.Row = 2;
             rgl.Layout.Column = 2;
 
-            imageGl = ImageGui.generateGridLayout(gl);
-            imageGl.Layout.Row = 2;
-            imageGl.Layout.Column = 1;
-            imageGui = ImageGui(imageGl);
-
-            obj.regionGuiPanel = uipanel(rgl, ...
-                "Title", "Region Editor", ...
-                "TitlePosition", "centertop" ...
-                );
+            imageGui = generateImageGui(gl);
+            [obj.regionPanel, obj.regionGui] = generateRegionGui(rgl);
             obj.videoGui = VideoGui(gl, {1, [1, 2]});
 
             obj.scaleFactorInputElement = generateScaleFactorElement(rgl);
@@ -44,7 +35,6 @@ classdef TrackingGui
             obj.imageGui = imageGui;
 
             layoutElements(obj);
-            layoutImageGui(imageGui);
         end
     end
 
@@ -68,8 +58,11 @@ classdef TrackingGui
         function gui = getImageGui(obj)
             gui = obj.imageGui;
         end
-        function regionGuiPanel = getRegionGuiPanel(obj)
-            regionGuiPanel = obj.regionGuiPanel;
+        function gui = getRegionGui(obj)
+            gui = obj.regionGui;
+        end
+        function gui = getRegionPanel(obj)
+            gui = obj.regionPanel;
         end
 
         % components for processing
@@ -121,12 +114,6 @@ end
 
 
 %% Functions to lay out elements in GUI
-function layoutImageGui(imageGui)
-gl = imageGui.getGridLayout();
-gl.Layout.Row = 2;
-gl.Layout.Column = 1;
-end
-
 function layoutElements(gui)
 gl = gui.getGridLayout();
 set(gl, ...
@@ -141,8 +128,13 @@ end
 function layoutTopElements(gui)
 rowHeight = TrackingGui.rowHeight;
 videoGui = gui.getVideoGui();
-gl = videoGui.getGridLayout();
-set(gl, "RowHeight", rowHeight);
+imageGui = gui.getImageGui();
+imageGl = imageGui.getGridLayout();
+videoGl = videoGui.getGridLayout();
+
+imageGl.Layout.Row = 2;
+imageGl.Layout.Column = 1;
+set(videoGl, "RowHeight", rowHeight);
 end
 
 function layoutRightsideElements(gui)
@@ -151,7 +143,7 @@ rgl = gui.getRightGridLayout();
 
 scaleFactorElement = gui.getScaleFactorInputElement();
 saveFilestemElement = gui.getSaveFilestemElement();
-regionGuiPanel = gui.getRegionGuiPanel();
+regionGuiPanel = gui.getRegionPanel();
 
 scaleFactorElement.Layout.Row = 1;
 saveFilestemElement.Layout.Row = 2;
@@ -178,6 +170,20 @@ set(fig, ...
     "Position", position ...
     );
 gl = uigridlayout(fig, size);
+end
+
+function imageGui = generateImageGui(parent)
+gl = ImageGui.generateGridLayout(parent);
+imageGui = ImageGui(gl);
+end
+
+function [panel, regionGui] = generateRegionGui(parent)
+panel = uipanel(parent, ...
+    "Title", "Region Editor", ...
+    "TitlePosition", "centertop" ...
+    );
+gl = RegionGui.generateGridLayout(panel);
+regionGui = RegionGui(gl);
 end
 
 %% Function to generate scale factor input

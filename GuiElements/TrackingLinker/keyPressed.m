@@ -3,31 +3,30 @@ activeRegion = trackingLinker.getActiveRegion();
 key = event.Key;
 modKey = ModifierKey(event);
 
-if objectExists(activeRegion) && RegionAdjustKey.is(key)
-    if modKey.isCtrlShiftAlt
-        if ArrowKey.isVertical(key)
-            RegionOrderer.byKey(activeRegion, event);
-        elseif RegionAdjustKey.isDelete(key)
-            trackingLinker.clearRegions();
-        end
+if objectExists(activeRegion)
+    if modKey.hasZeroModifiers
+        RegionMover.byKey(activeRegion, event);
     elseif modKey.isPureAlt
-        if ArrowKey.isVertical(key)
-            RegionOrderer.byKey(activeRegion, event);
-        elseif ArrowKey.isLeft(key)
+        if BracketKey.isLeftBracket(key)
             trackingLinker.setPreviousRegionVisible();
-        elseif ArrowKey.isRight(key)
+        elseif BracketKey.isRightBracket(key)
             trackingLinker.setNextRegionVisible();
         end
-    elseif modKey.hasZeroModifiers
-        RegionMover.byKey(activeRegion, event);
     elseif modKey.isPureCtrl
         if RegionAdjustKey.isStandard(key)
             RegionCompressor.byKey(activeRegion, event);
         elseif RegionAdjustKey.isDelete(key)
             RegionMover.byKey(activeRegion, event);
+        elseif BracketKey.isBracket(key)
+            RegionOrderer.byKey(activeRegion, event);
         end
     elseif modKey.isPureCtrlShift
         RegionExpander.byKey(activeRegion, event);
+        if BracketKey.isBracket(key)
+            RegionOrderer.byKey(activeRegion, event);
+        elseif RegionAdjustKey.isDelete(key)
+            trackingLinker.clearRegions();
+        end
     end
 elseif modKey.isPureCtrl
     % if strcmp(key, "i")

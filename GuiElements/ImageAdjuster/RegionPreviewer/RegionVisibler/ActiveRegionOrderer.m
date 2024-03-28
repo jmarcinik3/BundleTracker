@@ -12,8 +12,12 @@ classdef ActiveRegionOrderer < handle
 
     %% Functions to retrieve GUI elements or state information
     methods
+        function regions = getRegions(obj)
+            ax = obj.getAxis();
+            regions = RegionDrawer.getRegions(ax);
+        end
         function activeRegion = getActiveRegion(obj)
-            activeRegion = obj.activeRegion();
+            activeRegion = obj.activeRegion;
         end
     end
     methods (Access = protected)
@@ -30,14 +34,8 @@ classdef ActiveRegionOrderer < handle
             count = numel(regions);
             exists = count >= 1;
         end
-    end
-    methods (Access = private)
         function ax = getAxis(obj)
             ax = obj.axis;
-        end
-        function regions = getRegions(obj)
-            ax = obj.getAxis();
-            regions = RegionDrawer.getRegions(ax);
         end
     end
 
@@ -82,5 +80,5 @@ end
 
 
 function indices = getRegionIndices(regions)
-indices = str2double(get(regions, "Tag"));
+indices = str2double(get(regions, "Label"));
 end

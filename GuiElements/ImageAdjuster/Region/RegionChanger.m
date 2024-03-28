@@ -1,140 +1,155 @@
 classdef RegionChanger
     properties (Access = private)
-        linker;
+        previewer;
     end
 
     methods
-        function obj = RegionChanger(linker)
-            obj.linker = linker;
+        function obj = RegionChanger(previewer)
+            obj.previewer = previewer;
         end
     end
 
     methods
         function threshold(obj, source, event)
-            linker = obj.linker;
-            thresholdChanged(linker, source, event);
+            previewer = obj.previewer;
+            thresholdChanged(previewer, source, event);
         end
         function invert(obj, source, event)
-            linker = obj.linker;
-            invertChanged(linker, source, event);
+            previewer = obj.previewer;
+            invertChanged(previewer, source, event);
         end
         function trackingMode(obj, source, event)
-            linker = obj.linker;
-            trackingModeChanged(linker, source, event);
+            previewer = obj.previewer;
+            trackingModeChanged(previewer, source, event);
         end
         function angleMode(obj, source, event)
-            linker = obj.linker;
-            angleModeChanged(linker, source, event);
+            previewer = obj.previewer;
+            angleModeChanged(previewer, source, event);
         end
         function positiveDirection(obj, source, event)
-            linker = obj.linker;
-            positiveDirectionChanged(linker, source, event);
+            previewer = obj.previewer;
+            positiveDirectionChanged(previewer, source, event);
+        end
+    end
+
+    methods (Static)
+        function region(previewer)
+            thresholdParserChanged(previewer);
+            invertParserChanged(previewer);
+            trackingModeParserChanged(previewer);
+            angleModeParserChanged(previewer);
+            directionParserChanged(previewer);
         end
     end
 end
 
 
 
-function thresholdChanged(linker, source, event)
+function thresholdChanged(previewer, source, event)
 switch event.EventName
     case "ValueChanged"
-        thresholdSliderChanged(linker, source, event)
+        thresholdSliderChanged(previewer, source, event)
     case "PostSet"
-        thresholdParserChanged(linker, source, event);
+        thresholdParserChanged(previewer, source, event);
 end
 end
-function thresholdSliderChanged(linker, ~, event)
+function thresholdSliderChanged(previewer, ~, event)
 thresholds = event.Value;
-regionUserData = RegionUserData.fromRegionLinker(linker);
-regionUserData.setThresholds(thresholds);
+regionUserData = RegionUserData.fromRegionPreviewer(previewer);
+regionUserData.IntensityRange = thresholds;
 end
-function thresholdParserChanged(linker, ~, event)
-regionUserData = RegionUserData.fromRegionLinker(linker);
+function thresholdParserChanged(previewer, ~, ~)
+regionUserData = RegionUserData.fromRegionPreviewer(previewer);
+regionGui = previewer.getRegionGui();
 thresholds = regionUserData.getThresholds();
-thresholdSlider = linker.gui.getThresholdSlider();
+thresholdSlider = regionGui.getThresholdSlider();
 set(thresholdSlider, "Value", thresholds);
-linker.thresholdSliderChanged(thresholdSlider, event);
+previewer.thresholdSliderChanged(thresholdSlider, []);
 end
 
-function invertChanged(linker, source, event)
+function invertChanged(previewer, source, event)
 switch event.EventName
     case "ValueChanged"
-        invertCheckboxChanged(linker, source, event);
+        invertCheckboxChanged(previewer, source, event);
     case "PostSet"
-        invertParserChanged(linker, source, event);
+        invertParserChanged(previewer, source, event);
 end
 end
-function invertCheckboxChanged(linker, source, event)
-regionUserData = RegionUserData.fromRegionLinker(linker);
+function invertCheckboxChanged(previewer, ~, event)
+regionUserData = RegionUserData.fromRegionPreviewer(previewer);
 invert = event.Value;
+regionUserData.IsInverted = invert;
 regionUserData.setInvert(invert);
-linker.invertCheckboxChanged(source, event);
 end
-function invertParserChanged(linker, ~, event)
-regionUserData = RegionUserData.fromRegionLinker(linker);
+function invertParserChanged(previewer, ~, ~)
+regionUserData = RegionUserData.fromRegionPreviewer(previewer);
+regionGui = previewer.getRegionGui();
 invert = regionUserData.getInvert();
-invertCheckbox = linker.gui.getInvertCheckbox();
+invertCheckbox = regionGui.getInvertCheckbox();
 set(invertCheckbox, "Value", invert);
-linker.invertCheckboxChanged(invertCheckbox, event);
+previewer.invertCheckboxChanged(invertCheckbox, []);
 end
 
-function trackingModeChanged(linker, source, event)
+function trackingModeChanged(previewer, source, event)
 switch event.EventName
     case "ValueChanged"
-        trackingModeElementChanged(linker, source, event);
+        trackingModeElementChanged(previewer, source, event);
     case "PostSet"
-        trackingModeParserChanged(linker, source, event);
+        trackingModeParserChanged(previewer, source, event);
 end
 end
-function trackingModeElementChanged(linker, ~, event)
-regionUserData = RegionUserData.fromRegionLinker(linker);
+function trackingModeElementChanged(previewer, ~, event)
+regionUserData = RegionUserData.fromRegionPreviewer(previewer);
 trackingMode = event.Value;
-regionUserData.setTrackingMode(trackingMode);
+regionUserData.TrackingMode = trackingMode;
 end
-function trackingModeParserChanged(linker, ~, ~)
-regionUserData = RegionUserData.fromRegionLinker(linker);
+function trackingModeParserChanged(previewer, ~, ~)
+regionUserData = RegionUserData.fromRegionPreviewer(previewer);
+regionGui = previewer.getRegionGui();
 trackingMode = regionUserData.getTrackingMode();
-trackingSelection = linker.gui.getTrackingSelectionElement();
+trackingSelection = regionGui.getTrackingSelectionElement();
 set(trackingSelection, "Value", trackingMode);
 end
 
-function angleModeChanged(linker, source, event)
+function angleModeChanged(previewer, source, event)
 switch event.EventName
     case "ValueChanged"
-        angleModeElementChanged(linker, source, event);
+        angleModeElementChanged(previewer, source, event);
     case "PostSet"
-        angleModeParserChanged(linker, source, event);
+        angleModeParserChanged(previewer, source, event);
 end
 end
-function angleModeElementChanged(linker, ~, event)
-regionUserData = RegionUserData.fromRegionLinker(linker);
+function angleModeElementChanged(previewer, ~, event)
+regionUserData = RegionUserData.fromRegionPreviewer(previewer);
 angleMode = event.Value;
-regionUserData.setAngleMode(angleMode);
+regionUserData.AngleMode = angleMode;
 end
-function angleModeParserChanged(linker, ~, ~)
-regionUserData = RegionUserData.fromRegionLinker(linker);
+function angleModeParserChanged(previewer, ~, ~)
+regionUserData = RegionUserData.fromRegionPreviewer(previewer);
+regionGui = previewer.getRegionGui();
 angleMode = regionUserData.getAngleMode();
-angleSelection = linker.gui.getAngleSelectionElement();
+angleSelection = regionGui.getAngleSelectionElement();
 set(angleSelection, "Value", angleMode);
 end
 
-function positiveDirectionChanged(linker, source, event)
+function positiveDirectionChanged(previewer, source, event)
 switch event.EventName
     case "SelectionChanged"
-        directionElementChanged(linker, source, event);
+        directionElementChanged(previewer, source, event);
     case "PostSet"
-        directionParserChanged(linker, source, event);
+        directionParserChanged(previewer, source, event);
 end
 end
-function directionElementChanged(linker, source, ~)
-regionUserData = RegionUserData.fromRegionLinker(linker);
+function directionElementChanged(previewer, source, ~)
+regionUserData = RegionUserData.fromRegionPreviewer(previewer);
 selectedButton = get(source, "SelectedObject");
 direction = DirectionGui.buttonToLocation(selectedButton);
-regionUserData.setPositiveDirection(direction);
+regionUserData.Direction = direction;
 end
-function directionParserChanged(linker, ~, ~)
-regionUserData = RegionUserData.fromRegionLinker(linker);
+function directionParserChanged(previewer, ~, ~)
+regionUserData = RegionUserData.fromRegionPreviewer(previewer);
+regionGui = previewer.getRegionGui();
 direction = regionUserData.getPositiveDirection();
-directionGui = linker.gui.getDirectionGui();
+directionGui = regionGui.getDirectionGui();
 directionGui.setLocation(direction);
 end
