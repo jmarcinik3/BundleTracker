@@ -1,7 +1,7 @@
 classdef RegionExpanderLinker < RegionAdjusterLinker
     methods
-        function obj = RegionExpanderLinker(gui, region)
-            regionExpander = RegionExpander(region);
+        function obj = RegionExpanderLinker(gui, previewer)
+            regionExpander = RegionExpander(previewer);
             callbacks = generateCallbacks(regionExpander);
             obj@RegionAdjusterLinker(gui, callbacks);
         end

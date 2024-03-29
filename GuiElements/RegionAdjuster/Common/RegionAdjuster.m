@@ -4,18 +4,19 @@ classdef RegionAdjuster
     end
 
     properties (Access = private)
-        region;
+        previewer;
     end
 
     methods
-        function obj = RegionAdjuster(region)
-            obj.region = region;
+        function obj = RegionAdjuster(previewer)
+            obj.previewer = previewer;
         end
     end
 
     methods (Access = protected)
         function region = getRegion(obj)
-            region = obj.region;
+            previewer = obj.previewer;
+            region = previewer.getActiveRegion();
         end
         function performAction(obj, action)
             region = obj.getRegion();

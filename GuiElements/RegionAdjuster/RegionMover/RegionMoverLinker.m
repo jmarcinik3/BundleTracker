@@ -1,7 +1,7 @@
 classdef RegionMoverLinker < RegionAdjusterLinker
     methods
-        function obj = RegionMoverLinker(gui, region)
-            regionMover = RegionMover(region);
+        function obj = RegionMoverLinker(gui, previewer)
+            regionMover = RegionMover(previewer);
             callbacks = generateCallbacks(regionMover);
             obj@RegionAdjusterLinker(gui, callbacks);
         end

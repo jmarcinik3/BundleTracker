@@ -1,7 +1,7 @@
 classdef RegionCompressorLinker < RegionAdjusterLinker
     methods
-        function obj = RegionCompressorLinker(gui, region)
-            regionCompressor = RegionCompressor(region);
+        function obj = RegionCompressorLinker(gui, previewer)
+            regionCompressor = RegionCompressor(previewer);
             callbacks = generateCallbacks(regionCompressor);
             obj@RegionAdjusterLinker(gui, callbacks);
         end

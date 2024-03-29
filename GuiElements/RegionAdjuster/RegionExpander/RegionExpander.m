@@ -1,7 +1,7 @@
 classdef RegionExpander < RegionAdjuster
     methods
-        function obj = RegionExpander(region)
-            obj@RegionAdjuster(region);
+        function obj = RegionExpander(previewer)
+            obj@RegionAdjuster(previewer);
         end
     end
 

@@ -1,7 +1,7 @@
 classdef RegionCompressor < RegionAdjuster
     methods
-        function obj = RegionCompressor(region)
-            obj@RegionAdjuster(region);
+        function obj = RegionCompressor(previewer)
+            obj@RegionAdjuster(previewer);
         end
     end
 

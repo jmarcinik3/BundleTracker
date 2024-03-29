@@ -1,7 +1,7 @@
 classdef RegionMover < RegionAdjuster
     methods
-        function obj = RegionMover(region)
-            obj@RegionAdjuster(region);
+        function obj = RegionMover(previewer)
+            obj@RegionAdjuster(previewer);
         end
     end
 
