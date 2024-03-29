@@ -15,8 +15,11 @@ classdef RegionAdjuster
 
     methods (Access = protected)
         function region = getRegion(obj)
-            previewer = obj.previewer;
-            region = previewer.getActiveRegion();
+            region = obj.previewer;
+            if RegionType.isRegion(region)
+            elseif isa(region, "RegionPreviewer")
+                region = region.getActiveRegion();
+            end
         end
         function performAction(obj, action)
             region = obj.getRegion();
