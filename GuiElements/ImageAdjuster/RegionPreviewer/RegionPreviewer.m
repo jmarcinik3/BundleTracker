@@ -21,6 +21,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             obj.regionLinker = RegionLinker(regionGui, fullRawImage);
 
             configureInteractiveImage(obj, imageGui);
+            obj.regionLinker.updateRegionalRawImage([]);
         end
     end
 
@@ -31,6 +32,9 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         end
     end
     methods (Access = protected)
+        function linker = getImageLinker(obj)
+            linker = obj.imageLinker;
+        end
         function ax = getAxis(obj)
             ax = getAxis@RegionDrawer(obj);
         end
@@ -55,7 +59,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         function drawRegionsByParameters(obj, parameters, blobShape)
             drawRegionsByParameters(obj, parameters, blobShape);
         end
-        
+
         function changeImage(obj, im)
             obj.clearRegions();
             obj.imageLinker.changeImage(im);
@@ -85,7 +89,9 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         end
         function deletingRegion(obj, source, ~)
             activeRegion = obj.getActiveRegion();
-            if activeRegion == source
+            if ~obj.multipleRegionsExist()
+                obj.regionLinker.updateRegionalRawImage([]);
+            elseif activeRegion == source
                 obj.setPreviousRegionVisible();
             end
         end
@@ -118,21 +124,27 @@ regionUserData = RegionUserData.fromRegion(region);
 regionUserData.resetToDefaults(keyword);
 end
 
-
-
 function drawRegionsByParameters(obj, parameters, blobShape)
 taskName = ['Drawing ', blobShape, 's'];
 multiWaitbar(taskName, 0, 'CanCancel', 'on');
 regionCount = size(parameters, 1);
-regions = {};
+regions = images.roi.Rectangle.empty(0, regionCount);
+
+    function region = drawRegionByParameters(index)
+        parameter = parameters(index, :);
+        region = obj.drawRegionByParameters(parameter, blobShape);
+        configureRegion(obj, region);
+    end
+
+    function cancel = updateWaitbar(index)
+        proportionComplete = index / regionCount;
+        cancel = multiWaitbar(taskName, proportionComplete);
+    end
 
 for index = 1:regionCount
-    parameter = parameters(index, :);
-    region = drawRegionByParameters(obj, parameter, blobShape);
-    regions{index} = region; %#ok<AGROW>
-
-    proportionComplete = index / regionCount;
-    if multiWaitbar(taskName, proportionComplete)
+    region = drawRegionByParameters(index);
+    regions(index) = region;
+    if updateWaitbar(index)
         deleteRegions(regions);
         break;
     end
@@ -141,16 +153,10 @@ end
 multiWaitbar(taskName, 'Close');
 end
 
-function region = drawRegionByParameters(obj, parameters, blobShape)
-region = obj.drawRegionByParameters(parameters, blobShape);
-configureRegion(obj, region);
-end
-
 function is = isDoubleClick(event)
 selectionType = event.SelectionType;
 is = selectionType == "double";
 end
-
 function is = isLeftClick(event)
 name = event.EventName;
 switch name

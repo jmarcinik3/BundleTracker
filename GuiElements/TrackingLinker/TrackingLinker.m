@@ -45,8 +45,9 @@ classdef TrackingLinker < RegionPreviewer ...
         end
 
         function exportImageIfPossible(obj, ~, ~)
+            imageLinker = obj.getImageLinker();
             directoryPath = obj.gui.getDirectoryPath();
-            obj.imageLinker.exportImageIfPossible(directoryPath);
+            imageLinker.exportImageIfPossible(directoryPath);
         end
         function trackButtonPushed(obj, ~, ~)
             if obj.regionExists("Start Tracking")

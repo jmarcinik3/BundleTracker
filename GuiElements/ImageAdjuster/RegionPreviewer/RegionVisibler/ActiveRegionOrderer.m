@@ -29,10 +29,17 @@ classdef ActiveRegionOrderer < handle
             regions = obj.getRegions();
             indices = getRegionIndices(regions);
         end
-        function exists = regionExists(obj)
+        function regionCount = getRegionCount(obj)
             regions = obj.getRegions();
-            count = numel(regions);
-            exists = count >= 1;
+            regionCount = numel(regions);
+        end
+        function exists = regionExists(obj)
+            regionCount = obj.getRegionCount();
+            exists = regionCount >= 1;
+        end
+        function exist = multipleRegionsExist(obj)
+            regionCount = obj.getRegionCount();
+            exist = regionCount >= 2;
         end
         function ax = getAxis(obj)
             ax = obj.axis;

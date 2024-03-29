@@ -33,8 +33,12 @@ classdef RegionLinker < PreprocessorLinker
     end
     methods (Access = ?RegionPreviewer)
         function updateRegionalRawImage(obj, region)
-            fullRawImage = obj.fullRawImage;
-            regionRawImage = MatrixUnpadder.byRegion2d(region, fullRawImage);
+            if RegionType.isRegion(region)
+                fullRawImage = obj.fullRawImage;
+                regionRawImage = MatrixUnpadder.byRegion2d(region, fullRawImage);
+            else
+                regionRawImage = [];
+            end
             obj.setRawImage(regionRawImage);
         end
     end

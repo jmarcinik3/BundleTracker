@@ -22,67 +22,115 @@ classdef ResultsParser
         function time = getTime(obj)
             time = obj.results.t;
         end
-        function trace = getProcessedTrace(obj)
+        function trace = getProcessedTrace(obj, index)
             trace = vertcat(obj.results.xProcessed);
+            if nargin > 1
+                trace = trace(index, :);
+            end
         end
-        function error = getProcessedTraceError(obj)
+        function error = getProcessedTraceError(obj, index)
             error = vertcat(obj.results.xProcessedError);
+            if nargin > 1
+                error = error(index, :);
+            end
         end
-        function trace = getProcessedTrace2(obj)
+        function trace = getProcessedTrace2(obj, index)
             trace = vertcat(obj.results.yProcessed);
+            if nargin > 1
+                trace = trace(index, :);
+            end
         end
-        function trace = getProcessedTraceError2(obj)
+        function trace = getProcessedTraceError2(obj, index)
             trace = vertcat(obj.results.yProcessedError);
+            if nargin > 1
+                trace = trace(index, :);
+            end
         end
 
-        function x = getRawTraceX(obj)
+        function x = getRawTraceX(obj, index)
             x = vertcat(obj.results.x);
+            if nargin > 1
+                x = x(index, :);
+            end
         end
-        function y = getRawTraceY(obj)
+        function y = getRawTraceY(obj, index)
             y = vertcat(obj.results.y);
+            if nargin > 1
+                y = y(index, :);
+            end
         end
-        function error = getRawTraceErrorX(obj)
+        function error = getRawTraceErrorX(obj, index)
             error = vertcat(obj.results.xError);
+            if nargin > 1
+                error = error(index, :);
+            end
         end
-        function error = getRawTraceErrorY(obj)
+        function error = getRawTraceErrorY(obj, index)
             error = vertcat(obj.results.yError);
+            if nargin > 1
+                error = error(index, :);
+            end
         end
 
-        function angle = getAngleRadians(obj)
+        function angle = getAngleRadians(obj, index)
             angle = vertcat(obj.results.angle);
+            if nargin > 1
+                angle = angle(index, :);
+            end
         end
-        function angle = getAngleDegrees(obj)
-            angleRad = obj.getAngleRadians();
+        function angle = getAngleDegrees(obj, index)
+            angleRad = obj.getAngleRadians(index);
             angle = rad2deg(angleRad);
         end
-        function error = getAngleErrorRadians(obj)
+        function error = getAngleErrorRadians(obj, index)
             error = vertcat(obj.results.angleError);
+            if nargin > 1
+                error = error(index, :);
+            end
         end
-        function error = getAngleErrorDegrees(obj)
-            errorRad = obj.getAngleErrorRadians();
+        function error = getAngleErrorDegrees(obj, index)
+            errorRad = obj.getAngleErrorRadians(index);
             error = rad2deg(errorRad);
         end
-        function info = getAngleInfo(obj)
+        function info = getAngleInfo(obj, index)
             info = vertcat(obj.results.angleInfo);
+            if nargin > 1
+                info = info(index, :);
+            end
         end
 
-        function trackingMode = getTrackingMode(obj)
+        function trackingMode = getTrackingMode(obj, index)
             trackingMode = vertcat(obj.results.TrackingMode);
+            if nargin > 1
+                trackingMode = trackingMode(index, :);
+            end
         end
-        function angleMode = getAngleMode(obj)
+        function angleMode = getAngleMode(obj, index)
             angleMode = vertcat(obj.results.AngleMode);
+            if nargin > 1
+                angleMode = angleMode(index, :);
+            end
         end
-        function location = getPositiveDirection(obj)
+        function location = getPositiveDirection(obj, index)
             location = vertcat(obj.results.Direction);
+            if nargin > 1
+                location = location(index, :);
+            end
         end
         function fps = getFps(obj)
             fps = obj.results.Fps;
         end
-        function is = pixelsAreInverted(obj)
+        function is = pixelsAreInverted(obj, index)
             is = vertcat(obj.results.IsInverted);
+            if nargin > 1
+                is = is(index, :);
+            end
         end
-        function intensities = getIntensityRange(obj)
+        function intensities = getIntensityRange(obj, index)
             intensities = vertcat(obj.results.IntensityRange);
+            if nargin > 1
+                intensities = intensities(index, :);
+            end
         end
 
         function scaleFactor = getScaleFactor(obj)
