@@ -1,6 +1,6 @@
 classdef ImageGui < ProcessorGui
     properties (Constant, Access = private)
-        rows = 3;
+        rows = 4;
         columns = 6;
         size = [ImageGui.rows, ImageGui.columns];
     end
@@ -23,23 +23,8 @@ end
 
 
 function layoutElements(imageGui)
-configureGridLayout(imageGui);
-configurePositions(imageGui);
-end
-
-function configureGridLayout(imageGui)
-gl = imageGui.getGridLayout();
-
-% Set up row heights and column widths for grid layout
-set(gl, ...
-    "Padding", [0, 0, 0, 0], ...
-    "RowHeight", {TrackingGui.rowHeight, DirectionGui.height, '1x'}, ...
-    "ColumnWidth", {'1x', '3x', '1x', '3x', '1x', '3x'} ...
-    );
-end
-
-function configurePositions(imageGui)
 columnCount = ImageGui.columns;
+rowCount = ImageGui.rows;
 
 % Retrieve components
 gl = imageGui.getGridLayout();
@@ -62,18 +47,31 @@ invertCheckbox.Layout.Column = columnCount;
 
 % lay out processing elements
 trackingLabel.Layout.Row = 2;
-angleLabel.Layout.Row = 2;
 trackingSelection.Layout.Row = 2;
-angleSelection.Layout.Row = 2;
-directionElement.Layout.Row = 2;
+angleLabel.Layout.Row = 3;
+angleSelection.Layout.Row = 3;
+directionElement.Layout.Row = [2, 3];
 
 trackingLabel.Layout.Column = 1;
 trackingSelection.Layout.Column = 2;
-angleLabel.Layout.Column = 3;
-angleSelection.Layout.Column = 4;
-directionElement.Layout.Column = [5, 6];
+angleLabel.Layout.Column = 1;
+angleSelection.Layout.Column = 2;
+directionElement.Layout.Column = [3, 4];
 
 % Set up axis on which bundles are displayed
-ax.Layout.Row = ImageGui.rows;
+ax.Layout.Row = rowCount;
 ax.Layout.Column = [1, columnCount];
+
+% Set up row heights and column widths for grid layout
+rowSpacing = 1;
+rowHeight = (DirectionGui.height - rowSpacing) / 2;
+
+gl.RowHeight = num2cell(rowHeight * ones(1, rowCount));
+gl.RowHeight{end} = '1x';
+
+set(gl, ...
+    "Padding", [0, 0, 0, 0], ...
+    "RowSpacing", rowSpacing, ...
+    "ColumnWidth", {64, 192, 96, 96, '3x', 96} ...
+    );
 end

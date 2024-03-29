@@ -17,7 +17,6 @@ classdef Postprocessor < handle
         end
         function process(obj)
             % shift first to reduce error and to rotate about mean
-            obj.direct(); % set direction based on given diagonal
             obj.shift(); % center trace around zero by subtracting its mean
             obj.scale(); % scale traces nm/px and add time from FPS
             obj.rotate(); % rotate trace to direction of maximal movement
@@ -46,11 +45,10 @@ classdef Postprocessor < handle
             parser = obj.parser;
             resultCount = parser.getRegionCount();
 
-            for index = 1:resultCount
-                preResult = results(index);
-                postResult = func(preResult, parser, index);
-                obj.results(index) = postResult;
-            end
+            obj.results = arrayfun( ...
+                @(index) func(results(index), parser, index), ...
+                1:resultCount ...
+                );
         end
     end
 end
@@ -71,94 +69,117 @@ end
 
 function postResult = directSingle(result, parser, index)
 positiveDirection = parser.getPositiveDirection(index);
-disp(positiveDirection);
-% process trace direction based on given diagonal
-switch positiveDirection
-    case DirectionGui.upperLeft
-        x = -result.yProcessed;
-        y = -result.xProcessed;
-    case DirectionGui.upperRight
-        x = result.xProcessed;
-        y = -result.yProcessed;
-    case DirectionGui.lowerLeft
-        x = -result.xProcessed;
-        y = result.yProcessed;
-    case DirectionGui.lowerRight
-        x = result.yProcessed;
-        y = result.xProcessed;
-end
+[x, y, ~] = directXy( ...
+    result.xProcessed, ...
+    result.yProcessed, ...
+    positiveDirection ...
+    );
 
 % update processed traces
 postResult = result;
 postResult.xProcessed = x;
 postResult.yProcessed = y;
 end
+function [x, y, angle] = directXy(x, y, positiveDirection)
+angle = angleFromDirection(positiveDirection);
+[x, y] = TraceRotator.rotate2d(x, -y, angle);
+end
+function angle = angleFromDirection(direction)
+switch direction
+    case DirectionGui.tags(2, 3) % right
+        angle = 0;
+    case DirectionGui.tags(1, 3) % upper right
+        angle = 45;
+    case DirectionGui.tags(1, 2) % upper
+        angle = 90;
+    case DirectionGui.tags(1, 1) % upper left
+        angle = 135;
+    case DirectionGui.tags(2, 1) % left
+        angle = 180;
+    case DirectionGui.tags(3, 1) % lower left
+        angle = 225;
+    case DirectionGui.tags(3, 2) % lower
+        angle = 270;
+    case DirectionGui.tags(3, 3) % lower right
+        angle = 315;
+end
+angle = deg2rad(angle);
+end
 
 function postResult = scaleSingle(result, parser, ~)
-% retrieve necessary data for scaling
-positionScale = parser.getScaleFactor();
+scaleFactor = parser.getScaleFactor();
 scaleError = parser.getScaleFactorError();
 fps = parser.getFps();
-scaleErrorFactor = (scaleError / positionScale) ^ 2;
 
-x = result.xProcessed;
-y = result.yProcessed;
-xError = result.xProcessedError;
-yError = result.yProcessedError;
-
-% scale traces
-xScaled = positionScale * x;
-yScaled = positionScale * y;
-xScaledError = xScaled .* sqrt((xError./x).^2 + scaleErrorFactor);
-yScaledError = yScaled .* sqrt((yError./y).^2 + scaleErrorFactor);
+[x, y, xError, yError] = scaleXy( ...
+    result.xProcessed, ...
+    result.yProcessed, ...
+    result.xProcessedError, ...
+    result.yProcessedError, ...
+    scaleFactor, ...
+    scaleError ...
+    );
 
 % update processed traces
 postResult = result;
-postResult.xProcessed = xScaled;
-postResult.yProcessed = yScaled;
-postResult.xProcessedError = xScaledError;
-postResult.yProcessedError = yScaledError;
-postResult.t = (1:numel(x)) / fps; % add time values
+postResult.xProcessed = x;
+postResult.yProcessed = y;
+postResult.xProcessedError = xError;
+postResult.yProcessedError = yError;
+postResult.t = scaleTime(fps, x);
+end
+function [x, y, xerr, yerr] = scaleXy(x, y, xerr, yerr, scaleFactor, scaleError)
+scaleErrorFactor = (scaleError / scaleFactor) ^ 2;
+x = scaleFactor * x;
+y = scaleFactor * y;
+xerr = x .* sqrt((xerr./x).^2 + scaleErrorFactor);
+yerr = y .* sqrt((yerr./y).^2 + scaleErrorFactor);
+end
+function t = scaleTime(fps, x)
+t = (1:numel(x)) / fps;
 end
 
 function postResult = shiftSingle(result, ~, ~)
-% retrieve necessary data for shifting
-x = result.xProcessed;
-y = result.yProcessed;
-xErrorOld = result.xProcessedError;
-yErrorOld = result.yProcessedError;
-
-% tare traces to zero mean
-xsize = numel(x);
-xShifted = x - mean(x);
-yShifted = y - mean(y);
-xErrorFromMean = sqrt(sum(xErrorOld.^2)) / xsize;
-yErrorFromMean = sqrt(sum(yErrorOld.^2)) / xsize;
-xErrorTotal = sqrt(xErrorOld.^2 + xErrorFromMean^2);
-yErrorTotal = sqrt(yErrorOld.^2 + yErrorFromMean^2);
+[x, y, xError, yError] = shiftXy( ...
+    result.xProcessed, ...
+    result.yProcessed, ...
+    result.xProcessedError, ...
+    result.yProcessedError ...
+    );
 
 % update processed traces
 postResult = result;
-postResult.xProcessed = xShifted;
-postResult.yProcessed = yShifted;
-postResult.xProcessedError = xErrorTotal;
-postResult.yProcessedError = yErrorTotal;
+postResult.xProcessed = x;
+postResult.yProcessed = y;
+postResult.xProcessedError = xError;
+postResult.yProcessedError = yError;
+end
+function [x, y, xerr, yerr] = shiftXy(x, y, xerr, yerr)
+xsize = numel(x);
+x = x - mean(x);
+y = y - mean(y);
+xErrorFromMean = sqrt(sum(xerr.^2)) / xsize;
+yErrorFromMean = sqrt(sum(yerr.^2)) / xsize;
+xerr = sqrt(xerr.^2 + xErrorFromMean^2);
+yerr = sqrt(yerr.^2 + yErrorFromMean^2);
 end
 
 function postResult = rotateSingle(result, parser, index)
-% retrieve necessary data for rotating
 angleMode = parser.getAngleMode(index);
+positiveDirection = parser.getPositiveDirection(index);
 x = result.xProcessed;
 y = result.yProcessed;
-xError = result.xProcessedError;
-yError = result.yProcessedError;
 
-% find angle based on linear regression and rotate by it
-[angle, angleError, angleInfo] = AngleAlgorithms.byKeyword(x, y, angleMode);
-[xRotated, yRotated] = TraceRotator.rotate2d(x, y, angle);
-[xRotatedError, yRotatedError] = TraceRotator.rotate2dError( ...
-    x, y, xError, yError, angle, angleError ...
+[x, y, angleDirection] = directXy(x, y, positiveDirection);
+[angleRotate, angleError, angleInfo] = AngleAlgorithms.byKeyword(x, y, angleMode);
+[x, y, xError, yError] = rotateXy( ...
+    x, ...
+    y, ...
+    result.xProcessedError, ...
+    result.yProcessedError, ...
+    angleRotate, angleError ...
     );
+angle = rerange(angleRotate + angleDirection);
 
 postResult = result;
 % add information pertaining to best-fit angle
@@ -167,8 +188,23 @@ postResult.angleError = angleError;
 postResult.angleInfo = angleInfo;
 
 % update processed traces
-postResult.xProcessed = xRotated;
-postResult.yProcessed = yRotated;
-postResult.xProcessedError = xRotatedError;
-postResult.yProcessedError = yRotatedError;
+postResult.xProcessed = x;
+postResult.yProcessed = y;
+postResult.xProcessedError = xError;
+postResult.yProcessedError = yError;
+end
+function [xrot, yrot, xroterr, yroterr] = rotateXy(x, y, xerr, yerr, angle, angleError)
+[xrot, yrot] = TraceRotator.rotate2d(x, y, angle);
+[xroterr, yroterr] = TraceRotator.rotate2dError( ...
+    x, y, ...
+    xerr, yerr, ...
+    angle, angleError ...
+    );
+end
+
+function angle = rerange(angle)
+angle = mod(angle, 6.28319);
+if angle > 3.14159
+    angle = angle - 6.28319;
+end
 end

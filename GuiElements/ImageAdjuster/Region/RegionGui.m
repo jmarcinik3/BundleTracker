@@ -18,7 +18,7 @@ classdef RegionGui < ProcessorGui
             regionMoverGui = RegionMoverGui(gl);
             regionCompressorGui = RegionCompressorGui(gl);
             regionExpanderGui = RegionExpanderGui(gl);
-            
+
             obj.gridLayout = gl;
             layoutElements( ...
                 obj, ...
@@ -124,5 +124,8 @@ gl.ColumnWidth = num2cell(adjusterLength * ones(1, columnCount));
 gl.ColumnWidth{1} = '1x';
 gl.ColumnWidth{end} = '1x';
 
-set(gl, "Padding", [0, 0, 0, 0]);
+set(gl, ...
+    "Padding", [0, 0, 0, 0], ...
+    "RowSpacing", 1 ...
+    );
 end

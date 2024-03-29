@@ -56,7 +56,7 @@ end
 function thresholdSliderChanged(previewer, ~, event)
 thresholds = event.Value;
 regionUserData = RegionUserData.fromRegionPreviewer(previewer);
-regionUserData.IntensityRange = thresholds;
+regionUserData.setThresholds(thresholds);
 end
 function thresholdParserChanged(previewer, ~, ~)
 regionUserData = RegionUserData.fromRegionPreviewer(previewer);
@@ -78,7 +78,6 @@ end
 function invertCheckboxChanged(previewer, ~, event)
 regionUserData = RegionUserData.fromRegionPreviewer(previewer);
 invert = event.Value;
-regionUserData.IsInverted = invert;
 regionUserData.setInvert(invert);
 end
 function invertParserChanged(previewer, ~, ~)
@@ -101,7 +100,7 @@ end
 function trackingModeElementChanged(previewer, ~, event)
 regionUserData = RegionUserData.fromRegionPreviewer(previewer);
 trackingMode = event.Value;
-regionUserData.TrackingMode = trackingMode;
+regionUserData.setTrackingMode(trackingMode);
 end
 function trackingModeParserChanged(previewer, ~, ~)
 regionUserData = RegionUserData.fromRegionPreviewer(previewer);
@@ -122,7 +121,7 @@ end
 function angleModeElementChanged(previewer, ~, event)
 regionUserData = RegionUserData.fromRegionPreviewer(previewer);
 angleMode = event.Value;
-regionUserData.AngleMode = angleMode;
+regionUserData.setAngleMode(angleMode);
 end
 function angleModeParserChanged(previewer, ~, ~)
 regionUserData = RegionUserData.fromRegionPreviewer(previewer);
@@ -144,7 +143,7 @@ function directionElementChanged(previewer, source, ~)
 regionUserData = RegionUserData.fromRegionPreviewer(previewer);
 selectedButton = get(source, "SelectedObject");
 direction = DirectionGui.buttonToLocation(selectedButton);
-regionUserData.Direction = direction;
+regionUserData.setPositiveDirection(direction);
 end
 function directionParserChanged(previewer, ~, ~)
 regionUserData = RegionUserData.fromRegionPreviewer(previewer);

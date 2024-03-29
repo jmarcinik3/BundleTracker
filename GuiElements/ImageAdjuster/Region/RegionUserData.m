@@ -16,7 +16,7 @@ classdef RegionUserData < handle
             ];
     end
 
-    properties (SetObservable)
+    properties (SetObservable, Access = private)
         IntensityRange;
         IsInverted;
         TrackingMode;
@@ -93,13 +93,13 @@ classdef RegionUserData < handle
             obj.IsInverted = invert;
         end
         function setTrackingMode(obj, trackingMode)
-            obj.TrackingMode = trackingMode;
+            obj.TrackingMode = string(trackingMode);
         end
         function setAngleMode(obj, angleMode)
-            obj.AngleMode = angleMode;
+            obj.AngleMode = string(angleMode);
         end
         function setPositiveDirection(obj, positiveDirection)
-            obj.Direction = positiveDirection;
+            obj.Direction = string(positiveDirection);
         end
     end
 
