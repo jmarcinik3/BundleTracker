@@ -10,6 +10,7 @@ classdef OtsuThresholdsLinker < AutoThresholdLinker
             set(gui.getCountSpinner(), "ValueChangingFcn", @obj.countSpinnerChanging);
             
             initialLevels = get(levelsSlider, "Value");
+            rerangeLevelsSlider(levelsSlider, maxLevelCount);
             obj.changeLevels(initialLevels);
         end
     end
@@ -52,7 +53,7 @@ classdef OtsuThresholdsLinker < AutoThresholdLinker
             gui = obj.getGui();
             levelsSlider = gui.getLevelsSlider();
             newLevels = rerangeLevelsSlider(levelsSlider, levelCount);
-            obj.levelsChanged(newLevels, levelCount);
+            obj.changeLevels(newLevels, levelCount);
         end
     end
 end

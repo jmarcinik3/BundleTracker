@@ -7,6 +7,8 @@ classdef AutoThresholder < handle
     properties (Access = private)
         regionsThresholds;
         calculateThresholds;
+        minIntensities;
+        maxIntensities;
     end
 
     methods
@@ -14,9 +16,11 @@ classdef AutoThresholder < handle
             if nargin == 2
                 maxLevelCount = 1;
             end
-            obj.isSingleThreshold = maxLevelCount == 1;
+
             regionCount = numel(regionalImages);
 
+            [obj.minIntensities, obj.maxIntensities] = findIntensities(regionalImages);
+            obj.isSingleThreshold = maxLevelCount == 1;
             obj.calculateThresholds = thresholdFcn;
             obj.regionalImages = regionalImages;
             obj.regionsThresholds = preallocateRegionThresholds(regionCount, maxLevelCount);
@@ -70,11 +74,13 @@ classdef AutoThresholder < handle
             else
                 thresholds = obj.calculateThresholds(im, levelCount);
             end
-            paddedThresholds = [0, thresholds, Inf];
+            minIntensity = obj.minIntensities(regionIndex);
+            maxIntensity = obj.maxIntensities(regionIndex);
+            paddedThresholds = [minIntensity, thresholds, maxIntensity];
         end
 
         function is = thresholdsExist(obj, regionIndex, levelCount)
-            minRegionThresholds = obj.regionsThresholds(regionIndex, levelCount, 2);
+            minRegionThresholds = max(obj.getRegionThresholds(regionIndex, levelCount));
             is = minRegionThresholds > 0;
         end
         function thresholds = getRegionThresholds(obj, regionIndex, levelCount)
@@ -101,4 +107,15 @@ end
 
 function threshold = getThresholdFromLevel(level, thresholds)
 threshold = uint16(twoValueInterpolate(double(thresholds), level, 0));
+end
+
+function [minIntensities, maxIntensities] = findIntensities(regionalImages)
+regionCount = numel(regionalImages);
+minIntensities = zeros(1, regionCount);
+maxIntensities = zeros(1, regionCount);
+for index = 1:regionCount
+    regionalImage = regionalImages{index};
+    minIntensities(index) = min(min(regionalImage));
+    maxIntensities(index) = max(max(regionalImage));
+end
 end

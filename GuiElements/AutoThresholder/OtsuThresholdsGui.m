@@ -1,7 +1,7 @@
 classdef OtsuThresholdsGui
     properties (Constant)
         title = "Threshold Regions by Otsu's Method";
-        maxLevelCount = 20;
+        maxLevelCount = 6;
     end
 
     properties (Constant, Access = private)
