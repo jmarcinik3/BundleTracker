@@ -1,5 +1,5 @@
 classdef AutoThresholdLinker < AutoThresholder
-    properties (Access = protected)
+    properties (Access = ?AutoThresholdOpener)
         thresholdRanges = [];
     end
 
@@ -10,11 +10,8 @@ classdef AutoThresholdLinker < AutoThresholder
     end
 
     methods
-        function obj = AutoThresholdLinker(gui, regionalImages, thresholdFcn, maxLevelCount)
-            if nargin == 3
-                maxLevelCount = 1;
-            end
-
+        function obj = AutoThresholdLinker(gui, regionalImages, thresholdFcn)
+            maxLevelCount = gui.getMaxLevelCount();
             obj@AutoThresholder(regionalImages, thresholdFcn, maxLevelCount);
 
             axs = gui.getAxes();
@@ -23,28 +20,12 @@ classdef AutoThresholdLinker < AutoThresholder
 
             obj.gui = gui;
             obj.interactiveImages = iIms;
-
-            regionCount = numel(regionalImages);
-            for index = 1:regionCount
-                im = obj.rethresholdRegion(index, [1, 2], 1);
-                obj.displayRegionalImage(index, im);
-            end
-        end
-    end
-
-    %% Functions to open GUI
-    methods (Static)
-        function thresholdRanges = openGui(fig, regionalImages, thresholdFcn)
-            regionCount = numel(regionalImages);
-            gui = AutoThresholdGui(fig, regionCount);
-            linker = AutoThresholdLinker(gui, regionalImages, thresholdFcn);
-            uiwait(fig);
-            thresholdRanges = linker.thresholdRanges;
+            thresholdRegions(obj, regionalImages);
         end
     end
 
     %% Functions to retrieve GUI elements
-    methods (Access = protected)
+    methods
         function gui = getGui(obj)
             gui = obj.gui;
         end
@@ -114,5 +95,13 @@ else
     gui = obj.gui;
     levels = gui.getLevels();
     levelCount = gui.getLevelCount();
+end
+end
+
+function thresholdRegions(obj, regionalImages)
+regionCount = numel(regionalImages);
+for index = 1:regionCount
+    im = obj.rethresholdRegion(index, [1, 2], 1);
+    obj.displayRegionalImage(index, im);
 end
 end

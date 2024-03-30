@@ -1,13 +1,12 @@
-classdef OtsuThresholdsGui
+classdef AutoThresholdsGui
     properties (Constant)
-        title = "Threshold Regions by Otsu's Method";
-        maxLevelCount = 6;
+        title = "Threshold Regions";
     end
 
     properties (Constant, Access = private)
         rows = 3;
         columns = 4;
-        size = [OtsuThresholdsGui.rows, OtsuThresholdsGui.columns];
+        size = [AutoThresholdsGui.rows, AutoThresholdsGui.columns];
     end
 
     properties (Access = private)
@@ -16,17 +15,21 @@ classdef OtsuThresholdsGui
         levelsSlider;
         countSpinner;
         actionButtons;
+        
+        maxLevelCount;
     end
 
     methods
-        function obj = OtsuThresholdsGui(fig, regionCount)
-            set(fig, "Name", OtsuThresholdsGui.title);
-            gl = uigridlayout(fig, OtsuThresholdsGui.size);
+        function obj = AutoThresholdsGui(fig, regionCount, maxLevelCount)
+            set(fig, "Name", AutoThresholdsGui.title);
+            gl = uigridlayout(fig, AutoThresholdsGui.size);
+
+            obj.maxLevelCount = maxLevelCount;
 
             obj.axesGrid = generateAxesGrid(gl, regionCount);
-            obj.levelsSlider = generateLevelsSlider(gl);
+            obj.levelsSlider = generateLevelsSlider(gl, maxLevelCount);
             obj.actionButtons = generateActionButtons(gl);
-            obj.countSpinner = generateLevelCountSpinner(gl);
+            obj.countSpinner = generateLevelCountSpinner(gl, maxLevelCount);
             obj.gridLayout = gl;
             layoutElements(obj);
         end
@@ -76,6 +79,9 @@ classdef OtsuThresholdsGui
             levelSpinner = obj.getCountSpinner();
             levelCount = get(levelSpinner, "Value");
         end
+        function maxLevelCount = getMaxLevelCount(obj)
+            maxLevelCount = obj.maxLevelCount;
+        end
     end
 end
 
@@ -84,7 +90,7 @@ end
 function layoutElements(gui)
 % set default row height for GUI elements
 rowHeight = TrackingGui.rowHeight;
-columns = OtsuThresholdsGui.columns;
+columns = AutoThresholdsGui.columns;
 
 % retrieve GUI elements
 gl = gui.getGridLayout();
@@ -121,17 +127,14 @@ gl.RowHeight = {'1x', rowHeight, rowHeight};
 gl.ColumnWidth = {96, '4x', 96, '1x'};
 end
 
-function slider = generateLevelsSlider(gl)
+function slider = generateLevelsSlider(gl, maxLevelCount)
 slider = uislider(gl, "range");
-maxLevelCount = OtsuThresholdsGui.maxLevelCount;
 sliderLimits = [0, maxLevelCount+1];
 set(slider, "Limits", sliderLimits, "Value", sliderLimits);
 end
 
-function spinner = generateLevelCountSpinner(gl)
+function spinner = generateLevelCountSpinner(gl, maxLevelCount)
 spinner = uispinner(gl);
-maxLevelCount = OtsuThresholdsGui.maxLevelCount;
-
 set(spinner, ...
     "Limits", [1, maxLevelCount], ...
     "Value", maxLevelCount, ...

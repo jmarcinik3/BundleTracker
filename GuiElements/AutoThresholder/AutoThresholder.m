@@ -47,18 +47,17 @@ classdef AutoThresholder < handle
             end
         end
     end
-    methods (Access = private)
-
-    end
 
     %% Functions to perform thresholding on region
-    methods (Access = protected)
+    methods
         function im = rethresholdRegion(obj, regionIndex, levels, levelCount)
             im = obj.getRegionalImage(regionIndex);
             thresholdRange = obj.generateThresholdRange(regionIndex, levels, levelCount);
             noiseRemover = NoiseRemover(thresholdRange);
             im = noiseRemover.get(im);
         end
+    end
+    methods (Access = protected)
         function thresholdRange = generateThresholdRange(obj, regionIndex, levels, levelCount)
             thresholds = obj.generateRegionThreshold(regionIndex, levelCount);
             thresholdRange = getThresholdsFromLevels(levels, thresholds);

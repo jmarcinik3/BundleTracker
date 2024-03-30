@@ -4,7 +4,6 @@ uimenu(m, ...
     "Text", BlobDetectorGui.title, ...
     "MenuSelectedFcn", @trackingLinker.blobDetectionButtonPushed ...
     );
-generateThresholdsMenu(m, trackingLinker);
 generateThresholdMenu(m, trackingLinker);
 generateResetMenu(m, trackingLinker);
 end
@@ -22,15 +21,10 @@ for index = 1:numel(resetKeywords)
 end
 end
 
-function generateThresholdsMenu(parentMenu, trackingLinker)
-uimenu(parentMenu, ...
-    "Text", OtsuThresholdsGui.title, ...
-    "MenuSelectedFcn", @trackingLinker.otsuThresholdsPushed ...
-    );
-end
+
 
 function generateThresholdMenu(parentMenu, trackingLinker)
-m = uimenu(parentMenu, "Text", "Binary Autothreshold");
+m = uimenu(parentMenu, "Text", "Autothreshold");
 thresholdKeywords = Threshold.keywords;
 for index = 1:numel(thresholdKeywords)
     thresholdKeyword = thresholdKeywords(index);

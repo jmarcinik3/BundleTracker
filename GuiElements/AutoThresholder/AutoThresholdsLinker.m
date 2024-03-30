@@ -1,28 +1,17 @@
-classdef OtsuThresholdsLinker < AutoThresholdLinker
+classdef AutoThresholdsLinker < AutoThresholdLinker
     methods
-        function obj = OtsuThresholdsLinker(gui, regionalImages)
-            maxLevelCount = OtsuThresholdsGui.maxLevelCount;
-            obj@AutoThresholdLinker(gui, regionalImages, @multithresh, maxLevelCount);
+        function obj = AutoThresholdsLinker(gui, regionalImages, thresholdFcn)
+            obj@AutoThresholdLinker(gui, regionalImages, thresholdFcn);
 
             levelsSlider = gui.getLevelsSlider();
             set(levelsSlider, "ValueChangingFcn", @obj.levelsChanging);
             set(gui.getActionButtons(), "ButtonPushedFcn", @obj.actionButtonPushed);
             set(gui.getCountSpinner(), "ValueChangingFcn", @obj.countSpinnerChanging);
             
+            maxLevelCount = gui.getMaxLevelCount();
             initialLevels = get(levelsSlider, "Value");
             rerangeLevelsSlider(levelsSlider, maxLevelCount);
             obj.changeLevels(initialLevels);
-        end
-    end
-
-    %% Functions to generate thresholds
-    methods (Static)
-        function thresholdRanges = openGui(fig, regionalImages)
-            regionCount = numel(regionalImages);
-            gui = OtsuThresholdsGui(fig, regionCount);
-            linker = OtsuThresholdsLinker(gui, regionalImages);
-            uiwait(fig);
-            thresholdRanges = linker.thresholdRanges;
         end
     end
 

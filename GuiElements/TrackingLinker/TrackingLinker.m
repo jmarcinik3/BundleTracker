@@ -84,17 +84,10 @@ classdef TrackingLinker < RegionPreviewer ...
             updateFrameLabel(obj);
         end
 
-        function otsuThresholdRegions(obj, regions)
-            im = obj.getFirstFrame();
-            regionalImages = generateRegionalImages(regions, im);
-            fig = generateFigure(OtsuThresholdsGui.title);
-            newThresholds = OtsuThresholdsLinker.openGui(fig, regionalImages);
-            RegionUserData.setRegionsThresholds(regions, newThresholds);
-        end
         function thresholdRegions(obj, regions, thresholdKeyword)
             im = obj.getFirstFrame();
             regionalImages = generateRegionalImages(regions, im);
-            fig = generateFigure(thresholdKeyword);
+            fig = generateFigure();
             newThresholds = AutoThresholdOpener.byKeyword(fig, regionalImages, thresholdKeyword);
             RegionUserData.setRegionsThresholds(obj, newThresholds);
         end
@@ -202,7 +195,7 @@ fps = obj.getFps();
 label = sprintf("%d Frames (%d FPS)", frameCount, fps);
 end
 
-function fig = generateFigure(title)
-fig = uifigure("Name", title);
+function fig = generateFigure(varargin)
+fig = uifigure(varargin{:});
 colormap(fig, "turbo");
 end
