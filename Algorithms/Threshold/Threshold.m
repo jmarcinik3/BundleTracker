@@ -4,12 +4,14 @@ classdef Threshold
         ridlerCalvardKeyword = "Ridler-Calvard Method";
         kittlerIllingworthKeyword = "Kittler-Illingworth Thresholding";
         crossEntropyKeyword = "Minimum Cross Entropy";
+        fuzzyEntropyKeyword = "Minimum Fuzzy Entropy"
         triangleKeyword = "Triangle Method";
         keywords = sort([ ...
             Threshold.otsuKeyword, ...
             Threshold.ridlerCalvardKeyword, ...
             Threshold.kittlerIllingworthKeyword, ...
             Threshold.crossEntropyKeyword, ...
+            Threshold.fuzzyEntropyKeyword, ...
             Threshold.triangleKeyword ...
             ]);
     end
@@ -25,6 +27,8 @@ classdef Threshold
                     thresholdFcn = @Threshold.byKittlerIllingworth;
                 case Threshold.crossEntropyKeyword
                     thresholdFcn = @Threshold.byMinimumCrossEntropy;
+                case Threshold.fuzzyEntropyKeyword
+                    thresholdFcn = @Threshold.byFuzzyEntropy;
                 case Threshold.triangleKeyword
                     thresholdFcn = @Threshold.byTriangle;
             end
@@ -40,6 +44,11 @@ classdef Threshold
 
         function threshold = byKittlerIllingworth(im)
             threshold = kittlerIllingworth(im);
+        end
+
+        function threshold = byFuzzyEntropy(im)
+            threshold = fuzzyEntropy(im, 1, "RunCount", 3);
+            threshold = Threshold.im2(threshold, class(im));
         end
 
         function threshold = byMinimumCrossEntropy(im)
