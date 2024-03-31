@@ -1,17 +1,21 @@
 classdef Threshold
     properties (Constant)
-        otsuKeyword = "Otsu's Method";
-        ridlerCalvardKeyword = "Ridler-Calvard Method";
-        kittlerIllingworthKeyword = "Kittler-Illingworth Thresholding";
         crossEntropyKeyword = "Minimum Cross Entropy";
         fuzzyEntropyKeyword = "Minimum Fuzzy Entropy"
+        johannsonBilleKeyword = "Johannsen-Bille Method";
+        kapurSahooWongKeyword = "Kapur-Sahoo-Wong Method"
+        kittlerIllingworthKeyword = "Kittler-Illingworth Thresholding";
+        otsuKeyword = "Otsu's Method";
+        ridlerCalvardKeyword = "Ridler-Calvard Method";
         triangleKeyword = "Triangle Method";
         keywords = sort([ ...
-            Threshold.otsuKeyword, ...
-            Threshold.ridlerCalvardKeyword, ...
-            Threshold.kittlerIllingworthKeyword, ...
             Threshold.crossEntropyKeyword, ...
             Threshold.fuzzyEntropyKeyword, ...
+            Threshold.johannsonBilleKeyword, ...
+            Threshold.kapurSahooWongKeyword, ...
+            Threshold.kittlerIllingworthKeyword, ...
+            Threshold.otsuKeyword, ...
+            Threshold.ridlerCalvardKeyword, ...
             Threshold.triangleKeyword ...
             ]);
     end
@@ -19,19 +23,44 @@ classdef Threshold
     methods (Static)
         function thresholdFcn = handleByKeyword(keyword)
             switch keyword
-                case Threshold.otsuKeyword
-                    thresholdFcn = @Threshold.byOtsu;
-                case Threshold.ridlerCalvardKeyword
-                    thresholdFcn = @Threshold.byRidlerCalvard;
-                case Threshold.kittlerIllingworthKeyword
-                    thresholdFcn = @Threshold.byKittlerIllingworth;
                 case Threshold.crossEntropyKeyword
                     thresholdFcn = @Threshold.byMinimumCrossEntropy;
                 case Threshold.fuzzyEntropyKeyword
                     thresholdFcn = @Threshold.byFuzzyEntropy;
+                case Threshold.johannsonBilleKeyword
+                    thresholdFcn = @Threshold.byJohannsenBille;
+                case Threshold.kapurSahooWongKeyword
+                    thresholdFcn = @Threshold.byKapurSahooWong;
+                case Threshold.kittlerIllingworthKeyword
+                    thresholdFcn = @Threshold.byKittlerIllingworth;
+                case Threshold.otsuKeyword
+                    thresholdFcn = @Threshold.byOtsu;
+                case Threshold.ridlerCalvardKeyword
+                    thresholdFcn = @Threshold.byRidlerCalvard;
                 case Threshold.triangleKeyword
                     thresholdFcn = @Threshold.byTriangle;
             end
+        end
+
+        function threshold = byFuzzyEntropy(im)
+            threshold = fuzzyEntropy(im, 1, "RunCount", 3);
+            threshold = Threshold.im2(threshold, class(im));
+        end
+
+        function threshold = byJohannsenBille(im)
+            threshold = Threshold.im2(johannsenBille(im), class(im));
+        end
+
+        function threshold = byKapurSahooWong(im)
+            threshold = Threshold.im2(kapurSahooWong(im), class(im));
+        end
+
+        function threshold = byKittlerIllingworth(im)
+            threshold = kittlerIllingworth(im);
+        end
+
+        function threshold = byMinimumCrossEntropy(im)
+            threshold = Threshold.im2(minimumCrossEntropy(im), class(im));
         end
 
         function threshold = byOtsu(im)
@@ -40,19 +69,6 @@ classdef Threshold
 
         function threshold = byRidlerCalvard(im)
             threshold = ridlerCalvard(im);
-        end
-
-        function threshold = byKittlerIllingworth(im)
-            threshold = kittlerIllingworth(im);
-        end
-
-        function threshold = byFuzzyEntropy(im)
-            threshold = fuzzyEntropy(im, 1, "RunCount", 3);
-            threshold = Threshold.im2(threshold, class(im));
-        end
-
-        function threshold = byMinimumCrossEntropy(im)
-            threshold = Threshold.im2(minimumCrossEntropy(im), class(im));
         end
 
         function threshold = byTriangle(im)
