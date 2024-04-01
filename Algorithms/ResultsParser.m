@@ -79,7 +79,11 @@ classdef ResultsParser
             end
         end
         function angle = getAngleDegrees(obj, index)
-            angleRad = obj.getAngleRadians(index);
+            if nargin > 1
+                angleRad = obj.getAngleRadians(index);
+            else
+                angleRad = obj.getAngleRadians();
+            end
             angle = rad2deg(angleRad);
         end
         function error = getAngleErrorRadians(obj, index)
@@ -89,7 +93,11 @@ classdef ResultsParser
             end
         end
         function error = getAngleErrorDegrees(obj, index)
-            errorRad = obj.getAngleErrorRadians(index);
+            if nargin > 1
+                errorRad = obj.getAngleErrorRadians(index);
+            else
+                errorRad = obj.getAngleErrorRadians();
+            end
             error = rad2deg(errorRad);
         end
         function info = getAngleInfo(obj, index)
