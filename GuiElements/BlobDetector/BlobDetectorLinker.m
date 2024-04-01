@@ -1,9 +1,18 @@
 classdef BlobDetectorLinker < handle
+    properties (Constant, Access = private)
+        backgroundAlpha = 0.333;
+    end
+
     properties (Access = private)
         gui;
         imPreprocessed;
         blobAnalyzer;
         applyRegions = false;
+
+        rawImage;
+        interactiveImage;
+        previousAlphaTime = datetime;
+        alphaDeltaTime = 0.167;
 
         blobShape;
         rectanglePositions;
@@ -21,11 +30,16 @@ classdef BlobDetectorLinker < handle
         function obj = BlobDetectorLinker(gui, im)
             ax = gui.getAxis();
             fig = gui.getFigure();
-            iIm = image(ax, gray2rgb(mat2gray(im), fig)); % display RGB image
-            AxisResizer(iIm, "FitToContent", true);
+            iIm = image(ax, gray2rgb(mat2gray(im), fig));
+            AxisResizer(iIm, ...
+                "FitToContent", true, ...
+                "AddListener", false ...
+                );
 
             blobShapeDropdown = gui.getShapeDropdown();
-            set(gui.getThresholdSlider(), "ValueChangingFcn", @obj.thresholdsChanging);
+            thresholdSlider = gui.getThresholdSlider();
+
+            set(thresholdSlider, "ValueChangingFcn", @obj.thresholdsChanging);
             set(gui.getAreaSlider(), "ValueChangingFcn", @obj.blobAreaChanging );
             set(gui.getConnectivityElement(), "ValueChangedFcn", @obj.connectivityChanged);
             set(gui.getCountSpinner(), "ValueChangingFcn", @obj.maximumCountChanging);
@@ -35,9 +49,13 @@ classdef BlobDetectorLinker < handle
             set(gui.getActionButtons(), "ButtonPushedFcn", @obj.actionButtonPushed);
 
             obj.gui = gui;
+            obj.rawImage = im2double(im);
+            obj.interactiveImage = iIm;
             obj.blobShape = get(blobShapeDropdown, "Value");
             obj.blobAnalyzer = generateBlobAnalyzer(gui);
             obj.imPreprocessed = detrendMatrix(im);
+
+            updateImageAlpha(obj, thresholdSlider.Value);
             obj.redetectBlobs();
         end
     end
@@ -161,6 +179,7 @@ classdef BlobDetectorLinker < handle
         function thresholdsChanging(obj, ~, event)
             thresholds = event.Value;
             obj.redetectBlobs(thresholds);
+            obj.updateImageAlphaTimed(thresholds);
         end
         function blobAreaChanging(obj, ~, event)
             areas = uint16(event.Value);
@@ -199,6 +218,14 @@ classdef BlobDetectorLinker < handle
                 h = gui.getBlobHeight();
             end
             obj.redrawBlobs(h, w);
+        end
+
+        function updateImageAlphaTimed(obj, thresholds)
+            currentTime = datetime;
+            if alphaNeedsUpdated(obj, currentTime)
+                updateImageAlpha(obj, thresholds);
+                obj.previousAlphaTime = currentTime;
+            end
         end
     end
 end
@@ -244,3 +271,22 @@ imPreprocessed = double(im);
 imPreprocessed = imPreprocessed - smoothdata2(imPreprocessed, "movmean");
 imPreprocessed = mat2gray(imPreprocessed);
 end
+
+function needsUpdate = alphaNeedsUpdated(obj, currentTime)
+previousTime = obj.previousAlphaTime;
+deltaTime = obj.alphaDeltaTime;
+elapsedSeconds = seconds(currentTime - previousTime);
+needsUpdate = elapsedSeconds > deltaTime;
+end
+
+function updateImageAlpha(obj, thresholds)
+iIm = obj.interactiveImage;
+im = obj.imPreprocessed;
+alpha = BlobDetectorLinker.backgroundAlpha;
+
+imAlpha = 0.5 * (1 + alpha) * ones(size(im));
+imAlpha(im > thresholds(2)) = 1;
+imAlpha(im < thresholds(1)) = alpha;
+set(iIm, "AlphaData", imAlpha);
+end
+
