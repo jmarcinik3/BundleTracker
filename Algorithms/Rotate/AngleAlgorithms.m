@@ -1,7 +1,7 @@
 classdef AngleAlgorithms
     properties (Constant)
         ellipseFit = "Elliptical Regression";
-        kmeansKeyword = "K-Means Clustering";
+        kmeansKeyword = "2-Means Clustering";
         linearFit = "Linear Regression";
         keywords = sort([ ...
             AngleAlgorithms.ellipseFit, ...
