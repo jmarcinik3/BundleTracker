@@ -1,6 +1,7 @@
 classdef AutoThresholder < handle
     properties (Access = protected)
         regionalImages;
+        preprocessedImages;
         isSingleThreshold;
     end
 
@@ -18,11 +19,17 @@ classdef AutoThresholder < handle
             end
 
             regionCount = numel(regionalImages);
+            preprocessedImages = cellfun( ...
+                @preprocessImage, ...
+                regionalImages, ...
+                "UniformOutput", false ...
+                );
 
             [obj.minIntensities, obj.maxIntensities] = findIntensities(regionalImages);
             obj.isSingleThreshold = maxLevelCount == 1;
             obj.calculateThresholds = thresholdFcn;
             obj.regionalImages = regionalImages;
+            obj.preprocessedImages = preprocessedImages;
             obj.regionsThresholds = preallocateRegionThresholds(regionCount, maxLevelCount);
         end
     end
@@ -34,6 +41,9 @@ classdef AutoThresholder < handle
         end
         function im = getRegionalImage(obj, index)
             im = obj.regionalImages{index};
+        end
+        function im = getPreprocessedImage(obj, index)
+            im = obj.preprocessedImages{index};
         end
 
         function thresholds = generateRegionThreshold(obj, regionIndex, levelCount)
@@ -67,7 +77,7 @@ classdef AutoThresholder < handle
     %% Functions to memoize thresholds
     methods (Access = private)
         function paddedThresholds = calculateRegionThresholds(obj, regionIndex, levelCount)
-            im = obj.getRegionalImage(regionIndex);
+            im = obj.getPreprocessedImage(regionIndex);
             if obj.isSingleThreshold
                 thresholds = obj.calculateThresholds(im);
             else
@@ -117,4 +127,8 @@ for index = 1:regionCount
     minIntensities(index) = min(min(regionalImage));
     maxIntensities(index) = max(max(regionalImage));
 end
+end
+
+function im = preprocessImage(im)
+im(im == 0) = min(im(im > 0));
 end
