@@ -15,8 +15,20 @@ classdef ResultsParser
         function count = getRegionCount(obj)
             count = numel(obj.results);
         end
-        function label = getLabel(obj)
+        function regions = getRegions(obj)
+            results = obj.results;
+            regionCount = obj.getRegionCount();
+            regions = arrayfun( ...
+                @(index) results(index).Region, ...
+                1:regionCount, ...
+                "UniformOutput", false ...
+                );
+        end
+        function label = getLabel(obj, index)
             label = vertcat(obj.results.Label);
+            if nargin > 1
+                label = label(index);
+            end
         end
 
         function time = getTime(obj)

@@ -34,7 +34,7 @@ classdef RegionVisibler < ActiveRegionOrderer
         end
         function previewRegion(obj, region)
             obj.setActiveRegion(region);
-            RegionDrawer.updateSelected(region);
+            RegionUpdater.update(region);
         end
     end
     methods (Access = private)

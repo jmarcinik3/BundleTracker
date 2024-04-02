@@ -70,9 +70,7 @@ classdef VideoSelector < handle
             previousDirectoryPath = obj.gui.getDirectoryPath();
             title = VideoSelector.importTitle;
             extensions = VideoSelector.extensions;
-
-            [filename, directoryPath, ~] = uigetfile(extensions, title, previousDirectoryPath);
-            filepath = strcat(directoryPath, filename);
+            filepath = uigetfilepath(extensions, title, previousDirectoryPath);
             obj.setFilepathIfChosen(filepath, source, event);
         end
         function openDirectory(obj, ~, ~)

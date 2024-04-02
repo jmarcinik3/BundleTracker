@@ -18,6 +18,12 @@ classdef RegionDrawer < RegionShaper
             configureRegion(obj, region);
         end
 
+        function region = importRegion(obj, regionInfo)
+            ax = obj.getAxis();
+            varargin = namedargs2cell(rmfield(regionInfo, "Type"));
+            region = importRegion(ax, regionInfo.Type, varargin{:});
+            configureRegion(obj, region);
+        end
         function region = drawRegionByParameters(obj, parameters, keyword)
             ax = obj.getAxis();
             region = drawRegionByParameters(ax, parameters, keyword);
@@ -28,7 +34,7 @@ classdef RegionDrawer < RegionShaper
         function region = byPoint(obj, point)
             region = obj.generateRegionByKeyword();
             beginDrawingFromPoint(region, point);
-            RegionDrawer.updateSelected(region);
+            configureRegion(obj, region);
         end
     end
 
@@ -45,14 +51,6 @@ classdef RegionDrawer < RegionShaper
             end
         end
     end
-
-    %% Functions to update GUI and state information
-    methods (Static)
-        function updateSelected(activeRegion)
-            RegionUpdater.selected(activeRegion);
-            RegionUpdater.labels(activeRegion);
-        end
-    end
 end
 
 
@@ -61,9 +59,23 @@ function configureRegion(obj, region)
 defaults = SettingsParser.getRegionDefaults();
 set(region, defaults{:});
 addMetadataToRegion(obj, region);
+RegionUpdater.update(region);
 end
 
 function addMetadataToRegion(obj, region)
 userData = obj.userDataFcn();
 set(region, "UserData", userData);
+end
+
+function region = importRegion(ax, regionType, varargin)
+switch regionType
+    case 'images.roi.rectangle'
+        region = images.roi.Rectangle(ax, varargin{:});
+    case 'images.roi.ellipse'
+        region = images.roi.Ellipse(ax, varargin{:});
+    case 'images.roi.polygon'
+        region = images.roi.Polygon(ax, varargin{:});
+    case 'images.roi.freehand'
+        region = images.roi.Freehand(ax, varargin{:});
+end
 end

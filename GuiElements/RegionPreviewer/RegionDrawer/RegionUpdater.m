@@ -1,5 +1,10 @@
 classdef RegionUpdater
     methods (Static)
+        function update(region)
+            RegionUpdater.selected(region);
+            RegionUpdater.labels(region);
+        end
+
         function selected(region)
             updateSelected(region);
         end

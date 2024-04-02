@@ -2,7 +2,16 @@ function generateFileMenu(fig, trackingLinker)
 m = uimenu(fig, "Text", "File");
 generateSaveImageMenu(m, trackingLinker);
 generateImportVideoMenu(m, trackingLinker);
+generateImportRegionMenu(m, trackingLinker);
 generateOpenDirectoryMenu(m, trackingLinker);
+end
+
+function generateImportRegionMenu(parentMenu, trackingLinker)
+uimenu(parentMenu, ...
+    "Text", trackingLinker.importRegionsTitle, ...
+    "MenuSelectedFcn", @trackingLinker.importRegionsMenuCalled, ...
+    "Accelerator", "R" ...
+    );
 end
 
 function generateSaveImageMenu(parentMenu, trackingLinker)

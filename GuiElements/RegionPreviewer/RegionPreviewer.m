@@ -61,6 +61,20 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             end
         end
 
+        function importRegionsFromFile(obj, filepath)
+            resultsParser = ResultsParser(filepath);
+            regionInfos = resultsParser.getRegions();
+            obj.importRegionsFromInfo(regionInfos);
+        end
+        function importRegionsFromInfo(obj, regionInfos)
+            regionCount = numel(regionInfos);
+            for index = 1:regionCount
+                regionInfo = regionInfos{index};
+                region = obj.importRegion(regionInfo);
+                configureRegion(obj, region);
+            end
+        end
+
         function drawRegionsByParameters(obj, parameters, blobShape)
             drawRegionsByParameters(obj, parameters, blobShape);
         end

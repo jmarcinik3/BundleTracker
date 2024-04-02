@@ -1,6 +1,11 @@
 classdef TrackingLinker < RegionPreviewer ...
         & VideoImporter ...
         & VideoSelector
+    
+    properties (Constant)
+        importRegionsTitle = "Import Regions";
+    end
+
     properties (Access = private)
         gui;
     end
@@ -41,6 +46,16 @@ classdef TrackingLinker < RegionPreviewer ...
                 resetKeyword = source.UserData;
                 regions = obj.getRegions();
                 obj.resetRegionsToDefaults(regions, resetKeyword);
+            end
+        end
+
+        function importRegionsMenuCalled(obj, ~, ~)
+            previousDirectoryPath = obj.gui.getDirectoryPath();
+            extensions = {'*.mat', "MATLAB Structure"};
+            title = TrackingLinker.importRegionsTitle;
+            filepath = uigetfilepath(extensions, title, previousDirectoryPath);
+            if isfile(filepath)
+                obj.importRegionsFromFile(filepath);
             end
         end
 
