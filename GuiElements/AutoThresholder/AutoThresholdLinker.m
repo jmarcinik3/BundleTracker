@@ -88,12 +88,11 @@ AxisResizer(iIm, "FitToContent", true, "AddListener", false);
 end
 
 function [levels, levelCount] = getThresholdsInput(obj)
+gui = obj.gui;
+levels = gui.getLevels();
 if obj.isSingleThreshold
-    levels = [1, 2];
     levelCount = 1;
 else
-    gui = obj.gui;
-    levels = gui.getLevels();
     levelCount = gui.getLevelCount();
 end
 end
