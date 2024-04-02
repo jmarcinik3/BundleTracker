@@ -50,7 +50,7 @@ classdef RegionUserData < handle
         end
     end
 
-    %% Functions to retrive state information
+    %% Functions to retrieve state information
     methods
         function thresholds = getThresholds(obj)
             thresholds = obj.IntensityRange;
@@ -76,6 +76,14 @@ classdef RegionUserData < handle
                 regions = regions.getRegions();
             end
             setRegionsThresholds(regions, thresholds);
+        end
+        function configureByResultsParser(region, parser, index)
+            regionUserData = RegionUserData.fromRegion(region);
+            regionUserData.setThresholds(parser.getIntensityRange(index));
+            regionUserData.setInvert(parser.pixelsAreInverted(index));
+            regionUserData.setTrackingMode(parser.getTrackingMode(index));
+            regionUserData.setAngleMode(parser.getAngleMode(index));
+            regionUserData.setPositiveDirection(parser.getPositiveDirection(index));
         end
     end
     methods

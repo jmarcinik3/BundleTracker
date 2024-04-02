@@ -63,16 +63,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 
         function importRegionsFromFile(obj, filepath)
             resultsParser = ResultsParser(filepath);
-            regionInfos = resultsParser.getRegions();
-            obj.importRegionsFromInfo(regionInfos);
-        end
-        function importRegionsFromInfo(obj, regionInfos)
-            regionCount = numel(regionInfos);
-            for index = 1:regionCount
-                regionInfo = regionInfos{index};
-                region = obj.importRegion(regionInfo);
-                configureRegion(obj, region);
-            end
+            importRegionsFromInfo(obj, resultsParser);
         end
 
         function drawRegionsByParameters(obj, parameters, blobShape)
@@ -94,7 +85,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         function buttonDownFcn(obj, source, event)
             if isLeftClick(event)
                 region = obj.drawRegionOnClick(source, event);
-                configureRegion(obj, region);
+                configureRegionToGui(obj, region);
             end
         end
         function regionClicked(obj, source, event)
@@ -132,7 +123,7 @@ iIm = imageGui.getInteractiveImage();
 set(iIm, "ButtonDownFcn", @obj.buttonDownFcn);
 end
 
-function configureRegion(obj, region)
+function configureRegionToGui(obj, region)
 regionGui = obj.getRegionGui();
 RegionGuiConfigurer.configure(obj, regionGui, region);
 obj.previewRegion(region);
@@ -152,7 +143,7 @@ regions = images.roi.Rectangle.empty(0, regionCount);
     function region = drawRegionByParameters(index)
         parameter = parameters(index, :);
         region = obj.drawRegionByParameters(parameter, blobShape);
-        configureRegion(obj, region);
+        configureRegionToGui(obj, region);
     end
 
     function cancel = updateWaitbar(index)
@@ -162,6 +153,36 @@ regions = images.roi.Rectangle.empty(0, regionCount);
 
 for index = 1:regionCount
     region = drawRegionByParameters(index);
+    regions(index) = region;
+    if updateWaitbar(index)
+        deleteRegions(regions);
+        break;
+    end
+end
+
+multiWaitbar(taskName, 'Close');
+end
+
+function importRegionsFromInfo(obj, resultsParser)
+taskName = 'Importing Regions';
+multiWaitbar(taskName, 0, 'CanCancel', 'on');
+regionCount = resultsParser.getRegionCount();
+regions = images.roi.Rectangle.empty(0, regionCount);
+
+    function region = importRegionFromInfo(index)
+        regionInfo = resultsParser.getRegion(index);
+        region = obj.importRegion(regionInfo);
+        configureRegionToGui(obj, region);
+        RegionUserData.configureByResultsParser(region, resultsParser, index);
+    end
+
+    function cancel = updateWaitbar(index)
+        proportionComplete = index / regionCount;
+        cancel = multiWaitbar(taskName, proportionComplete);
+    end
+
+for index = 1:regionCount
+    region = importRegionFromInfo(index);
     regions(index) = region;
     if updateWaitbar(index)
         deleteRegions(regions);
