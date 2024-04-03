@@ -29,12 +29,6 @@ classdef PreprocessorLinker < ImagePreprocessor
 
     %% Functions to update state of GUI
     methods
-        function setVisible(obj, visible)
-            gl = obj.gui.getGridLayout();
-            set(gl, "Visible", visible);
-        end
-    end
-    methods
         function invertCheckboxChanged(obj, ~, ~)
             thresholds = obj.gui.getThresholds();
             obj.updateFromRawImage(thresholds);
@@ -46,6 +40,12 @@ classdef PreprocessorLinker < ImagePreprocessor
         function thresholdSliderChanged(obj, source, ~)
             thresholds = get(source, "Value");
             obj.updateFromRawImage(thresholds);
+        end
+    end
+    methods (Access = private)
+        function setVisible(obj, visible)
+            gl = obj.gui.getGridLayout();
+            set(gl, "Visible", visible);
         end
     end
 end

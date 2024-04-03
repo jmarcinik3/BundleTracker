@@ -13,7 +13,7 @@ classdef NoiseRemover
         function im = get(obj, im)
             minIntensity = obj.minimumIntensity;
             maxIntensity = obj.maximumIntensity;
-            im(im < minIntensity) = max(minIntensity, min(im(:)));
+            im(im < minIntensity) = minIntensity;
             im(im > maxIntensity) = maxIntensity;
             im = mat2gray(im);
         end
