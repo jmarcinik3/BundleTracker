@@ -73,10 +73,10 @@ function slider = generateThresholdSlider(gl)
 slider = uislider(gl, "range");
 
 % set major and minor tick locations
-maxIntensity = 2^16; % maximum intensity for TIF image
+maxIntensity = 1;
 defaults = SettingsParser.getThresholdSliderDefaults();
-minorTicks = round(0:maxIntensity/32:maxIntensity);
-majorTicks = round(0:maxIntensity/4:maxIntensity);
+minorTicks = 0:maxIntensity/32:maxIntensity;
+majorTicks = 0:maxIntensity/4:maxIntensity;
 majorTickLabels = arrayfun(@(tick) sprintf("%d", tick), majorTicks);
 set(slider, ...
     "Limits", [0, maxIntensity], ...

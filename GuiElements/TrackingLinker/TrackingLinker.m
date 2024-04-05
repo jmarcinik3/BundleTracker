@@ -1,12 +1,14 @@
 classdef TrackingLinker < RegionPreviewer ...
         & VideoImporter ...
         & VideoSelector
-    
+
     properties (Constant)
         importRegionsTitle = "Import Regions";
+        extensions = {'*.mat', "MATLAB Structure"};
     end
 
     properties (Access = private)
+        firstFrame;
         gui;
     end
 
@@ -22,7 +24,7 @@ classdef TrackingLinker < RegionPreviewer ...
             regionGui = trackingGui.getRegionGui();
 
             obj@RegionPreviewer(regionGui, imageGui);
-            obj@VideoImporter([]);
+            obj@VideoImporter;
             obj@VideoSelector(videoGui);
 
             set(videoGui.getFilepathField(), "ValueChangedFcn", @obj.videoFilepathChanged);
@@ -51,7 +53,7 @@ classdef TrackingLinker < RegionPreviewer ...
 
         function importRegionsMenuCalled(obj, ~, ~)
             previousDirectoryPath = obj.gui.getDirectoryPath();
-            extensions = {'*.mat', "MATLAB Structure"};
+            extensions = TrackingLinker.extensions;
             title = TrackingLinker.importRegionsTitle;
             filepath = uigetfilepath(extensions, title, previousDirectoryPath);
             if isfile(filepath)
@@ -88,15 +90,23 @@ classdef TrackingLinker < RegionPreviewer ...
                 obj.thresholdRegions(regions, thresholdKeyword);
             end
         end
+    
+        function openWaterfallPlotPushed(obj, ~, ~)
+            startingDirectory = obj.gui.getDirectoryPath();
+            extensions = TrackingLinker.extensions;
+            filepath = uigetfilepath(extensions, "Create Waterfall Plot", startingDirectory);
+            if isfile(filepath)
+                openWaterfallPlot(filepath);
+            end
+        end
     end
     methods (Access = private)
         function videoFilepathChanged(obj, ~, ~)
             filepath = obj.gui.getVideoFilepath();
-            firstFrame = obj.getFirstFrame();
-
-            obj.changeImage(firstFrame);
-            obj.setFilepath(filepath); % must come before updating frame label
-            updateFrameLabel(obj);
+            fileCount = numel(filepath);
+            if fileCount >= 1 && isfile(filepath)
+                videoFilepathChanged(obj, filepath);
+            end
         end
 
         function thresholdRegions(obj, regions, thresholdKeyword)
@@ -188,7 +198,6 @@ title = sprintf("Tracking Completed (%d)", regionCount);
 message = trackingCompletedMessage(results, filepath);
 msgbox(message, title);
 end
-
 function message = trackingCompletedMessage(results, filepath)
 resultsParser = ResultsParser(results);
 regionCount = resultsParser.getRegionCount();
@@ -199,18 +208,47 @@ fpsMsg = sprintf("FPS: %d", fps);
 message = [savedMsg, countMsg, fpsMsg];
 end
 
-function updateFrameLabel(obj)
-label = generateFrameLabel(obj);
+function videoFilepathChanged(obj, filepath)
+videoReader = VideoReader(filepath);
+firstFrame = read(videoReader, 1);
+videoProfile = get(videoReader, "VideoFormat");
+maxIntensity = getMaximumIntensity(videoProfile);
+label = generateFrameLabel(videoReader);
+
+obj.changeImage(firstFrame);
+updateThresholdSliderRanges(obj, maxIntensity);
 obj.setFrameLabel(label);
+obj.importVideoToRam(videoReader);
 end
 
-function label = generateFrameLabel(obj)
-frameCount = obj.getFrameCount();
-fps = obj.getFps();
+function label = generateFrameLabel(videoReader)
+frameCount = get(videoReader, "NumFrames");
+fps = get(videoReader, "FrameRate");
 label = sprintf("%d Frames (%d FPS)", frameCount, fps);
 end
 
-function fig = generateFigure(varargin)
-fig = uifigure(varargin{:});
-colormap(fig, "turbo");
+function updateThresholdSliderRanges(obj, maxIntensity)
+imageLinker = obj.getImageLinker();
+regionLinker = obj.getRegionLinker();
+imageLinker.setMaximumIntensity(maxIntensity);
+regionLinker.setMaximumIntensity(maxIntensity);
+end
+function maxIntensity = getMaximumIntensity(videoProfile)
+switch string(videoProfile)
+    case {"Mono8 Signed", "RGB24 Signed"}
+        maxIntensity = 2^7;
+    case {"Mono8", "RGB24", "Grayscale"}
+        maxIntensity = 2^8;
+    case {"Mono16 Signed", "RGB48 Signed"}
+        maxIntensity = 2^15;
+    case {"Mono16", "RGB48"}
+        maxIntensity = 2^16;
+end
+end
+
+function openWaterfallPlot(filepath)
+resultsParser = ResultsParser(filepath);
+traces = resultsParser.getProcessedTrace();
+time = resultsParser.getTime();
+WaterfallLinker.openFigure(traces, time);
 end

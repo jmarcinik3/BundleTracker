@@ -14,7 +14,10 @@ classdef VideoGui < handle
 
             gl = generateGridLayout(parent, location);
             obj.filepathField = generateFilepathField(gl, valueChangedFcn);
-            obj.frameElement = uilabel(gl, "Text", "");
+            obj.frameElement = uilabel(gl, ...
+                "Text", "", ...
+                "HorizontalAlignment", "center" ...
+                );
             
             obj.filepathField.Layout.Column = 1;
             obj.frameElement.Layout.Column = 2;

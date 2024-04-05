@@ -40,6 +40,9 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         function linker = getImageLinker(obj)
             linker = obj.imageLinker;
         end
+        function linker = getRegionLinker(obj)
+            linker = obj.regionLinker;
+        end
         function ax = getAxis(obj)
             ax = getAxis@RegionDrawer(obj);
         end

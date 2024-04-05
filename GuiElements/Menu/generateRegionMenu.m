@@ -21,8 +21,6 @@ for index = 1:numel(resetKeywords)
 end
 end
 
-
-
 function generateThresholdMenu(parentMenu, trackingLinker)
 m = uimenu(parentMenu, "Text", "Autothreshold");
 thresholdKeywords = Threshold.keywords;

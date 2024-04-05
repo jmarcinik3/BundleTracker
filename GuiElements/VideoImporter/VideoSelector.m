@@ -22,13 +22,6 @@ classdef VideoSelector < handle
     end
 
     %% Functions to retrieve state information
-    methods (Access = protected)
-        function im = getFirstFrame(obj)
-            filepath = obj.gui.getFilepath();
-            videoReader = VideoReader(filepath);
-            im = readFrame(videoReader);
-        end
-    end
     methods (Access = private)
         function is = directoryIsValid(obj)
             directoryPath = obj.gui.getDirectoryPath();

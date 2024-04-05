@@ -29,7 +29,6 @@
             "StripeColor": "none"
         },
         "ThresholdSlider": {
-            "Value": [0, 65535],
             "FontSize": 8,
             "FontWeight": "normal",
             "FontAngle": "normal",

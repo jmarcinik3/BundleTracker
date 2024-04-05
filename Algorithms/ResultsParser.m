@@ -1,5 +1,5 @@
 classdef ResultsParser
-    properties
+    properties (Access = private)
         results;
     end
 
@@ -12,6 +12,12 @@ classdef ResultsParser
             end
         end
 
+        function result = getResult(obj, index)
+            result = obj.results;
+            if nargin > 1
+                result = result(index);
+            end
+        end
         function count = getRegionCount(obj)
             count = numel(obj.results);
         end

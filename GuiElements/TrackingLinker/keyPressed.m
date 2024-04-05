@@ -28,13 +28,9 @@ if objectExists(activeRegion)
             trackingLinker.clearRegions();
         end
     end
-elseif modKey.isPureCtrl
-    % if strcmp(key, "i")
-    %     trackingLinker.importVideo(source, event);
-    % elseif strcmp(key, "o")
-    %     trackingLinker.openDirectory();
-    % elseif strcmp(key, "s")
-    %     trackingLinker.exportImageIfPossible(source, event);
+end
+
+if modKey.isPureCtrl
     if strcmp(key, "return")
         trackingLinker.trackButtonPushed(source, event)
     end

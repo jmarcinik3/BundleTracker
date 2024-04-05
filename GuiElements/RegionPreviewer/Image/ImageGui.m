@@ -40,17 +40,17 @@ trackingLabel = uilabel(gl, "Text", "Tracking:");
 angleLabel = uilabel(gl, "Text", "Rotation:");
 
 % lay out preprocessing elements
-thresholdSlider.Layout.Row = 1;
-invertCheckbox.Layout.Row = 1;
+thresholdSlider.Layout.Row = 2;
+invertCheckbox.Layout.Row = 2;
 thresholdSlider.Layout.Column = [1, columnCount-1];
 invertCheckbox.Layout.Column = columnCount;
 
 % lay out processing elements
-trackingLabel.Layout.Row = 2;
-trackingSelection.Layout.Row = 2;
-angleLabel.Layout.Row = 3;
-angleSelection.Layout.Row = 3;
-directionElement.Layout.Row = [2, 3];
+trackingLabel.Layout.Row = 3;
+trackingSelection.Layout.Row = 3;
+angleLabel.Layout.Row = 4;
+angleSelection.Layout.Row = 4;
+directionElement.Layout.Row = [3, 4];
 
 trackingLabel.Layout.Column = 1;
 trackingSelection.Layout.Column = 2;
@@ -59,15 +59,14 @@ angleSelection.Layout.Column = 2;
 directionElement.Layout.Column = [3, 4];
 
 % Set up axis on which bundles are displayed
-ax.Layout.Row = rowCount;
+ax.Layout.Row = 1;
 ax.Layout.Column = [1, columnCount];
 
 % Set up row heights and column widths for grid layout
 rowSpacing = 1;
 rowHeight = (DirectionGui.height - rowSpacing) / 2;
-
 gl.RowHeight = num2cell(rowHeight * ones(1, rowCount));
-gl.RowHeight{end} = '1x';
+gl.RowHeight{1} = '1x';
 
 set(gl, ...
     "Padding", [0, 0, 0, 0], ...

@@ -25,30 +25,27 @@ classdef Postprocessor < handle
             results = obj.results;
         end
 
-        function direct(obj)
-            obj.performOverResults(@directSingle);
+        function direct(obj, varargin)
+            obj.performOverResults(@directSingle, varargin{:});
         end
-        function scale(obj)
-            obj.performOverResults(@scaleSingle);
+        function scale(obj, varargin)
+            obj.performOverResults(@scaleSingle, varargin{:});
         end
         function shift(obj)
             obj.performOverResults(@shiftSingle);
         end
-        function rotate(obj)
-            obj.performOverResults(@rotateSingle);
+        function rotate(obj, varargin)
+            obj.performOverResults(@rotateSingle, varargin{:});
         end
     end
 
     methods (Access = private)
-        function performOverResults(obj, func)
+        function performOverResults(obj, func, varargin)
             results = obj.results;
             parser = obj.parser;
             resultCount = parser.getRegionCount();
-
-            obj.results = arrayfun( ...
-                @(index) func(results(index), parser, index), ...
-                1:resultCount ...
-                );
+            processResult = @(index) func(results(index), parser, index, varargin{:});
+            obj.results = arrayfun(processResult, 1:resultCount);
         end
     end
 end
@@ -56,7 +53,7 @@ end
 
 
 function postResult = instantiatePostResult(parser)
-postResult = parser.results;
+postResult = parser.getResult();
 resultCount = parser.getRegionCount();
 
 for index = 1:resultCount
@@ -67,8 +64,12 @@ for index = 1:resultCount
 end
 end
 
-function postResult = directSingle(result, parser, index)
-positiveDirection = parser.getPositiveDirection(index);
+function postResult = directSingle(result, parser, index, varargin)
+p = inputParser;
+addOptional(p, "PositiveDirection", parser.getPositiveDirection(index));
+parse(p, varargin{:});
+positiveDirection = p.Results.PositiveDirection;
+
 [x, y, ~] = directXy( ...
     result.xProcessed, ...
     result.yProcessed, ...
@@ -77,6 +78,7 @@ positiveDirection = parser.getPositiveDirection(index);
 
 % update processed traces
 postResult = result;
+postResult.Direction = positiveDirection;
 postResult.xProcessed = x;
 postResult.yProcessed = y;
 end
@@ -106,10 +108,15 @@ end
 angle = deg2rad(angle);
 end
 
-function postResult = scaleSingle(result, parser, ~)
-scaleFactor = parser.getScaleFactor();
-scaleError = parser.getScaleFactorError();
-fps = parser.getFps();
+function postResult = scaleSingle(result, parser, ~, varargin)
+p = inputParser;
+addOptional(p, "Fps", parser.getFps());
+addOptional(p, "ScaleFactor", parser.getScaleFactor());
+addOptional(p, "ScaleFactorError", parser.getScaleFactorError());
+parse(p, varargin{:});
+scaleFactor = p.Results.ScaleFactor;
+scaleError = p.Results.ScaleFactorError;
+fps = p.Results.Fps;
 
 [x, y, xError, yError] = scaleXy( ...
     result.xProcessed, ...
@@ -120,8 +127,13 @@ fps = parser.getFps();
     scaleError ...
     );
 
-% update processed traces
 postResult = result;
+% add information pertaining to scale factor
+postResult.ScaleFactor = scaleFactor;
+postResult.ScaleFactorError = scaleError;
+postResult.Fps = fps;
+
+% update processed traces
 postResult.xProcessed = x;
 postResult.yProcessed = y;
 postResult.xProcessedError = xError;
@@ -164,9 +176,14 @@ xerr = sqrt(xerr.^2 + xErrorFromMean^2);
 yerr = sqrt(yerr.^2 + yErrorFromMean^2);
 end
 
-function postResult = rotateSingle(result, parser, index)
-angleMode = parser.getAngleMode(index);
-positiveDirection = parser.getPositiveDirection(index);
+function postResult = rotateSingle(result, parser, index, varargin)
+p = inputParser;
+addOptional(p, "AngleMode", parser.getAngleMode(index));
+addOptional(p, "PositiveDirection", parser.getPositiveDirection(index));
+parse(p, varargin{:});
+angleMode = p.Results.AngleMode;
+positiveDirection = p.Results.PositiveDirection;
+
 x = result.xProcessed;
 y = result.yProcessed;
 
@@ -183,6 +200,8 @@ angle = rerange(angleRotate + angleDirection);
 
 postResult = result;
 % add information pertaining to best-fit angle
+postResult.Direction = positiveDirection;
+postResult.AngleMode = angleMode;
 postResult.angle = angle;
 postResult.angleError = angleError;
 postResult.angleInfo = angleInfo;

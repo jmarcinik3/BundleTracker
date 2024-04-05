@@ -100,7 +100,7 @@ classdef BlobDetectorGui
         end
         function areas = getAreas(obj)
             slider = obj.getAreaSlider();
-            areas = uint16(slider.Value);
+            areas = round(slider.Value);
         end
         function connectivity = getConnectivity(obj)
             elem = obj.getConnectivityElement();

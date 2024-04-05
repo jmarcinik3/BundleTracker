@@ -63,8 +63,7 @@ classdef BlobDetectorLinker < handle
     %% Functions to generate regions
     methods (Static)
         function [parameters, blobShape] = openFigure(im)
-            fig = uifigure;
-            colormap(fig, "turbo");
+            fig = generateFigure();
             gui = BlobDetectorGui(fig);
             linker = BlobDetectorLinker(gui, im);
             uiwait(fig);
@@ -182,7 +181,7 @@ classdef BlobDetectorLinker < handle
             obj.updateImageAlphaTimed(thresholds);
         end
         function blobAreaChanging(obj, ~, event)
-            areas = uint16(event.Value);
+            areas = round(event.Value);
             obj.setBlobAnalyzer( ...
                 "MinimumBlobArea", areas(1), ...
                 "MaximumBlobArea", areas(2) ...

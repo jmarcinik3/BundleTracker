@@ -8,6 +8,7 @@ classdef TrackingGui
         gridLayout; % uigridlayout containing GUI components
         rightGridLayout % uigridlayout for rightside column
 
+        imagePanel;
         imageGui;
         regionPanel;
         regionGui;
@@ -23,7 +24,7 @@ classdef TrackingGui
             rgl.Layout.Row = 2;
             rgl.Layout.Column = 2;
 
-            imageGui = generateImageGui(gl);
+            [imagePanel, imageGui] = generateImageGui(gl);
             [obj.regionPanel, obj.regionGui] = generateRegionGui(rgl);
             obj.videoGui = VideoGui(gl, {1, [1, 2]});
 
@@ -32,6 +33,7 @@ classdef TrackingGui
 
             obj.gridLayout = gl;
             obj.rightGridLayout = rgl;
+            obj.imagePanel = imagePanel;
             obj.imageGui = imageGui;
 
             layoutElements(obj);
@@ -58,11 +60,14 @@ classdef TrackingGui
         function gui = getImageGui(obj)
             gui = obj.imageGui;
         end
+        function panel = getImagePanel(obj)
+            panel = obj.imagePanel;
+        end
         function gui = getRegionGui(obj)
             gui = obj.regionGui;
         end
-        function gui = getRegionPanel(obj)
-            gui = obj.regionPanel;
+        function panel = getRegionPanel(obj)
+            panel = obj.regionPanel;
         end
 
         % components for processing
@@ -117,6 +122,7 @@ end
 function layoutElements(gui)
 gl = gui.getGridLayout();
 set(gl, ...
+    "RowSpacing", 0, ...
     "ColumnWidth", {'3x', '1x'}, ...
     "RowHeight", {TrackingGui.rowHeight, '1x'} ...
     );
@@ -128,12 +134,11 @@ end
 function layoutTopElements(gui)
 rowHeight = TrackingGui.rowHeight;
 videoGui = gui.getVideoGui();
-imageGui = gui.getImageGui();
-imageGl = imageGui.getGridLayout();
+imagePanel = gui.getImagePanel();
 videoGl = videoGui.getGridLayout();
 
-imageGl.Layout.Row = 2;
-imageGl.Layout.Column = 1;
+imagePanel.Layout.Row = 2;
+imagePanel.Layout.Column = 1;
 set(videoGl, "RowHeight", rowHeight);
 end
 
@@ -150,20 +155,25 @@ saveFilestemElement.Layout.Row = 2;
 regionGuiPanel.Layout.Row = 3;
 
 set(scaleFactorElement, ...
+    "Padding", [0, 0, 0, 0], ...
     "RowHeight", rowHeight, ...
-    "ColumnWidth", {'3x', '3x', '1x', '2x'} ...
+    "ColumnWidth", {72, '3x', '1x', '3x'} ...
     );
 set(saveFilestemElement, ...
+    "Padding", [0, 0, 0, 0], ...
     "RowHeight", rowHeight, ...
-    "ColumnWidth", {'1x', '2x'} ...
+    "ColumnWidth", {72, '1x'} ...
     );
 
-set(rgl, "RowHeight", {rowHeight, rowHeight, '1x'});
+set(rgl, ...
+    "Padding", [0, 0, 0, 0], ...
+    "RowSpacing", 0, ...
+    "RowHeight", {rowHeight, rowHeight, '1x'} ...
+    );
 end
 
 function gl = generateGridLayout(size)
-fig = uifigure();
-colormap(fig, "turbo");
+fig = generateFigure();
 position = [300, 200, 1000, 700];
 set(fig, ...
     "Name", "Hair-Bundle Tracking", ...
@@ -172,8 +182,12 @@ set(fig, ...
 gl = uigridlayout(fig, size);
 end
 
-function imageGui = generateImageGui(parent)
-gl = ImageGui.generateGridLayout(parent);
+function [panel, imageGui] = generateImageGui(parent)
+panel = uipanel(parent, ...
+    "Title", "Global Editor", ...
+    "TitlePosition", "centertop" ...
+    );
+gl = ImageGui.generateGridLayout(panel);
 imageGui = ImageGui(gl);
 end
 
@@ -197,7 +211,6 @@ end
 % uilabel, uieditfield("numeric")]
 function gl = generateScaleFactorElement(parent)
 gl = uigridlayout(parent, [1 4]);
-gl.Padding = [0 0 0 0];
 
 lbl1 = uilabel(gl);
 lbl1.Text = "length/px:"; % label for scaling

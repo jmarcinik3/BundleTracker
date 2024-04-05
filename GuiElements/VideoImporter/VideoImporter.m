@@ -1,15 +1,9 @@
 classdef VideoImporter < handle
     properties (Access = private)
-        ims; % stored 3D matrix of grayscale video (uint16)
-    end
-    properties (Access = private)
+        ims = []; % stored 3D matrix of grayscale video
+        firstFrame = [];
+        fps = 0;
         videoReader; % object to read video
-    end
-
-    methods
-        function obj = VideoImporter(filepath)
-            obj.setFilepath(filepath);
-        end
     end
 
     %% Functions to retrieve state information
@@ -20,48 +14,47 @@ classdef VideoImporter < handle
             ims = obj.ims(rowsSlice, columnsSlice, :);
         end
     end
+
     methods (Access = protected)
         function im = getFrameInRegion(obj, frameNumber, region)
             im1 = obj.ims(:, :, 1);
             [rowsSlice, columnsSlice] = MatrixUnpadder.slicesByRegion(region, im1);
             im = obj.ims(rowsSlice, columnsSlice, frameNumber);
         end
-
-        function fps = getFps(obj)
-            fps = get(obj.videoReader, "FrameRate");
+        function im = getFirstFrame(obj)
+            im = obj.firstFrame;
         end
-        function frameCount = getFrameCount(obj)
-            frameCount = get(obj.videoReader, "NumFrames");
+        function fps = getFps(obj)
+            fps = obj.fps;
         end
     end
 
     %% Functions to set state information
     methods (Access = protected)
-        function setFilepath(obj, filepath)
+        function importVideoToRam(obj, videoReader)
             obj.ims = [];
-            fileCount = numel(filepath);
-            if fileCount >= 1 && isfile(filepath)
-                videoReader = VideoReader(filepath);
-                obj.videoReader = videoReader;
-                obj.ims = readVideo(videoReader);
-            end
+            obj.fps = get(videoReader, "FrameRate");
+            obj.firstFrame = read(videoReader, 1);
+            obj.ims = readVideo(videoReader);
         end
     end
 end
 
 
-
 function ims = readVideo(videoReader)
 taskName = 'Importing Frames';
-
 multiWaitbar(taskName, 0);
 frameCount = get(videoReader, "NumFrames");
 ims = preallocateVideo(videoReader);
 
+    function updateWaitbar(index)
+        proportionComplete = index / frameCount;
+        multiWaitbar(taskName, proportionComplete);
+    end
+
 for index = 1:frameCount
     ims(:, :, index) = read(videoReader, index);
-    proportionComplete = index / frameCount;
-    multiWaitbar(taskName, proportionComplete);
+    updateWaitbar(index);
 end
 
 multiWaitbar(taskName, 'Close');
@@ -71,5 +64,6 @@ function ims = preallocateVideo(videoReader)
 w = get(videoReader, "Width");
 h = get(videoReader, "Height");
 frameCount = get(videoReader, "NumFrames");
-ims = zeros(h, w, frameCount, "uint16");
+imageClass = class(read(videoReader, 1));
+ims = zeros(h, w, frameCount, imageClass);
 end

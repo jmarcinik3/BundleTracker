@@ -55,8 +55,11 @@ end
 end
 function thresholdSliderChanged(previewer, ~, event)
 thresholds = event.Value;
-regionUserData = RegionUserData.fromRegionPreviewer(previewer);
-regionUserData.setThresholds(thresholds);
+region = previewer.getActiveRegion();
+if isvalid(region)
+    regionUserData = RegionUserData.fromRegion(region);
+    regionUserData.setThresholds(thresholds);
+end
 end
 function thresholdParserChanged(previewer, ~, ~)
 regionUserData = RegionUserData.fromRegionPreviewer(previewer);
