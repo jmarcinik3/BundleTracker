@@ -1,45 +1,39 @@
 classdef LineAccenter < handle
-    properties (Constant, Access = private)
-        defaultWidth = 0.5;
-        accentWidth = 2;
-    end
-
     properties (Access = private)
-        defaultColor = [1, 0, 0, 0.1667];
-        accentColor = [1, 0, 0, 1];
-    end
-
-    properties (Access = private)
-        axis; % axis on which waterfall is plotted
-        lineObjs; % array of Line objects plotted on axis
+        defaultWidth;
+        accentWidth;
+        defaultColor;
+        accentColor;
+        lineObjs;
     end
 
     methods
-        function obj = LineAccenter(lineObjs)
-            ax = get(lineObjs(1), "Parent");
-            set(lineObjs, "Color", obj.defaultColor);
+        function obj = LineAccenter(lineObjs, varargin)
+            p = inputParser;
+            addOptional(p, "DefaultWidth", 0.5);
+            addOptional(p, "AccentWidth", 2);
+            addOptional(p, "DefaultColor", [1, 0, 0, 0.1667]);
+            addOptional(p, "AccentColor", [1, 0, 0, 1]);
+            parse(p, varargin{:});
+            obj.defaultWidth = p.Results.DefaultWidth;
+            obj.accentWidth = p.Results.AccentWidth;
+            obj.defaultColor = p.Results.DefaultColor;
+            obj.accentColor = p.Results.AccentColor;
 
-            obj.axis = ax;
+            set(lineObjs, "Color", obj.defaultColor);
             obj.lineObjs = lineObjs;
         end
     end
 
-    %% Functions to retrieve GUI elements
-    methods (Access = protected)
-        function ax = getAxis(obj)
-            ax = obj.axis;
-        end
-        function lineObjs = getLineObjects(obj, index)
-            if nargin == 1
-                lineObjs = obj.lineObjs;
-            else
-                lineObjs = obj.lineObjs(index);
-            end
+    %% Functions to retreive GUI elements
+    methods (Access = private)
+        function lineObjs = getLineObjects(obj)
+            lineObjs = obj.lineObjs;
         end
     end
 
     %% Functions to set state information
-    methods (Access = protected)
+    methods
         function setColor(obj, color)
             obj.accentColor(1:3) = color;
             obj.defaultColor(1:3) = color;
@@ -50,7 +44,7 @@ classdef LineAccenter < handle
     end
 
     %% Functions to update state of GUI
-    methods (Access = protected)
+    methods
         function accentLine(obj, accentLines)
             LineAccenter.accentLineColor(obj, accentLines);
             LineAccenter.accentLineWidth(obj, accentLines);
@@ -67,8 +61,8 @@ classdef LineAccenter < handle
             lineObjs = obj.getLineObjects();
             accentLineWidth( ...
                 accentLines, lineObjs, ...
-                "DefaultLineWidth", LineAccenter.defaultWidth, ...
-                "AccentLineWidth", LineAccenter.accentWidth ...
+                "DefaultLineWidth", obj.defaultWidth, ...
+                "AccentLineWidth", obj.accentWidth ...
                 );
         end
         function accentNone(obj)

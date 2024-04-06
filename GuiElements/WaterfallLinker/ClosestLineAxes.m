@@ -1,20 +1,22 @@
-classdef WaterfallAxes < LinePreviewer & LineAccenter
+classdef ClosestLineAxes < handle
     properties (Access = private)
         x; % 1D array of x values (defaults to 1:linePointCount)
         y; % 2D array (index, length) of y values
         xPixels; % 1D array of x values in pixels in pixels from inner axis position
         yPixels; % 2D array of y values in pixels from inner axis position
         lineCount; % number of lines
-        linePointCount; % numbers of points per line
+        linePointCount; % number of points per line
+
+        axis; % axis on which main lines are plotted
+        lineObjs; % Line objects plotted on axis
     end
 
-    methods (Abstract, Access = protected)
-        afterAxisHover(obj, closestLine, event); % call on mouse hover over axis
-        afterAxisExit(obj, source, event); % call on mouse exit from axis
+    properties (SetObservable)
+        ClosestLine = []; % line closest to cursor
     end
 
     methods
-        function obj = WaterfallAxes(ax, y, x)
+        function obj = ClosestLineAxes(ax, y, x)
             linePointCount = size(y, 2);
             if nargin < 3
                 x = 1:linePointCount;
@@ -22,10 +24,7 @@ classdef WaterfallAxes < LinePreviewer & LineAccenter
 
             lineObjs = waterfallOnAxis(ax, y, x);
 
-            obj@LineAccenter(lineObjs);
-            obj@LinePreviewer(ax);
             configureAxis(obj, ax);
-
             x = dataFromLines(lineObjs, "x");
             y = dataFromLines(lineObjs, "y");
 
@@ -35,6 +34,25 @@ classdef WaterfallAxes < LinePreviewer & LineAccenter
             obj.yPixels = limitsToPixels(ax, y, "y");
             obj.lineCount = numel(lineObjs);
             obj.linePointCount = linePointCount;
+
+            obj.lineObjs = lineObjs;
+            obj.axis = ax;
+        end
+    end
+
+    %% Functions to retrieve GUI elements
+    methods
+        function lineObjs = getLineObjects(obj, index)
+            if nargin == 1
+                lineObjs = obj.lineObjs;
+            else
+                lineObjs = obj.lineObjs(index);
+            end
+        end
+    end
+    methods (Access = private)
+        function ax = getAxis(obj)
+            ax = obj.axis;
         end
     end
 
@@ -45,6 +63,14 @@ classdef WaterfallAxes < LinePreviewer & LineAccenter
             y = obj.yPixels;
             closestIndex = getClosestIndex(xyMousePixels, x, y);
             closestLine = obj.getLineObjects(closestIndex);
+            if obj.isNewClosestLine(closestLine)
+                obj.ClosestLine = closestLine;
+            end
+        end
+        function is = isNewClosestLine(obj, lineObj)
+            closestLine = obj.ClosestLine;
+            is = numel(closestLine) == 0 ...
+                || ~strcmp(closestLine.Tag, lineObj.Tag);
         end
     end
 
@@ -62,36 +88,15 @@ classdef WaterfallAxes < LinePreviewer & LineAccenter
         end
     end
 
-    %% Function sto update state information
-    methods (Access = private)
-        function resetPreviewLines(obj)
-            obj.previewIndices = [];
-        end
-    end
-
     %% Functions to update state of GUI
-    methods (Access = protected)
-        function updateAccentLines(obj, closestLine)
-            if nargin < 2
-                closestLine = [];
-            end
-            previewedLines = obj.getPreviewedLines();
-            accentLines = [previewedLines, closestLine];
-            obj.accentLineColor(accentLines);
-            obj.accentLineWidth(closestLine);
-        end
-    end
     methods (Access = private)
-        function mouseExited(obj, source, event)
-            obj.updateAccentLines();
-            obj.afterAxisExit(source, event);
+        function mouseExited(obj, ~, ~)
+            obj.ClosestLine = [];
         end
         function onAxisHover(obj, ~, event)
             ax = obj.getAxis();
             xyMousePixels = hoverEventToPixels(ax, event);
             closestLine = obj.getClosestLine(xyMousePixels);
-            obj.updateAccentLines(closestLine);
-            obj.afterAxisHover(closestLine, event);
         end
         function axisButtonDown(obj, ~, event)
             eventName = event.EventName;
@@ -100,7 +105,6 @@ classdef WaterfallAxes < LinePreviewer & LineAccenter
                 xyMousePixels = hitEventToPixels(ax, event);
                 closestLine = obj.getClosestLine(xyMousePixels);
                 closestLine.ButtonDownFcn(closestLine, event);
-                obj.updateAccentLines();
             end
         end
         function figureSizeChanged(obj, ~, ~)
@@ -202,6 +206,7 @@ for index = 1:yCount
     set(lineObj, "YData", yData)
 end
 end
+
 function yOffsets = calculateOffsets(y, padding)
 y = y';
 yCount = size(y, 2);

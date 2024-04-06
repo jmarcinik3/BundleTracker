@@ -1,24 +1,20 @@
 classdef LinePreviewer < handle
     properties (Access = private)
-        originalAxis;
         previewAxis;
         originalLines;
         previewedLines = [];
         previewLines = [];
-        previewLabels = [];
     end
 
     methods
-        function obj = LinePreviewer(ax)
-            originalLines = findobj(ax.Children, "Type", "Line");
+        function obj = LinePreviewer(originalLines)
             set(originalLines, "ButtonDownFcn", @obj.lineButtonDown);
-            obj.originalAxis = ax;
             obj.originalLines = originalLines;
         end
     end
 
     %% Functions to retrieve GUI elements
-    methods (Access = protected)
+    methods
         function lineObjs = getPreviewedLines(obj)
             lineObjs = obj.previewedLines;
         end
@@ -42,13 +38,6 @@ classdef LinePreviewer < handle
                 lineObjs = obj.previewLines(index);
             end
         end
-        function labels = getPreviewLabels(obj, index)
-            if nargin == 1
-                labels = obj.getPreviewLabels;
-            else
-                labels = obj.getPreviewLabels(index);
-            end
-        end
     end
 
     %% Functions to retrieve state information
@@ -57,6 +46,28 @@ classdef LinePreviewer < handle
             previewLines = obj.getPreviewLines();
             previewCount = numel(previewLines);
             exists = previewCount >= 1;
+        end
+        function index = getLineIndex(obj, lineObj)
+            previewLines = obj.getPreviewLines();
+            previewedLines = obj.getPreviewedLines();
+            if obj.isPreviewLine(lineObj)
+                index = find(previewLines == lineObj);
+            elseif obj.isPreviewedLine(lineObj)
+                index = find(previewedLines == lineObj);
+            end
+        end
+
+        function is = isPreviewedLine(obj, lineObj)
+            previewedLines = obj.getPreviewedLines();
+            is = ismember(lineObj, previewedLines);
+        end
+        function is = isPreviewLine(obj, lineObj)
+            previewLines = obj.getPreviewLines();
+            is = ismember(lineObj, previewLines);
+        end
+        function is = isOriginalLine(obj, lineObj)
+            originalLines = obj.getOriginalLines();
+            is = ismember(lineObj, originalLines);
         end
     end
 
@@ -70,9 +81,8 @@ classdef LinePreviewer < handle
             obj.previewedLines = [obj.previewedLines, originalLine];
             obj.previewLines = [obj.previewLines, previewLine];
         end
-        function deleteIndex = removePreviewFromArray(obj, originalLine)
-            previewedLines = obj.getPreviewedLines();
-            deleteIndex = find(previewedLines == originalLine);
+        function deleteIndex = removeLine(obj, lineObj)
+            deleteIndex = obj.getLineIndex(lineObj);
             previewLine = obj.getPreviewLines(deleteIndex);
             delete(previewLine);
             obj.previewedLines(deleteIndex) = [];
@@ -83,11 +93,14 @@ classdef LinePreviewer < handle
     %% Functions to update state of GUI
     methods (Access = protected)
         function toggleLinePreview(obj, lineObj)
-            previewLines = obj.getPreviewedLines();
-            if ~ismember(lineObj, previewLines)
-                obj.addPreviewLine(lineObj);
-            else
-                obj.removePreviewLine(lineObj);
+            isOriginal = obj.isOriginalLine(lineObj);
+            isPreviewed = obj.isPreviewedLine(lineObj);
+            isPreview = obj.isPreviewLine(lineObj);
+
+            if isPreview || (isOriginal && isPreviewed)
+                obj.removeLine(lineObj);
+            elseif isOriginal && ~isPreviewed
+                obj.addPreviewedLine(lineObj);
             end
         end
     end
@@ -103,20 +116,18 @@ classdef LinePreviewer < handle
         function updatePreviewLines(obj)
             if obj.existsPreviewLine()
                 ax = obj.getPreviewAxis();
-                WaterfallAxes.reOffsetLines(ax);
+                ClosestLineAxes.reOffsetLines(ax);
                 relabelWaterfall(ax);
             end
         end
         function previewAxisDeleted(obj, ~, ~)
             obj.resetPreviewLines();
         end
-        function addPreviewLine(obj, originalLine)
+        function addPreviewedLine(obj, originalLine)
             ax = obj.getPreviewAxis();
             previewLine = plotLineOnAxis(ax, originalLine);
             obj.addPreviewToArray(originalLine, previewLine);
-        end
-        function removePreviewLine(obj, originalLine)
-            obj.removePreviewFromArray(originalLine);
+            set(previewLine, "ButtonDownFcn", @obj.lineButtonDown);
         end
     end
 end
@@ -139,7 +150,7 @@ function newLabels = relabelWaterfall(ax)
 lineObjs = findobj(ax.Children, "Type", "Line");
 lineCount = numel(lineObjs);
 axXlim = get(ax, "Xlim");
-yDatas = WaterfallAxes.dataFromLines(lineObjs, 'y');
+yDatas = ClosestLineAxes.dataFromLines(lineObjs, 'y');
 
 xText = interp1([0, 1], axXlim, 0.02) * ones(1, lineCount);
 yText = mean(yDatas, 2);
