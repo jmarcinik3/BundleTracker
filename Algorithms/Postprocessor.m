@@ -144,8 +144,8 @@ function [x, y, xerr, yerr] = scaleXy(x, y, xerr, yerr, scaleFactor, scaleError)
 scaleErrorFactor = (scaleError / scaleFactor) ^ 2;
 x = scaleFactor * x;
 y = scaleFactor * y;
-xerr = x .* sqrt((xerr./x).^2 + scaleErrorFactor);
-yerr = y .* sqrt((yerr./y).^2 + scaleErrorFactor);
+xerr = abs(x) .* sqrt((xerr./x).^2 + scaleErrorFactor);
+yerr = abs(y) .* sqrt((yerr./y).^2 + scaleErrorFactor);
 end
 function t = scaleTime(fps, x)
 t = (1:numel(x)) / fps;
