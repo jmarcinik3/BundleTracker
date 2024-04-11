@@ -32,6 +32,6 @@ processor = @noiseRemover.get;
 end
 
 function processor = generateImageInverter(invert)
-imageInverter = ImageInverter(invert, 1);
+imageInverter = ImageInverter(invert);
 processor = @imageInverter.get;
 end

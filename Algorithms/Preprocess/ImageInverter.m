@@ -1,18 +1,16 @@
 classdef ImageInverter
     properties
         invert;
-        intensity;
     end
 
     methods
-        function obj = ImageInverter(invert, maxIntensity)
+        function obj = ImageInverter(invert)
             obj.invert = invert;
-            obj.intensity = maxIntensity;
         end
 
         function im = get(obj, im)
             if obj.invert
-                im = obj.intensity - im;
+                im = imcomplement(im);
             end
         end
     end
