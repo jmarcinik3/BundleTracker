@@ -27,9 +27,6 @@ classdef SettingsParser
         function invert = getDefaultInvert()
             invert = getDefaults().InvertCheckbox.Value;
         end
-        function thresholds = getDefaultThresholds()
-            thresholds = getDefaults().ThresholdSlider.Value';
-        end
         function trackingMode = getDefaultTrackingMode()
             trackingMode = getDefaults().TrackingDropdown.Value;
         end
@@ -43,6 +40,32 @@ classdef SettingsParser
         function color = getRegionTrackedColor()
             color = getAesthetics().Region.TrackedColor;
         end
+
+        function defaults = getTrackingFigureDefaults()
+            defaults = getDefaults().TrackingFigure;
+        end
+        function defaults = getBlobDetectionFigureDefaults()
+            defaults = getDefaults().BlobDetectionFigure;
+        end
+        function defaults = getAutothresholdFigureDefaults()
+            defaults = getDefaults().AutothresholdFigure;
+        end
+
+        function label = getExportAxisLabel()
+            label = getMenuLabels().ExportAxisImage;
+        end
+        function label = getImportRegionsLabel()
+            label = getMenuLabels().ImportRegions;
+        end
+        function label = getImportVideoLabel()
+            label = getMenuLabels().ImportVideo;
+        end
+        function label = getOpenDirectoryLabel()
+            label = getMenuLabels().OpenDirectory;
+        end
+        function label = getResetRegionLabel()
+            label = getMenuLabels().ResetRegion;
+        end
     end
 end
 
@@ -55,6 +78,11 @@ end
 function defaults = getAesthetics()
 info = toStruct();
 defaults = info.Aesthetics;
+end
+
+function labels = getMenuLabels()
+info = toStruct();
+labels = info.Menu.Labels;
 end
 
 function info = toStruct()

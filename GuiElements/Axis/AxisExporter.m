@@ -1,7 +1,4 @@
 classdef AxisExporter < handle
-    properties (Constant)
-        title = "Export Axi&s as Image";
-    end
     properties (Access = private, Constant)
         extensions = { ...
             '*.png', "Portable Network Graphics (PNG)"; ...
@@ -35,7 +32,7 @@ classdef AxisExporter < handle
     methods (Static)
         function export(ax, startDirectory)
             extensions = AxisExporter.extensions;
-            title = AxisExporter.title;
+            title = SettingsParser.getExportAxisLabel();
             [filename, directoryPath, ~] = uiputfile(extensions, title, startDirectory);
 
             if directoryIsChosen(directoryPath)

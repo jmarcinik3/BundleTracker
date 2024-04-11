@@ -1,6 +1,5 @@
 {
-    "Defaults":
-    {
+    "Defaults": {
         "AngleDropdown": {
             "Value": "2-Means Clustering",
             "FontWeight": "normal",
@@ -18,8 +17,7 @@
             "Tooltip": "Preprocess: Check to invert image"
         },
         "PositiveDirection": "Upper Right",
-        "Region":
-        {
+        "Region": {
             "Color": [0, 0.4470, 0.7410],
             "FaceAlpha": 0.2,
             "LabelAlpha": 1,
@@ -42,14 +40,40 @@
             "FontColor": [0, 0, 0],
             "BackgroundColor": [0.96, 0.96, 0.96],
             "Tooltip": "Postprocess: Choose method to track center of region"
+        },
+        "AutothresholdFigure": {
+            "Name": "Threshold Regions",
+            "WindowStyle": "modal",
+            "WindowState": "normal",
+            "Resize": "on"
+        },
+        "BlobDetectionFigure": {
+            "Name": "Blob Detection",
+            "WindowStyle": "modal",
+            "WindowState": "normal",
+            "Resize": "on"
+        },
+        "TrackingFigure": {
+            "Name": "Track Regions",
+            "WindowStyle": "normal",
+            "WindowState": "normal",
+            "Position": [300, 200, 1000, 700],
+            "Resize": "on"
         }
     },
-    "Aesthetics":
-    {
-        "Region":
-        {
+    "Aesthetics": {
+        "Region": {
             "TrackedColor": [0, 1, 0],
             "QueueColor": [1, 0, 0]
+        }
+    },
+    "Menu": {
+        "Labels": {
+            "ExportAxisImage": "Export Axi&s as Image",
+            "ImportRegions": "Import &Regions",
+            "ImportVideo": "&Import Video",
+            "OpenDirectory": "&Open Directory",
+            "ResetRegion": "Reset to Default"
         }
     }
 }

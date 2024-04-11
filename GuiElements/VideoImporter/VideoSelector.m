@@ -1,8 +1,4 @@
 classdef VideoSelector < handle
-    properties (Constant)
-        importTitle = "&Import Video";
-        openTitle = "&Open Directory";
-    end
     properties (Access = private, Constant)
         extensions = { ...
             '*.mj2', "Motion JPEG 2000"; ...
@@ -27,7 +23,7 @@ classdef VideoSelector < handle
             directoryPath = obj.gui.getDirectoryPath();
             is = isfolder(directoryPath);
             if ~is
-                title = VideoSelector.openTitle;
+                title = SettingsParser.getOpenDirectoryLabel();
                 obj.throwAlertMessage("Directory path is invalid!", title);
             end
         end
@@ -61,7 +57,7 @@ classdef VideoSelector < handle
     methods
         function importVideo(obj, source, event)
             previousDirectoryPath = obj.gui.getDirectoryPath();
-            title = VideoSelector.importTitle;
+            title = SettingsParser.getImportVideoLabel();
             extensions = VideoSelector.extensions;
             filepath = uigetfilepath(extensions, title, previousDirectoryPath);
             obj.setFilepathIfChosen(filepath, source, event);

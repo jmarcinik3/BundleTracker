@@ -62,8 +62,7 @@ classdef BlobDetectorLinker < handle
 
     %% Functions to generate regions
     methods (Static)
-        function [parameters, blobShape] = openFigure(im)
-            fig = generateFigure();
+        function [parameters, blobShape] = openFigure(fig, im)
             gui = BlobDetectorGui(fig);
             linker = BlobDetectorLinker(gui, im);
             uiwait(fig);

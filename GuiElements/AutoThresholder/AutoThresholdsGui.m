@@ -1,8 +1,4 @@
 classdef AutoThresholdsGui
-    properties (Constant)
-        title = "Threshold Regions";
-    end
-
     properties (Constant, Access = private)
         rows = 3;
         columns = 4;
@@ -21,7 +17,6 @@ classdef AutoThresholdsGui
 
     methods
         function obj = AutoThresholdsGui(fig, regionCount, maxLevelCount)
-            set(fig, "Name", AutoThresholdsGui.title);
             gl = uigridlayout(fig, AutoThresholdsGui.size);
 
             obj.maxLevelCount = maxLevelCount;

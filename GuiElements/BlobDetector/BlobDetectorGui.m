@@ -1,9 +1,5 @@
 classdef BlobDetectorGui
     properties (Constant)
-        title = "Add Regions by Blob Detection";
-    end
-
-    properties (Constant)
         rows = 7;
         columns = 4;
         size = [BlobDetectorGui.rows, BlobDetectorGui.columns];
@@ -23,7 +19,6 @@ classdef BlobDetectorGui
 
     methods
         function obj = BlobDetectorGui(fig)
-            set(fig, "Name", BlobDetectorGui.title);
             gl = uigridlayout(fig, BlobDetectorGui.size);
             shapeGl = uigridlayout(gl);
 

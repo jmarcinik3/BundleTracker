@@ -132,7 +132,7 @@ classdef RegionUserData < handle
             obj.setPositiveDirection(defaultPositiveDirection);
         end
         function resetToDefaultThresholds(obj)
-            defaultThresholds = SettingsParser.getDefaultThresholds();
+            defaultThresholds = [0, Inf];
             obj.setThresholds(defaultThresholds);
         end
         function resetToDefaultTrackingMode(obj)

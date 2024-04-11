@@ -64,8 +64,11 @@ end
 function thresholdParserChanged(previewer, ~, ~)
 regionUserData = RegionUserData.fromRegionPreviewer(previewer);
 regionGui = previewer.getRegionGui();
-thresholds = regionUserData.getThresholds();
 thresholdSlider = regionGui.getThresholdSlider();
+
+thresholds = regionUserData.getThresholds();
+thresholds(1) = max(thresholds(1), thresholdSlider.Limits(1));
+thresholds(2) = min(thresholds(2), thresholdSlider.Limits(2));
 set(thresholdSlider, "Value", thresholds);
 previewer.thresholdSliderChanged(thresholdSlider, []);
 end

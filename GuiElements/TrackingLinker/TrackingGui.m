@@ -173,12 +173,8 @@ set(rgl, ...
 end
 
 function gl = generateGridLayout(size)
-fig = generateFigure();
-position = [300, 200, 1000, 700];
-set(fig, ...
-    "Name", "Hair-Bundle Tracking", ...
-    "Position", position ...
-    );
+figDefaults = namedargs2cell(SettingsParser.getTrackingFigureDefaults());
+fig = generateFigure(figDefaults{:});
 gl = uigridlayout(fig, size);
 end
 

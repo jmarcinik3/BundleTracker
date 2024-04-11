@@ -3,7 +3,6 @@ classdef TrackingLinker < RegionPreviewer ...
         & VideoSelector
 
     properties (Constant)
-        importRegionsTitle = "Import Regions";
         extensions = {'*.mat', "MATLAB Structure"};
     end
 
@@ -44,7 +43,8 @@ classdef TrackingLinker < RegionPreviewer ...
     %% Functions to update state of GUI
     methods
         function resetRegionsButtonPushed(obj, source, ~)
-            if obj.regionExists(RegionPreviewer.resetTitle)
+            title = SettingsParser.getResetRegionLabel();
+            if obj.regionExists(title)
                 resetKeyword = source.UserData;
                 regions = obj.getRegions();
                 obj.resetRegionsToDefaults(regions, resetKeyword);
@@ -54,7 +54,7 @@ classdef TrackingLinker < RegionPreviewer ...
         function importRegionsMenuCalled(obj, ~, ~)
             previousDirectoryPath = obj.gui.getDirectoryPath();
             extensions = TrackingLinker.extensions;
-            title = TrackingLinker.importRegionsTitle;
+            title = SettingsParser.getImportRegionsLabel();
             filepath = uigetfilepath(extensions, title, previousDirectoryPath);
             if isfile(filepath)
                 obj.importRegionsFromFile(filepath);
@@ -72,25 +72,19 @@ classdef TrackingLinker < RegionPreviewer ...
             end
         end
         function blobDetectionButtonPushed(obj, ~, ~)
+            fig = generateBlobDetectionFigure();
             im = obj.getFirstFrame();
-            [blobParameters, blobShape] = BlobDetectorLinker.openFigure(im);
+            [blobParameters, blobShape] = BlobDetectorLinker.openFigure(fig, im);
             obj.drawRegionsByParameters(blobParameters, blobShape);
-        end
-
-        function otsuThresholdsPushed(obj, ~, ~)
-            if obj.regionExists(OtsuThresholdsGui.title)
-                regions = obj.getRegions();
-                obj.otsuThresholdRegions(regions);
-            end
         end
         function regionThresholdButtonPushed(obj, source, ~)
             thresholdKeyword = source.UserData;
             if obj.regionExists(thresholdKeyword)
                 regions = obj.getRegions();
-                obj.thresholdRegions(regions, thresholdKeyword);
+                thresholdRegions(obj, regions, thresholdKeyword);
             end
         end
-    
+
         function openWaterfallPlotPushed(obj, ~, ~)
             startingDirectory = obj.gui.getDirectoryPath();
             extensions = TrackingLinker.extensions;
@@ -107,14 +101,6 @@ classdef TrackingLinker < RegionPreviewer ...
             if fileCount >= 1 && isfile(filepath)
                 videoFilepathChanged(obj, filepath);
             end
-        end
-
-        function thresholdRegions(obj, regions, thresholdKeyword)
-            im = obj.getFirstFrame();
-            regionalImages = generateRegionalImages(regions, im);
-            fig = generateFigure();
-            newThresholds = AutoThresholdOpener.byKeyword(fig, regionalImages, thresholdKeyword);
-            RegionUserData.setRegionsThresholds(obj, newThresholds);
         end
     end
 
@@ -251,4 +237,23 @@ resultsParser = ResultsParser(filepath);
 traces = resultsParser.getProcessedTrace();
 time = resultsParser.getTime();
 WaterfallLinker.openFigure(traces, time);
+end
+
+function thresholdRegions(obj, regions, thresholdKeyword)
+fig = generateAutothresholdFigure(thresholdKeyword);
+im = obj.getFirstFrame();
+regionalImages = generateRegionalImages(regions, im);
+newThresholds = AutoThresholdOpener.byKeyword(fig, regionalImages, thresholdKeyword);
+RegionUserData.setRegionsThresholds(obj, newThresholds);
+end
+
+function fig = generateBlobDetectionFigure()
+figDefaults = namedargs2cell(SettingsParser.getBlobDetectionFigureDefaults());
+fig = generateFigure(figDefaults{:});
+end
+function fig = generateAutothresholdFigure(thresholdKeyword)
+figDefaults = SettingsParser.getAutothresholdFigureDefaults();
+figDefaults.Name = sprintf("%s (%s)", figDefaults.Name, thresholdKeyword);
+figDefaults = namedargs2cell(figDefaults);
+fig = generateFigure(figDefaults{:});
 end

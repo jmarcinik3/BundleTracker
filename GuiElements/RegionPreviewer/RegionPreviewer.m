@@ -1,12 +1,7 @@
 classdef RegionPreviewer < RegionDrawer & RegionVisibler
-    properties (Constant)
-        resetTitle = "Reset to Default";
-    end
-
     properties (Access = private)
         imageLinker;
         regionLinker;
-        regionCounter = 1;
     end
 
     methods

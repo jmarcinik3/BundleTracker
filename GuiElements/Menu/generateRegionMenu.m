@@ -1,16 +1,23 @@
 function generateRegionMenu(fig, trackingLinker)
 m = uimenu(fig, "Text", "Region");
-uimenu(m, ...
-    "Text", BlobDetectorGui.title, ...
-    "MenuSelectedFcn", @trackingLinker.blobDetectionButtonPushed ...
-    );
+generateBlobDetectionMenu(m, trackingLinker);
 generateThresholdMenu(m, trackingLinker);
 generateResetMenu(m, trackingLinker);
 end
 
+function generateBlobDetectionMenu(parentMenu, trackingLinker)
+text = SettingsParser.getBlobDetectionFigureDefaults().Name;
+uimenu(parentMenu, ...
+    "Text", text, ...
+    "MenuSelectedFcn", @trackingLinker.blobDetectionButtonPushed ...
+    );
+end
+
 function generateResetMenu(parentMenu, trackingLinker)
 resetKeywords = RegionUserData.keywords;
-m = uimenu(parentMenu, "Text", RegionPreviewer.resetTitle);
+text = SettingsParser.getResetRegionLabel();
+m = uimenu(parentMenu, "Text", text);
+
 for index = 1:numel(resetKeywords)
     resetKeyword = resetKeywords(index);
     uimenu(m, ...
