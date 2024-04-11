@@ -68,7 +68,7 @@ classdef LineAccenter < handle
         function accentNone(obj)
             lineObjs = obj.getLineObjects();
             set(lineObjs, "Color", obj.defaultColor);
-            set(lineObjs, "LineWidth", WaterfallAxes.defaultWidth);
+            set(lineObjs, "LineWidth", obj.defaultWidth);
         end
     end
 end

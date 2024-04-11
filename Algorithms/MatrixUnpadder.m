@@ -4,7 +4,7 @@ classdef MatrixUnpadder
             if isstring(im)
                 im = imread(im);
             end
-            regionMask = createMask(region, im);
+            regionMask = region.createMask(im);
             unpaddedMatrix = MatrixUnpadder.byMask2d(regionMask, im);
         end
 
@@ -23,7 +23,7 @@ classdef MatrixUnpadder
             if isstring(im)
                 im = imread(im);
             end
-            regionMask = createMask(region, im);
+            regionMask = region.createMask(im);
             [rowsSlice, columnsSlice] = MatrixUnpadder.slicesByMatrix(regionMask);
         end
 
