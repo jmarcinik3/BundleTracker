@@ -199,6 +199,9 @@ classdef ErrorPropagator
         function obj = sqrt(obj1)
             obj = obj1 .^ 0.5;
         end
+        function obj = nthroot(obj1, n)
+            obj = obj1 .^ (1 / n);
+        end
 
         function obj = sin(obj1)
             obj = ErrorPropagator.scalarFunction(obj1, @sin);
