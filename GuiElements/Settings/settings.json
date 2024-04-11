@@ -16,7 +16,7 @@
             "FontColor": [0, 0, 0],
             "Tooltip": "Preprocess: Check to invert image"
         },
-        "PositiveDirection": "Upper Right",
+        "PositiveDirection": "Right",
         "Region": {
             "Color": [0, 0.4470, 0.7410],
             "FaceAlpha": 0.2,

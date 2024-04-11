@@ -1,27 +1,41 @@
 classdef AngleAlgorithms
     properties (Constant)
-        ellipseFit = "Elliptical Regression";
-        kmeansKeyword = "2-Means Clustering";
-        linearFit = "Linear Regression";
-        keywords = sort([ ...
-            AngleAlgorithms.ellipseFit, ...
+        keywords = [ ...
+            AngleAlgorithms.noneKeyword, ...
+            sort([ ...
+            AngleAlgorithms.ellipseKeyword, ...
             AngleAlgorithms.kmeansKeyword, ...
-            AngleAlgorithms.linearFit, ...
-            ]);
+            AngleAlgorithms.linearKeyword, ...
+            ]) ...
+            ];
     end
+    properties (Constant, Access = private)
+        noneKeyword = "None";
+        ellipseKeyword = "Elliptical Regression";
+        kmeansKeyword = "2-Means Clustering";
+        linearKeyword = "Linear Regression";
+    end
+    
 
     methods (Static)
         function [angle, angleError, angleInfo] = byKeyword(x, y, keyword)
             switch keyword
-                case AngleAlgorithms.ellipseFit
+                case AngleAlgorithms.noneKeyword
+                    [angle, angleError, angleInfo] = AngleAlgorithms.byNone(x, y);
+                case AngleAlgorithms.ellipseKeyword
                     [angle, angleError, angleInfo] = AngleAlgorithms.byEllipseFit(x, y);
                 case AngleAlgorithms.kmeansKeyword
                     [angle, angleError, angleInfo] = AngleAlgorithms.byKMeansClustering(x, y);
-                case AngleAlgorithms.linearFit
+                case AngleAlgorithms.linearKeyword
                     [angle, angleError, angleInfo] = AngleAlgorithms.byLinearFit(x, y);
             end
         end
 
+        function [angle, angleError, fitInfo] = byNone(~, ~)
+            angle = 0;
+            angleError = 0;
+            fitInfo = [];
+        end
         function [angle, angleError, fitInfo] = byEllipseFit(x, y)
             [angle, angleError, fitInfo] = byEllipseFit(x, y);
         end

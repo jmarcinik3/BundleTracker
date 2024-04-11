@@ -48,12 +48,8 @@ classdef KMeans
 
             pointCount = size(xy, 1);
             xyCenters = zeros(k, 2, bootstrapCount);
-            randomMatrix = rand(pointCount, 1);
-            keepLevels = linspace(0, 1, bootstrapCount+1);
             for index = 1:bootstrapCount
-                mask = (keepLevels(index) < randomMatrix) ...
-                    & (randomMatrix <= keepLevels(index+1));
-                [~, xyCenter] = kmeans(xy(mask, :), k);
+                [~, xyCenter] = kmeans(xy(index:bootstrapCount:pointCount, :), k);
                 xyCenter = sort(xyCenter, 1);
                 xyCenters(:, :, index) = xyCenter;
             end
