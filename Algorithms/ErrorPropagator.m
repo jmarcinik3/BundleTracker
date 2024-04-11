@@ -27,7 +27,7 @@ classdef ErrorPropagator
             x1 = obj1.Value;
             [x2, xerr2] = getValueError(obj2);
             x = x1 + x2;
-            xerr = sumError2(x1, x2, obj1.Error, xerr2);
+            xerr = sqrt(obj1.Error.^2 + xerr2.^2);
             obj = ErrorPropagator(x, xerr);
         end
         function obj = minus(obj1, obj2)
@@ -44,7 +44,7 @@ classdef ErrorPropagator
             x1 = obj1.Value;
             [x2, xerr2] = getValueError(obj2);
             x = x1 .* x2;
-            xerr = multiplyError2(x1, x2, obj1.Error, xerr2);
+            xerr = sqrt((x2.*obj1.Error).^2 + (x1.*xerr2).^2);
             obj = ErrorPropagator(x, xerr);
         end
         function obj = mtimes(obj1, obj2)
@@ -82,15 +82,15 @@ classdef ErrorPropagator
         function obj = power(obj1, n)
             x1 = obj1.Value;
             x = x1 .^ n;
-            xerr = powerError(x1, obj1.Error, n);
+            xerr = sqrt(n) * obj1.Error .* abs(x1).^(n-1);
             obj = ErrorPropagator(x, xerr);
         end
             
         function obj = rdivide(obj1, obj2)
             x1 = obj1.Value;
-            x2 = obj2.Value;
-            x = x1 ./ x2;
-            xerr = divideError2(x1, x2, obj1.Error, obj2.Error);
+            x2i = 1 ./ obj2.Value;
+            x = x1 .* x2i;
+            xerr = abs(x2i) .* sqrt(obj1.Error.^2 + (x1.*x2i.*obj2.Error).^2);
             obj = ErrorPropagator(x, xerr);
         end
         function obj = ldivide(obj1, obj2)
@@ -161,12 +161,6 @@ classdef ErrorPropagator
     end
 
     methods (Static)
-        function x = getValue(objs)
-            x = reshape([objs.Value], size(objs));
-        end
-        function x = getError(objs)
-            x = reshape([objs.Error], size(objs));
-        end
         function obj = scalarFunction(obj1, handle, varargin)
             x = obj1.Value;
             xerr = obj1.Error;
@@ -176,18 +170,36 @@ classdef ErrorPropagator
             yerr = 0.5 * (yerrLow + yerrHigh);
             obj = ErrorPropagator(y, yerr);
         end
-
-        function obj = sum(objs, varargin)
-            x = ErrorPropagator.getValue(objs);
-            xerr = ErrorPropagator.getError(objs);
-            y = sum(x, varargin{:});
-            yerr = sqrt(sum(xerr.^2, varargin{:}));
-            obj = ErrorPropagator(y, yerr);
-        end
     end
 
     % Helper methods for common functions
     methods
+        function obj = sum(obj1, varargin)
+            y = sum(obj1.Value, varargin{:});
+            yerr = sqrt( sum(obj1.Error.^2, varargin{:}) );
+            obj = ErrorPropagator(y, yerr);
+        end
+        function obj = cumsum(obj1, varargin)
+            y = cumsum(obj1.Value, varargin{:});
+            yerr = sqrt( cumsum(obj1.Error.^2), varargin{:} );
+            obj = ErrorPropagator(y, yerr);
+        end
+        function obj = prod(obj1, varargin)
+            x = obj1.Value;
+            y = prod(x, varargin{:});
+            yerr = abs(y) .* sqrt( sum((obj1.Error./x).^2, varargin{:}) );
+            obj = ErrorPropagator(y, yerr);
+        end
+        function obj = cumprod(obj1, varargin)
+            x = obj1.Value;
+            y = cumprod(x, varargin{:});
+            yerr = abs(y) .* sqrt( cumsum((obj1.Error./x).^2, varargin{:}) );
+            obj = ErrorPropagator(y, yerr);
+        end
+        function obj = sqrt(obj1)
+            obj = obj1 .^ 0.5;
+        end
+
         function obj = sin(obj1)
             obj = ErrorPropagator.scalarFunction(obj1, @sin);
         end
@@ -277,23 +289,6 @@ end
 
 
 
-function xerr = multiplyError2(x1, x2, xerr1, xerr2)
-xerr = sqrt((x2.*xerr1).^2 + (x1.*xerr2).^2);
-end
-
-function xerr = divideError2(x1, x2, xerr1, xerr2)
-x2i = 1 ./ abs(x2);
-xerr = x2i .* sqrt(xerr1.^2 + (x1.*x2i.*xerr2).^2);
-end
-
-function xerr = powerError(x1, xerr1, n)
-xerr = sqrt(n) * xerr1 .* abs(x1).^(n-1);
-end
-
-function xerr = sumError2(~, ~, xerr1, xerr2)
-xerr = sqrt(xerr1.^2 + xerr2.^2);
-end
-
 function [x, xerr] = getValueError(obj)
 if isa(obj, "ErrorPropagator")
     x = obj.Value;
@@ -307,12 +302,10 @@ end
 function fieldname = checkField(obj, S)
 fieldname = S(1).subs;
 if ~ismember(fieldname, fieldnames(obj))
-    msg = sptrinf( ...
-        "%s is not a valid fieldname for %s.", ...
+    error("%s is not a valid fieldname for %s.", ...
         fieldname, ...
         class(obj) ...
         );
-    error(msg);
 end
 end
 
