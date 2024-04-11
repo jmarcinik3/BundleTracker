@@ -2,7 +2,7 @@
     "Defaults":
     {
         "AngleDropdown": {
-            "Value": "Elliptical Regression",
+            "Value": "2-Means Clustering",
             "FontWeight": "normal",
             "FontAngle": "normal",
             "FontColor": [0, 0, 0],

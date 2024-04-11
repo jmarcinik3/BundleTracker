@@ -29,7 +29,7 @@ classdef AngleAlgorithms
             [angle, angleError, fitInfo] = byLinearFit(x, y);
         end
         function [angle, angleError, fitInfo] = byKMeansClustering(x, y)
-            [angle, angleError, fitInfo] = byKMeansClustering(x, y);
+            [angle, angleError, fitInfo] = KMeans(x, y, 2).angleWithError();
         end
     end
 end
@@ -52,21 +52,6 @@ fitInfo = struct( ...
     );
 end
 
-function [angle, angleError, fitInfo] = byKMeansClustering(x, y)
-xy = [x', y'];
-[labels, centers] = kmeans(xy, 2);
-xcenters = centers(:, 1);
-ycenters = centers(:, 2);
-deltaX = diff(xcenters);
-deltaY = diff(ycenters);
-angle = atan(deltaY / deltaX);
-angleError = Inf;
-fitInfo = struct( ...
-    "Labels", labels, ...
-    "Centers", centers ...
-    );
-end
-
 function [angle, angleError, fitInfo] = byLinearFit(x, y)
 fitInfo = fitlm(x, y);
 slope = fitInfo.Coefficients.Estimate(2);
@@ -74,5 +59,3 @@ slopeError = fitInfo.Coefficients.SE(2);
 angle = atan(slope);
 angleError = slopeError / (1+slope^2);
 end
-
-
