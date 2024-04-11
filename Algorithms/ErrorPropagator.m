@@ -187,7 +187,7 @@ classdef ErrorPropagator
     end
 
     % Helper methods for common functions
-    methods (Static)
+    methods
         function obj = sin(obj1)
             obj = ErrorPropagator.scalarFunction(obj1, @sin);
         end
