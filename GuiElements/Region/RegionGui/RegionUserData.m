@@ -1,11 +1,6 @@
 classdef RegionUserData < handle
     properties (Constant)
-        allKeyword = "All",
-        angleModeKeyword = "Angle Mode";
-        invertKeyword = "Invert";
-        positiveDirectionKeyword = "Positive Direction";
-        thresholdsKeyword = "Thresholds";
-        trackingModeKeyword = "Tracking Mode";
+        allKeyword = "All";
         keywords = [ ...
             RegionUserData.allKeyword, ...
             RegionUserData.angleModeKeyword, ...
@@ -14,6 +9,13 @@ classdef RegionUserData < handle
             RegionUserData.thresholdsKeyword, ...
             RegionUserData.trackingModeKeyword ...
             ];
+    end
+    properties (Constant, Access = private)
+        angleModeKeyword = "Angle Mode";
+        invertKeyword = "Invert";
+        positiveDirectionKeyword = "Positive Direction";
+        thresholdsKeyword = "Thresholds";
+        trackingModeKeyword = "Tracking Mode";
     end
 
     properties (SetObservable, Access = private)
