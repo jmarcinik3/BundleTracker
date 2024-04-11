@@ -17,7 +17,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             RegionCompressorLinker(regionGui.getRegionCompressorGui(), obj);
             RegionExpanderLinker(regionGui.getRegionExpanderGui(), obj);
 
-            obj.imageLinker = ImageLinker(imageGui);
+            obj.imageLinker = imageLinker;
             obj.regionLinker = RegionLinker(regionGui, fullRawImage);
 
             configureInteractiveImage(obj, imageGui);
