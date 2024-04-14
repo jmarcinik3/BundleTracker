@@ -4,6 +4,7 @@ classdef AngleAlgorithms
             AngleAlgorithms.noneKeyword, ...
             sort([ ...
             AngleAlgorithms.ellipseKeyword, ...
+            AngleAlgorithms.gaussianMixtureKeyword, ...
             AngleAlgorithms.kmeansKeyword, ...
             AngleAlgorithms.linearKeyword, ...
             ]) ...
@@ -12,6 +13,7 @@ classdef AngleAlgorithms
     properties (Constant, Access = private)
         noneKeyword = "None";
         ellipseKeyword = "Elliptical Regression";
+        gaussianMixtureKeyword = "Two Gaussian Mixtures";
         kmeansKeyword = "2-Means Clustering";
         linearKeyword = "Linear Regression";
     end
@@ -24,6 +26,8 @@ classdef AngleAlgorithms
                     [angle, angleError, angleInfo] = AngleAlgorithms.byNone(x, y);
                 case AngleAlgorithms.ellipseKeyword
                     [angle, angleError, angleInfo] = AngleAlgorithms.byEllipseFit(x, y);
+                case AngleAlgorithms.gaussianMixtureKeyword
+                    [angle, angleError, angleInfo] = AngleAlgorithms.byGaussianMixture(x, y);
                 case AngleAlgorithms.kmeansKeyword
                     [angle, angleError, angleInfo] = AngleAlgorithms.byKMeansClustering(x, y);
                 case AngleAlgorithms.linearKeyword
@@ -39,11 +43,14 @@ classdef AngleAlgorithms
         function [angle, angleError, fitInfo] = byEllipseFit(x, y)
             [angle, angleError, fitInfo] = byEllipseFit(x, y);
         end
-        function [angle, angleError, fitInfo] = byLinearFit(x, y)
-            [angle, angleError, fitInfo] = byLinearFit(x, y);
+        function [angle, angleError, fitInfo] = byGaussianMixture(x, y)
+            [angle, angleError, fitInfo] = GaussianMixture(x, y, 2).angleWithError();
         end
         function [angle, angleError, fitInfo] = byKMeansClustering(x, y)
             [angle, angleError, fitInfo] = KMeans(x, y, 2).angleWithError();
+        end
+        function [angle, angleError, fitInfo] = byLinearFit(x, y)
+            [angle, angleError, fitInfo] = byLinearFit(x, y);
         end
     end
 end
