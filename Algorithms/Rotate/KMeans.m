@@ -20,6 +20,7 @@ classdef KMeans
             k = obj.k;
             xy = obj.xy;
             [labels, centers] = kmeans(xy, k);
+            centers = sort(centers, 1);
         end
 
         function [angle, angleError, angleInfo] = angleWithError(obj)
@@ -64,5 +65,5 @@ function angleWithError = calculateAngle(xyCenter)
 dx = xyCenter(2, 1) - xyCenter(1, 1);
 dy = xyCenter(2, 2) - xyCenter(1, 2);
 ratio = dy ./ dx;
-angleWithError = ErrorPropagator.scalarFunction(ratio, @atan);
+angleWithError = atan(ratio);
 end
