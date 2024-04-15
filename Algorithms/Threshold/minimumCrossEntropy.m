@@ -4,31 +4,19 @@ binLength = numel(binCounts);
 
 binProbabilities = binCounts / numel(im);
 binCdf = cumsum(binProbabilities);
-binAreas = (1:numel(binProbabilities))' .* binProbabilities;
+binAreas = (1:numel(binProbabilities)).' .* binProbabilities;
 binBelowAreas = cumsum(binAreas);
-binTotalArea = binBelowAreas(binLength);
+
+binAboveAreas =  binBelowAreas(binLength) - binBelowAreas;
+binAntiCdf = 1 - binCdf;
 
 imEntropy = sum(binAreas .* log(1:binLength), "all");
-minimumEntropy = Inf;
-for binIndex = 1:binLength
-    binBelowArea = binBelowAreas(binIndex);
-    binBelowProbability = binCdf(binIndex);
-    binAboveProbability = 1 - binBelowProbability;
+lowEntropies = binBelowAreas .* log(binBelowAreas ./ binCdf);
+lowEntropies(binCdf <= 0) = 0;
+highEntropies = binAboveAreas .* log(binAboveAreas ./ binAntiCdf);
+highEntropies(binAntiCdf <= 0) = 0;
 
-    crossEntropy = imEntropy;
-    if binBelowProbability > 0
-        lowEntropy = -binBelowArea * log(binBelowArea / binBelowProbability);
-        crossEntropy = crossEntropy + lowEntropy;
-    end
-    if binAboveProbability > 0
-        binAboveArea = binTotalArea - binBelowArea;
-        highEntropy = -binAboveArea * log(binAboveArea / binAboveProbability);
-        crossEntropy = crossEntropy + highEntropy;
-    end
-    
-    if crossEntropy < minimumEntropy
-        minimumEntropy = crossEntropy;
-        threshold = (binIndex - 1) / binLength;
-    end
-end
+crossEntropies = imEntropy - lowEntropies - highEntropies;
+[~, minIndex] = min(crossEntropies);
+threshold = (minIndex - 1) / binLength;
 end
