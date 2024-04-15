@@ -1,8 +1,7 @@
 classdef AutoThresholdOpener
     methods (Static)
         function thresholdRanges = byKeyword(fig, regionalImages, keyword)
-            thresholdFcn = Threshold.handleByKeyword(keyword);
-            linker = AutoThresholdOpener.generateLinker(fig, regionalImages, thresholdFcn, 1);
+            linker = AutoThresholdOpener.generateLinker(fig, regionalImages, keyword, 1);
             thresholdRanges = AutoThresholdOpener.getThresholdRanges(linker);
         end
     end

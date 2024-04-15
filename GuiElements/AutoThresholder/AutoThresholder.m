@@ -60,6 +60,14 @@ classdef AutoThresholder < handle
 
     %% Functions to perform thresholding on region
     methods
+        function resetRegionsThresholds(obj)
+            preallocateSize = size(obj.regionsThresholds);
+            obj.regionsThresholds = zeros(preallocateSize);
+        end
+        function setThresholdFcn(obj, thresholdFcn)
+            obj.calculateThresholds = thresholdFcn;
+        end
+
         function im = rethresholdRegion(obj, regionIndex, levels, levelCount)
             im = obj.getRegionalImage(regionIndex);
             thresholdRange = obj.generateThresholdRange(regionIndex, levels, levelCount);

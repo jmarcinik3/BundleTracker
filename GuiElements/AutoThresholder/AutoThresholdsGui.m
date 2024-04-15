@@ -1,6 +1,6 @@
 classdef AutoThresholdsGui
     properties (Constant, Access = private)
-        rows = 3;
+        rows = 4;
         columns = 4;
         size = [AutoThresholdsGui.rows, AutoThresholdsGui.columns];
     end
@@ -10,6 +10,7 @@ classdef AutoThresholdsGui
         axesGrid;
         levelsSlider;
         countSpinner;
+        modeDropdown;
         actionButtons;
         
         maxLevelCount;
@@ -25,6 +26,7 @@ classdef AutoThresholdsGui
             obj.levelsSlider = generateLevelsSlider(gl, maxLevelCount);
             obj.actionButtons = generateActionButtons(gl);
             obj.countSpinner = generateLevelCountSpinner(gl, maxLevelCount);
+            obj.modeDropdown = generateMethodDropdown(gl);
             obj.gridLayout = gl;
             layoutElements(obj);
         end
@@ -52,6 +54,9 @@ classdef AutoThresholdsGui
         function spinner = getCountSpinner(obj)
             spinner = obj.countSpinner;
         end
+        function dropdown = getThresholdModeDropdown(obj)
+            dropdown = obj.modeDropdown;
+        end
 
         function buttons = getActionButtons(obj)
             buttons = obj.actionButtons;
@@ -77,6 +82,10 @@ classdef AutoThresholdsGui
         function maxLevelCount = getMaxLevelCount(obj)
             maxLevelCount = obj.maxLevelCount;
         end
+        function mode = getThresholdMode(obj)
+            modeDropdown = obj.modeDropdown;
+            mode = get(modeDropdown, "Value");
+        end
     end
 end
 
@@ -92,34 +101,42 @@ gl = gui.getGridLayout();
 agl = gui.getAxesGrid();
 levelsSlider = gui.getLevelsSlider();
 countSpinner = gui.getCountSpinner();
+modeDropdown = gui.getThresholdModeDropdown();
 applyButton = gui.getApplyButton();
 cancelButton = gui.getCancelButton();
 
 % generate labels for appropriate elements
 levelsLabel = uilabel(gl, "Text", "Pixel Intensity:");
 countLabel = uilabel(gl, "Text", "Intensity Levels:");
+modeLabel = uilabel(gl, "Text", "Method:");
 
 % lay out axis elements
 agl.Layout.Row = 1;
 agl.Layout.Column = [1, columns];
 
-% lay out level-based elements
-levelElements = [levelsLabel, levelsSlider, countLabel, countSpinner];
-for index = 1:numel(levelElements)
-    elem = levelElements(index);
-    elem.Layout.Row = 2;
+% lay out level slider elements
+levelsLabel.Layout.Row = 2;
+levelsSlider.Layout.Row = 2;
+levelsLabel.Layout.Column = 1;
+levelsSlider.Layout.Column = [2, columns];
+
+% lay out other elements in same row
+elements = [modeLabel, modeDropdown, countLabel, countSpinner];
+for index = 1:numel(elements)
+    elem = elements(index);
+    elem.Layout.Row = 3;
     elem.Layout.Column = index;
 end
 
 % lay out apply/cancel buttons
-applyButton.Layout.Row = 3;
-cancelButton.Layout.Row = 3;
+applyButton.Layout.Row = 4;
+cancelButton.Layout.Row = 4;
 applyButton.Layout.Column = [1, 2];
 cancelButton.Layout.Column = [3, 4];
 
 % set grid sizes
-gl.RowHeight = {'1x', rowHeight, rowHeight};
-gl.ColumnWidth = {96, '4x', 96, '1x'};
+gl.RowHeight = {'1x', rowHeight, rowHeight, rowHeight};
+gl.ColumnWidth = {96, '1x', 96, '1x'};
 end
 
 function slider = generateLevelsSlider(gl, maxLevelCount)
@@ -129,10 +146,16 @@ set(slider, "Limits", sliderLimits, "Value", sliderLimits);
 end
 
 function spinner = generateLevelCountSpinner(gl, maxLevelCount)
-spinner = uispinner(gl);
-set(spinner, ...
+spinner = uispinner(gl, ...
     "Limits", [1, maxLevelCount], ...
     "Value", maxLevelCount, ...
     "Step", 1 ...
+    );
+end
+
+function dropdown = generateMethodDropdown(gl)
+dropdown = uidropdown(gl, ...
+    "Items", Threshold.keywords, ...
+    "Value", Threshold.otsuKeyword ...
     );
 end

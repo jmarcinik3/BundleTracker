@@ -10,16 +10,23 @@ classdef AutoThresholdLinker < AutoThresholder
     end
 
     methods
-        function obj = AutoThresholdLinker(gui, regionalImages, thresholdFcn)
+        function obj = AutoThresholdLinker(gui, regionalImages, thresholdKeyword)
+            thresholdFcn = Threshold.handleByKeyword(thresholdKeyword);
             maxLevelCount = gui.getMaxLevelCount();
             obj@AutoThresholder(regionalImages, thresholdFcn, maxLevelCount);
 
             axs = gui.getAxes();
             iIms = generateInteractiveImages(axs, regionalImages);
+            thresholdModeDropdown = gui.getThresholdModeDropdown();
+            set(gui.getLevelsSlider(), "ValueChangingFcn", @obj.levelsChanging);
+            set(thresholdModeDropdown, "ValueChangedFcn", @obj.thresholdModeChanged);
             set(gui.getActionButtons(), "ButtonPushedFcn", @obj.actionButtonPushed);
 
             obj.gui = gui;
             obj.interactiveImages = iIms;
+
+            set(thresholdModeDropdown, "Value", thresholdKeyword);
+            obj.changeThresholdMode(thresholdKeyword);
             thresholdRegions(obj, regionalImages);
         end
     end
@@ -51,14 +58,46 @@ classdef AutoThresholdLinker < AutoThresholder
     %% Functions to update state of GUI
     methods (Access = protected)
         function displayRegionalImage(obj, index, im)
-            fig = obj.gui.getFigure();
+            gui = obj.getGui();
+            fig = gui.getFigure();
             iIm = obj.interactiveImages(index);
             im = gray2rgb(im, fig);
             set(iIm, "CData", im);
         end
 
+        function levelsChanging(obj, ~, event)
+            levels = event.Value;
+            obj.changeLevels(levels);
+        end
+        function changeLevels(obj, levels, levelCount)
+            gui = obj.getGui();
+            if nargin < 2
+                levels = gui.getLevels();
+            end
+            if nargin < 3
+                levelCount = gui.getLevelCount();
+            end
+
+            regionCount = obj.getRegionCount();
+            for index = 1:regionCount
+                im = obj.rethresholdRegion(index, levels, levelCount);
+                obj.displayRegionalImage(index, im);
+            end
+        end
+
+        function thresholdModeChanged(obj, ~, event)
+            thresholdKeyword = event.Value;
+            obj.changeThresholdMode(thresholdKeyword);
+        end
+        function changeThresholdMode(obj, thresholdMode)
+            thresholdFcn = Threshold.handleByKeyword(thresholdMode);
+            obj.resetRegionsThresholds();
+            obj.setThresholdFcn(thresholdFcn);
+            obj.changeLevels();
+        end
+
         function actionButtonPushed(obj, source, ~)
-            gui = obj.gui;
+            gui = obj.getGui();
             fig = gui.getFigure();
             obj.applyThresholds = source == gui.getApplyButton();
             obj.thresholdRanges = obj.getCurrentThresholds();
@@ -88,7 +127,7 @@ AxisResizer(iIm, "FitToContent", true, "AddListener", false);
 end
 
 function [levels, levelCount] = getThresholdsInput(obj)
-gui = obj.gui;
+gui = obj.getGui();
 levels = gui.getLevels();
 if obj.isSingleThreshold
     levelCount = 1;
