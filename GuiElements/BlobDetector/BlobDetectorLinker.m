@@ -139,7 +139,7 @@ classdef BlobDetectorLinker < handle
     methods (Access = private)
         function setBlobAnalyzer(obj, varargin)
             blobAnalyzer = obj.blobAnalyzer;
-            release(blobAnalyzer);
+            blobAnalyzer.release();
             set(blobAnalyzer, varargin{:});
             obj.redetectBlobs();
         end
@@ -162,7 +162,7 @@ classdef BlobDetectorLinker < handle
             im = obj.generateThresholdedImage(thresholds);
             obj.updateImageAlphaTimed(im);
 
-            [area, center, bbox, majAx, minAx, angle] = step(blobAnalyzer, im);
+            [area, center, bbox, majAx, minAx, angle] = blobAnalyzer.step(im);
             obj.blobAreas = area;
             obj.blobCenters = center;
             obj.blobBoundingBoxes = bbox;
