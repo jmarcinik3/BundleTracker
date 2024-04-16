@@ -9,9 +9,9 @@ classdef BlobDetectorLinker < handle
         blobAnalyzer;
         applyRegions = false;
 
-        rawImage;
         interactiveImage;
         previousAlphaTime = datetime;
+        alphaTimer = timer();
         alphaDeltaTime = 0.167;
 
         blobShape;
@@ -47,15 +47,15 @@ classdef BlobDetectorLinker < handle
             set(gui.getSizeSpinners(), "ValueChangingFcn", @obj.blobSizeChanging);
             set(gui.getExcludeBorderBlobsCheckbox(), "ValueChangedFcn", @obj.excludeBorderBlobsChanged);
             set(gui.getActionButtons(), "ButtonPushedFcn", @obj.actionButtonPushed);
+            set(obj.alphaTimer, "StartDelay", obj.alphaDeltaTime);
 
             obj.gui = gui;
-            obj.rawImage = im2double(im);
             obj.interactiveImage = iIm;
             obj.blobShape = get(blobShapeDropdown, "Value");
             obj.blobAnalyzer = generateBlobAnalyzer(gui);
             obj.imPreprocessed = detrendMatrix(im);
 
-            updateImageAlpha(obj, thresholdSlider.Value);
+            updateImageAlpha(obj, obj.generateThresholdedImage());
             obj.redetectBlobs();
         end
     end
@@ -150,6 +150,7 @@ classdef BlobDetectorLinker < handle
 
             blobAnalyzer = obj.blobAnalyzer;
             im = obj.generateThresholdedImage(thresholds);
+            obj.updateImageAlphaTimed(im);
 
             [area, center, bbox, majAx, minAx, angle] = step(blobAnalyzer, im);
             obj.blobAreas = area;
@@ -177,7 +178,6 @@ classdef BlobDetectorLinker < handle
         function thresholdsChanging(obj, ~, event)
             thresholds = event.Value;
             obj.redetectBlobs(thresholds);
-            obj.updateImageAlphaTimed(thresholds);
         end
         function blobAreaChanging(obj, ~, event)
             areas = round(event.Value);
@@ -218,11 +218,19 @@ classdef BlobDetectorLinker < handle
             obj.redrawBlobs(h, w);
         end
 
-        function updateImageAlphaTimed(obj, thresholds)
+        function updateImageAlphaTimed(obj, im, ~)
             currentTime = datetime;
             if alphaNeedsUpdated(obj, currentTime)
-                updateImageAlpha(obj, thresholds);
+                updateImageAlpha(obj, im);
                 obj.previousAlphaTime = currentTime;
+            elseif nargin < 3
+                alphaTimer = obj.alphaTimer;
+                stop(alphaTimer);
+                set(alphaTimer, ...
+                    "StartDelay", obj.alphaDeltaTime, ...
+                    "TimerFcn", @(src,~)obj.updateImageAlphaTimed(im, src) ...
+                    );
+                start(alphaTimer);
             end
         end
     end
@@ -277,14 +285,10 @@ elapsedSeconds = seconds(currentTime - previousTime);
 needsUpdate = elapsedSeconds > deltaTime;
 end
 
-function updateImageAlpha(obj, thresholds)
+function updateImageAlpha(obj, im)
 iIm = obj.interactiveImage;
-im = obj.imPreprocessed;
 alpha = BlobDetectorLinker.backgroundAlpha;
-
-imAlpha = 0.5 * (1 + alpha) * ones(size(im));
-imAlpha(im > thresholds(2)) = 1;
-imAlpha(im < thresholds(1)) = alpha;
+imAlpha = (1 - alpha) * im + alpha; % 1 if im==1, alpha if im==0
 set(iIm, "AlphaData", imAlpha);
 end
 
