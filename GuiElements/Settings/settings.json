@@ -71,6 +71,7 @@
             "Name": "Track Regions",
             "WindowStyle": "normal",
             "WindowState": "normal",
+            "Position": [300, 200, 1000, 700],
             "Resize": "on"
         }
     },
