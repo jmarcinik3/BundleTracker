@@ -11,8 +11,9 @@ classdef BlobDetectorLinker < handle
 
         interactiveImage;
         previousAlphaTime = datetime;
-        alphaTimer = timer();
+        alphaTimer = timer;
         alphaDeltaTime = 0.167;
+        maximumArea;
 
         blobShape;
         rectanglePositions;
@@ -38,9 +39,17 @@ classdef BlobDetectorLinker < handle
 
             blobShapeDropdown = gui.getShapeDropdown();
             thresholdSlider = gui.getThresholdSlider();
+            
+            maximumArea = 2 * sqrt(numel(im));
+            areaSlider = gui.getAreaSlider();
+            areaLimits = [0, maximumArea];
 
             set(thresholdSlider, "ValueChangingFcn", @obj.thresholdsChanging);
-            set(gui.getAreaSlider(), "ValueChangingFcn", @obj.blobAreaChanging );
+            set(areaSlider, ...
+                "Limits", areaLimits, ...
+                "Value", areaLimits, ...
+                "ValueChangingFcn", @obj.blobAreaChanging ...
+                );
             set(gui.getConnectivityElement(), "ValueChangedFcn", @obj.connectivityChanged);
             set(gui.getCountSpinner(), "ValueChangingFcn", @obj.maximumCountChanging);
             set(blobShapeDropdown, "ValueChangedFcn", @obj.blobShapeChanged);
@@ -54,6 +63,7 @@ classdef BlobDetectorLinker < handle
             obj.blobShape = get(blobShapeDropdown, "Value");
             obj.blobAnalyzer = generateBlobAnalyzer(gui);
             obj.imPreprocessed = detrendMatrix(im);
+            obj.maximumArea = maximumArea;
 
             updateImageAlpha(obj, obj.generateThresholdedImage());
             obj.redetectBlobs();
@@ -180,7 +190,7 @@ classdef BlobDetectorLinker < handle
             obj.redetectBlobs(thresholds);
         end
         function blobAreaChanging(obj, ~, event)
-            areas = round(event.Value);
+            areas = areasFromEvent(obj, event);
             obj.setBlobAnalyzer( ...
                 "MinimumBlobArea", areas(1), ...
                 "MaximumBlobArea", areas(2) ...
@@ -276,6 +286,13 @@ function imPreprocessed = detrendMatrix(im)
 imPreprocessed = double(im);
 imPreprocessed = imPreprocessed - smoothdata2(imPreprocessed, "movmean");
 imPreprocessed = mat2gray(imPreprocessed);
+end
+
+function areas = areasFromEvent(obj, event)
+areas = round(event.Value);
+if areas(2) == obj.maximumArea
+    areas(2) = Inf;
+end
 end
 
 function needsUpdate = alphaNeedsUpdated(obj, currentTime)
