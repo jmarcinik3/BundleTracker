@@ -77,11 +77,11 @@ classdef TrackingLinker < RegionPreviewer ...
             [blobParameters, blobShape] = BlobDetectorLinker.openFigure(fig, im);
             obj.drawRegionsByParameters(blobParameters, blobShape);
         end
-        function regionThresholdButtonPushed(obj, source, ~)
-            thresholdKeyword = source.UserData;
-            if obj.regionExists(thresholdKeyword)
+        function regionThresholdButtonPushed(obj, ~, ~)
+            title = SettingsParser.getAutothresholdFigureDefaults().Name;
+            if obj.regionExists(title)
                 regions = obj.getRegions();
-                thresholdRegions(obj, regions, thresholdKeyword);
+                thresholdRegions(obj, regions);
             end
         end
 
@@ -239,11 +239,11 @@ time = resultsParser.getTime();
 WaterfallLinker.openFigure(traces, time);
 end
 
-function thresholdRegions(obj, regions, thresholdKeyword)
-fig = generateAutothresholdFigure(thresholdKeyword);
+function thresholdRegions(obj, regions)
+fig = generateAutothresholdFigure();
 im = obj.getFirstFrame();
 regionalImages = generateRegionalImages(regions, im);
-newThresholds = AutoThresholdOpener.byKeyword(fig, regionalImages, thresholdKeyword);
+newThresholds = AutoThresholdOpener.openFigure(fig, regionalImages);
 RegionUserData.setRegionsThresholds(obj, newThresholds);
 end
 
@@ -251,9 +251,7 @@ function fig = generateBlobDetectionFigure()
 figDefaults = namedargs2cell(SettingsParser.getBlobDetectionFigureDefaults());
 fig = generateFigure(figDefaults{:});
 end
-function fig = generateAutothresholdFigure(thresholdKeyword)
-figDefaults = SettingsParser.getAutothresholdFigureDefaults();
-figDefaults.Name = sprintf("%s (%s)", figDefaults.Name, thresholdKeyword);
-figDefaults = namedargs2cell(figDefaults);
+function fig = generateAutothresholdFigure()
+figDefaults = namedargs2cell(SettingsParser.getAutothresholdFigureDefaults());
 fig = generateFigure(figDefaults{:});
 end

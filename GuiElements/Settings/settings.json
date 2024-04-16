@@ -26,6 +26,14 @@
             "SelectedColor": [1, 1, 0],
             "StripeColor": "none"
         },
+        "ThresholdModeDropdown": {
+            "Value": "Otsu's Method",
+            "FontWeight": "normal",
+            "FontAngle": "normal",
+            "FontColor": [0, 0, 0],
+            "BackgroundColor": [0.96, 0.96, 0.96],
+            "Tooltip": "Choose method to threshold region"
+        },
         "ThresholdSlider": {
             "FontSize": 8,
             "FontWeight": "normal",
@@ -42,7 +50,7 @@
             "Tooltip": "Postprocess: Choose method to track center of region"
         },
         "AutothresholdFigure": {
-            "Name": "Threshold Regions",
+            "Name": "Automatic Threshold",
             "WindowStyle": "modal",
             "WindowState": "normal",
             "Resize": "on"

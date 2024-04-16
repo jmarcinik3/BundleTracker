@@ -4,21 +4,23 @@ classdef SettingsParser
     end
 
     methods (Static)
-        function angleMode = getAngleModeDefaults()
-            angleMode = namedargs2cell(getDefaults().AngleDropdown);
+        function defaults = getAngleModeDefaults()
+            defaults = namedargs2cell(getDefaults().AngleDropdown);
         end
-        function invert = getInvertCheckboxDefaults()
-            invert = namedargs2cell(getDefaults().InvertCheckbox);
+        function defaults = getInvertCheckboxDefaults()
+            defaults = namedargs2cell(getDefaults().InvertCheckbox);
         end
-        function positiveDirection = getDefaultPositiveDirection()
-            positiveDirection = getDefaults().PositiveDirection;
+        function defaults = getDefaultPositiveDirection()
+            defaults = getDefaults().PositiveDirection;
         end
-        function thresholds = getThresholdSliderDefaults()
-            thresholds = namedargs2cell(getDefaults().ThresholdSlider);
-            thresholds{2} = thresholds{2}';
+        function defaults = getThresholdModeDropdownDefaults()
+            defaults = namedargs2cell(getDefaults().ThresholdModeDropdown);
         end
-        function trackingMode = getTrackingModeDefaults()
-            trackingMode = namedargs2cell(getDefaults().TrackingDropdown);
+        function defaults = getThresholdSliderDefaults()
+            defaults = namedargs2cell(getDefaults().ThresholdSlider);
+        end
+        function defaults = getTrackingModeDefaults()
+            defaults = namedargs2cell(getDefaults().TrackingDropdown);
         end
 
         function angleMode = getDefaultAngleMode()

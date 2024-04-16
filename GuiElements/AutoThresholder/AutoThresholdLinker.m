@@ -10,14 +10,18 @@ classdef AutoThresholdLinker < AutoThresholder
     end
 
     methods
-        function obj = AutoThresholdLinker(gui, regionalImages, thresholdKeyword)
+        function obj = AutoThresholdLinker(gui, regionalImages)
+            thresholdModeDropdown = gui.getThresholdModeDropdown();
+            thresholdKeyword = get(thresholdModeDropdown, "Value");
             thresholdFcn = Threshold.handleByKeyword(thresholdKeyword);
             maxLevelCount = gui.getMaxLevelCount();
+
             obj@AutoThresholder(regionalImages, thresholdFcn, maxLevelCount);
 
             axs = gui.getAxes();
             iIms = generateInteractiveImages(axs, regionalImages);
             thresholdModeDropdown = gui.getThresholdModeDropdown();
+
             set(gui.getLevelsSlider(), "ValueChangingFcn", @obj.levelsChanging);
             set(thresholdModeDropdown, "ValueChangedFcn", @obj.thresholdModeChanged);
             set(gui.getActionButtons(), "ButtonPushedFcn", @obj.actionButtonPushed);
@@ -25,9 +29,8 @@ classdef AutoThresholdLinker < AutoThresholder
             obj.gui = gui;
             obj.interactiveImages = iIms;
 
-            set(thresholdModeDropdown, "Value", thresholdKeyword);
-            obj.changeThresholdMode(thresholdKeyword);
-            thresholdRegions(obj, regionalImages);
+            initialLevels = gui.getLevels();
+            thresholdRegions(obj, regionalImages, initialLevels);
         end
     end
 
@@ -90,6 +93,11 @@ classdef AutoThresholdLinker < AutoThresholder
             obj.changeThresholdMode(thresholdKeyword);
         end
         function changeThresholdMode(obj, thresholdMode)
+            if nargin < 2
+                gui = obj.getGui();
+                thresholdMode = gui.getThresholdMode();
+            end
+
             thresholdFcn = Threshold.handleByKeyword(thresholdMode);
             obj.resetRegionsThresholds();
             obj.setThresholdFcn(thresholdFcn);
@@ -136,10 +144,14 @@ else
 end
 end
 
-function thresholdRegions(obj, regionalImages)
+function thresholdRegions(obj, regionalImages, levels)
+if nargin < 3
+    levels = [1, 2];
+end
+
 regionCount = numel(regionalImages);
 for index = 1:regionCount
-    im = obj.rethresholdRegion(index, [1, 2], 1);
+    im = obj.rethresholdRegion(index, levels, 1);
     obj.displayRegionalImage(index, im);
 end
 end

@@ -1,7 +1,7 @@
 classdef AutoThresholdOpener
     methods (Static)
-        function thresholdRanges = byKeyword(fig, regionalImages, keyword)
-            linker = AutoThresholdOpener.generateLinker(fig, regionalImages, keyword, 1);
+        function thresholdRanges = openFigure(fig, regionalImages)
+            linker = AutoThresholdOpener.generateLinker(fig, regionalImages, 1);
             thresholdRanges = AutoThresholdOpener.getThresholdRanges(linker);
         end
     end
@@ -14,10 +14,10 @@ classdef AutoThresholdOpener
             uiwait(fig);
             thresholdRanges = linker.thresholdRanges;
         end
-        function linker = generateLinker(fig, regionalImages, thresholdFcn, maxLevelCount)
+        function linker = generateLinker(fig, regionalImages, maxLevelCount)
             regionCount = numel(regionalImages);
             gui = AutoThresholdsGui(fig, regionCount, maxLevelCount);
-            linker = AutoThresholdsLinker(gui, regionalImages, thresholdFcn);
+            linker = AutoThresholdsLinker(gui, regionalImages);
         end
     end
 end

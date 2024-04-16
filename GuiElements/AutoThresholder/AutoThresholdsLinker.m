@@ -1,16 +1,13 @@
 classdef AutoThresholdsLinker < AutoThresholdLinker
     methods
-        function obj = AutoThresholdsLinker(gui, regionalImages, thresholdFcn)
-            obj@AutoThresholdLinker(gui, regionalImages, thresholdFcn);
+        function obj = AutoThresholdsLinker(gui, regionalImages)
+            obj@AutoThresholdLinker(gui, regionalImages);
 
             levelsSlider = gui.getLevelsSlider();
             maxLevelCount = gui.getMaxLevelCount();
 
             set(gui.getCountSpinner(), "ValueChangingFcn", @obj.countSpinnerChanging);
-
-            initialLevels = get(levelsSlider, "Value");
             rerangeLevelsSlider(levelsSlider, maxLevelCount);
-            obj.changeLevels(initialLevels);
         end
     end
 
@@ -40,7 +37,7 @@ newMax = levelCount + 1;
 scaleFactor = newMax / (previousLevelCount + 1);
 newLevels = previousLevels * scaleFactor;
 newLimits = [0, newMax];
-majorTickInterval = ceil(sqrt(newMax));
+majorTickInterval = 1; % ceil(sqrt(newMax));
 
 set(slider, ...
     "Limits", newLimits, ...

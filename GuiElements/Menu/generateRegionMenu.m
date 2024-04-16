@@ -1,7 +1,7 @@
 function generateRegionMenu(fig, trackingLinker)
 m = uimenu(fig, "Text", "Region");
-generateBlobDetectionMenu(m, trackingLinker);
 generateThresholdMenu(m, trackingLinker);
+generateBlobDetectionMenu(m, trackingLinker);
 generateResetMenu(m, trackingLinker);
 end
 
@@ -29,14 +29,9 @@ end
 end
 
 function generateThresholdMenu(parentMenu, trackingLinker)
-m = uimenu(parentMenu, "Text", "Autothreshold");
-thresholdKeywords = Threshold.keywords;
-for index = 1:numel(thresholdKeywords)
-    thresholdKeyword = thresholdKeywords(index);
-    uimenu(m, ...
-        "Text", thresholdKeyword, ...
-        "MenuSelectedFcn", @trackingLinker.regionThresholdButtonPushed, ...
-        "UserData", thresholdKeyword ...
-        );
-end
+text = SettingsParser.getAutothresholdFigureDefaults().Name;
+uimenu(parentMenu, ...
+    "Text", text, ...
+    "MenuSelectedFcn", @trackingLinker.regionThresholdButtonPushed ...
+    );
 end
