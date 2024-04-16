@@ -1,5 +1,5 @@
 classdef AxisExporter < handle
-    properties (Access = private, Constant)
+    properties (Constant)
         extensions = { ...
             '*.png', "Portable Network Graphics (PNG)"; ...
             '*.jpg;*.jpeg', "Joint Photographic Experts Group (JPEG)"; ...
@@ -20,23 +20,19 @@ classdef AxisExporter < handle
             obj.axis = ax;
         end
     end
-       
+
     %% Functions to export image
-    methods (Access = protected)
+    methods
         function exportImage(obj, startDirectory)
             ax = obj.axis;
             AxisExporter.export(ax, startDirectory);
         end
     end
-    
-    methods (Static)
-        function export(ax, startDirectory)
-            extensions = AxisExporter.extensions;
-            title = SettingsParser.getExportAxisLabel();
-            [filename, directoryPath, ~] = uiputfile(extensions, title, startDirectory);
 
-            if directoryIsChosen(directoryPath)
-                filepath = strcat(directoryPath, filename);
+    methods (Static)
+        function export(ax, path)
+            [filepath, isfilepath] = getFilepath(path);
+            if isfilepath
                 exportgraphics(ax, filepath);
             end
         end
@@ -45,6 +41,20 @@ end
 
 
 
-function is = directoryIsChosen(directoryPath)
-is = directoryPath ~= 0;
+function [filepath, isfilepath] = getFilepath(path)
+if isfolder(path)
+    [filepath, isfilepath] = fileFromDirectoryPath(path);
+elseif isstring(path) || ischar(path)
+    isfilepath = true;
+    filepath = path;
+else
+    error("Path must be a directory of file path.")
 end
+end
+
+function [filepath, isfilepath] = fileFromDirectoryPath(startDirectory)
+extensions = AxisExporter.extensions;
+title = SettingsParser.getExportAxisLabel();
+[filepath, isfilepath] = uiputfilepath(extensions, title, startDirectory);
+end
+

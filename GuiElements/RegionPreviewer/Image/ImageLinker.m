@@ -9,9 +9,9 @@ classdef ImageLinker < PreprocessorLinker & ImageAxis
 
     %% Functions to update state of GUI
     methods
-        function exportImageIfPossible(obj, startDirectory)
+        function exportImage(obj, path)
             if obj.imageExists()
-                obj.exportImage(startDirectory);
+                exportImage@ImageAxis(obj, path);
             else
                 obj.throwAlertMessage("No image imported!", "Export Image");
             end

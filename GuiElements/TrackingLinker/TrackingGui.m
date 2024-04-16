@@ -14,13 +14,12 @@ classdef TrackingGui
         regionGui;
         videoGui
         scaleFactorInputElement;
-        saveFilestemElement;
     end
 
     methods
         function obj = TrackingGui()
             gl = generateGridLayout([2, 2]);
-            rgl = uigridlayout(gl, [3, 1]);
+            rgl = uigridlayout(gl, [2, 1]);
             rgl.Layout.Row = 2;
             rgl.Layout.Column = 2;
 
@@ -29,7 +28,6 @@ classdef TrackingGui
             obj.videoGui = VideoGui(gl, {1, [1, 2]});
 
             obj.scaleFactorInputElement = generateScaleFactorElement(rgl);
-            obj.saveFilestemElement = generateSaveFilestemElement(rgl);
 
             obj.gridLayout = gl;
             obj.rightGridLayout = rgl;
@@ -74,11 +72,6 @@ classdef TrackingGui
         function elem = getScaleFactorInputElement(obj)
             elem = obj.scaleFactorInputElement;
         end
-
-        % components related to files
-        function elem = getSaveFilestemElement(obj)
-            elem = obj.saveFilestemElement;
-        end
     end
 
     %% Functions to retrieve state information
@@ -100,11 +93,6 @@ classdef TrackingGui
             gl = obj.scaleFactorInputElement;
             textbox = gl.Children(4);
             err = textbox.Value;
-        end
-        function stem = getSaveFilestem(obj)
-            gl = obj.saveFilestemElement;
-            textbox = gl.Children(2);
-            stem = textbox.Value;
         end
 
         function filepath = generateSaveFilepath(obj)
@@ -147,28 +135,21 @@ rowHeight = TrackingGui.rowHeight;
 rgl = gui.getRightGridLayout();
 
 scaleFactorElement = gui.getScaleFactorInputElement();
-saveFilestemElement = gui.getSaveFilestemElement();
 regionGuiPanel = gui.getRegionPanel();
 
 scaleFactorElement.Layout.Row = 1;
-saveFilestemElement.Layout.Row = 2;
-regionGuiPanel.Layout.Row = 3;
+regionGuiPanel.Layout.Row = 2;
 
 set(scaleFactorElement, ...
     "Padding", [0, 0, 0, 0], ...
     "RowHeight", rowHeight, ...
     "ColumnWidth", {72, '3x', '1x', '3x'} ...
     );
-set(saveFilestemElement, ...
-    "Padding", [0, 0, 0, 0], ...
-    "RowHeight", rowHeight, ...
-    "ColumnWidth", {72, '1x'} ...
-    );
 
 set(rgl, ...
     "Padding", [0, 0, 0, 0], ...
     "RowSpacing", 0, ...
-    "RowHeight", {rowHeight, rowHeight, '1x'} ...
+    "RowHeight", {rowHeight, '1x'} ...
     );
 end
 
@@ -222,25 +203,4 @@ lbl1.Layout.Column = 1;
 tb1.Layout.Column = 2;
 lbl2.Layout.Column = 3;
 tb2.Layout.Column = 4;
-end
-
-%% Function to generate save filestem input
-% Generates edit field (with label) allowing user to set FPS
-%
-% Arguments
-%
-% * uigridlayout |parent|: layout to add edit field in
-%
-% Returns uigridlayout composed of [uilabel, uieditfield("text")]
-function gl = generateSaveFilestemElement(parent)
-gl = uigridlayout(parent, [1 2]);
-gl.Padding = [0 0 0 0];
-
-lbl = uilabel(gl);
-lbl.Text = "Filestem:"; % label
-tb = uieditfield(gl, "text");
-tb.Value = "results"; % default value
-
-lbl.Layout.Column = 1;
-tb.Layout.Column = 2;
 end

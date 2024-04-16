@@ -1,6 +1,7 @@
-function filepath = uigetfilepath(varargin)
+function [filepath, isfilepath] = uigetfilepath(varargin)
 [filename, directoryPath, ~] = uigetfile(varargin{:});
-if filename
+isfilepath = ischar(filename) || isstring(filename);
+if isfilepath
     filepath = strcat(directoryPath, filename);
 else
     filepath = "";

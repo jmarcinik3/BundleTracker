@@ -61,11 +61,16 @@
             "WindowState": "normal",
             "Resize": "on"
         },
+        "TrackingCompletedFigure": {
+            "Name": "Tracking Completed",
+            "WindowStyle": "modal",
+            "WindowState": "normal",
+            "Resize": "on"
+        },
         "TrackingFigure": {
             "Name": "Track Regions",
             "WindowStyle": "normal",
             "WindowState": "normal",
-            "Position": [300, 200, 1000, 700],
             "Resize": "on"
         }
     },
@@ -74,6 +79,10 @@
             "TrackedColor": [0, 1, 0],
             "QueueColor": [1, 0, 0]
         }
+    },
+    "Filenames": {
+        "Image": "regions.png",
+        "Results": "results.mat"
     },
     "Menu": {
         "Labels": {

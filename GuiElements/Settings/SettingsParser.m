@@ -33,6 +33,13 @@ classdef SettingsParser
             trackingMode = getDefaults().TrackingDropdown.Value;
         end
 
+        function filename = getDefaultImageFilename()
+            filename = getFilenames().Image;
+        end
+        function filename = getDefaultResultsFilename()
+            filename = getFilenames().Results;
+        end
+
         function color = getRegionDefaults()
             color = namedargs2cell(getDefaults().Region);
         end
@@ -45,6 +52,9 @@ classdef SettingsParser
 
         function defaults = getTrackingFigureDefaults()
             defaults = getDefaults().TrackingFigure;
+        end
+        function defaults = getTrackingCompletedFigureDefaults()
+            defaults = getDefaults().TrackingCompletedFigure;
         end
         function defaults = getBlobDetectionFigureDefaults()
             defaults = getDefaults().BlobDetectionFigure;
@@ -80,6 +90,11 @@ end
 function defaults = getAesthetics()
 info = toStruct();
 defaults = info.Aesthetics;
+end
+
+function filenames = getFilenames()
+info = toStruct();
+filenames = info.Filenames;
 end
 
 function labels = getMenuLabels()

@@ -60,12 +60,10 @@ classdef TrackingLinker < RegionPreviewer ...
                 obj.importRegionsFromFile(filepath);
             end
         end
-
-        function exportImageIfPossible(obj, ~, ~)
-            imageLinker = obj.getImageLinker();
-            directoryPath = obj.gui.getDirectoryPath();
-            imageLinker.exportImageIfPossible(directoryPath);
+        function exportImageButtonPushed(obj, ~, ~)
+            obj.exportImage();
         end
+
         function trackButtonPushed(obj, ~, ~)
             if obj.regionExists("Start Tracking")
                 obj.trackAndSaveRegions();
@@ -102,6 +100,13 @@ classdef TrackingLinker < RegionPreviewer ...
                 videoFilepathChanged(obj, filepath);
             end
         end
+        function exportImage(obj, path)
+            if nargin < 2
+                path = obj.gui.getDirectoryPath();
+            end
+            imageLinker = obj.getImageLinker();
+            imageLinker.exportImage(path);
+        end
     end
 
     %% Functions to generate state information
@@ -134,9 +139,25 @@ classdef TrackingLinker < RegionPreviewer ...
             end
         end
         function trackingCompleted(obj, results)
-            filepath = obj.saveResults(results);
-            displayTrackingCompleted(results, filepath);
-            obj.exportImageIfPossible();
+            fig = generateTrackingCompletedFigure(results);
+            resultsFilepath = generateResultsFilepath(obj);
+            imageFilepath = generateImageFilepath(obj);
+            trackingCompleteGui = TrackingCompletedGui( ...
+                fig, results, ...
+                "ResultsFilepath", resultsFilepath, ...
+                "ImageFilepath", imageFilepath ...
+                );
+            uiwait(fig);
+
+            resultsFilepath = trackingCompleteGui.resultsFilepath;
+            imageFilepath = trackingCompleteGui.imageFilepath;
+
+            if ischar(resultsFilepath) || isstring(resultsFilepath)
+                save(resultsFilepath, "results");
+            end
+            if ischar(imageFilepath) || isstring(imageFilepath)
+                obj.exportImage(imageFilepath);
+            end
         end
         function [cancel, results] = trackAndProcess(obj)
             taskName = 'Tracking Regions';
@@ -163,10 +184,6 @@ classdef TrackingLinker < RegionPreviewer ...
             RegionUpdater.selected(activeRegion);
             multiWaitbar(taskName,'Close');
         end
-        function filepath = saveResults(obj, results)
-            filepath = obj.gui.generateSaveFilepath();
-            save(filepath, "results");
-        end
 
         function throwAlertMessage(obj, message, title)
             fig = obj.gui.getFigure();
@@ -176,23 +193,6 @@ classdef TrackingLinker < RegionPreviewer ...
 end
 
 
-
-function displayTrackingCompleted(results, filepath)
-resultsParser = ResultsParser(results);
-regionCount = resultsParser.getRegionCount();
-title = sprintf("Tracking Completed (%d)", regionCount);
-message = trackingCompletedMessage(results, filepath);
-msgbox(message, title);
-end
-function message = trackingCompletedMessage(results, filepath)
-resultsParser = ResultsParser(results);
-regionCount = resultsParser.getRegionCount();
-fps = resultsParser.getFps();
-savedMsg = sprintf("Results saved to %s", filepath);
-countMsg = sprintf("Cell Count: %d", regionCount);
-fpsMsg = sprintf("FPS: %d", fps);
-message = [savedMsg, countMsg, fpsMsg];
-end
 
 function videoFilepathChanged(obj, filepath)
 videoReader = VideoReader(filepath);
@@ -247,6 +247,15 @@ newThresholds = AutoThresholdOpener.openFigure(fig, regionalImages);
 RegionUserData.setRegionsThresholds(obj, newThresholds);
 end
 
+function fig = generateTrackingCompletedFigure(results)
+resultsParser = ResultsParser(results);
+regionCount = resultsParser.getRegionCount();
+
+figDefaults = SettingsParser.getTrackingCompletedFigureDefaults();
+figDefaults.Name = sprintf("%s (%d)", figDefaults.Name, regionCount);
+figDefaults = namedargs2cell(figDefaults);
+fig = generateFigure(figDefaults{:});
+end
 function fig = generateBlobDetectionFigure()
 figDefaults = namedargs2cell(SettingsParser.getBlobDetectionFigureDefaults());
 fig = generateFigure(figDefaults{:});
@@ -254,4 +263,15 @@ end
 function fig = generateAutothresholdFigure()
 figDefaults = namedargs2cell(SettingsParser.getAutothresholdFigureDefaults());
 fig = generateFigure(figDefaults{:});
+end
+
+function filepath = generateResultsFilepath(obj)
+directoryPath = obj.gui.getDirectoryPath();
+filename = SettingsParser.getDefaultResultsFilename();
+filepath = sprintf("%s\\%s", directoryPath, filename);
+end
+function filepath = generateImageFilepath(obj)
+directoryPath = obj.gui.getDirectoryPath();
+filename = SettingsParser.getDefaultImageFilename();
+filepath = sprintf("%s\\%s", directoryPath, filename);
 end
