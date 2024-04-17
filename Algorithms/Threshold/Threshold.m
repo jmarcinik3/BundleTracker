@@ -8,6 +8,8 @@ classdef Threshold
         otsuKeyword = "Otsu's Method";
         ridlerCalvardKeyword = "Ridler-Calvard Method";
         triangleKeyword = "Triangle Method";
+        yanniHorneKeyword = "Yanni-Horne";
+        yenChangChangKeyword = "Yen-Change-Change";
         keywords = sort([ ...
             Threshold.crossEntropyKeyword, ...
             Threshold.fuzzyEntropyKeyword, ...
@@ -16,7 +18,9 @@ classdef Threshold
             Threshold.kittlerIllingworthKeyword, ...
             Threshold.otsuKeyword, ...
             Threshold.ridlerCalvardKeyword, ...
-            Threshold.triangleKeyword ...
+            Threshold.triangleKeyword, ...
+            Threshold.yanniHorneKeyword, ...
+            Threshold.yenChangChangKeyword ...
             ]);
     end
 
@@ -39,6 +43,10 @@ classdef Threshold
                     thresholdFcn = @Threshold.byRidlerCalvard;
                 case Threshold.triangleKeyword
                     thresholdFcn = @Threshold.byTriangle;
+                case Threshold.yanniHorneKeyword
+                    thresholdFcn = @Threshold.byYanniHorne;
+                case Threshold.yenChangChangKeyword
+                    thresholdFcn = @Threshold.byYenChangChang;
             end
         end
 
@@ -46,33 +54,32 @@ classdef Threshold
             threshold = fuzzyEntropy(im, 1, "RunCount", 3);
             threshold = Threshold.im2(threshold, class(im));
         end
-
         function threshold = byJohannsenBille(im)
             threshold = Threshold.im2(johannsenBille(im), class(im));
         end
-
         function threshold = byKapurSahooWong(im)
             threshold = Threshold.im2(kapurSahooWong(im), class(im));
         end
-
         function threshold = byKittlerIllingworth(im)
             threshold = kittlerIllingworth(im);
         end
-
         function threshold = byMinimumCrossEntropy(im)
             threshold = Threshold.im2(minimumCrossEntropy(im), class(im));
         end
-
         function threshold = byOtsu(im)
             threshold = Threshold.im2(graythresh(im), class(im));
         end
-
         function threshold = byRidlerCalvard(im)
             threshold = ridlerCalvard(im);
         end
-
         function threshold = byTriangle(im)
             threshold = Threshold.im2(triangleThreshold(im), class(im));
+        end
+        function threshold = byYanniHorne(im)
+            threshold = Threshold.im2(yanniHorne(im), class(im));
+        end
+        function threshold = byYenChangChang(im)
+            threshold = Threshold.im2(yenChangChang(im), class(im));
         end
 
         function im = im2(im, toClass)
