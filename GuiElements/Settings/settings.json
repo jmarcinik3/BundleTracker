@@ -1,7 +1,7 @@
 {
     "Defaults": {
         "AngleDropdown": {
-            "Value": "2-Means Clustering",
+            "Value": "None",
             "FontWeight": "normal",
             "FontAngle": "normal",
             "FontColor": [0, 0, 0],
