@@ -7,6 +7,7 @@ classdef AngleAlgorithms
             AngleAlgorithms.gaussianMixtureKeyword, ...
             AngleAlgorithms.kmeansKeyword, ...
             AngleAlgorithms.linearKeyword, ...
+            AngleAlgorithms.minimumCovarianceKeyword, ...
             ]) ...
             ];
     end
@@ -16,8 +17,9 @@ classdef AngleAlgorithms
         gaussianMixtureKeyword = "Two Gaussian Mixtures";
         kmeansKeyword = "2-Means Clustering";
         linearKeyword = "Linear Regression";
+        minimumCovarianceKeyword = "Minimum Covariance";
     end
-    
+
 
     methods (Static)
         function [angle, angleError, angleInfo] = byKeyword(x, y, keyword)
@@ -32,6 +34,8 @@ classdef AngleAlgorithms
                     [angle, angleError, angleInfo] = AngleAlgorithms.byKMeansClustering(x, y);
                 case AngleAlgorithms.linearKeyword
                     [angle, angleError, angleInfo] = AngleAlgorithms.byLinearFit(x, y);
+                case AngleAlgorithms.minimumCovarianceKeyword
+                    [angle, angleError, angleInfo] = AngleAlgorithms.byMinimumCovariance(x, y);
             end
         end
 
@@ -52,6 +56,9 @@ classdef AngleAlgorithms
         function [angle, angleError, fitInfo] = byLinearFit(x, y)
             [angle, angleError, fitInfo] = byLinearFit(x, y);
         end
+        function [angle, angleError, fitInfo] = byMinimumCovariance(x, y)
+            [angle, angleError, fitInfo] = MinimumCovariance(x, y).angleWithError();
+        end
     end
 end
 
@@ -60,7 +67,7 @@ end
 function [angle, angleError, fitInfo] = byEllipseFit(x, y)
 xy = [x; y];
 fitter = EllipticalFitter(xy);
-angle = deg2rad(fitter.angle);
+angle = fitter.angle;
 majorRadius = fitter.majorDiam / 2;
 minorRadius = fitter.minorDiam / 2;
 center = fitter.center;
