@@ -38,7 +38,9 @@ classdef PreprocessorLinker < ImagePreprocessor
             obj.updateFromRawImage(thresholds);
         end
         function thresholdSliderChanged(obj, source, ~)
-            thresholds = get(source, "Value");
+            values = get(source, "Value");
+            thresholds = round(values);
+            set(source, "Value", thresholds);
             obj.updateFromRawImage(thresholds);
         end
         
