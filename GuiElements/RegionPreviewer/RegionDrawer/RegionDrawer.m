@@ -19,6 +19,7 @@ classdef RegionDrawer < RegionShaper
         end
 
         function region = importRegion(obj, regionInfo)
+            regionInfo = getRegionMetadata(regionInfo);
             ax = obj.getAxis();
             varargin = namedargs2cell(rmfield(regionInfo, "Type"));
             region = importRegion(ax, regionInfo.Type, varargin{:});
@@ -42,8 +43,7 @@ classdef RegionDrawer < RegionShaper
     methods (Static)
         function regions = getRegions(obj)
             if isa(obj, "matlab.ui.control.UIAxes")
-                children = obj.Children;
-                regions = findobj(children, "Type", "images.roi");
+                regions = findobj(obj.Children, "Type", "images.roi");
                 regions = flip(regions);
             elseif RegionType.isRegion(obj)
                 ax = ancestor(obj, "axes");
@@ -57,14 +57,11 @@ end
 
 function configureRegion(obj, region)
 defaults = SettingsParser.getRegionDefaults();
-set(region, defaults{:});
-addMetadataToRegion(obj, region);
+set(region, ...
+    defaults{:}, ...
+    "UserData", obj.userDataFcn() ...
+    );
 RegionUpdater.update(region);
-end
-
-function addMetadataToRegion(obj, region)
-userData = obj.userDataFcn();
-set(region, "UserData", userData);
 end
 
 function region = importRegion(ax, regionType, varargin)
