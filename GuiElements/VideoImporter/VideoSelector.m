@@ -1,4 +1,4 @@
-classdef VideoSelector < handle
+classdef VideoSelector < AlertThrower
     properties (Access = private, Constant)
         extensions = { ...
             '*.mj2', "Motion JPEG 2000"; ...
@@ -69,10 +69,9 @@ classdef VideoSelector < handle
             end
         end
     end
-    methods (Access = private)
-        function throwAlertMessage(obj, message, title)
+    methods (Access = protected)
+        function fig = getFigure(obj)
             fig = obj.gui.getFigure();
-            uialert(fig, message, title);
         end
     end
 end

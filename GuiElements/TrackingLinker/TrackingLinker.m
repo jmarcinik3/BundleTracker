@@ -1,6 +1,7 @@
 classdef TrackingLinker < RegionPreviewer ...
         & VideoImporter ...
-        & VideoSelector
+        & VideoSelector ...
+        & AlertThrower
 
     properties (Constant)
         extensions = {'*.mat', "MATLAB Structure"};
@@ -84,8 +85,15 @@ classdef TrackingLinker < RegionPreviewer ...
         function regionThresholdButtonPushed(obj, ~, ~)
             title = SettingsParser.getAutothresholdFigureDefaults().Name;
             if obj.regionExists(title)
-                regions = obj.getRegions();
-                thresholdRegions(obj, regions);
+                regionalImages = generateRegionalImages( ...
+                    obj.getRegions(), ...
+                    obj.getFirstFrame() ...
+                    );
+                newThresholds = AutoThresholdOpener.openFigure( ...
+                    generateAutothresholdFigure(), ...
+                    regionalImages ...
+                    );
+                RegionUserData.setRegionsThresholds(obj, newThresholds);
             end
         end
 
@@ -94,7 +102,11 @@ classdef TrackingLinker < RegionPreviewer ...
             extensions = TrackingLinker.extensions;
             filepath = uigetfilepath(extensions, "Create Waterfall Plot", startingDirectory);
             if isfile(filepath)
-                openWaterfallPlot(filepath);
+                resultsParser = ResultsParser(filepath);
+                WaterfallLinker.openFigure( ...
+                    resultsParser.getProcessedTrace(), ...
+                    resultsParser.getTime() ...
+                    );
             end
         end
     end
@@ -182,10 +194,12 @@ classdef TrackingLinker < RegionPreviewer ...
             RegionUpdater.selected(activeRegion);
             multiWaitbar(taskName,'Close');
         end
+    end
 
-        function throwAlertMessage(obj, message, title)
+    %% Helper functions to call methods from properties
+    methods (Access = protected)
+        function fig = getFigure(obj)
             fig = obj.gui.getFigure();
-            uialert(fig, message, title);
         end
     end
 end
@@ -204,47 +218,27 @@ obj.setMaximumIntensity(maxIntensity);
 obj.setFrameLabel(label);
 obj.importVideoToRam(videoReader);
 end
-
 function label = generateFrameLabel(videoReader)
 frameCount = get(videoReader, "NumFrames");
 fps = get(videoReader, "FrameRate");
 label = sprintf("%d Frames (%d FPS)", frameCount, fps);
 end
-
 function maxIntensity = getMaximumIntensity(videoProfile)
 switch string(videoProfile)
-    case {"Mono8 Signed", "RGB24 Signed"}
-        maxIntensity = 2^7;
-    case {"Mono8", "RGB24", "Grayscale"}
-        maxIntensity = 2^8;
-    case {"Mono16 Signed", "RGB48 Signed"}
-        maxIntensity = 2^15;
-    case {"Mono16", "RGB48"}
-        maxIntensity = 2^16;
+    case {"Mono8 Signed", "RGB24 Signed"}, maxIntensity = 2^7;
+    case {"Mono8", "RGB24", "Grayscale"}, maxIntensity = 2^8;
+    case {"Mono16 Signed", "RGB48 Signed"}, maxIntensity = 2^15;
+    case {"Mono16", "RGB48"}, maxIntensity = 2^16;
 end
-end
-
-function openWaterfallPlot(filepath)
-resultsParser = ResultsParser(filepath);
-traces = resultsParser.getProcessedTrace();
-time = resultsParser.getTime();
-WaterfallLinker.openFigure(traces, time);
-end
-
-function thresholdRegions(obj, regions)
-fig = generateAutothresholdFigure();
-im = obj.getFirstFrame();
-regionalImages = generateRegionalImages(regions, im);
-newThresholds = AutoThresholdOpener.openFigure(fig, regionalImages);
-RegionUserData.setRegionsThresholds(obj, newThresholds);
 end
 
 function fig = generateTrackingCompletedFigure(results)
-resultsParser = ResultsParser(results);
-regionCount = resultsParser.getRegionCount();
-
 figDefaults = SettingsParser.getTrackingCompletedFigureDefaults();
-figDefaults.Name = sprintf("%s (%d)", figDefaults.Name, regionCount);
+figDefaults.Name = sprintf( ...
+    "%s (%d)", ...
+    figDefaults.Name, ...
+    ResultsParser(results).getRegionCount() ...
+    );
 figDefaults = namedargs2cell(figDefaults);
 fig = generateFigure(figDefaults{:});
 end
@@ -258,12 +252,16 @@ fig = generateFigure(figDefaults{:});
 end
 
 function filepath = generateResultsFilepath(obj)
-directoryPath = obj.gui.getDirectoryPath();
-filename = SettingsParser.getDefaultResultsFilename();
-filepath = sprintf("%s\\%s", directoryPath, filename);
+filepath = sprintf( ...
+    "%s\\%s", ...
+    obj.gui.getDirectoryPath(), ...
+    SettingsParser.getDefaultResultsFilename() ...
+    );
 end
 function filepath = generateImageFilepath(obj)
-directoryPath = obj.gui.getDirectoryPath();
-filename = SettingsParser.getDefaultImageFilename();
-filepath = sprintf("%s\\%s", directoryPath, filename);
+filepath = sprintf( ...
+    "%s\\%s", ...
+    obj.gui.getDirectoryPath(), ...
+    SettingsParser.getDefaultImageFilename() ...
+    );
 end

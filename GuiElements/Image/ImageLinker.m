@@ -1,4 +1,7 @@
-classdef ImageLinker < PreprocessorLinker & ImageAxis
+classdef ImageLinker < PreprocessorLinker ...
+        & ImageAxis ...
+        & AlertThrower
+
     methods
         function obj = ImageLinker(imageGui)
             iIm = imageGui.getInteractiveImage();
@@ -19,12 +22,6 @@ classdef ImageLinker < PreprocessorLinker & ImageAxis
         function obj = changeImage(obj, im)
             obj.setRawImage(im);
             obj.setBoundsToCurrent(); % update zoomer for new image
-        end
-    end
-    methods (Access = private)
-        function throwAlertMessage(obj, message, title)
-            fig = obj.getFigure();
-            uialert(fig, message, title);
         end
     end
 end

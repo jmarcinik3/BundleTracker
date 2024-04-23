@@ -47,14 +47,10 @@ multiWaitbar(taskName, 0);
 frameCount = get(videoReader, "NumFrames");
 ims = preallocateVideo(videoReader);
 
-    function updateWaitbar(index)
-        proportionComplete = index / frameCount;
-        multiWaitbar(taskName, proportionComplete);
-    end
-
 for index = 1:frameCount
     ims(:, :, index) = read(videoReader, index);
-    updateWaitbar(index);
+    proportionComplete = index / frameCount;
+    multiWaitbar(taskName, proportionComplete);
 end
 
 multiWaitbar(taskName, 'Close');
