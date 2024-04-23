@@ -93,7 +93,7 @@ if isa(region, "images.roi.Rectangle")
     rectangleLeft(region);
 elseif isa(region, "images.roi.Ellipse")
     ellipseLeft(region);
-elseif iisa(region, "images.roi.Polygon") ...
+elseif isa(region, "images.roi.Polygon") ...
         || isa(region, "images.roi.Freehand")
     vertexLeft(region);
 end
