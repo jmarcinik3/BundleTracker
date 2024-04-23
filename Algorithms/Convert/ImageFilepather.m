@@ -59,12 +59,12 @@ rootname = nameSplits{1};
 indexFormat = sprintf("%%0%dd", strlength(nameSplits{2}));
 end
 
-function [file, count] = getFirstFile(directory, extension)
+function [file, fileCount] = getFirstFile(directory, extension)
 pattern = fullfile(directory, sprintf("*%s", extension));
 files = dir(pattern);
 
-count = numel(files);
-if count == 0
+fileCount = numel(files);
+if fileCount == 0
     file = nan;
 else
     file = files(1);

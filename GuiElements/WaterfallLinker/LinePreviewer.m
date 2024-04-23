@@ -43,9 +43,7 @@ classdef LinePreviewer < handle
     %% Functions to retrieve state information
     methods (Access = private)
         function exists = existsPreviewLine(obj)
-            previewLines = obj.getPreviewLines();
-            previewCount = numel(previewLines);
-            exists = previewCount >= 1;
+            exists = numel(obj.getPreviewLines()) >= 1;
         end
         function index = getLineIndex(obj, lineObj)
             previewLines = obj.getPreviewLines();

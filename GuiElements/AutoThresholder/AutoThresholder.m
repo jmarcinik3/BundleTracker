@@ -18,7 +18,6 @@ classdef AutoThresholder < handle
                 maxLevelCount = 1;
             end
 
-            regionCount = numel(regionalImages);
             preprocessedImages = cellfun( ...
                 @preprocessImage, ...
                 regionalImages, ...
@@ -30,7 +29,7 @@ classdef AutoThresholder < handle
             obj.calculateThresholds = thresholdFcn;
             obj.regionalImages = regionalImages;
             obj.preprocessedImages = preprocessedImages;
-            obj.regionsThresholds = preallocateRegionThresholds(regionCount, maxLevelCount);
+            obj.regionsThresholds = preallocateRegionThresholds(numel(regionalImages), maxLevelCount);
         end
     end
 

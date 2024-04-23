@@ -1,5 +1,6 @@
 classdef RegionPreviewer < RegionDrawer & RegionVisibler
     properties (Access = private)
+        axis;
         imageLinker;
         regionLinker;
     end
@@ -7,8 +8,8 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
     methods
         function obj = RegionPreviewer(regionGui, imageGui)
             ax = imageGui.getAxis();
-            obj@RegionVisibler(ax, regionGui);
-            obj@RegionDrawer(ax, @imageGui.getRegionUserData);
+            obj@RegionVisibler(regionGui);
+            obj@RegionDrawer;
 
             RegionMoverLinker(regionGui.getRegionMoverGui(), obj);
             RegionCompressorLinker(regionGui.getRegionCompressorGui(), obj);
@@ -17,6 +18,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             imageLinker = ImageLinker(imageGui);
             obj.imageLinker = imageLinker;
             obj.regionLinker = RegionLinker(regionGui, imageLinker.getRawImage());
+            obj.axis = ax;
 
             configureInteractiveImage(obj, imageGui);
             obj.updateRegionalRawImage([]);
@@ -31,7 +33,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
     end
     methods (Access = protected)
         function ax = getAxis(obj)
-            ax = getAxis@RegionDrawer(obj);
+            ax = obj.axis;
         end
     end
 
@@ -49,8 +51,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             end
         end
         function importRegionsFromFile(obj, filepath)
-            resultsParser = ResultsParser(filepath);
-            importRegionsFromInfo(obj, resultsParser);
+            importRegionsFromInfo(obj, ResultsParser(filepath));
         end
         function drawRegionsByParameters(obj, parameters, blobShape)
             drawRegionsByParameters(obj, parameters, blobShape);
@@ -157,6 +158,12 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         end
         function invertCheckboxChanged(obj, source, event)
             obj.regionLinker.invertCheckboxChanged(source, event);
+        end
+    end
+    methods (Access = protected)
+        function userData = getRegionUserData(obj)
+            imageGui = obj.imageLinker.getGui();
+            userData = imageGui.getRegionUserData();
         end
     end
 end

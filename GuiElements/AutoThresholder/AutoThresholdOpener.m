@@ -15,8 +15,7 @@ classdef AutoThresholdOpener
             thresholdRanges = linker.thresholdRanges;
         end
         function linker = generateLinker(fig, regionalImages, maxLevelCount)
-            regionCount = numel(regionalImages);
-            gui = AutoThresholdsGui(fig, regionCount, maxLevelCount);
+            gui = AutoThresholdsGui(fig, numel(regionalImages), maxLevelCount);
             linker = AutoThresholdsLinker(gui, regionalImages);
         end
     end

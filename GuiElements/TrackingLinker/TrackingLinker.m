@@ -101,8 +101,7 @@ classdef TrackingLinker < RegionPreviewer ...
     methods (Access = private)
         function videoFilepathChanged(obj, ~, ~)
             filepath = obj.gui.getVideoFilepath();
-            fileCount = numel(filepath);
-            if fileCount >= 1 && isfile(filepath)
+            if numel(filepath) >= 1 && isfile(filepath)
                 videoFilepathChanged(obj, filepath);
             end
         end
@@ -122,7 +121,7 @@ classdef TrackingLinker < RegionPreviewer ...
     end
     methods (Access = protected)
         function exists = regionExists(obj, title)
-            exists = regionExists@ActiveRegionOrderer(obj);
+            exists = regionExists@RegionVisibler(obj);
             if ~exists && nargin >= 2
                 obj.throwAlertMessage("No cells selected!", title);
             end

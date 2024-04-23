@@ -118,9 +118,8 @@ end
 
 function iIms = generateInteractiveImages(axs, regionalImages)
 iIms = [];
-regionCount = numel(regionalImages);
 
-for index = regionCount:-1:1
+for index = numel(regionalImages):-1:1
     regionalImage = regionalImages{index};
     ax = axs(index);
     iIm = generateInteractiveImage(ax, regionalImage);
@@ -149,8 +148,7 @@ if nargin < 3
     levels = [1, 2];
 end
 
-regionCount = numel(regionalImages);
-for index = 1:regionCount
+for index = 1:numel(regionalImages)
     im = obj.rethresholdRegion(index, levels, 1);
     obj.displayRegionalImage(index, im);
 end

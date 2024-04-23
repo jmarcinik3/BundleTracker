@@ -1,17 +1,29 @@
-classdef RegionDrawer < RegionShaper
-    properties (Access = private)
-        userDataFcn;
+classdef RegionDrawer < handle
+    properties (Constant)
+        rectangleKeyword = "Rectangle";
+        ellipseKeyword = "Ellipse";
+        polygonKeyword = "Polygon";
+        freehandKeyword = "Freehand";
     end
 
-    methods
-        function obj = RegionDrawer(ax, userDataFcn)
-            obj@RegionShaper(ax);
-            obj.userDataFcn = userDataFcn;
-        end
+    properties (Access = private)
+        shapeKeyword = RegionDrawer.rectangleKeyword;
+    end
+
+    methods (Abstract, Access = protected)
+        getRegionUserData(obj);
+        getAxis(obj);
     end
 
     %% Functions to generate GUI elements
     methods (Access = protected)
+        function region = drawRegionByKeyword(obj)
+            ax = obj.getAxis();
+            keyword = obj.getRegionShape();
+            region = drawRegionByKeyword(ax, keyword);
+            configureRegion(obj, region);
+        end
+
         function region = drawRegionOnClick(obj, ~, event)
             point = event.IntersectionPoint(1:2);
             region = obj.byPoint(point);
@@ -19,10 +31,8 @@ classdef RegionDrawer < RegionShaper
         end
 
         function region = importRegion(obj, regionInfo)
-            regionInfo = getRegionMetadata(regionInfo);
             ax = obj.getAxis();
-            varargin = namedargs2cell(rmfield(regionInfo, "Type"));
-            region = importRegion(ax, regionInfo.Type, varargin{:});
+            region = drawRegionByInfo(ax, regionInfo);
             configureRegion(obj, region);
         end
         function region = drawRegionByParameters(obj, parameters, keyword)
@@ -33,7 +43,7 @@ classdef RegionDrawer < RegionShaper
     end
     methods (Access = private)
         function region = byPoint(obj, point)
-            region = obj.generateRegionByKeyword();
+            region = obj.drawRegionByKeyword();
             beginDrawingFromPoint(region, point);
             configureRegion(obj, region);
         end
@@ -54,6 +64,30 @@ classdef RegionDrawer < RegionShaper
             end
         end
     end
+    methods
+        function shape = getRegionShape(obj)
+            shape = obj.shapeKeyword;
+        end
+    end
+
+    %% Functions to set state information
+    methods
+        function setRegionShape(obj, shapeKeyword)
+            obj.shapeKeyword = shapeKeyword;
+        end
+        function setRectangleShape(obj, ~, ~)
+            obj.setRegionShape(RegionDrawer.rectangleKeyword);
+        end
+        function setEllipseShape(obj, ~, ~)
+            obj.setRegionShape(RegionDrawer.ellipseKeyword);
+        end
+        function setPolygonShape(obj, ~, ~)
+            obj.setRegionShape(RegionDrawer.polygonKeyword);
+        end
+        function setFreehandShape(obj, ~, ~)
+            obj.setRegionShape(RegionDrawer.freehandKeyword);
+        end
+    end
 end
 
 
@@ -62,20 +96,48 @@ function configureRegion(obj, region)
 defaults = SettingsParser.getRegionDefaults();
 set(region, ...
     defaults{:}, ...
-    "UserData", obj.userDataFcn() ...
+    "UserData", obj.getRegionUserData() ...
     );
 RegionUpdater.update(region);
 end
 
-function region = importRegion(ax, regionType, varargin)
-switch regionType
-    case 'images.roi.rectangle'
-        region = images.roi.Rectangle(ax, varargin{:});
-    case 'images.roi.ellipse'
-        region = images.roi.Ellipse(ax, varargin{:});
-    case 'images.roi.polygon'
-        region = images.roi.Polygon(ax, varargin{:});
-    case 'images.roi.freehand'
-        region = images.roi.Freehand(ax, varargin{:});
+function region = drawRegionByInfo(ax, regionInfo)
+regionInfo = getRegionMetadata(regionInfo);
+regionType = regionInfo.Type;
+varargin = namedargs2cell(rmfield(regionInfo, "Type"));
+if strcmpi(regionType, "images.roi.rectangle")
+    region = images.roi.Rectangle(ax, varargin{:});
+elseif strcmpi(regionType, "images.roi.ellipse")
+    region = images.roi.Ellipse(ax, varargin{:});
+elseif strcmpi(regionType, "images.roi.polygon")
+    region = images.roi.Polygon(ax, varargin{:});
+elseif strcmpi(regionType, "images.roi.freehand")
+    region = images.roi.Freehand(ax, varargin{:});
+end
+end
+
+function region = drawRegionByParameters(ax, parameters, keyword)
+switch keyword
+    case BlobDrawer.ellipseKeyword
+        region = images.roi.Ellipse(ax, ...
+            "Center", parameters(1:2), ...
+            "RotationAngle", rad2deg(parameters(5)), ...
+            "SemiAxes", parameters(3:4) ...
+            );
+    case BlobDrawer.rectangleKeyword
+        region = images.roi.Rectangle(ax, "Position", parameters);
+end
+end
+
+function region = drawRegionByKeyword(ax, keyword)
+switch keyword
+    case RegionDrawer.rectangleKeyword
+        region = images.roi.Rectangle(ax);
+    case RegionDrawer.ellipseKeyword
+        region = images.roi.Ellipse(ax);
+    case RegionDrawer.polygonKeyword
+        region = images.roi.Polygon(ax);
+    case RegionDrawer.freehandKeyword
+        region = images.roi.Freehand(ax);
 end
 end

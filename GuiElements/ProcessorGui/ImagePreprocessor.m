@@ -30,8 +30,7 @@ classdef ImagePreprocessor < handle
     %% Functions to retrieve state information
     methods (Access = protected)
         function exists = imageExists(obj)
-            im = obj.getRawImage();
-            exists = numel(im) >= 1;
+            exists = numel(obj.getRawImage()) >= 1;
         end
     end
 

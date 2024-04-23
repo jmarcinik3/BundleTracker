@@ -84,8 +84,7 @@ defaultColor = p.Results.DefaultColor;
 accentColor = p.Results.AccentColor;
 
 set(unaccentLineObjs, "Color", defaultColor);
-existsLine = numel(accentLineObjs) >= 1;
-if existsLine
+if numel(accentLineObjs) >= 1
     set(accentLineObjs, "Color", accentColor);
 end
 end
@@ -99,8 +98,7 @@ defaultWidth = p.Results.DefaultLineWidth;
 accentWidth = p.Results.AccentLineWidth;
 
 set(unaccentLineObjs, "LineWidth", defaultWidth);
-existsLine = numel(accentLineObjs) >= 1;
-if existsLine
+if numel(accentLineObjs) >= 1
     set(accentLineObjs, "LineWidth", accentWidth);
 end
 end
