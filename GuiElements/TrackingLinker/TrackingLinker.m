@@ -8,7 +8,6 @@ classdef TrackingLinker < RegionPreviewer ...
     end
 
     properties (Access = private)
-        firstFrame;
         gui;
     end
 
