@@ -40,7 +40,7 @@ classdef RegionVisibler < ActiveRegionOrderer
     methods (Access = private)
         function setAdjacentRegionVisible(obj, distance)
             activeRegion = obj.getActiveRegion();
-            if objectIsValid(activeRegion)
+            if ~isempty(activeRegion) && isvalid(activeRegion)
                 adjacentRegion = getAdjacentRegion(obj, distance);
                 obj.previewRegion(adjacentRegion);
             elseif obj.regionExists()
@@ -52,10 +52,6 @@ classdef RegionVisibler < ActiveRegionOrderer
 end
 
 
-
-function isValid = objectIsValid(obj)
-isValid = ~isempty(obj) && isvalid(obj);
-end
 
 function region = getRegionByIndex(obj, index)
 regions = obj.getRegions();

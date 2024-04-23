@@ -16,7 +16,10 @@ classdef RegionAdjuster
     methods (Access = protected)
         function region = getRegion(obj)
             region = obj.previewer;
-            if RegionType.isRegion(region)
+            if isa(region, "images.roi.Rectangle") ...
+                    || isa(region, "images.roi.Ellipse") ...
+                    || isa(region, "images.roi.Polygon") ...
+                    || isa(region, "images.roi.Freehand")
             elseif isa(region, "RegionPreviewer")
                 region = region.getActiveRegion();
             end

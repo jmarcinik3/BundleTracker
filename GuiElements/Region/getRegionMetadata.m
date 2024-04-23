@@ -1,11 +1,11 @@
 function meta = getRegionMetadata(region)
-if RegionType.isRectangle(region)
+if strcmpi(region.Type, "images.roi.rectangle")
     meta = appendRectangleMetadata(region);
-elseif RegionType.isEllipse(region)
+elseif strcmpi(region.Type, "images.roi.ellipse")
     meta = appendEllipseMetadata(region);
-elseif RegionType.isPolygon(region)
+elseif strcmpi(region.Type, "images.roi.polygon")
     meta = appendPolygonMetadata(region);
-elseif RegionType.isFreehand(region)
+elseif strcmpi(region.Type, "images.roi.freehand")
     meta = appendFreehandMetadata(region);
 end
 end

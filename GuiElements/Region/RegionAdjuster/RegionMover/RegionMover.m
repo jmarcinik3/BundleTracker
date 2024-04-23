@@ -70,30 +70,38 @@ end
 
 
 function moveUp(region)
-if RegionType.hasPointPosition(region)
+if isa(region, "images.roi.Rectangle") ...
+        || isa(region, "images.roi.Ellipse")
     positionUp(region);
-elseif RegionType.hasVertexPosition(region)
+elseif isa(region, "images.roi.Polygon") ...
+        || isa(region, "images.roi.Freehand")
     vertexUp(region);
 end
 end
 function moveDown(region)
-if RegionType.hasPointPosition(region)
+if isa(region, "images.roi.Rectangle") ...
+        || isa(region, "images.roi.Ellipse")
     positionDown(region);
-elseif RegionType.hasVertexPosition(region)
+elseif isa(region, "images.roi.Polygon") ...
+        || isa(region, "images.roi.Freehand")
     vertexDown(region);
 end
 end
 function moveLeft(region)
-if RegionType.hasPointPosition(region)
+if isa(region, "images.roi.Rectangle") ...
+        || isa(region, "images.roi.Ellipse")
     positionLeft(region);
-elseif RegionType.hasVertexPosition(region)
+elseif isa(region, "images.roi.Polygon") ...
+        || isa(region, "images.roi.Freehand")
     vertexLeft(region);
 end
 end
 function moveRight(region)
-if RegionType.hasPointPosition(region)
+if isa(region, "images.roi.Rectangle") ...
+        || isa(region, "images.roi.Ellipse")
     positionRight(region);
-elseif RegionType.hasVertexPosition(region)
+elseif isa(region, "images.roi.Polygon") ...
+        || isa(region, "images.roi.Freehand")
     vertexRight(region);
 end
 end

@@ -6,13 +6,11 @@ classdef RegionLinker < PreprocessorLinker
 
     methods
         function obj = RegionLinker(regionGui, fullRawImage)
-            % regionMoverGui = regionGui.getRegionMoverGui();
-            % regionCompressorGui = regionGui.getRegionCompressorGui();
-            % regionExpanderGui = regionGui.getRegionExpanderGui();
             obj@PreprocessorLinker(regionGui);
-
-            iIm = regionGui.getInteractiveImage();
-            AxisResizer(iIm, "FitToContent", true);
+            AxisResizer( ...
+                regionGui.getInteractiveImage(), ...
+                "FitToContent", true ...
+                );
             obj.fullRawImage = fullRawImage;
             obj.regionGui = regionGui;
         end
@@ -33,7 +31,10 @@ classdef RegionLinker < PreprocessorLinker
     end
     methods (Access = ?RegionPreviewer)
         function updateRegionalRawImage(obj, region)
-            if RegionType.isRegion(region)
+            if isa(region, "images.roi.Rectangle") ...
+                    || isa(region, "images.roi.Ellipse") ...
+                    || isa(region, "images.roi.Polygon") ...
+                    || isa(region, "images.roi.Freehand")
                 fullRawImage = obj.fullRawImage;
                 regionRawImage = MatrixUnpadder.byRegion2d(region, fullRawImage);
             else

@@ -6,10 +6,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 
     methods
         function obj = RegionPreviewer(regionGui, imageGui)
-            imageLinker = ImageLinker(imageGui);
             ax = imageGui.getAxis();
-            fullRawImage = imageLinker.getRawImage();
-
             obj@RegionVisibler(ax, regionGui);
             obj@RegionDrawer(ax, @imageGui.getRegionUserData);
 
@@ -17,11 +14,12 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             RegionCompressorLinker(regionGui.getRegionCompressorGui(), obj);
             RegionExpanderLinker(regionGui.getRegionExpanderGui(), obj);
 
+            imageLinker = ImageLinker(imageGui);
             obj.imageLinker = imageLinker;
-            obj.regionLinker = RegionLinker(regionGui, fullRawImage);
+            obj.regionLinker = RegionLinker(regionGui, imageLinker.getRawImage());
 
             configureInteractiveImage(obj, imageGui);
-            obj.regionLinker.updateRegionalRawImage([]);
+            obj.updateRegionalRawImage([]);
         end
     end
 
@@ -32,19 +30,8 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         end
     end
     methods (Access = protected)
-        function linker = getImageLinker(obj)
-            linker = obj.imageLinker;
-        end
-        function linker = getRegionLinker(obj)
-            linker = obj.regionLinker;
-        end
         function ax = getAxis(obj)
             ax = getAxis@RegionDrawer(obj);
-        end
-    end
-    methods (Access = ?RegionChanger)
-        function gui = getRegionGui(obj)
-            gui = obj.regionLinker.getRegionGui();
         end
     end
 
@@ -55,19 +42,24 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
                 keyword = RegionUserData.allKeyword;
             end
             if obj.regionExists()
-                arrayfun(@(region) resetRegionToDefaults(region, keyword), regions);
+                arrayfun( ...
+                    @(region) RegionUserData(region).resetToDefaults(keyword), ...
+                    regions ...
+                    );
             end
         end
-
         function importRegionsFromFile(obj, filepath)
             resultsParser = ResultsParser(filepath);
             importRegionsFromInfo(obj, resultsParser);
         end
-
         function drawRegionsByParameters(obj, parameters, blobShape)
             drawRegionsByParameters(obj, parameters, blobShape);
         end
 
+        function setMaximumIntensity(obj, maxIntensity)
+            obj.imageLinker.setMaximumIntensity(maxIntensity);
+            obj.regionLinker.setMaximumIntensity(maxIntensity);
+        end
         function changeImage(obj, im)
             obj.clearRegions();
             obj.imageLinker.changeImage(im);
@@ -75,41 +67,96 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         end
         function previewRegion(obj, region)
             previewRegion@RegionVisibler(obj, region);
-            RegionChanger.region(obj);
-            obj.regionLinker.updateRegionalRawImage(region);
+            regionChanged(obj);
+            obj.updateRegionalRawImage(region);
         end
     end
-    methods (Access = ?RegionGuiConfigurer)
+    methods (Access = private)
         function buttonDownFcn(obj, source, event)
-            if isLeftClick(event)
+            if event.Button == 1 % is left click
                 region = obj.drawRegionOnClick(source, event);
                 configureRegionToGui(obj, region);
             end
         end
         function regionClicked(obj, source, event)
-            if isDoubleClick(event)
+            if event.SelectionType == "double"
                 obj.resetRegionsToDefaults(source);
             end
             obj.previewRegion(source);
         end
         function regionMoving(obj, source, ~)
-            obj.regionLinker.updateRegionalRawImage(source);
+            obj.updateRegionalRawImage(source);
         end
         function deletingRegion(obj, source, ~)
             activeRegion = obj.getActiveRegion();
             if ~obj.multipleRegionsExist()
-                obj.regionLinker.updateRegionalRawImage([]);
+                obj.updateRegionalRawImage([]);
             elseif activeRegion == source
                 obj.setPreviousRegionVisible();
             end
         end
+
+        function thresholdChanged(obj, source, event)
+            switch event.EventName
+                case "ValueChanged"
+                    if obj.regionExists()
+                        RegionUserData(obj).setThresholds(event.Value);
+                    end
+                case "PostSet"
+                    thresholdParserChanged(obj, source, event);
+            end
+        end
+        function invertChanged(obj, source, event)
+            switch event.EventName
+                case "ValueChanged"
+                    RegionUserData(obj).setInvert(event.Value);
+                case "PostSet"
+                    invertParserChanged(obj, source, event);
+            end
+        end
+        function trackingModeChanged(obj, source, event)
+            switch event.EventName
+                case "ValueChanged"
+                    RegionUserData(obj).setTrackingMode(event.Value);
+                case "PostSet"
+                    trackingModeParserChanged(obj, source, event);
+            end
+        end
+        function angleModeChanged(obj, source, event)
+            switch event.EventName
+                case "ValueChanged"
+                    RegionUserData(obj).setAngleMode(event.Value);
+                case "PostSet"
+                    angleModeParserChanged(obj, source, event);
+            end
+        end
+        function positiveDirectionChanged(obj, source, event)
+            switch event.EventName
+                case "SelectionChanged"
+                    direction = DirectionGui.buttonToLocation(get(source, "SelectedObject"));
+                    RegionUserData(obj).setPositiveDirection(direction);
+                case "PostSet"
+                    directionParserChanged(obj, source, event);
+            end
+        end
     end
-    methods (Access = ?RegionChanger)
+
+    %% Helper functions to call methods from properties
+    methods
+        function exportImage(obj, path)
+            obj.imageLinker.exportImage(path);
+        end
+        function gui = getRegionGui(obj)
+            gui = obj.regionLinker.getRegionGui();
+        end
+        function updateRegionalRawImage(obj, region)
+            obj.regionLinker.updateRegionalRawImage(region);
+        end
         function thresholdSliderChanged(obj, source, event)
-            obj.regionLinker.thresholdSliderChanged(source, event)
+            obj.regionLinker.thresholdSliderChanged(source, event);
         end
         function invertCheckboxChanged(obj, source, event)
-            obj.regionLinker.invertCheckboxChanged(source, event)
+            obj.regionLinker.invertCheckboxChanged(source, event);
         end
     end
 end
@@ -123,13 +170,8 @@ end
 
 function configureRegionToGui(obj, region)
 regionGui = obj.getRegionGui();
-RegionGuiConfigurer.configure(obj, regionGui, region);
+configureRegionGui(obj, regionGui, region);
 obj.previewRegion(region);
-end
-
-function resetRegionToDefaults(region, keyword)
-regionUserData = RegionUserData.fromRegion(region);
-regionUserData.resetToDefaults(keyword);
 end
 
 function drawRegionsByParameters(obj, parameters, blobShape)
@@ -191,19 +233,99 @@ end
 multiWaitbar(taskName, 'Close');
 end
 
-function is = isDoubleClick(event)
-selectionType = event.SelectionType;
-is = selectionType == "double";
+
+
+function configureRegionGui(previewer, gui, region)
+directionGui = gui.getDirectionGui();
+regionUserData = RegionUserData(region);
+
+configureRegion(previewer, region);
+configureThreshold(previewer, gui, regionUserData);
+configureInvert(previewer, gui, regionUserData);
+configureTrackingMode(previewer, gui, regionUserData);
+configureAngleMode(previewer, gui, regionUserData);
+configurePositiveDirection(previewer, directionGui, regionUserData);
 end
-function is = isLeftClick(event)
-name = event.EventName;
-switch name
-    case "ROIClicked"
-        selectionType = event.SelectionType;
-        is = selectionType == "left" ...
-            || selectionType == "shift" ...
-            || selectionType == "ctrl";
-    case "Hit"
-        is = event.Button == 1;
+function configureThreshold(previewer, gui, regionUserData)
+set(gui.getThresholdSlider(), ...
+    "ValueChangedFcn", @previewer.thresholdChanged, ...
+    "Value", regionUserData.getThresholds() ...
+    );
+addlistener(regionUserData, "IntensityRange", "PostSet", @previewer.thresholdChanged);
 end
+function configureInvert(previewer, gui, regionUserData)
+set(gui.getInvertCheckbox(), ...
+    "ValueChangedFcn", @previewer.invertChanged, ...
+    "Value", regionUserData.getInvert() ...
+    );
+addlistener(regionUserData, "IsInverted", "PostSet", @previewer.invertChanged);
+end
+function configureTrackingMode(previewer, gui, regionUserData)
+set(gui.getTrackingSelectionElement(), ...
+    "ValueChangedFcn", @previewer.trackingModeChanged, ...
+    "Value", regionUserData.getTrackingMode() ...
+    );
+addlistener(regionUserData, "TrackingMode", "PostSet", @previewer.trackingModeChanged);
+end
+function configureAngleMode(previewer, gui, regionUserData)
+set(gui.getAngleSelectionElement(), ...
+    "ValueChangedFcn", @previewer.angleModeChanged, ...
+    "Value", regionUserData.getAngleMode() ...
+    );
+addlistener(regionUserData, "AngleMode", "PostSet", @previewer.angleModeChanged);
+end
+function configurePositiveDirection(previewer, directionGui, regionUserData)
+changedFcn = @previewer.positiveDirectionChanged;
+set(directionGui.getRadioGroup(), "SelectionChangedFcn", changedFcn);
+directionGui.setLocation(regionUserData.getPositiveDirection());
+addlistener(regionUserData, "Direction", "PostSet", changedFcn);
+end
+function configureRegion(previewer, region)
+addlistener(region, "MovingROI", @previewer.regionMoving);
+addlistener(region, "ROIMoved", @previewer.regionMoving);
+addlistener(region, "ROIClicked", @previewer.regionClicked);
+addlistener(region, "DeletingROI", @previewer.deletingRegion);
+end
+
+
+
+function regionChanged(previewer)
+thresholdParserChanged(previewer);
+invertParserChanged(previewer);
+trackingModeParserChanged(previewer);
+angleModeParserChanged(previewer);
+directionParserChanged(previewer);
+end
+
+function thresholdParserChanged(previewer, ~, ~)
+thresholdSlider = previewer.getRegionGui().getThresholdSlider();
+
+thresholds = RegionUserData(previewer).getThresholds();
+thresholds(1) = max(thresholds(1), thresholdSlider.Limits(1));
+thresholds(2) = min(thresholds(2), thresholdSlider.Limits(2));
+set(thresholdSlider, "Value", thresholds);
+previewer.thresholdSliderChanged(thresholdSlider, []);
+end
+
+function invertParserChanged(previewer, ~, ~)
+invertCheckbox = previewer.getRegionGui().getInvertCheckbox();
+set(invertCheckbox, ...
+    "Value", RegionUserData(previewer).getInvert() ...
+    );
+previewer.invertCheckboxChanged(invertCheckbox, [])
+end
+function trackingModeParserChanged(previewer, ~, ~)
+set(previewer.getRegionGui().getTrackingSelectionElement(), ...
+    "Value", RegionUserData(previewer).getTrackingMode() ...
+    );
+end
+function angleModeParserChanged(previewer, ~, ~)
+set(previewer.getRegionGui().getAngleSelectionElement(), ...
+    "Value", RegionUserData(previewer).getAngleMode() ...
+    );
+end
+function directionParserChanged(previewer, ~, ~)
+direction = RegionUserData(previewer).getPositiveDirection();
+directionGui = previewer.getRegionGui().getDirectionGui();
+directionGui.setLocation(direction);
 end

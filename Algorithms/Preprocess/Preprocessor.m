@@ -18,7 +18,7 @@ classdef Preprocessor
 
     methods (Static)
         function processor = fromRegion(region)
-            regionUserData = RegionUserData.fromRegion(region);
+            regionUserData = RegionUserData(region);
             thresholds = regionUserData.getThresholds();
             invert = regionUserData.getInvert();
             processor = Preprocessor(thresholds, invert);

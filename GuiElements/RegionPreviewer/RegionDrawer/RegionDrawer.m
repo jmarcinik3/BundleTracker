@@ -45,7 +45,10 @@ classdef RegionDrawer < RegionShaper
             if isa(obj, "matlab.ui.control.UIAxes")
                 regions = findobj(obj.Children, "Type", "images.roi");
                 regions = flip(regions);
-            elseif RegionType.isRegion(obj)
+            elseif isa(obj, "images.roi.Rectangle") ...
+                    || isa(obj, "images.roi.Ellipse") ...
+                    || isa(obj, "images.roi.Polygon") ...
+                    || isa(obj, "images.roi.Freehand")
                 ax = ancestor(obj, "axes");
                 regions = RegionDrawer.getRegions(ax);
             end

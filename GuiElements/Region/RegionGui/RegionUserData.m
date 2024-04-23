@@ -27,17 +27,16 @@ classdef RegionUserData < handle
     end
 
     methods
-        function obj = RegionUserData()
-        end
-    end
-
-    methods (Static)
-        function obj = fromRegion(region)
-            obj = region.UserData;
-        end
-        function obj = fromRegionPreviewer(previewer)
-            region = previewer.getActiveRegion();
-            obj = RegionUserData.fromRegion(region);
+        function obj = RegionUserData(arg)
+            if nargin == 0
+            elseif isa(arg, "images.roi.Rectangle") ...
+                    || isa(arg, "images.roi.Ellipse") ...
+                    || isa(arg, "images.roi.Polygon") ...
+                    || isa(arg, "images.roi.Freehand")
+                obj = arg.UserData;
+            elseif isa(arg, "RegionPreviewer")
+                obj = RegionUserData(arg.getActiveRegion());
+            end
         end
     end
 
@@ -74,13 +73,16 @@ classdef RegionUserData < handle
     %% Functions to set state information
     methods (Static)
         function setRegionsThresholds(regions, thresholds)
-            if ~RegionType.isRegion(regions)
+            if ~isa(regions, "images.roi.Rectangle") ...
+                    && ~isa(regions, "images.roi.Ellipse") ...
+                    && ~isa(regions, "images.roi.Polygon") ...
+                    && ~isa(regions, "images.roi.Freehand")
                 regions = regions.getRegions();
             end
             setRegionsThresholds(regions, thresholds);
         end
         function configureByResultsParser(region, parser, index)
-            regionUserData = RegionUserData.fromRegion(region);
+            regionUserData = RegionUserData(region);
             regionUserData.setThresholds(parser.getIntensityRange(index));
             regionUserData.setInvert(parser.pixelsAreInverted(index));
             regionUserData.setTrackingMode(parser.getTrackingMode(index));
@@ -150,8 +152,7 @@ thresholdCount = size(thresholds, 1);
 for index = 1:thresholdCount
     region = regions(index);
     newThreshold = thresholds(index, :);
-    regionUserData = RegionUserData.fromRegion(region);
-    regionUserData.setThresholds(newThreshold);
+    RegionUserData(region).setThresholds(newThreshold);
 end
 end
 
@@ -179,6 +180,3 @@ obj.resetToDefaultPositiveDirection();
 obj.resetToDefaultThresholds();
 obj.resetToDefaultTrackingMode();
 end
-
-
-

@@ -23,7 +23,7 @@ classdef TrackingLinker < RegionPreviewer ...
             regionGui = trackingGui.getRegionGui();
 
             obj@RegionPreviewer(regionGui, imageGui);
-            obj@VideoImporter;
+            obj@VideoImporter();
             obj@VideoSelector(videoGui);
 
             set(videoGui.getFilepathField(), "ValueChangedFcn", @obj.videoFilepathChanged);
@@ -63,6 +63,12 @@ classdef TrackingLinker < RegionPreviewer ...
         function exportImageButtonPushed(obj, ~, ~)
             obj.exportImage();
         end
+        function exportImage(obj, path)
+            if nargin < 2
+                path = obj.gui.getDirectoryPath();
+            end
+            exportImage@RegionPreviewer(obj, path);
+        end
 
         function trackButtonPushed(obj, ~, ~)
             if obj.regionExists("Start Tracking")
@@ -99,13 +105,6 @@ classdef TrackingLinker < RegionPreviewer ...
             if fileCount >= 1 && isfile(filepath)
                 videoFilepathChanged(obj, filepath);
             end
-        end
-        function exportImage(obj, path)
-            if nargin < 2
-                path = obj.gui.getDirectoryPath();
-            end
-            imageLinker = obj.getImageLinker();
-            imageLinker.exportImage(path);
         end
     end
 
@@ -202,7 +201,7 @@ maxIntensity = getMaximumIntensity(videoProfile);
 label = generateFrameLabel(videoReader);
 
 obj.changeImage(firstFrame);
-updateThresholdSliderRanges(obj, maxIntensity);
+obj.setMaximumIntensity(maxIntensity);
 obj.setFrameLabel(label);
 obj.importVideoToRam(videoReader);
 end
@@ -213,12 +212,6 @@ fps = get(videoReader, "FrameRate");
 label = sprintf("%d Frames (%d FPS)", frameCount, fps);
 end
 
-function updateThresholdSliderRanges(obj, maxIntensity)
-imageLinker = obj.getImageLinker();
-regionLinker = obj.getRegionLinker();
-imageLinker.setMaximumIntensity(maxIntensity);
-regionLinker.setMaximumIntensity(maxIntensity);
-end
 function maxIntensity = getMaximumIntensity(videoProfile)
 switch string(videoProfile)
     case {"Mono8 Signed", "RGB24 Signed"}

@@ -68,41 +68,45 @@ end
 
 
 function expandUp(region)
-if RegionType.isRectangle(region)
+if isa(region, "images.roi.Rectangle")
     rectangleUp(region);
-elseif RegionType.isEllipse(region)
+elseif isa(region, "images.roi.Ellipse")
     ellipseUp(region);
-elseif RegionType.hasVertexPosition(region)
+elseif isa(region, "images.roi.Polygon") ...
+        || isa(region, "images.roi.Freehand")
     vertexUp(region);
 end
 end
 
 function expandDown(region)
-if RegionType.isRectangle(region)
+if isa(region, "images.roi.Rectangle")
     rectangleDown(region);
-elseif RegionType.isEllipse(region)
+elseif isa(region, "images.roi.Ellipse")
     ellipseDown(region);
-elseif RegionType.hasVertexPosition(region)
+elseif isa(region, "images.roi.Polygon") ...
+        || isa(region, "images.roi.Freehand")
     vertexDown(region);
 end
 end
 
 function expandLeft(region)
-if RegionType.isRectangle(region)
+if isa(region, "images.roi.Rectangle")
     rectangleLeft(region);
-elseif RegionType.isEllipse(region)
+elseif isa(region, "images.roi.Ellipse")
     ellipseLeft(region);
-elseif RegionType.hasVertexPosition(region)
+elseif isa(region, "images.roi.Polygon") ...
+        || isa(region, "images.roi.Freehand")
     vertexLeft(region);
 end
 end
 
 function expandRight(region)
-if RegionType.isRectangle(region)
+if isa(region, "images.roi.Rectangle")
     rectangleRight(region);
-elseif RegionType.isEllipse(region)
+elseif isa(region, "images.roi.Ellipse")
     ellipseRight(region);
-elseif RegionType.hasVertexPosition(region)
+elseif isa(region, "images.roi.Polygon") ...
+        || isa(region, "images.roi.Freehand")
     vertexRight(region);
 end
 end
