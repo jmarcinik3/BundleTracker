@@ -23,6 +23,13 @@ classdef SettingsParser
             defaults = namedargs2cell(getDefaults().TrackingDropdown);
         end
 
+        function defaults = getScaleFactorDefaults()
+            defaults = namedargs2cell(getDefaults().ScaleFactorField);
+        end
+        function defaults = getScaleFactorErrorDefaults()
+            defaults = namedargs2cell(getDefaults().ScaleFactorErrorField);
+        end
+
         function angleMode = getDefaultAngleMode()
             angleMode = getDefaults().AngleDropdown.Value;
         end

@@ -26,6 +26,14 @@
             "SelectedColor": [1, 1, 0],
             "StripeColor": "none"
         },
+        "ScaleFactorField":
+        {
+            "Value": 1
+        },
+        "ScaleFactorErrorField":
+        {
+            "Value": 0
+        },
         "ThresholdModeDropdown": {
             "Value": "Otsu's Method",
             "FontWeight": "normal",

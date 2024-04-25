@@ -189,15 +189,13 @@ end
 function gl = generateScaleFactorElement(parent)
 gl = uigridlayout(parent, [1 4]);
 
-lbl1 = uilabel(gl);
-lbl1.Text = "length/px:"; % label for scaling
-tb1 = uieditfield(gl, "numeric");
-tb1.Value = 108.3; % default scaling
+lbl1 = uilabel(gl, "Text", "length/px:");
+scaleFactorDefaults = SettingsParser.getScaleFactorDefaults();
+tb1 = uieditfield(gl, "numeric", scaleFactorDefaults{:});
 
-lbl2 = uilabel(gl);
-lbl2.Text = "±"; % label for error
-tb2 = uieditfield(gl, "numeric");
-tb2.Value = 0.8; % default error
+scaleFactorErrorDefaults = SettingsParser.getScaleFactorErrorDefaults();
+lbl2 = uilabel(gl, "Text", "±");
+tb2 = uieditfield(gl, "numeric", scaleFactorErrorDefaults{:});
 
 lbl1.Layout.Column = 1;
 tb1.Layout.Column = 2;
