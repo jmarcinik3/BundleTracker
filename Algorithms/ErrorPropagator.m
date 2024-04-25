@@ -79,13 +79,14 @@ classdef ErrorPropagator
 
             obj = ErrorPropagator(x, xerr);
         end
-        function obj = power(obj1, n)
+        function obj = power(obj1, obj2)
             x1 = obj1.Value;
-            x = x1 .^ n;
-            xerr = sqrt(n) * obj1.Error .* abs(x1).^(n-1);
+            [x2, xerr2] = getValueError(obj2);
+            x = x1 .^ x2;
+            xerr = x .* sqrt((x2.*obj1.Error./x1).^2 + (log(x1).*xerr2).^2);
             obj = ErrorPropagator(x, xerr);
         end
-            
+
         function obj = rdivide(obj1, obj2)
             x1 = obj1.Value;
             x2i = 1 ./ obj2.Value;
