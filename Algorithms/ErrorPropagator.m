@@ -89,9 +89,10 @@ classdef ErrorPropagator
 
         function obj = rdivide(obj1, obj2)
             x1 = obj1.Value;
-            x2i = 1 ./ obj2.Value;
+            [x2, xerr2] = getValueError(obj2);
+            x2i = 1 ./ x2;
             x = x1 .* x2i;
-            xerr = abs(x2i) .* sqrt(obj1.Error.^2 + (x1.*x2i.*obj2.Error).^2);
+            xerr = abs(x2i) .* sqrt(obj1.Error.^2 + (x1.*x2i.*xerr2).^2);
             obj = ErrorPropagator(x, xerr);
         end
         function obj = ldivide(obj1, obj2)
@@ -280,13 +281,16 @@ classdef ErrorPropagator
             obj = ErrorPropagator.scalarFunction(obj1, @acsch);
         end
         function obj = log(obj1)
-            obj = ErrorPropagator.scalarFunction(obj1, @log);
+            x1 = obj1.Value;
+            x = log(x1);
+            xerr = abs(obj1.Error ./ x1);
+            obj = ErrorPropagator(x, xerr);
         end
         function obj = log10(obj1)
-            obj = ErrorPropagator.scalarFunction(obj1, @log10);
+            obj = log(obj1) ./ log(10);
         end
         function obj = log2(obj1)
-            obj = ErrorPropagator.scalarFunction(obj1, @log2);
+            obj = log(obj1) ./ log(2);
         end
     end
 end
