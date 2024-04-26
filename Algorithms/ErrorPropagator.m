@@ -24,9 +24,8 @@ classdef ErrorPropagator
 
     methods
         function obj = plus(obj1, obj2)
-            x1 = obj1.Value;
             [x2, xerr2] = getValueError(obj2);
-            x = x1 + x2;
+            x = obj1.Value + x2;
             xerr = sqrt(obj1.Error.^2 + xerr2.^2);
             obj = ErrorPropagator(x, xerr);
         end
@@ -44,7 +43,7 @@ classdef ErrorPropagator
             x1 = obj1.Value;
             [x2, xerr2] = getValueError(obj2);
             x = x1 .* x2;
-            xerr = sqrt((x2.*obj1.Error).^2 + (x1.*xerr2).^2);
+            xerr = sqrt((obj1.Error.*x2).^2 + (x1.*xerr2).^2);
             obj = ErrorPropagator(x, xerr);
         end
         function obj = mtimes(obj1, obj2)
@@ -176,6 +175,15 @@ classdef ErrorPropagator
 
     % Helper methods for common functions
     methods
+        function n = numels(obj)
+            n = numel(obj.Value);
+        end
+        function obj = repmat(obj1, varargin)
+            x = repmat(obj1.Value, varargin{:});
+            xerr = repmat(obj1.Error, varargin{:});
+            obj = ErrorPropagator(x, xerr);
+        end
+
         function obj = sum(obj1, varargin)
             y = sum(obj1.Value, varargin{:});
             yerr = sqrt( sum(obj1.Error.^2, varargin{:}) );
@@ -197,6 +205,11 @@ classdef ErrorPropagator
             y = cumprod(x, varargin{:});
             yerr = abs(y) .* sqrt( cumsum((obj1.Error./x).^2, varargin{:}) );
             obj = ErrorPropagator(y, yerr);
+        end
+        function obj = mean(obj1, varargin)
+            obj = sum(obj1, varargin{:});
+            n = numels(obj1) ./ numels(obj);
+            obj = obj ./ n;
         end
         function obj = sqrt(obj1)
             obj = obj1 .^ 0.5;

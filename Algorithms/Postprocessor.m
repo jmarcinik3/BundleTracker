@@ -141,11 +141,13 @@ postResult.yProcessedError = yError;
 postResult.t = scaleTime(fps, x);
 end
 function [x, y, xerr, yerr] = scaleXy(x, y, xerr, yerr, scaleFactor, scaleError)
-scaleErrorFactor = (scaleError / scaleFactor) ^ 2;
-x = scaleFactor * x;
-y = scaleFactor * y;
-xerr = abs(x) .* sqrt((xerr./x).^2 + scaleErrorFactor);
-yerr = abs(y) .* sqrt((yerr./y).^2 + scaleErrorFactor);
+xyWithError = ErrorPropagator([x; y], [xerr; yerr]);
+scaleWithError = ErrorPropagator(scaleFactor, scaleError);
+xyScaled = xyWithError .* scaleWithError;
+x = xyScaled.Value(1, :);
+y = xyScaled.Value(2, :);
+xerr = xyScaled.Error(1, :);
+yerr = xyScaled.Error(2, :);
 end
 function t = scaleTime(fps, x)
 t = (1:numel(x)) / fps;
@@ -167,13 +169,12 @@ postResult.xProcessedError = xError;
 postResult.yProcessedError = yError;
 end
 function [x, y, xerr, yerr] = shiftXy(x, y, xerr, yerr)
-xsize = numel(x);
-x = x - mean(x);
-y = y - mean(y);
-xErrorFromMean = sqrt(sum(xerr.^2)) / xsize;
-yErrorFromMean = sqrt(sum(yerr.^2)) / xsize;
-xerr = sqrt(xerr.^2 + xErrorFromMean^2);
-yerr = sqrt(yerr.^2 + yErrorFromMean^2);
+xyWithError = ErrorPropagator([x; y], [xerr; yerr]);
+xyShifted = xyWithError - mean(xyWithError, 2);
+x = xyShifted.Value(1, :);
+y = xyShifted.Value(2, :);
+xerr = xyShifted.Error(1, :);
+yerr = xyShifted.Error(2, :);
 end
 
 function postResult = rotateSingle(result, parser, index, varargin)
