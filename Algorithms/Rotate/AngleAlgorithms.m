@@ -84,6 +84,8 @@ function [angle, angleError, fitInfo] = byLinearFit(x, y)
 fitInfo = fitlm(x, y);
 slope = fitInfo.Coefficients.Estimate(2);
 slopeError = fitInfo.Coefficients.SE(2);
-angle = atan(slope);
-angleError = slopeError / (1+slope^2);
+slopeWithError = ErrorPropagator(slope, slopeError);
+angleWithError = atan(slopeWithError);
+angle = angleWithError.Value;
+angleError = angleWithError.Error;
 end

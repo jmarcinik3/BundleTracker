@@ -233,7 +233,10 @@ classdef ErrorPropagator
             obj = ErrorPropagator.scalarFunction(obj1, @acos);
         end
         function obj = atan(obj1)
-            obj = ErrorPropagator.scalarFunction(obj1, @atan);
+            x1 = obj1.Value;
+            x = atan(x1);
+            xerr = obj1.Error ./ (1 + x1.^2);
+            obj = ErrorPropagator(x, xerr);
         end
         function obj = acot(obj1)
             obj = ErrorPropagator.scalarFunction(obj1, @acot);
