@@ -34,20 +34,24 @@ classdef RegionOrderer
 
     methods
         function bringToFront(obj, ~, ~)
-            region = obj.region;
-            bringToFront(region);
+            obj.performAction(@bringToFront);
         end
         function bringForward(obj, ~, ~)
-            region = obj.region;
-            bringForward(region);
+            obj.performAction(@bringForward);
         end
         function sendBackward(obj, ~, ~)
-            region = obj.region;
-            sendBackward(region);
+            obj.performAction(@sendBackward);
         end
         function sendToBack(obj, ~, ~)
+            obj.performAction(@sendToBack);
+        end
+    end
+
+    methods (Access = private)
+        function performAction(obj, action)
             region = obj.region;
-            sendToBack(region);
+            action(region);
+            RegionUpdater.update(region);
         end
     end
 end
@@ -73,12 +77,9 @@ end
 
 
 
-function children = getFigureChildren(region)
+function z = getRegionZ(region)
 fig = ancestor(region, "figure");
 children = findobj(fig);
-end
-function z = getRegionZ(region)
-children = getFigureChildren(region);
 z = find(children==region);
 end
 function z = getRegionsZ(region)

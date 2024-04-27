@@ -57,32 +57,16 @@ classdef RegionVisibler < handle
     %% Functions to update state of GUI
     methods
         function bringRegionToFront(obj, ~, ~)
-            if obj.regionExists()
-                activeRegion = obj.getActiveRegion();
-                regionOrderer = RegionOrderer(activeRegion);
-                regionOrderer.bringToFront();
-            end
+            obj.moveRegionZ(Inf);
         end
         function bringRegionForward(obj, ~, ~)
-            if obj.regionExists()
-                activeRegion = obj.getActiveRegion();
-                regionOrderer = RegionOrderer(activeRegion);
-                regionOrderer.bringForward();
-            end
+            obj.moveRegionZ(1);
         end
         function sendRegionBackward(obj, ~, ~)
-            if obj.regionExists()
-                activeRegion = obj.getActiveRegion();
-                regionOrderer = RegionOrderer(activeRegion);
-                regionOrderer.sendBackward();
-            end
+            obj.moveRegionZ(-1);
         end
         function sendRegionToBack(obj, ~, ~)
-            if obj.regionExists()
-                activeRegion = obj.getActiveRegion();
-                regionOrderer = RegionOrderer(activeRegion);
-                regionOrderer.sendToBack();
-            end
+            obj.moveRegionZ(-Inf);
         end
 
         function clearRegions(obj, ~, ~)
@@ -114,6 +98,18 @@ classdef RegionVisibler < handle
             elseif obj.regionExists()
                 firstRegion = getRegionByIndex(obj, 1);
                 obj.previewRegion(firstRegion);
+            end
+        end
+        function moveRegionZ(obj, distance)
+            if obj.regionExists()
+                activeRegion = obj.getActiveRegion();
+                regionOrderer = RegionOrderer(activeRegion);
+                switch distance
+                    case Inf, regionOrderer.bringToFront();
+                    case 1, regionOrderer.bringForward();
+                    case -1, regionOrderer.sendBackward();
+                    case -Inf, regionOrderer.sendToBack();
+                end
             end
         end
     end
