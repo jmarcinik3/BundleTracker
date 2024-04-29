@@ -8,12 +8,21 @@ classdef MinimumCovariance
     methods
         function obj = MinimumCovariance(x, y, varargin)
             p = inputParser;
-            addOptional(p, "BootstrapCount", round(nthroot(numel(x), 3)));
+            addOptional(p, "BootstrapCount", 4);
             parse(p, varargin{:});
             obj.bootstrapCount = p.Results.BootstrapCount;
 
             obj.x = x;
             obj.y = y;
+        end
+
+        function angle = calculateAngle(obj)
+            x = obj.x;
+            y = obj.y;
+
+            covMatrix = cov(x, y);
+            absRotCovFunc = @(theta) abs(rotateCovariance(covMatrix, theta));
+            angle = fminsearch(absRotCovFunc, 0);
         end
 
         function [angle, angleError, angleInfo] = angleWithError(obj)
@@ -30,8 +39,10 @@ classdef MinimumCovariance
 
             pointCount = numel(x);
             angles = zeros(1, bootstrapCount);
+            partition = cvpartition(pointCount, "KFold", bootstrapCount);
+
             for index = 1:bootstrapCount
-                mask = index:bootstrapCount:pointCount;
+                mask = test(partition, index);
                 angle = calculateAngle(x(mask), y(mask));
                 angles(:, index) = angle;
             end

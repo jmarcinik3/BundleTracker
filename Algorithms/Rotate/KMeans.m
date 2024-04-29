@@ -8,7 +8,7 @@ classdef KMeans
     methods
         function obj = KMeans(x, y, k, varargin)
             p = inputParser;
-            addOptional(p, "BootstrapCount", round(sqrt(numel(x))));
+            addOptional(p, "BootstrapCount", 4);
             parse(p, varargin{:});
             obj.bootstrapCount = p.Results.BootstrapCount;
 
@@ -49,8 +49,11 @@ classdef KMeans
 
             pointCount = size(xy, 1);
             xyCenters = zeros(k, 2, bootstrapCount);
+            partition = cvpartition(pointCount, "KFold", bootstrapCount);
+            
             for index = 1:bootstrapCount
-                [~, xyCenter] = kmeans(xy(index:bootstrapCount:pointCount, :), k);
+                mask = test(partition, index);
+                [~, xyCenter] = kmeans(xy(mask, :), k);
                 xyCenter = sort(xyCenter, 1);
                 xyCenters(:, :, index) = xyCenter;
             end

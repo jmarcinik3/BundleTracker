@@ -8,7 +8,7 @@ classdef GaussianMixture
     methods
         function obj = GaussianMixture(x, y, k, varargin)
             p = inputParser;
-            addOptional(p, "BootstrapCount", round(nthroot(numel(x), 3)));
+            addOptional(p, "BootstrapCount", 4);
             parse(p, varargin{:});
             obj.bootstrapCount = p.Results.BootstrapCount;
 
@@ -45,8 +45,11 @@ classdef GaussianMixture
 
             pointCount = size(xy, 1);
             xyCenters = zeros(k, 2, bootstrapCount);
+            partition = cvpartition(pointCount, "KFold", bootstrapCount);
+
             for index = 1:bootstrapCount
-                fitInfo = fitGaussianMixtures(xy(index:bootstrapCount:pointCount, :), k);
+                mask = test(partition, index);
+                fitInfo = fitGaussianMixtures(xy(mask, :), k);
                 xyCenter = fitInfo.mu;
                 xyCenter = sort(xyCenter, 1);
                 xyCenters(:, :, index) = xyCenter;
