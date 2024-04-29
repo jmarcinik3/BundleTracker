@@ -118,14 +118,10 @@ scaleFactor = p.Results.ScaleFactor;
 scaleError = p.Results.ScaleFactorError;
 fps = p.Results.Fps;
 
-[x, y, xError, yError] = scaleXy( ...
-    result.xProcessed, ...
-    result.yProcessed, ...
-    result.xProcessedError, ...
-    result.yProcessedError, ...
-    scaleFactor, ...
-    scaleError ...
-    );
+scaleFactor = ErrorPropagator(scaleFactor, scaleError);
+x = ErrorPropagator(result.xProcessed, result.xProcessedError);
+y = ErrorPropagator(result.yProcessed, result.yProcessedError);
+[x, y] = scaleXy(x, y, scaleFactor);
 
 postResult = result;
 % add information pertaining to scale factor
@@ -134,47 +130,36 @@ postResult.ScaleFactorError = scaleError;
 postResult.Fps = fps;
 
 % update processed traces
-postResult.xProcessed = x;
-postResult.yProcessed = y;
-postResult.xProcessedError = xError;
-postResult.yProcessedError = yError;
-postResult.t = scaleTime(fps, x);
+postResult.xProcessed = x.Value;
+postResult.yProcessed = y.Value;
+postResult.xProcessedError = x.Error;
+postResult.yProcessedError = y.Error;
+postResult.t = (1:n) / fps;
 end
-function [x, y, xerr, yerr] = scaleXy(x, y, xerr, yerr, scaleFactor, scaleError)
-xyWithError = ErrorPropagator([x; y], [xerr; yerr]);
-scaleWithError = ErrorPropagator(scaleFactor, scaleError);
-xyScaled = xyWithError .* scaleWithError;
-x = xyScaled.Value(1, :);
-y = xyScaled.Value(2, :);
-xerr = xyScaled.Error(1, :);
-yerr = xyScaled.Error(2, :);
-end
-function t = scaleTime(fps, x)
-t = (1:numel(x)) / fps;
+function [x, y] = scaleXy(x, y, scaleFactor)
+xy = [x; y];
+xyScaled = xy .* scaleFactor;
+x = xyScaled(1, :);
+y = xyScaled(2, :);
 end
 
 function postResult = shiftSingle(result, ~, ~)
-[x, y, xError, yError] = shiftXy( ...
-    result.xProcessed, ...
-    result.yProcessed, ...
-    result.xProcessedError, ...
-    result.yProcessedError ...
-    );
+x = ErrorPropagator(result.xProcessed, result.xProcessedError);
+y = ErrorPropagator(result.yProcessed, result.yProcessedError);
+[x, y] = shiftXy(x, y);
 
 % update processed traces
 postResult = result;
-postResult.xProcessed = x;
-postResult.yProcessed = y;
-postResult.xProcessedError = xError;
-postResult.yProcessedError = yError;
+postResult.xProcessed = x.Value;
+postResult.yProcessed = y.Value;
+postResult.xProcessedError = x.Error;
+postResult.yProcessedError = y.Error;
 end
-function [x, y, xerr, yerr] = shiftXy(x, y, xerr, yerr)
-xyWithError = ErrorPropagator([x; y], [xerr; yerr]);
-xyShifted = xyWithError - mean(xyWithError, 2);
-x = xyShifted.Value(1, :);
-y = xyShifted.Value(2, :);
-xerr = xyShifted.Error(1, :);
-yerr = xyShifted.Error(2, :);
+function [x, y] = shiftXy(x, y)
+xy = [x; y];
+xyShifted = xy - mean(xy, 2);
+x = xyShifted(1, :);
+y = xyShifted(2, :);
 end
 
 function postResult = rotateSingle(result, parser, index, varargin)
@@ -185,48 +170,31 @@ parse(p, varargin{:});
 angleMode = p.Results.AngleMode;
 positiveDirection = p.Results.PositiveDirection;
 
-x = result.xProcessed;
-y = result.yProcessed;
+x = ErrorPropagator(result.xProcessed, result.xProcessedError);
+y = ErrorPropagator(result.yProcessed, result.yProcessedError);
 
 [x, y, angleDirection] = directXy(x, y, positiveDirection);
-[angleRotate, angleError, angleInfo] = AngleAlgorithms.byKeyword(x, y, angleMode);
-[x, y, xError, yError] = rotateXy( ...
-    x, ...
-    y, ...
-    result.xProcessedError, ...
-    result.yProcessedError, ...
-    angleRotate, angleError ...
-    );
+[angleRotate, angleError, angleInfo] = AngleAlgorithms.byKeyword(x.Value, y.Value, angleMode);
+angleRotate = ErrorPropagator(angleRotate, angleError);
+[x, y] = rotateXy(x, y, angleRotate);
 angle = rerange(angleRotate + angleDirection);
 
 postResult = result;
 % add information pertaining to best-fit angle
 postResult.Direction = positiveDirection;
 postResult.AngleMode = angleMode;
-postResult.angle = angle;
-postResult.angleError = angleError;
+postResult.angle = angle.Value;
+postResult.angleError = angle.Error;
 postResult.angleInfo = angleInfo;
 
 % update processed traces
-postResult.xProcessed = x;
-postResult.yProcessed = y;
-postResult.xProcessedError = xError;
-postResult.yProcessedError = yError;
+postResult.xProcessed = x.Value;
+postResult.yProcessed = y.Value;
+postResult.xProcessedError = x.Error;
+postResult.yProcessedError = y.Error;
 end
-function [xrot, yrot, xroterr, yroterr] = rotateXy(x, y, xerr, yerr, angle, angleError)
-xWithError = ErrorPropagator(x, xerr);
-yWithError = ErrorPropagator(y, yerr);
-angleWithError = ErrorPropagator(angle, angleError);
-[xRotated, yRotated] = TraceRotator.rotate2d( ...
-    xWithError, ...
-    yWithError, ...
-    angleWithError ...
-    );
-
-xrot = xRotated.Value;
-yrot = yRotated.Value;
-xroterr = xRotated.Error;
-yroterr = yRotated.Error;
+function [x, y] = rotateXy(x, y, angle)
+[x, y] = TraceRotator.rotate2d(x, y, angle);
 end
 
 function angle = rerange(angle)

@@ -218,6 +218,11 @@ classdef ErrorPropagator
             obj = obj1 .^ (1 / n);
         end
 
+        function obj = mod(obj1, n)
+            x = mod(obj1.Value, n);
+            obj = ErrorPropagator(x, obj1.Error);
+        end
+
         function obj = sin(obj1)
             obj = ErrorPropagator.scalarFunction(obj1, @sin);
         end
