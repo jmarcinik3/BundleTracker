@@ -62,7 +62,8 @@ classdef Centroid
             xyw = xyw ./ sum(xyw, 2);
             xym = xyw .* xymeans;
             
-            xyerr = sqrt(sum(xym .* xymeans, 2) - sum(xym, 2).^2);
+            discriminant = sum(xym .* xymeans, 2) - sum(xym, 2).^2;
+            xyerr = sqrt(abs(discriminant));
             xerr = xyerr(1);
             yerr = xyerr(2);
         end
