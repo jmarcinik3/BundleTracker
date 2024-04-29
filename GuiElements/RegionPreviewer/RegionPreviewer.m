@@ -176,7 +176,7 @@ set(iIm, "ButtonDownFcn", @obj.buttonDownFcn);
 end
 
 function configureRegionToGui(obj, region)
-regionIs1d = ~sum(createMask(region), "all");
+regionIs1d = ~sum(region.createMask(), "all");
 if regionIs1d
     deleteRegions(region);
     return;
