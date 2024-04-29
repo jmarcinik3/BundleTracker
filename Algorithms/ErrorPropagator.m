@@ -222,6 +222,9 @@ classdef ErrorPropagator
             x = mod(obj1.Value, n);
             obj = ErrorPropagator(x, obj1.Error);
         end
+        function obj = wrapToPi(obj1)
+            obj = ErrorPropagator(wrapToPi(obj1.Value), obj1.Error);
+        end
 
         function obj = sin(obj1)
             obj = ErrorPropagator.scalarFunction(obj1, @sin);

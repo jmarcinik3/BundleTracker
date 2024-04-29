@@ -134,7 +134,7 @@ postResult.xProcessed = x.Value;
 postResult.yProcessed = y.Value;
 postResult.xProcessedError = x.Error;
 postResult.yProcessedError = y.Error;
-postResult.t = (1:n) / fps;
+postResult.t = (1:numel(x.Value)) / fps;
 end
 function [x, y] = scaleXy(x, y, scaleFactor)
 xy = [x; y];
@@ -177,7 +177,7 @@ y = ErrorPropagator(result.yProcessed, result.yProcessedError);
 [angleRotate, angleError, angleInfo] = AngleAlgorithms.byKeyword(x.Value, y.Value, angleMode);
 angleRotate = ErrorPropagator(angleRotate, angleError);
 [x, y] = rotateXy(x, y, angleRotate);
-angle = rerange(angleRotate + angleDirection);
+angle = wrapToPi(angleRotate + angleDirection);
 
 postResult = result;
 % add information pertaining to best-fit angle
@@ -195,11 +195,4 @@ postResult.yProcessedError = y.Error;
 end
 function [x, y] = rotateXy(x, y, angle)
 [x, y] = TraceRotator.rotate2d(x, y, angle);
-end
-
-function angle = rerange(angle)
-angle = mod(angle, 6.28319);
-if angle > 3.14159
-    angle = angle - 6.28319;
-end
 end
