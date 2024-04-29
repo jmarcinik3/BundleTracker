@@ -176,6 +176,12 @@ set(iIm, "ButtonDownFcn", @obj.buttonDownFcn);
 end
 
 function configureRegionToGui(obj, region)
+regionIs1d = ~sum(createMask(region), "all");
+if regionIs1d
+    deleteRegions(region);
+    return;
+end
+
 regionGui = obj.getRegionGui();
 configureRegionGui(obj, regionGui, region);
 obj.previewRegion(region);
@@ -187,7 +193,7 @@ multiWaitbar(taskName, 0, 'CanCancel', 'on');
 regionCount = size(parameters, 1);
 regions = images.roi.Rectangle.empty(0, regionCount);
 
-    function region = drawRegionByParameters(index)
+    function region = drawRegion(index)
         parameter = parameters(index, :);
         region = obj.drawRegionByParameters(parameter, blobShape);
         configureRegionToGui(obj, region);
@@ -199,8 +205,7 @@ regions = images.roi.Rectangle.empty(0, regionCount);
     end
 
 for index = 1:regionCount
-    region = drawRegionByParameters(index);
-    regions(index) = region;
+    regions(index) = drawRegion(index);
     if updateWaitbar(index)
         deleteRegions(regions);
         break;
@@ -216,7 +221,7 @@ multiWaitbar(taskName, 0, 'CanCancel', 'on');
 regionCount = resultsParser.getRegionCount();
 regions = images.roi.Rectangle.empty(0, regionCount);
 
-    function region = importRegionFromInfo(index)
+    function region = importRegion(index)
         regionInfo = resultsParser.getRegion(index);
         region = obj.importRegion(regionInfo);
         configureRegionToGui(obj, region);
@@ -229,8 +234,7 @@ regions = images.roi.Rectangle.empty(0, regionCount);
     end
 
 for index = 1:regionCount
-    region = importRegionFromInfo(index);
-    regions(index) = region;
+    regions(index) = importRegion(index);
     if updateWaitbar(index)
         deleteRegions(regions);
         break;

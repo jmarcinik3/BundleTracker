@@ -17,17 +17,14 @@ classdef RegionDrawer < handle
 
     %% Functions to generate GUI elements
     methods (Access = protected)
-        function region = drawRegionByKeyword(obj)
+        function region = drawRegionOnClick(obj, ~, event)
             ax = obj.getAxis();
             keyword = obj.getRegionShape();
+            point = event.IntersectionPoint(1:2);
+
             region = drawRegionByKeyword(ax, keyword);
             configureRegion(obj, region);
-        end
-
-        function region = drawRegionOnClick(obj, ~, event)
-            point = event.IntersectionPoint(1:2);
-            region = obj.byPoint(point);
-            configureRegion(obj, region);
+            beginDrawingFromPoint(region, point);
         end
 
         function region = importRegion(obj, regionInfo)
@@ -38,13 +35,6 @@ classdef RegionDrawer < handle
         function region = drawRegionByParameters(obj, parameters, keyword)
             ax = obj.getAxis();
             region = drawRegionByParameters(ax, parameters, keyword);
-            configureRegion(obj, region);
-        end
-    end
-    methods (Access = private)
-        function region = byPoint(obj, point)
-            region = obj.drawRegionByKeyword();
-            beginDrawingFromPoint(region, point);
             configureRegion(obj, region);
         end
     end
