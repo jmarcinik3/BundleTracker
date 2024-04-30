@@ -15,12 +15,13 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             RegionCompressorLinker(regionGui.getRegionCompressorGui(), obj);
             RegionExpanderLinker(regionGui.getRegionExpanderGui(), obj);
 
+            set(imageGui.getInteractiveImage(), "ButtonDownFcn", @obj.buttonDownFcn);
+
             imageLinker = ImageLinker(imageGui);
             obj.imageLinker = imageLinker;
             obj.regionLinker = RegionLinker(regionGui, imageLinker.getRawImage());
             obj.axis = ax;
 
-            configureInteractiveImage(obj, imageGui);
             obj.updateRegionalRawImage([]);
         end
     end
@@ -169,11 +170,6 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 end
 
 
-
-function configureInteractiveImage(obj, imageGui)
-iIm = imageGui.getInteractiveImage();
-set(iIm, "ButtonDownFcn", @obj.buttonDownFcn);
-end
 
 function configureRegionToGui(obj, region)
 regionIs1d = ~sum(region.createMask(), "all");

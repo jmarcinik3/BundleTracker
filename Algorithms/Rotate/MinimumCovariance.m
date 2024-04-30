@@ -16,15 +16,6 @@ classdef MinimumCovariance
             obj.y = y;
         end
 
-        function angle = calculateAngle(obj)
-            x = obj.x;
-            y = obj.y;
-
-            covMatrix = cov(x, y);
-            absRotCovFunc = @(theta) abs(rotateCovariance(covMatrix, theta));
-            angle = fminsearch(absRotCovFunc, 0);
-        end
-
         function [angle, angleError, angleInfo] = angleWithError(obj)
             angle = calculateAngle(obj.x, obj.y);
             angleError = obj.bootstrapError(obj.bootstrapCount);

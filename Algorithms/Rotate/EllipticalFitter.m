@@ -98,7 +98,7 @@ classdef EllipticalFitter < ConicFitter
             obj.center = x0(:).';
             obj.majorDiam = AxesDiams(1);
             obj.minorDiam = AxesDiams(2);
-            obj.angle = theta;
+            obj.angle = deg2rad(theta);
         end
 
         function xy = sample(obj,varargin)
@@ -141,7 +141,6 @@ classdef EllipticalFitter < ConicFitter
         end
     end
 
-
     methods (Access = protected, Hidden)
         function propgrp = getPropertyGroups(obj)
             if ~isscalar(obj)
@@ -155,7 +154,6 @@ classdef EllipticalFitter < ConicFitter
             end
         end
     end
-
 
     methods (Static)
         function obj = groundtruth(xy,center,ab, theta)
