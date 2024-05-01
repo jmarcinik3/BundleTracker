@@ -68,10 +68,11 @@ function [angle, angleError, fitInfo] = byEllipseFit(x, y)
 xy = [x; y];
 fitter = EllipticalFitter(xy);
 angle = fitter.angle;
-majorRadius = fitter.majorDiam / 2;
-minorRadius = fitter.minorDiam / 2;
+majorRadius = 0.5 * fitter.majorDiameter;
+minorRadius = 0.5 * fitter.minorDiameter;
 center = fitter.center;
 angleError = Inf;
+
 fitInfo = struct( ...
     "MajorRadius", majorRadius, ...
     "MinorRadius", minorRadius, ...

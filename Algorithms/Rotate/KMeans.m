@@ -64,9 +64,9 @@ classdef KMeans
 end
 
 
-function angleWithError = calculateAngle(xyCenter)
+function angle = calculateAngle(xyCenter)
 dx = xyCenter(2, 1) - xyCenter(1, 1);
 dy = xyCenter(2, 2) - xyCenter(1, 2);
 ratio = dy ./ dx;
-angleWithError = atan(ratio);
+angle = atan(ratio);
 end
