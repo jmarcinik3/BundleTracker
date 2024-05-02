@@ -225,6 +225,12 @@ classdef ErrorPropagator
         function obj = wrapToPi(obj1)
             obj = ErrorPropagator(wrapToPi(obj1.Value), obj1.Error);
         end
+        function obj = rad2deg(obj1)
+            obj = ErrorPropagator(rad2deg(obj1.Value), rad2deg(obj1.Error));
+        end
+        function obj = deg2rad(obj1)
+            obj = ErrorPropagator(deg2rad(obj1.Value), deg2rad(obj1.Error));
+        end
 
         function obj = sin(obj1)
             obj = ErrorPropagator.scalarFunction(obj1, @sin);
