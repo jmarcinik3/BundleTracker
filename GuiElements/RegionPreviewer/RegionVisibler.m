@@ -80,13 +80,8 @@ classdef RegionVisibler < handle
             obj.setAdjacentRegionVisible(1);
         end
         function previewRegion(obj, region)
-            obj.setActiveRegion(region);
-            RegionUpdater.update(region);
-        end
-    end
-    methods (Access = protected)
-        function setActiveRegion(obj, region)
             obj.activeRegion = region;
+            RegionUpdater.update(region);
         end
     end
     methods (Access = private)

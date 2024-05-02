@@ -12,12 +12,7 @@ classdef TrackingLinker < RegionPreviewer ...
     end
 
     methods
-        function obj = TrackingLinker(trackingGui, varargin)
-            p = inputParser;
-            addOptional(p, "StartingFilepath", "");
-            parse(p, varargin{:});
-            startingFilepath = p.Results.StartingFilepath;
-
+        function obj = TrackingLinker(trackingGui)
             videoGui = trackingGui.getVideoGui();
             imageGui = trackingGui.getImageGui();
             regionGui = trackingGui.getRegionGui();
@@ -27,16 +22,14 @@ classdef TrackingLinker < RegionPreviewer ...
             obj@VideoSelector(videoGui);
 
             set(videoGui.getFilepathField(), "ValueChangedFcn", @obj.videoFilepathChanged);
-            obj.gui = trackingGui;
 
             fig = trackingGui.getFigure();
+            set(fig, "WindowKeyPressFcn", @(src, ev) keyPressed(obj, src, ev));
             TrackingToolbar(fig, obj);
-            figureKeyPressFcn = @(src, ev) keyPressed(obj, src, ev);
-            set(fig, "WindowKeyPressFcn", figureKeyPressFcn);
-
             TrackingMenu(fig, obj);
 
-            obj.setFilepathIfChosen(startingFilepath);
+            obj.gui = trackingGui;
+            drawnow;
         end
     end
 
@@ -57,17 +50,11 @@ classdef TrackingLinker < RegionPreviewer ...
             title = SettingsParser.getImportRegionsLabel();
             filepath = uigetfilepath(extensions, title, previousDirectoryPath);
             if isfile(filepath)
-                obj.importRegionsFromFile(filepath);
+                obj.importRegions(filepath);
             end
         end
         function exportImageButtonPushed(obj, ~, ~)
             obj.exportImage();
-        end
-        function exportImage(obj, path)
-            if nargin < 2
-                path = obj.gui.getDirectoryPath();
-            end
-            exportImage@RegionPreviewer(obj, path);
         end
 
         function trackButtonPushed(obj, ~, ~)
@@ -112,10 +99,21 @@ classdef TrackingLinker < RegionPreviewer ...
 
     %% Functions to be called as part of API
     methods
-        function trackAndSaveRegions(obj)
+        function exportImage(obj, path)
+            if nargin < 2
+                path = obj.gui.getDirectoryPath();
+            end
+            exportImage@RegionPreviewer(obj, path);
+        end
+        function trackAndSaveRegions(obj, filepath)
             [cancel, results] = obj.trackAndProcess();
+
             if ~cancel
-                obj.trackingCompleted(results);
+                if nargin < 2
+                    obj.trackingCompleted(results);
+                elseif nargin == 2
+                    save(filepath, "results");
+                end
             else
                 obj.throwAlertMessage("Tracking Canceled!", "Start Tracking");
             end
@@ -125,7 +123,16 @@ classdef TrackingLinker < RegionPreviewer ...
         function videoFilepathChanged(obj, ~, ~)
             filepath = obj.gui.getVideoFilepath();
             if numel(filepath) >= 1 && isfile(filepath)
-                videoFilepathChanged(obj, filepath);
+                videoReader = VideoReader(filepath);
+                firstFrame = read(videoReader, 1);
+                videoProfile = get(videoReader, "VideoFormat");
+                maxIntensity = getMaximumIntensity(videoProfile);
+                label = generateFrameLabel(videoReader);
+
+                obj.changeImage(firstFrame);
+                obj.setMaximumIntensity(maxIntensity);
+                obj.setFrameLabel(label);
+                obj.importVideoToRam(videoReader);
             end
         end
     end
@@ -165,9 +172,7 @@ classdef TrackingLinker < RegionPreviewer ...
             resultsFilepath = trackingCompleteGui.resultsFilepath;
             imageFilepath = trackingCompleteGui.imageFilepath;
 
-            if ischar(resultsFilepath) || isstring(resultsFilepath)
-                save(resultsFilepath, "results");
-            end
+            saveResults(results, resultsFilepath);
             if ischar(imageFilepath) || isstring(imageFilepath)
                 obj.exportImage(imageFilepath);
             end
@@ -209,18 +214,6 @@ end
 
 
 
-function videoFilepathChanged(obj, filepath)
-videoReader = VideoReader(filepath);
-firstFrame = read(videoReader, 1);
-videoProfile = get(videoReader, "VideoFormat");
-maxIntensity = getMaximumIntensity(videoProfile);
-label = generateFrameLabel(videoReader);
-
-obj.changeImage(firstFrame);
-obj.setMaximumIntensity(maxIntensity);
-obj.setFrameLabel(label);
-obj.importVideoToRam(videoReader);
-end
 function label = generateFrameLabel(videoReader)
 frameCount = get(videoReader, "NumFrames");
 fps = get(videoReader, "FrameRate");
@@ -267,4 +260,10 @@ filepath = sprintf( ...
     obj.gui.getDirectoryPath(), ...
     SettingsParser.getDefaultImageFilename() ...
     );
+end
+
+function saveResults(results, resultsFilepath)
+if ischar(resultsFilepath) || isstring(resultsFilepath)
+    save(resultsFilepath, "results");
+end
 end

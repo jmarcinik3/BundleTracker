@@ -51,13 +51,36 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
                     );
             end
         end
-        function importRegionsFromFile(obj, filepath)
-            importRegionsFromInfo(obj, ResultsParser(filepath));
-        end
-        function drawRegionsByParameters(obj, parameters, blobShape)
-            drawRegionsByParameters(obj, parameters, blobShape);
-        end
+        function importRegions(obj, filepath)
+            resultsParser = ResultsParser(filepath);
+            taskName = 'Importing Regions';
+            multiWaitbar(taskName, 0, 'CanCancel', 'on');
+            regionCount = resultsParser.getRegionCount();
+            regions = images.roi.Rectangle.empty(0, regionCount);
 
+            for index = 1:regionCount
+                regionInfo = resultsParser.getRegion(index);
+                region = obj.importRegion(regionInfo);
+                configureRegionToGui(obj, region);
+                RegionUserData.configureByResultsParser(region, resultsParser, index);
+                regions(index) = region;
+
+                proportionComplete = index / regionCount;
+                if multiWaitbar(taskName, proportionComplete)
+                    deleteRegions(regions);
+                    break;
+                end
+            end
+
+            multiWaitbar(taskName, 'Close');
+        end
+        function previewRegion(obj, region)
+            previewRegion@RegionVisibler(obj, region);
+            regionChanged(obj);
+            obj.updateRegionalRawImage(region);
+        end
+    end
+    methods (Access = protected)
         function setMaximumIntensity(obj, maxIntensity)
             obj.imageLinker.setMaximumIntensity(maxIntensity);
             obj.regionLinker.setMaximumIntensity(maxIntensity);
@@ -67,10 +90,27 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             obj.imageLinker.changeImage(im);
             obj.regionLinker.changeImage(im);
         end
-        function previewRegion(obj, region)
-            previewRegion@RegionVisibler(obj, region);
-            regionChanged(obj);
-            obj.updateRegionalRawImage(region);
+
+        function drawRegionsByParameters(obj, parameters, blobShape)
+            taskName = ['Drawing ', blobShape, 's'];
+            multiWaitbar(taskName, 0, 'CanCancel', 'on');
+            regionCount = size(parameters, 1);
+            regions = images.roi.Rectangle.empty(0, regionCount);
+
+            for index = 1:regionCount
+                parameter = parameters(index, :);
+                region = obj.drawRegionByParameters(parameter, blobShape);
+                configureRegionToGui(obj, region);
+                regions(index) = region;
+
+                proportionComplete = index / regionCount;
+                if multiWaitbar(taskName, proportionComplete)
+                    deleteRegions(regions);
+                    break;
+                end
+            end
+
+            multiWaitbar(taskName, 'Close');
         end
     end
     methods (Access = private)
@@ -182,65 +222,6 @@ regionGui = obj.getRegionGui();
 configureRegionGui(obj, regionGui, region);
 obj.previewRegion(region);
 end
-
-function drawRegionsByParameters(obj, parameters, blobShape)
-taskName = ['Drawing ', blobShape, 's'];
-multiWaitbar(taskName, 0, 'CanCancel', 'on');
-regionCount = size(parameters, 1);
-regions = images.roi.Rectangle.empty(0, regionCount);
-
-    function region = drawRegion(index)
-        parameter = parameters(index, :);
-        region = obj.drawRegionByParameters(parameter, blobShape);
-        configureRegionToGui(obj, region);
-    end
-
-    function cancel = updateWaitbar(index)
-        proportionComplete = index / regionCount;
-        cancel = multiWaitbar(taskName, proportionComplete);
-    end
-
-for index = 1:regionCount
-    regions(index) = drawRegion(index);
-    if updateWaitbar(index)
-        deleteRegions(regions);
-        break;
-    end
-end
-
-multiWaitbar(taskName, 'Close');
-end
-
-function importRegionsFromInfo(obj, resultsParser)
-taskName = 'Importing Regions';
-multiWaitbar(taskName, 0, 'CanCancel', 'on');
-regionCount = resultsParser.getRegionCount();
-regions = images.roi.Rectangle.empty(0, regionCount);
-
-    function region = importRegion(index)
-        regionInfo = resultsParser.getRegion(index);
-        region = obj.importRegion(regionInfo);
-        configureRegionToGui(obj, region);
-        RegionUserData.configureByResultsParser(region, resultsParser, index);
-    end
-
-    function cancel = updateWaitbar(index)
-        proportionComplete = index / regionCount;
-        cancel = multiWaitbar(taskName, proportionComplete);
-    end
-
-for index = 1:regionCount
-    regions(index) = importRegion(index);
-    if updateWaitbar(index)
-        deleteRegions(regions);
-        break;
-    end
-end
-
-multiWaitbar(taskName, 'Close');
-end
-
-
 
 function configureRegionGui(previewer, gui, region)
 directionGui = gui.getDirectionGui();

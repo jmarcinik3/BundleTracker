@@ -9,6 +9,8 @@ classdef ResultsParser
                 obj.results = load(results, "results").results;
             elseif isstruct(results)
                 obj.results = results;
+            elseif isa(results, "ResultsParser")
+                obj = results;
             end
         end
 

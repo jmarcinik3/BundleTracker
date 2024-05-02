@@ -31,36 +31,33 @@ classdef VideoSelector < AlertThrower
 
     %% Functions to set state information
     methods
-        function setFrameLabel(obj, text)
-            elem = obj.gui.getFrameLabel();
-            set(elem, "Text", text);
-        end
-        function setFilepathIfChosen(obj, filepath, source, event)
+        function importVideo(obj, filepath, source, event)
             if isfile(filepath)
                 if nargin == 2
                     source = obj;
                     event = generateFakeEvent(obj);
                 end
-                obj.setVideoFilepath(filepath, source, event);
+                filepathField = obj.gui.getFilepathField();
+                set(filepathField, "Value", filepath);
+                filepathField.ValueChangedFcn(source, event);
             end
         end
     end
-    methods (Access = private)
-        function setVideoFilepath(obj, filepath, source, event)
-            filepathField = obj.gui.getFilepathField();
-            set(filepathField, "Value", filepath);
-            filepathField.ValueChangedFcn(source, event);
+    methods (Access = protected)
+        function setFrameLabel(obj, text)
+            elem = obj.gui.getFrameLabel();
+            set(elem, "Text", text);
         end
     end
 
     %% Functions to update state information
     methods
-        function importVideo(obj, source, event)
+        function importVideoButtonPushed(obj, source, event)
             previousDirectoryPath = obj.gui.getDirectoryPath();
             title = SettingsParser.getImportVideoLabel();
             extensions = VideoSelector.extensions;
             filepath = uigetfilepath(extensions, title, previousDirectoryPath);
-            obj.setFilepathIfChosen(filepath, source, event);
+            obj.importVideo(filepath, source, event);
         end
         function openDirectory(obj, ~, ~)
             if obj.directoryIsValid()
