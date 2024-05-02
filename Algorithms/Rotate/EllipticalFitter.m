@@ -1,19 +1,18 @@
 classdef EllipticalFitter
     properties (SetAccess = protected)
-        majorRadius;
-        minorRadius;
-        center;
-        angle;
+        Center;
+        SemiAxes;
+        RotationAngle;
     end
 
     methods
         function obj = EllipticalFitter(xy)
             % XY: a 2xN  matrix
             [center, radii, angle] = ellipseFromXy(xy);
-            obj.center = center(:).';
-            obj.majorRadius = max(radii);
-            obj.minorRadius = min(radii);
-            obj.angle = angle;
+            [radii, angle] = rerangeDirection(radii, angle);
+            obj.Center = center(:).';
+            obj.SemiAxes = radii;
+            obj.RotationAngle = angle;
         end
     end
 end
@@ -50,6 +49,7 @@ end
 end
 
 
+
 function ab = radiiFromCoefficients(ABCDEF)
 ABCDEF = num2cell(ABCDEF);
 [A, B, C, D, E, F] = deal(ABCDEF{:});
@@ -57,8 +57,7 @@ ABCDEF = num2cell(ABCDEF);
 bottom = B^2 - 4*A*C;
 top1 = 2 * (A*E^2 + C*D^2 - B*D*E + F*bottom);
 top2 = (A + C) + [1, -1] * sqrt((A-C)^2 + B^2);
-top = sqrt(top1 * top2);
-ab = - top / bottom;
+ab = -sqrt(top1 * top2) / bottom;
 end
 
 function xy0 = centerFromCoefficients(ABCDEF)
@@ -70,14 +69,24 @@ end
 function angle = angleFromCoefficients(ABCDEF)
 ABCDEF = num2cell(ABCDEF);
 [A, B, C, ~, ~, ~] = deal(ABCDEF{:});
-angle = 0.5 * atan2(-B, C-A);
-angle = rerangeAngle(angle);
+
+if B == 0 && A < C
+    angle = 0;
+elseif B == 0 && A > C
+    angle = pi/2;
+elseif B ~= 0 && A < C
+    angle = 0.5 * acot((C-A)/B);
+elseif B ~= 0 && A > C
+    angle = pi/2 + 0.5 * acot((C-A)/B);
+end
 end
 
-function angle = rerangeAngle(angle)
+function [radii, angle] = rerangeDirection(radii, angle)
 if angle > pi/4
     angle = angle - pi/2;
+    radii = flip(radii);
 elseif angle < -pi/4
     angle = angle + pi/2;
+    radii = flip(radii);
 end
 end
