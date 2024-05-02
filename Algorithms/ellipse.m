@@ -2,7 +2,7 @@ function ellipseLine = ellipse(ax, varargin)
 p = inputParser;
 addOptional(p, "Center", [0, 0]);
 addOptional(p, "RotationAngle", 0);
-addRequired(p, "SemiAxes");
+addOptional(p, "SemiAxes", [1, 1]);
 parse(p, varargin{:});
 center = p.Results.Center;
 rotationAngle = p.Results.RotationAngle;

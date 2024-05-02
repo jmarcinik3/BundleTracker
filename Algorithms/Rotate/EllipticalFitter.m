@@ -1,7 +1,7 @@
 classdef EllipticalFitter
     properties (SetAccess = protected)
-        majorDiameter;
-        minorDiameter;
+        majorRadius;
+        minorRadius;
         center;
         angle;
     end
@@ -9,10 +9,10 @@ classdef EllipticalFitter
     methods
         function obj = EllipticalFitter(xy)
             % XY: a 2xN  matrix
-            [center, diameters, angle] = ellipseFromXy(xy);
+            [center, radii, angle] = ellipseFromXy(xy);
             obj.center = center(:).';
-            obj.majorDiameter = max(diameters);
-            obj.minorDiameter = min(diameters);
+            obj.majorRadius = max(radii);
+            obj.minorRadius = min(radii);
             obj.angle = angle;
         end
     end
@@ -20,13 +20,13 @@ end
 
 
 
-function [center, diameters, angle] = ellipseFromXy(xy)
+function [center, radii, angle] = ellipseFromXy(xy)
 xyCenter = median(xy, 2);
 ABCDEF = mostNullCoefficients(xy - xyCenter);
 checkDiscriminant(ABCDEF);
 center = centerFromCoefficients(ABCDEF) + xyCenter.';
 angle = angleFromCoefficients(ABCDEF);
-diameters = diametersFromCoefficients(ABCDEF);
+radii = radiiFromCoefficients(ABCDEF);
 end
 
 function ABCDEF = mostNullCoefficients(xy)
@@ -50,7 +50,7 @@ end
 end
 
 
-function ab = diametersFromCoefficients(ABCDEF)
+function ab = radiiFromCoefficients(ABCDEF)
 ABCDEF = num2cell(ABCDEF);
 [A, B, C, D, E, F] = deal(ABCDEF{:});
 
