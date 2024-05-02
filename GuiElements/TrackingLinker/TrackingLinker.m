@@ -109,6 +109,18 @@ classdef TrackingLinker < RegionPreviewer ...
             end
         end
     end
+
+    %% Functions to be called as part of API
+    methods
+        function trackAndSaveRegions(obj)
+            [cancel, results] = obj.trackAndProcess();
+            if ~cancel
+                obj.trackingCompleted(results);
+            else
+                obj.throwAlertMessage("Tracking Canceled!", "Start Tracking");
+            end
+        end
+    end
     methods (Access = private)
         function videoFilepathChanged(obj, ~, ~)
             filepath = obj.gui.getVideoFilepath();
@@ -139,14 +151,6 @@ classdef TrackingLinker < RegionPreviewer ...
         end
     end
     methods (Access = private)
-        function trackAndSaveRegions(obj)
-            [cancel, results] = obj.trackAndProcess();
-            if ~cancel
-                obj.trackingCompleted(results);
-            else
-                obj.throwAlertMessage("Tracking Canceled!", "Start Tracking");
-            end
-        end
         function trackingCompleted(obj, results)
             fig = generateTrackingCompletedFigure(results);
             resultsFilepath = generateResultsFilepath(obj);
