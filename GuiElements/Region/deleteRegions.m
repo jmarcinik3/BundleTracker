@@ -1,4 +1,7 @@
 function deleteRegions(regions)
+if numel(regions) == 0
+    return;
+end
 ax = ancestor(regions(1), "axes");
 regionCount = numel(regions);
 
