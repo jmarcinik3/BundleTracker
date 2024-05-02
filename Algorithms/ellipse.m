@@ -18,8 +18,8 @@ theta = linspace(0, 2*pi, Nb+1);
 
 xCosTheta = xRadius*cos(theta);
 ySinTheta = yRadius*sin(theta);
-x = xCosTheta*cos(rotationAngle) - ySinTheta*sin(rotationAngle) + xCenter;
-y = xCosTheta*sin(rotationAngle) + ySinTheta*cos(rotationAngle) + yCenter;
+x = xCosTheta*cos(rotationAngle) + ySinTheta*sin(rotationAngle) + xCenter;
+y = ySinTheta*cos(rotationAngle) - xCosTheta*sin(rotationAngle) + yCenter;
 
 ellipseLine = line(ax, x, y);
 end
