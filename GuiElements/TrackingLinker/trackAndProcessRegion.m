@@ -9,16 +9,34 @@ end
 end
 
 function [cancel, centers] = trackCenters(trackingLinker, region)
-ims = getPreprocessedVideoInRegion(trackingLinker, region);
+ims = trackingLinker.getVideoInRegion(region);
+ims = Preprocessor.fromRegion(region).preprocess(ims);
 trackingMode = RegionUserData(region).getTrackingMode();
-regionTracker = RegionTracker("TrackingMode", trackingMode);
-[cancel, centers] = regionTracker.track(ims);
+[cancel, centers] = trackVideo(ims, trackingMode);
 end
 
-function ims = getPreprocessedVideoInRegion(obj, region)
-ims = obj.getVideoInRegion(region);
-preprocessor = Preprocessor.fromRegion(region);
-ims = preprocessor.preprocess(ims);
+function [cancel, centers] = trackVideo(ims, trackingMode)
+taskName = 'Tracking Region';
+multiWaitbar(taskName, 0, 'CanCancel', 'on');
+frameCount = size(ims, 3);
+centers = PointStructurer.preallocate(frameCount);
+trackFrame = TrackingAlgorithms.handleByKeyword(trackingMode);
+
+cancel = false;
+proportionDelta = 1 / frameCount;
+for index = 1:frameCount
+    centers(index) = trackFrame(ims(:, :, index));
+    proportionComplete = index / frameCount;
+    if mod(proportionComplete, 0.01) < proportionDelta
+        cancel = multiWaitbar(taskName, proportionComplete);
+    end
+    if cancel
+        break;
+    end
+end
+
+centers = PointStructurer.mergePoints(centers);
+multiWaitbar(taskName, 'Close');
 end
 
 function result = processResult(region, centers, initialResult)
