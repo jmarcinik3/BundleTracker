@@ -51,29 +51,6 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
                     );
             end
         end
-        function importRegions(obj, filepath)
-            resultsParser = ResultsParser(filepath);
-            taskName = 'Importing Regions';
-            multiWaitbar(taskName, 0, 'CanCancel', 'on');
-            regionCount = resultsParser.getRegionCount();
-            regions = images.roi.Rectangle.empty(0, regionCount);
-
-            for index = 1:regionCount
-                regionInfo = resultsParser.getRegion(index);
-                region = obj.importRegion(regionInfo);
-                configureRegionToGui(obj, region);
-                RegionUserData.configureByResultsParser(region, resultsParser, index);
-                regions(index) = region;
-
-                proportionComplete = index / regionCount;
-                if multiWaitbar(taskName, proportionComplete)
-                    deleteRegions(regions);
-                    break;
-                end
-            end
-
-            multiWaitbar(taskName, 'Close');
-        end
         function previewRegion(obj, region)
             previewRegion@RegionVisibler(obj, region);
             regionChanged(obj);
@@ -100,7 +77,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             for index = 1:regionCount
                 parameter = parameters(index, :);
                 region = obj.drawRegionByParameters(parameter, blobShape);
-                configureRegionToGui(obj, region);
+                obj.configureRegionToGui(region);
                 regions(index) = region;
 
                 proportionComplete = index / regionCount;
@@ -112,12 +89,23 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 
             multiWaitbar(taskName, 'Close');
         end
+        function configureRegionToGui(obj, region)
+            regionIs1d = ~sum(region.createMask(), "all");
+            if regionIs1d
+                deleteRegions(region);
+                return;
+            end
+
+            regionGui = obj.getRegionGui();
+            configureRegionGui(obj, regionGui, region);
+            obj.previewRegion(region);
+        end
     end
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
             if event.Button == 1 % is left click
                 region = obj.drawRegionOnClick(source, event);
-                configureRegionToGui(obj, region);
+                obj.configureRegionToGui(region);
             end
         end
         function regionClicked(obj, source, event)
@@ -210,18 +198,6 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
 end
 
 
-
-function configureRegionToGui(obj, region)
-regionIs1d = ~sum(region.createMask(), "all");
-if regionIs1d
-    deleteRegions(region);
-    return;
-end
-
-regionGui = obj.getRegionGui();
-configureRegionGui(obj, regionGui, region);
-obj.previewRegion(region);
-end
 
 function configureRegionGui(previewer, gui, region)
 directionGui = gui.getDirectionGui();

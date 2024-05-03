@@ -13,7 +13,7 @@ classdef TrackingGui
         regionPanel;
         regionGui;
         videoGui
-        scaleFactorInputElement;
+        scaleFactorGridLayout;
     end
 
     methods
@@ -27,7 +27,7 @@ classdef TrackingGui
             [obj.regionPanel, obj.regionGui] = generateRegionGui(rgl);
             obj.videoGui = VideoGui(gl, {1, [1, 2]});
 
-            obj.scaleFactorInputElement = generateScaleFactorElement(rgl);
+            obj.scaleFactorGridLayout = generateScaleFactorElement(rgl);
 
             obj.gridLayout = gl;
             obj.rightGridLayout = rgl;
@@ -69,8 +69,14 @@ classdef TrackingGui
         end
 
         % components for processing
-        function elem = getScaleFactorInputElement(obj)
-            elem = obj.scaleFactorInputElement;
+        function textbox = getScaleFactorElement(obj)
+            textbox = obj.getScaleGridLayout().Children(2);
+        end
+        function textbox = getScaleFactorErrorElement(obj)
+            textbox = obj.getScaleGridLayout().Children(4);
+        end
+        function elem = getScaleGridLayout(obj)
+            elem = obj.scaleFactorGridLayout;
         end
     end
 
@@ -85,21 +91,12 @@ classdef TrackingGui
 
         % ...for postprocessing
         function factor = getScaleFactor(obj)
-            gl = obj.scaleFactorInputElement;
-            textbox = gl.Children(2);
+            textbox = obj.getScaleFactorElement();
             factor = textbox.Value;
         end
         function err = getScaleFactorError(obj)
-            gl = obj.scaleFactorInputElement;
-            textbox = gl.Children(4);
+            textbox = obj.getScaleFactorErrorElement();
             err = textbox.Value;
-        end
-
-        function filepath = generateSaveFilepath(obj)
-            directoryPath = obj.getDirectoryPath();
-            filestem = obj.getSaveFilestem();
-            filename = sprintf("%s%s.mat", filestem);
-            filepath = fullfile(directoryPath, filename);
         end
     end
 end
@@ -134,7 +131,7 @@ function layoutRightsideElements(gui)
 rowHeight = TrackingGui.rowHeight;
 rgl = gui.getRightGridLayout();
 
-scaleFactorElement = gui.getScaleFactorInputElement();
+scaleFactorElement = gui.getScaleGridLayout();
 regionGuiPanel = gui.getRegionPanel();
 
 scaleFactorElement.Layout.Row = 1;

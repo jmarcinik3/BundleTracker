@@ -99,6 +99,37 @@ classdef TrackingLinker < RegionPreviewer ...
 
     %% Functions to be called as part of API
     methods
+        function importRegions(obj, filepath)
+            resultsParser = ResultsParser(filepath);
+            taskName = 'Importing Regions';
+            multiWaitbar(taskName, 0, 'CanCancel', 'on');
+            regionCount = resultsParser.getRegionCount();
+            regions = images.roi.Rectangle.empty(0, regionCount);
+
+            for index = 1:regionCount
+                regionInfo = resultsParser.getRegion(index);
+                region = obj.importRegion(regionInfo);
+                obj.configureRegionToGui(region);
+                RegionUserData.configureByResultsParser(region, resultsParser, index);
+                regions(index) = region;
+
+                proportionComplete = index / regionCount;
+                cancel = multiWaitbar(taskName, proportionComplete);
+                if cancel
+                    deleteRegions(regions);
+                    break;
+                end
+            end
+
+            if ~cancel
+                obj.setScaleFactor( ...
+                    resultsParser.getScaleFactor(), ...
+                    resultsParser.getScaleFactorError() ...
+                    );
+            end
+
+            multiWaitbar(taskName, 'Close');
+        end
         function exportImage(obj, path)
             if nargin < 2
                 path = obj.gui.getDirectoryPath();
@@ -134,6 +165,13 @@ classdef TrackingLinker < RegionPreviewer ...
                 obj.setFrameLabel(label);
                 obj.importVideoToRam(videoReader);
             end
+        end
+        function setScaleFactor(obj, scaleFactor, scaleFactorError)
+            gui = obj.gui;
+            factorElement = gui.getScaleFactorElement();
+            errorElement = gui.getScaleFactorErrorElement();
+            set(factorElement, "Value", scaleFactor);
+            set(errorElement, "Value", scaleFactorError);
         end
     end
 

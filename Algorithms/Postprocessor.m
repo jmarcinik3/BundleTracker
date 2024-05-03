@@ -123,10 +123,10 @@ scaleFactor = p.Results.ScaleFactor;
 scaleError = p.Results.ScaleFactorError;
 fps = p.Results.Fps;
 
-scaleFactor = ErrorPropagator(scaleFactor, scaleError);
+scaleWithError = ErrorPropagator(scaleFactor, scaleError);
 x = ErrorPropagator(result.xProcessed, result.xProcessedError);
 y = ErrorPropagator(result.yProcessed, result.yProcessedError);
-[x, y] = scaleXy(x, y, scaleFactor);
+[x, y] = scaleXy(x, y, scaleWithError);
 
 postResult = result;
 % add information pertaining to scale factor
