@@ -1,25 +1,30 @@
-function [fitParameters, zFit, fitParameterErrors, zError, resnorm, rsquare] ...
-    = fmgaussfit(xInput, yInput, zzInput)
-% FMGAUSSFIT Create/alter optimization OPTIONS structure.
-%   [fitParameters,..., rr] = fmgaussfit(xInput,yInput,zzInput) uses zzInput for the surface
-%   height. xInput and yInput are vectors or matrices defining the x and y
-%   components of a surface. If xInput and yInput are vectors, length(xInput) = n and
-%   length(yInput) = m, where [m,n] = size(Z). In this case, the vertices of the
-%   surface faces are (xInput(j), yInput(i), zzInput(i,j)) triples. To create xInput and yInput
-%   matrices for arbitrary domains, use the meshgrid function. FMGAUSSFIT
-%   uses the lsqcurvefit tool, and the OPTIMZATION TOOLBOX. The initial
-%   guess for the gaussian is places at the maxima in the zzInput plane. The fit
-%   is restricted to be in the span of xInput and yInput.
-%   See:
-%       http://en.wikipedia.org/wiki/Gaussian_function
-%
-%   Examples:
-%     To fit a 2D gaussian:
-%       [fitParameters, zFit, fitParameterErrors, zError, resnorm, rr] =
-%       fmgaussfit(xInput, yInput, zzInput);
-%   See also SURF, OMPTMSET, LSQCURVEFIT, NLPARCI, NLPREDCI.
+classdef GaussianFitter
+    properties (Access = private)
+        im;
+    end
 
-%   Copyright 2013, Nathan Orloff.
+    methods
+        function obj = GaussianFitter(im)
+            obj.im = im;
+        end
+
+        function center = withError(obj)
+            im = obj.im;
+            [rows, columns] = size(im);
+            [x, y] = calculateXY(rows, columns);
+            [parameters, errors] = fmgaussfit(x, y, im);
+            center = PointStructurer.asPoint(parameters(5), parameters(6), errors(5), errors(6));
+        end
+    end
+end
+
+
+function [x, y] = calculateXY(rows, columns)
+x = ones(rows, 1) * (1:columns); % 2D matrix of x indicies
+y = (1:rows)' * ones(1, columns); % 2D matrix of y indicies
+end
+
+function [fitParameters, fitParameterErrors] = fmgaussfit(xInput, yInput, zzInput)
 
 %% Condition the data
 [xData, yData, zData] = prepareSurfaceData(xInput, yInput, zzInput);
@@ -44,7 +49,7 @@ LowerBound = [0, 0, 0, 0, xLowerBound, yLowerBound, 0];
 UpperBound = [Inf, 180, Inf, Inf, xUpperBound, yUpperBound, Inf]; % angle greater than 90 are redundant
 StartPoint = [amplitudeGuess, angleDegreesGuess, xStdGuess, yStdGuess, xGuess, yGuess, zGuess];
 
-tols = 1e-16;
+tols = 1e-14;
 options = optimset( ...
     "Algorithm", "levenberg-marquardt", ...
     "Display", "off", ...
@@ -56,18 +61,9 @@ options = optimset( ...
     );
 
 %% perform the fitting
-[fitParameters, resnorm, residuals] = ...
+[fitParameters, ~, residuals] = ...
     lsqcurvefit(@gaussian2d, StartPoint, xyData, zData, LowerBound, UpperBound, options);
-[fitParameterErrors, zFit, zError] = gaussian2dErrors(fitParameters, residuals, xyData);
-rsquare = rsquared(zData, zFit, zError);
-zFit = reshape(zFit, size(zzInput));
-zError = reshape(zError, size(zzInput));
-end
-
-function rr = rsquared(zData, zFit, zError)
-% reduced chi-squared
-deltaZ = zData - zFit;
-rr = 1 / (numel(zData)-8) .* sum((deltaZ./zError).^2); % minus 8 because there are 7 fit parameters +1 (DOF)
+fitParameterErrors = gaussian2dErrors(fitParameters, residuals, xyData);
 end
 
 function z = gaussian2d(p, xy)
@@ -83,12 +79,11 @@ c2 = xy{2} - p(6);
 z = p(7) + p(1)*exp(-b1*(b3*c1 + b4*c2).^2 - b2*(-b4*c1 + b3*c2).^2);
 end
 
-function [deltaParameters, zFit, zError] = gaussian2dErrors(p, residuals, xy)
+function deltaParameters = gaussian2dErrors(p, residuals, xy)
 % get the confidence intervals
 jacobian = guassian2dJacobian(p, xy);
 parameterConfidenceIntervals = nlparci(p, residuals, "Jacobian", jacobian);
 deltaParameters = (diff(parameterConfidenceIntervals, [], 2) / 2)';
-[zFit, zError] = nlpredci(@gaussian2d, xy, p, residuals, "Jacobian", jacobian);
 end
 
 function jacobian = guassian2dJacobian(p, xy)

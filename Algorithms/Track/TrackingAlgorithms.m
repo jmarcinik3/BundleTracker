@@ -28,21 +28,7 @@ classdef TrackingAlgorithms
             center = Centroid(im).withError();
         end
         function center = byGaussianFit(im)
-            center = gaussian(im);
+            center = GaussianFitter(im).withError();
         end
     end
-end
-
-function center = gaussian(im)
-[rows, columns] = size(im);
-x = 1:columns;
-y = (1:rows)';
-
-[fitParameters, ~, fitErrors, ~, ~, ~] = fmgaussfit(x, y, im);
-xmean = fitParameters(5);
-ymean = fitParameters(6);
-xerr = fitErrors(5);
-yerr = fitErrors(6);
-
-center = PointStructurer.asPoint(xmean, ymean, xerr, yerr);
 end
