@@ -59,7 +59,7 @@ classdef TrackingLinker < RegionPreviewer ...
 
         function trackButtonPushed(obj, ~, ~)
             if obj.regionExists("Start Tracking")
-                obj.trackAndSaveRegions();
+                obj.trackAndExportRegions();
             end
         end
         function blobDetectionButtonPushed(obj, ~, ~)
@@ -136,7 +136,7 @@ classdef TrackingLinker < RegionPreviewer ...
             end
             exportImage@RegionPreviewer(obj, path);
         end
-        function trackAndSaveRegions(obj, filepath)
+        function trackAndExportRegions(obj, filepath)
             [cancel, results] = obj.trackAndProcess();
 
             if ~cancel
