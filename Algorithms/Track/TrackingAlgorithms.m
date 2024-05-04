@@ -1,22 +1,22 @@
 classdef TrackingAlgorithms
     properties (Constant)
         centerOfMass = "Centroid";
+        crossCorrelation = "Maximum Cross-Correlation";
         gaussianFit = "2D Gaussian";
         keywords = sort([ ...
             TrackingAlgorithms.centerOfMass, ...
+            TrackingAlgorithms.crossCorrelation, ...
             TrackingAlgorithms.gaussianFit ...
             ]);
     end
 
     methods (Static)
-        function center = byKeyword(im, keyword)
-            handle = TrackingAlgorithms.handleByKeyword(keyword);
-            center = handle(im);
-        end
-        function handle = handleByKeyword(keyword)
+        function handle = handleByKeyword(keyword, ims)
             switch keyword
                 case TrackingAlgorithms.centerOfMass
                     handle = @TrackingAlgorithms.byCenterOfMass;
+                case TrackingAlgorithms.crossCorrelation
+                    handle = crossCorrelationTracker(ims(:, :, 1));
                 case TrackingAlgorithms.gaussianFit
                     handle = @TrackingAlgorithms.byGaussianFit;
             end
@@ -31,4 +31,11 @@ classdef TrackingAlgorithms
             center = GaussianFitter(im).withError();
         end
     end
+end
+
+
+
+function handle = crossCorrelationTracker(firstFrame)
+tracker = CrossCorrelation(firstFrame);
+handle = @tracker.offsetWithError;
 end

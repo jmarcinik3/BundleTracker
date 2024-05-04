@@ -20,7 +20,7 @@ taskName = 'Tracking Region';
 multiWaitbar(taskName, 0, 'CanCancel', 'on');
 frameCount = size(ims, 3);
 centers = PointStructurer.preallocate(frameCount);
-trackFrame = TrackingAlgorithms.handleByKeyword(trackingMode);
+trackFrame = TrackingAlgorithms.handleByKeyword(trackingMode, ims);
 
 cancel = false;
 proportionDelta = 1 / frameCount;
