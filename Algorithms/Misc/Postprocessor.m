@@ -21,6 +21,7 @@ classdef Postprocessor < handle
             obj.shift(); % center trace around zero by subtracting its mean
             obj.scale(); % scale traces nm/px and add time from FPS
             obj.rotate(); % rotate trace to direction of maximal movement
+            obj.detrend(); % detrend trace to remove drift
         end
         function results = getPostprocessedResult(obj)
             results = obj.results;
@@ -37,6 +38,9 @@ classdef Postprocessor < handle
         end
         function rotate(obj, varargin)
             obj.performOverResults(@rotateSingle, varargin{:});
+        end
+        function detrend(obj, varargin)
+            obj.performOverResults(@detrendSingle, varargin{:});
         end
     end
 
@@ -65,6 +69,26 @@ for index = 1:resultCount
     postResult(index).angle = 0;
     postResult(index).angleError = 0;
 end
+end
+
+function postResult = detrendSingle(result, parser, index, varargin)
+p = inputParser;
+addOptional(p, "DetrendMode", parser.getDetrendMode(index));
+parse(p, varargin{:});
+detrendMode = p.Results.DetrendMode;
+
+[x, y, detrendInfo] = DetrendAlgorithms.byKeyword( ...
+    result.xProcessed, ...
+    result.yProcessed, ...
+    detrendMode ...
+    );
+
+postResult = result;
+% update processed traces
+postResult.DetrendMode = detrendMode;
+postResult.DetrendInfo = detrendInfo;
+postResult.xProcessed = x;
+postResult.yProcessed = y;
 end
 
 function postResult = orientSingle(result, parser, index, varargin)
@@ -206,7 +230,6 @@ function newAngle = addAngle(result, angle)
 oldAngle = ErrorPropagator(result.angle, result.angleError);
 newAngle = wrapToPi(oldAngle + angle);
 end
-
 function extraAngle = angleIfNoiseInX(x, y, angle)
 extraAngle = 0;
 if std(x) < std(y)

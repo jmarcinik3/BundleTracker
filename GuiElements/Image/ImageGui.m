@@ -1,6 +1,6 @@
 classdef ImageGui < ProcessorGui
     properties (Constant, Access = private)
-        rows = 4;
+        rows = 5;
         columns = 6;
         size = [ImageGui.rows, ImageGui.columns];
     end
@@ -33,11 +33,13 @@ invertCheckbox = imageGui.getInvertCheckbox();
 trackingSelection = imageGui.getTrackingSelectionElement();
 angleSelection = imageGui.getAngleSelectionElement();
 directionElement = imageGui.getPositiveDirectionElement();
+detrendSelection = imageGui.getDetrendSelectionElement();
 ax = imageGui.getAxis();
 
 % generate labels for appropriate elements
-trackingLabel = uilabel(gl, "Text", "Tracking:");
-angleLabel = uilabel(gl, "Text", "Rotation:");
+trackingLabel = uilabel(gl, "Text", "Track:");
+angleLabel = uilabel(gl, "Text", "Rotate:");
+detrendLabel = uilabel(gl, "Text", "Detrend:");
 
 % lay out preprocessing elements
 thresholdSlider.Layout.Row = 2;
@@ -50,12 +52,16 @@ trackingLabel.Layout.Row = 3;
 trackingSelection.Layout.Row = 3;
 angleLabel.Layout.Row = 4;
 angleSelection.Layout.Row = 4;
-directionElement.Layout.Row = [3, 4];
+detrendLabel.Layout.Row = 5;
+detrendSelection.Layout.Row = 5;
+directionElement.Layout.Row = [3, 5];
 
 trackingLabel.Layout.Column = 1;
 trackingSelection.Layout.Column = 2;
 angleLabel.Layout.Column = 1;
 angleSelection.Layout.Column = 2;
+detrendLabel.Layout.Column = 1;
+detrendSelection.Layout.Column = 2;
 directionElement.Layout.Column = [3, 4];
 
 % Set up axis on which bundles are displayed
@@ -64,7 +70,7 @@ ax.Layout.Column = [1, columnCount];
 
 % Set up row heights and column widths for grid layout
 rowSpacing = 1;
-rowHeight = (DirectionGui.height - rowSpacing) / 2;
+rowHeight = (DirectionGui.height - rowSpacing) / 3;
 gl.RowHeight = num2cell(rowHeight * ones(1, rowCount));
 gl.RowHeight{1} = '1x';
 

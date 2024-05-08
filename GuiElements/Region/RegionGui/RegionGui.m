@@ -1,6 +1,6 @@
 classdef RegionGui < ProcessorGui
     properties (Constant, Access = private)
-        rows = 7;
+        rows = 8;
         columns = 5;
         size = [RegionGui.rows, RegionGui.columns];
     end
@@ -86,6 +86,7 @@ thresholdSlider = obj.getThresholdSlider();
 invertCheckbox = obj.getInvertCheckbox();
 trackingSelection = obj.getTrackingSelectionElement();
 angleSelection = obj.getAngleSelectionElement();
+detrendSelection = obj.getDetrendSelectionElement();
 directionElement = obj.getPositiveDirectionElement();
 
 % lay out full-row elements across all columns
@@ -95,6 +96,7 @@ rowElements = [ ...
     invertCheckbox, ...
     trackingSelection, ...
     angleSelection, ...
+    detrendSelection ...
     directionElement ...
     ];
 for index = 1:numel(rowElements)
@@ -111,14 +113,14 @@ adjustElements = [ ...
 for index = 1:numel(adjustElements)
     elem = adjustElements(index);
     elem.Layout.Column = index + 1;
-    elem.Layout.Row = 7;
+    elem.Layout.Row = rowCount;
 end
 
 % Set up row heights and column widths for grid layout
 gl.RowHeight = num2cell(rowHeight * ones(1, rowCount));
 gl.RowHeight{1} = '1x';
-gl.RowHeight{6} = DirectionGui.height;
-gl.RowHeight{7} = adjusterLength;
+gl.RowHeight{rowCount-1} = DirectionGui.height;
+gl.RowHeight{rowCount} = adjusterLength;
 
 gl.ColumnWidth = num2cell(adjusterLength * ones(1, columnCount));
 gl.ColumnWidth{1} = '1x';

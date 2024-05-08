@@ -20,12 +20,14 @@ classdef ProcessorGui < PreprocessorGui & PostprocessorGui
             trackingMode = postUserData.getTrackingMode();
             angleMode = postUserData.getAngleMode();
             positiveDirection = postUserData.getPositiveDirection();
+            detrendMode = postUserData.getDetrendMode();
 
             regionUserData = RegionUserData();
             regionUserData.setThresholds(thresholds);
             regionUserData.setInvert(invert);
             regionUserData.setTrackingMode(trackingMode);
             regionUserData.setAngleMode(angleMode);
+            regionUserData.setDetrendMode(detrendMode);
             regionUserData.setPositiveDirection(positiveDirection);
         end
     end

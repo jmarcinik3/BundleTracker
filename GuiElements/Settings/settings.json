@@ -8,6 +8,14 @@
             "BackgroundColor": [0.96, 0.96, 0.96],
             "Tooltip": "Postprocess: Choose method to rotate trace"
         },
+        "DetrendDropdown": {
+            "Value": "None",
+            "FontWeight": "normal",
+            "FontAngle": "normal",
+            "FontColor": [0, 0, 0],
+            "BackgroundColor": [0.96, 0.96, 0.96],
+            "Tooltip": "Postprocess: Choose method to detrend trace"
+        },
         "InvertCheckbox": {
             "Value": false,
             "Text": "Invert",

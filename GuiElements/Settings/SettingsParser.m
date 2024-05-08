@@ -7,6 +7,9 @@ classdef SettingsParser
         function defaults = getAngleModeDefaults()
             defaults = namedargs2cell(getDefaults().AngleDropdown);
         end
+        function defaults = getDetrendModeDefaults()
+            defaults = namedargs2cell(getDefaults().DetrendDropdown);
+        end
         function defaults = getInvertCheckboxDefaults()
             defaults = namedargs2cell(getDefaults().InvertCheckbox);
         end
@@ -32,6 +35,9 @@ classdef SettingsParser
 
         function angleMode = getDefaultAngleMode()
             angleMode = getDefaults().AngleDropdown.Value;
+        end
+        function angleMode = getDefaultDetrendMode()
+            angleMode = getDefaults().DetrendDropdown.Value;
         end
         function invert = getDefaultInvert()
             invert = getDefaults().InvertCheckbox.Value;

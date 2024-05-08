@@ -160,6 +160,14 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
                     angleModeParserChanged(obj, source, event);
             end
         end
+        function detrendModeChanged(obj, source, event)
+            switch event.EventName
+                case "ValueChanged"
+                    RegionUserData(obj).setDetrendMode(event.Value);
+                case "PostSet"
+                    detrendModeParserChanged(obj, source, event);
+            end
+        end
         function positiveDirectionChanged(obj, source, event)
             switch event.EventName
                 case "SelectionChanged"
@@ -258,6 +266,7 @@ thresholdParserChanged(previewer);
 invertParserChanged(previewer);
 trackingModeParserChanged(previewer);
 angleModeParserChanged(previewer);
+detrendModeParserChanged(previewer);
 directionParserChanged(previewer);
 end
 
@@ -286,6 +295,11 @@ end
 function angleModeParserChanged(previewer, ~, ~)
 set(previewer.getRegionGui().getAngleSelectionElement(), ...
     "Value", RegionUserData(previewer).getAngleMode() ...
+    );
+end
+function detrendModeParserChanged(previewer, ~, ~)
+set(previewer.getRegionGui().getDetrendSelectionElement(), ...
+    "Value", RegionUserData(previewer).getDetrendMode() ...
     );
 end
 function directionParserChanged(previewer, ~, ~)

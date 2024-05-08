@@ -4,6 +4,7 @@ classdef RegionUserData < handle
         keywords = [ ...
             RegionUserData.allKeyword, ...
             RegionUserData.angleModeKeyword, ...
+            RegionUserData.detrendModeKeyword, ...
             RegionUserData.invertKeyword, ...
             RegionUserData.positiveDirectionKeyword, ...
             RegionUserData.thresholdsKeyword, ...
@@ -12,6 +13,7 @@ classdef RegionUserData < handle
     end
     properties (Constant, Access = private)
         angleModeKeyword = "Angle Mode";
+        detrendModeKeyword = "Detrend Mode";
         invertKeyword = "Invert";
         positiveDirectionKeyword = "Positive Direction";
         thresholdsKeyword = "Thresholds";
@@ -21,8 +23,10 @@ classdef RegionUserData < handle
     properties (SetObservable, Access = private)
         IntensityRange;
         IsInverted;
+        
         TrackingMode;
         AngleMode;
+        DetrendMode;
         Direction;
     end
 
@@ -47,6 +51,7 @@ classdef RegionUserData < handle
             result.IsInverted = obj.IsInverted;
             result.TrackingMode = obj.TrackingMode;
             result.AngleMode = obj.AngleMode;
+            result.DetrendMode = obj.DetrendMode;
             result.Direction = obj.Direction;
         end
     end
@@ -64,6 +69,9 @@ classdef RegionUserData < handle
         end
         function angleMode = getAngleMode(obj)
             angleMode = obj.AngleMode;
+        end
+        function detrendMode = getDetrendMode(obj)
+            detrendMode = obj.DetrendMode;
         end
         function positiveDirection = getPositiveDirection(obj)
             positiveDirection = obj.Direction;
@@ -87,6 +95,7 @@ classdef RegionUserData < handle
             regionUserData.setInvert(parser.pixelsAreInverted(index));
             regionUserData.setTrackingMode(parser.getTrackingMode(index));
             regionUserData.setAngleMode(parser.getAngleMode(index));
+            regionUserData.setDetrendMode(parser.getDetrendMode(index));
             regionUserData.setPositiveDirection(parser.getPositiveDirection(index));
         end
     end
@@ -110,6 +119,9 @@ classdef RegionUserData < handle
         function setAngleMode(obj, angleMode)
             obj.AngleMode = string(angleMode);
         end
+        function setDetrendMode(obj, detrendMode)
+            obj.DetrendMode = string(detrendMode);
+        end
         function setPositiveDirection(obj, positiveDirection)
             obj.Direction = string(positiveDirection);
         end
@@ -126,6 +138,10 @@ classdef RegionUserData < handle
         function resetToDefaultAngleMode(obj)
             defaultAngleMode = SettingsParser.getDefaultAngleMode();
             obj.setAngleMode(defaultAngleMode);
+        end
+        function resetToDefaultDetrendMode(obj)
+            defaultDetrendMode = SettingsParser.getDefaultDetrendMode();
+            obj.setAngleMode(defaultDetrendMode);
         end
         function resetToDefaultInvert(obj)
             defaultInvert = SettingsParser.getDefaultInvert();
@@ -160,6 +176,8 @@ function resetByKeyword(obj, keyword)
 switch keyword
     case RegionUserData.angleModeKeyword
         obj.resetToDefaultAngleMode();
+    case RegionUserData.detrendModeKeyword
+        obj.resetToDefaultDetrendMode();
     case RegionUserData.invertKeyword
         obj.resetToDefaultInvert();
     case RegionUserData.positiveDirectionKeyword
@@ -175,6 +193,7 @@ end
 
 function resetToDefaultAll(obj)
 obj.resetToDefaultAngleMode();
+obj.resetToDefaultDetrendMode();
 obj.resetToDefaultInvert();
 obj.resetToDefaultPositiveDirection();
 obj.resetToDefaultThresholds();

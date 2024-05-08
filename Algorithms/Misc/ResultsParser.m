@@ -142,6 +142,12 @@ classdef ResultsParser
                 angleMode = angleMode(index, :);
             end
         end
+        function detrendMode = getDetrendMode(obj, index)
+            detrendMode = vertcat(obj.results.DetrendMode);
+            if nargin > 1
+                detrendMode = detrendMode(index, :);
+            end
+        end
         function location = getPositiveDirection(obj, index)
             location = vertcat(obj.results.Direction);
             if nargin > 1

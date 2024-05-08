@@ -4,6 +4,7 @@ classdef PostprocessorGui
         directionGui;
         trackingSelection;
         angleSelection;
+        detrendSelection;
     end
 
     methods
@@ -11,6 +12,7 @@ classdef PostprocessorGui
             obj.directionGui = DirectionGui(gl);
             obj.trackingSelection = generateTrackingSelection(gl);
             obj.angleSelection = generateAngleSelection(gl);
+            obj.detrendSelection = generateDetrendSelection(gl);
             obj.gridLayout = gl;
         end
     end
@@ -29,6 +31,9 @@ classdef PostprocessorGui
         function elem = getPositiveDirectionElement(obj)
             elem = obj.directionGui.getGridLayout();
         end
+        function elem = getDetrendSelectionElement(obj)
+            elem = obj.detrendSelection;
+        end
     end
 
     %% Functions to retrieve state information
@@ -36,11 +41,13 @@ classdef PostprocessorGui
         function regionUserData = getRegionUserData(obj)
             trackingMode = obj.getTrackingMode();
             angleMode = obj.getAngleMode();
+            detrendMode = obj.getDetrendMode();
             direction = obj.getPositiveDirection();
             
             regionUserData = RegionUserData();
             regionUserData.setTrackingMode(trackingMode);
             regionUserData.setAngleMode(angleMode);
+            regionUserData.setDetrendMode(detrendMode);
             regionUserData.setPositiveDirection(direction);
         end
     end
@@ -51,6 +58,9 @@ classdef PostprocessorGui
         function angleMode = getAngleMode(obj)
             angleMode = obj.angleSelection.Value;
         end
+        function detrend = getDetrendMode(obj)
+            detrend = obj.detrendSelection.Value;
+        end
         function direction = getPositiveDirection(obj)
             direction = obj.directionGui.getLocation();
         end
@@ -59,8 +69,7 @@ end
 
 
 %% Function to generate tracking method dropdown
-% Generates dropdown menu allowing user to select tracking method (e.g.
-% "Centroid")
+% Generates dropdown menu allowing user to select tracking method
 %
 % Arguments
 %
@@ -76,8 +85,7 @@ dropdown = uidropdown(gl, ...
 end
 
 %% Function to generate angle method dropdown
-% Generates dropdown menu allowing user to select tracking method (e.g.
-% "Centroid")
+% Generates dropdown menu allowing user to select angle method
 %
 % Arguments
 %
@@ -91,3 +99,20 @@ dropdown = uidropdown(gl, ...
     defaults{:} ...
     );
 end
+
+%% Function to generate detrend method dropdown
+% Generates dropdown menu allowing user to select detrend method
+%
+% Arguments
+%
+% * uigridlayout |gl|: layout to add dropdown in
+%
+% Returns uiddropdown
+function dropdown = generateDetrendSelection(gl)
+defaults = SettingsParser.getDetrendModeDefaults();
+dropdown = uidropdown(gl, ...
+    "Items", DetrendAlgorithms.keywords, ...
+    defaults{:} ...
+    );
+end
+
