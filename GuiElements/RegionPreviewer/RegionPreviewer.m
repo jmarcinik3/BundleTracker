@@ -219,6 +219,7 @@ configureThreshold(previewer, gui, regionUserData);
 configureInvert(previewer, gui, regionUserData);
 configureTrackingMode(previewer, gui, regionUserData);
 configureAngleMode(previewer, gui, regionUserData);
+configureDetrendMode(previewer, gui, regionUserData);
 configurePositiveDirection(previewer, directionGui, regionUserData);
 end
 function configureThreshold(previewer, gui, regionUserData)
@@ -248,6 +249,13 @@ set(gui.getAngleSelectionElement(), ...
     "Value", regionUserData.getAngleMode() ...
     );
 addlistener(regionUserData, "AngleMode", "PostSet", @previewer.angleModeChanged);
+end
+function configureDetrendMode(previewer, gui, regionUserData)
+set(gui.getDetrendSelectionElement(), ...
+    "ValueChangedFcn", @previewer.detrendModeChanged, ...
+    "Value", regionUserData.getDetrendMode() ...
+    );
+addlistener(regionUserData, "DetrendMode", "PostSet", @previewer.detrendModeChanged);
 end
 function configurePositiveDirection(previewer, directionGui, regionUserData)
 changedFcn = @previewer.positiveDirectionChanged;
