@@ -1,4 +1,4 @@
-function keyPressed(trackingLinker, source, event)
+function keyPress(trackingLinker, source, event)
 activeRegion = trackingLinker.getActiveRegion();
 key = event.Key;
 modKey = ModifierKey(event);

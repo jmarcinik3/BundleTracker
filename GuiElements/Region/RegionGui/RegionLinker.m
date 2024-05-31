@@ -1,4 +1,4 @@
-classdef RegionLinker < PreprocessorLinker
+classdef RegionLinker < PreprocessorLinker & AxisExporter
     properties (Access = private)
         fullRawImage;
         regionGui;
@@ -6,11 +6,15 @@ classdef RegionLinker < PreprocessorLinker
 
     methods
         function obj = RegionLinker(regionGui, fullRawImage)
+            ax = regionGui.getAxis();
+
             obj@PreprocessorLinker(regionGui);
+            obj@AxisExporter(ax);
             AxisResizer( ...
                 regionGui.getInteractiveImage(), ...
                 "FitToContent", true ...
                 );
+
             obj.fullRawImage = fullRawImage;
             obj.regionGui = regionGui;
         end
@@ -41,6 +45,13 @@ classdef RegionLinker < PreprocessorLinker
                 regionRawImage = [];
             end
             obj.setRawImage(regionRawImage);
+        end
+    end
+
+    %% Helper functions to call methods from properties
+    methods (Access = private)
+        function ax = getAxis(obj)
+            ax = obj.regionGui.getAxis();
         end
     end
 end

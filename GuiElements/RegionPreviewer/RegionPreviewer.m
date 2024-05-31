@@ -1,5 +1,5 @@
 classdef RegionPreviewer < RegionDrawer & RegionVisibler
-    properties (Access = private)
+    properties (Access = protected)
         axis;
         imageLinker;
         regionLinker;
@@ -183,6 +183,9 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
     methods
         function exportImage(obj, path)
             obj.imageLinker.exportImage(path);
+        end
+        function exportRegionImage(obj, path)
+            obj.regionLinker.exportImage(path);
         end
         function gui = getRegionGui(obj)
             gui = obj.regionLinker.getRegionGui();

@@ -5,6 +5,10 @@ classdef TrackingLinker < RegionPreviewer ...
 
     properties (Constant)
         extensions = {'*.mat', "MATLAB Structure"};
+        videoExtensions = { ...
+            '*.avi', "Audio Video Interleave"; ...
+            '*.mj2', "Motion JPEG 2000"; ...
+            };
     end
 
     properties (Access = private)
@@ -21,10 +25,14 @@ classdef TrackingLinker < RegionPreviewer ...
             obj@VideoImporter();
             obj@VideoSelector(videoGui);
 
-            set(videoGui.getFilepathField(), "ValueChangedFcn", @obj.videoFilepathChanged);
-
             fig = trackingGui.getFigure();
-            set(fig, "WindowKeyPressFcn", @(src, ev) keyPressed(obj, src, ev));
+            set(videoGui.getFilepathField(), "ValueChangedFcn", @obj.videoFilepathChanged);
+            set(imageGui.getAxis(), "ContextMenu", generateImageMenu(obj, fig));
+            set(regionGui.getAxis(), "ContextMenu", generateRegionMenu(obj, fig));
+            set(fig, ...
+                "WindowKeyPressFcn", @(src, ev) keyPress(obj, src, ev), ...
+                "WindowButtonDownFcn", @(src, ev) buttonDown(obj, src, ev) ...
+                );
             TrackingToolbar(fig, obj);
             TrackingMenu(fig, obj);
 
@@ -55,6 +63,12 @@ classdef TrackingLinker < RegionPreviewer ...
         end
         function exportImageButtonPushed(obj, ~, ~)
             obj.exportImage();
+        end
+        function exportRegionImageButtonPushed(obj, ~, ~)
+            obj.exportRegionImage();
+        end
+        function saveRegionVideoButtonPushed(obj, ~, ~)
+            obj.exportRegionVideo();
         end
 
         function trackButtonPushed(obj, ~, ~)
@@ -130,23 +144,54 @@ classdef TrackingLinker < RegionPreviewer ...
 
             multiWaitbar(taskName, 'Close');
         end
+
         function exportImage(obj, path)
             if nargin < 2
                 path = obj.gui.getDirectoryPath();
             end
             exportImage@RegionPreviewer(obj, path);
         end
+        function exportRegionImage(obj, path)
+            if nargin < 2
+                path = obj.gui.getDirectoryPath();
+            end
+            exportRegionImage@RegionPreviewer(obj, path);
+        end
+        function exportRegionVideo(obj, path)
+            if nargin < 2
+                path = obj.gui.getDirectoryPath();
+            end
+            [filepath, isfilepath] = uiputfilepath( ...
+                obj.videoExtensions, ...
+                "Export as Video", ...
+                path ...
+                );
+
+            if isfilepath
+                activeRegion = obj.getActiveRegion();
+                ims = obj.getVideoInRegion(activeRegion);
+                profile = generateProfile(filepath);
+                videoWriter = VideoWriter(filepath, profile);
+                set(videoWriter, "FrameRate", obj.getFps());
+                
+                imClass = determineImageClass(profile, class(ims));
+                ims = Preprocessor.fromRegion(activeRegion).preprocess(ims);
+                ims = imageToClass(ims, imClass);
+                export3dMatrixAsVideo(ims, videoWriter);
+            end
+        end
+
         function trackAndExportRegions(obj, filepath)
             [cancel, results] = obj.trackAndProcess();
-
-            if ~cancel
-                if nargin < 2
-                    obj.trackingCompleted(results);
-                elseif nargin == 2
-                    save(filepath, "results");
-                end
-            else
+            if cancel
                 obj.throwAlertMessage("Tracking Canceled!", "Start Tracking");
+                return;
+            end
+
+            if nargin == 1
+                obj.trackingCompleted(results);
+            elseif nargin == 2
+                save(filepath, "results");
             end
         end
     end
@@ -266,6 +311,25 @@ switch string(videoProfile)
 end
 end
 
+function profile = generateProfile(filepath)
+[~, ~, fileExtension] = fileparts(filepath);
+switch string(fileExtension)
+    case ".avi"
+        profile = "Grayscale AVI";
+    case ".mj2"
+        profile = "Archival";
+end
+end
+function imClass = determineImageClass(profile, imClass)
+switch string(profile)
+    case "Archival"
+        if strcmp(imClass, "double")
+            imClass = "uint16";
+        end
+    case "Grayscale AVI"
+end
+end
+
 function fig = generateTrackingCompletedFigure(results)
 figDefaults = SettingsParser.getTrackingCompletedFigureDefaults();
 figDefaults.Name = sprintf( ...
@@ -304,4 +368,34 @@ function saveResults(results, resultsFilepath)
 if ischar(resultsFilepath) || isstring(resultsFilepath)
     save(resultsFilepath, "results");
 end
+end
+function export3dMatrixAsVideo(ims, videoWriter)
+frameCount = size(ims, 3);
+open(videoWriter);
+for frameIndex = 1:frameCount
+    im = ims(:, :, frameIndex);
+    writeVideo(videoWriter, im);
+end
+close(videoWriter);
+end
+
+
+
+function cm = generateImageMenu(obj, fig)
+cm = uicontextmenu(fig);
+uimenu(cm, ...
+    "Text", "Export as Image", ...
+    "MenuSelectedFcn", @obj.exportImageButtonPushed ...
+    );
+end
+function cm = generateRegionMenu(obj, fig)
+cm = uicontextmenu(fig);
+uimenu(cm, ...
+    "Text", "Export as Image", ...
+    "MenuSelectedFcn", @obj.exportRegionImageButtonPushed ...
+    );
+uimenu(cm, ...
+    "Text", "Export as Video", ...
+    "MenuSelectedFcn", @obj.saveRegionVideoButtonPushed ...
+    );
 end
