@@ -300,9 +300,13 @@ end
 function label = generateFrameLabel(videoReader)
 frameCount = get(videoReader, "NumFrames");
 fps = get(videoReader, "FrameRate");
-h = get(videoReader, "Height");
 w = get(videoReader, "Width");
-label = sprintf("%d Frames (%d FPS, %dx%d)", frameCount, fps, h, w);
+h = get(videoReader, "Height");
+bitDepth = get(videoReader, "BitsPerPixel");
+label = sprintf( ...
+    "%d Frames (%d FPS, %dx%d, %d-bit)", ...
+    frameCount, fps, w, h, bitDepth ...
+    );
 end
 function maxIntensity = getMaximumIntensity(videoProfile)
 switch string(videoProfile)
