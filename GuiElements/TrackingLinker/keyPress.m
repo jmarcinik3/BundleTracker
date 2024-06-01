@@ -33,6 +33,8 @@ end
 if modKey.isPureCtrl
     if strcmp(key, "return")
         trackingLinker.trackButtonPushed(source, event)
+    elseif strcmp(key, "j")
+        trackingLinker.duplicateRegion(activeRegion);
     end
 end
 end

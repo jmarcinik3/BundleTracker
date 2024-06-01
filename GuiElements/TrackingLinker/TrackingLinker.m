@@ -311,8 +311,6 @@ figDefaults = namedargs2cell(SettingsParser.getAutothresholdFigureDefaults());
 fig = generateFigure(figDefaults{:});
 end
 
-
-
 function cm = generateImageGuiMenu(obj, fig)
 cm = uicontextmenu(fig);
 uimenu(cm, ...

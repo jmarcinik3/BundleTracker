@@ -56,6 +56,12 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             regionChanged(obj);
             obj.updateRegionalRawImage(region);
         end
+        function duplicateRegion(obj, region)
+            regionMeta = getRegionMetadata(region);
+            newRegion = obj.importRegion(regionMeta);
+            obj.configureRegionToGui(newRegion);
+            RegionUserData.configureByRegion(newRegion, region);
+        end
     end
     methods (Access = protected)
         function setMaximumIntensity(obj, maxIntensity)
@@ -100,6 +106,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             configureRegionGui(obj, regionGui, region);
             obj.previewRegion(region);
         end
+    
     end
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
@@ -176,13 +183,6 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
                 case "PostSet"
                     directionParserChanged(obj, source, event);
             end
-        end
-    
-        function duplicateRegion(obj, region)
-            regionMeta = getRegionMetadata(region);
-            newRegion = obj.importRegion(regionMeta);
-            obj.configureRegionToGui(newRegion);
-            RegionUserData.configureByRegion(newRegion, region);
         end
     end
 
@@ -290,11 +290,17 @@ elseif strcmpi(region.Type, "images.roi.freehand")
 end
 
 cm = region.ContextMenu;
-uimenu(cm, ...
-    "Text", "Duplicate " + regionShape, ...
+fixAspectMenu = cm.Children(2);
+deleteMenu = cm.Children(1);
+set(deleteMenu, "Text", "Delete " + regionShape + " (Crtl+Del)");
+
+duplicateMenu = uimenu(cm, ...
+    "Text", "Duplicate " + regionShape + " (Ctrl+J)", ...
     "MenuSelectedFcn", @(src, ev) previewer.duplicateRegion(region) ...
     );
-set(cm, "Children", cm.Children([2, 1, 3]));
+
+m = flip([fixAspectMenu, duplicateMenu, deleteMenu]);
+set(cm, "Children", m);
 end
 
 function regionChanged(previewer)
