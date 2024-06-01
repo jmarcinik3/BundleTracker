@@ -1,3 +1,29 @@
+function [cancel, results] = trackAndProcess(obj)
+taskName = 'Tracking Regions';
+regions = obj.getRegions();
+
+multiWaitbar(taskName, 0, 'CanCancel', 'on');
+regionCount = numel(regions);
+results = [];
+set(regions, "Color", SettingsParser.getRegionQueueColor());
+
+for index = 1:regionCount
+    region = regions(index);
+    [cancel, result] = trackAndProcessRegion(obj, region);
+    results = [results, result];
+
+    proportionComplete = index / regionCount;
+    cancel = multiWaitbar(taskName, proportionComplete) || cancel;
+    if cancel
+        break;
+    end
+end
+
+activeRegion = obj.getActiveRegion();
+RegionUpdater.selected(activeRegion);
+multiWaitbar(taskName,'Close');
+end
+
 function [cancel, result] = trackAndProcessRegion(trackingLinker, region)
 trackingLinker.previewRegion(region);
 [cancel, centers] = trackCenters(trackingLinker, region);

@@ -177,6 +177,13 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
                     directionParserChanged(obj, source, event);
             end
         end
+    
+        function duplicateRegion(obj, region)
+            regionMeta = getRegionMetadata(region);
+            newRegion = obj.importRegion(regionMeta);
+            obj.configureRegionToGui(newRegion);
+            RegionUserData.configureByRegion(newRegion, region);
+        end
     end
 
     %% Helper functions to call methods from properties
@@ -263,14 +270,32 @@ set(directionGui.getRadioGroup(), "SelectionChangedFcn", changedFcn);
 directionGui.setLocation(regionUserData.getPositiveDirection());
 addlistener(regionUserData, "Direction", "PostSet", changedFcn);
 end
+
 function configureRegion(previewer, region)
 addlistener(region, "MovingROI", @previewer.regionMoving);
 addlistener(region, "ROIMoved", @previewer.regionMoving);
 addlistener(region, "ROIClicked", @previewer.regionClicked);
 addlistener(region, "DeletingROI", @previewer.deletingRegion);
+generateRegionMenu(previewer, region);
+end
+function generateRegionMenu(previewer, region)
+if strcmpi(region.Type, "images.roi.rectangle")
+    regionShape = "Rectangle";
+elseif strcmpi(region.Type, "images.roi.ellipse")
+    regionShape = "Ellipse";
+elseif strcmpi(region.Type, "images.roi.polygon")
+    regionShape = "Polygon";
+elseif strcmpi(region.Type, "images.roi.freehand")
+    regionShape = "Freehand";
 end
 
+cm = region.ContextMenu;
+uimenu(cm, ...
+    "Text", "Duplicate " + regionShape, ...
+    "MenuSelectedFcn", @(src, ev) previewer.duplicateRegion(region) ...
+    );
 
+end
 
 function regionChanged(previewer)
 thresholdParserChanged(previewer);

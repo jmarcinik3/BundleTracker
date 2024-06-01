@@ -11,7 +11,7 @@ classdef TrackingLinker < RegionPreviewer ...
             };
     end
 
-    properties (Access = private)
+    properties
         gui;
     end
 
@@ -27,8 +27,8 @@ classdef TrackingLinker < RegionPreviewer ...
 
             fig = trackingGui.getFigure();
             set(videoGui.getFilepathField(), "ValueChangedFcn", @obj.videoFilepathChanged);
-            set(imageGui.getAxis(), "ContextMenu", generateImageMenu(obj, fig));
-            set(regionGui.getAxis(), "ContextMenu", generateRegionMenu(obj, fig));
+            set(imageGui.getAxis(), "ContextMenu", generateImageGuiMenu(obj, fig));
+            set(regionGui.getAxis(), "ContextMenu", generateRegionGuiMenu(obj, fig));
             set(fig, ...
                 "WindowKeyPressFcn", @(src, ev) keyPress(obj, src, ev), ...
                 "WindowButtonDownFcn", @(src, ev) buttonDown(obj, src, ev) ...
@@ -52,7 +52,7 @@ classdef TrackingLinker < RegionPreviewer ...
             end
         end
 
-        function importRegionsMenuCalled(obj, ~, ~)
+        function importRegionsButtonPushed(obj, ~, ~)
             previousDirectoryPath = obj.gui.getDirectoryPath();
             extensions = TrackingLinker.extensions;
             title = SettingsParser.getImportRegionsLabel();
@@ -173,7 +173,7 @@ classdef TrackingLinker < RegionPreviewer ...
                 profile = generateProfile(filepath);
                 videoWriter = VideoWriter(filepath, profile);
                 set(videoWriter, "FrameRate", obj.getFps());
-                
+
                 imClass = determineImageClass(profile, class(ims));
                 ims = Preprocessor.fromRegion(activeRegion).preprocess(ims);
                 ims = imageToClass(ims, imClass);
@@ -182,14 +182,14 @@ classdef TrackingLinker < RegionPreviewer ...
         end
 
         function trackAndExportRegions(obj, filepath)
-            [cancel, results] = obj.trackAndProcess();
+            [cancel, results] = trackAndProcess(obj);
             if cancel
                 obj.throwAlertMessage("Tracking Canceled!", "Start Tracking");
                 return;
             end
 
             if nargin == 1
-                obj.trackingCompleted(results);
+                trackingCompleted(obj, results);
             elseif nargin == 2
                 save(filepath, "results");
             end
@@ -241,50 +241,7 @@ classdef TrackingLinker < RegionPreviewer ...
         end
     end
     methods (Access = private)
-        function trackingCompleted(obj, results)
-            fig = generateTrackingCompletedFigure(results);
-            resultsFilepath = generateResultsFilepath(obj);
-            imageFilepath = generateImageFilepath(obj);
-            trackingCompleteGui = TrackingCompletedGui( ...
-                fig, results, ...
-                "ResultsFilepath", resultsFilepath, ...
-                "ImageFilepath", imageFilepath ...
-                );
-            uiwait(fig);
 
-            resultsFilepath = trackingCompleteGui.resultsFilepath;
-            imageFilepath = trackingCompleteGui.imageFilepath;
-
-            saveResults(results, resultsFilepath);
-            if ischar(imageFilepath) || isstring(imageFilepath)
-                obj.exportImage(imageFilepath);
-            end
-        end
-        function [cancel, results] = trackAndProcess(obj)
-            taskName = 'Tracking Regions';
-            regions = obj.getRegions();
-
-            multiWaitbar(taskName, 0, 'CanCancel', 'on');
-            regionCount = numel(regions);
-            results = [];
-            set(regions, "Color", SettingsParser.getRegionQueueColor());
-
-            for index = 1:regionCount
-                region = regions(index);
-                [cancel, result] = trackAndProcessRegion(obj, region);
-                results = [results, result];
-
-                proportionComplete = index / regionCount;
-                cancel = multiWaitbar(taskName, proportionComplete) || cancel;
-                if cancel
-                    break;
-                end
-            end
-
-            activeRegion = obj.getActiveRegion();
-            RegionUpdater.selected(activeRegion);
-            multiWaitbar(taskName,'Close');
-        end
     end
 
     %% Helper functions to call methods from properties
@@ -335,46 +292,6 @@ switch string(profile)
     case "Grayscale AVI"
 end
 end
-
-function fig = generateTrackingCompletedFigure(results)
-figDefaults = SettingsParser.getTrackingCompletedFigureDefaults();
-figDefaults.Name = sprintf( ...
-    "%s (%d)", ...
-    figDefaults.Name, ...
-    ResultsParser(results).getRegionCount() ...
-    );
-figDefaults = namedargs2cell(figDefaults);
-fig = generateFigure(figDefaults{:});
-end
-function fig = generateBlobDetectionFigure()
-figDefaults = namedargs2cell(SettingsParser.getBlobDetectionFigureDefaults());
-fig = generateFigure(figDefaults{:});
-end
-function fig = generateAutothresholdFigure()
-figDefaults = namedargs2cell(SettingsParser.getAutothresholdFigureDefaults());
-fig = generateFigure(figDefaults{:});
-end
-
-function filepath = generateResultsFilepath(obj)
-filepath = sprintf( ...
-    "%s\\%s", ...
-    obj.gui.getDirectoryPath(), ...
-    SettingsParser.getDefaultResultsFilename() ...
-    );
-end
-function filepath = generateImageFilepath(obj)
-filepath = sprintf( ...
-    "%s\\%s", ...
-    obj.gui.getDirectoryPath(), ...
-    SettingsParser.getDefaultImageFilename() ...
-    );
-end
-
-function saveResults(results, resultsFilepath)
-if ischar(resultsFilepath) || isstring(resultsFilepath)
-    save(resultsFilepath, "results");
-end
-end
 function export3dMatrixAsVideo(ims, videoWriter)
 frameCount = size(ims, 3);
 open(videoWriter);
@@ -385,16 +302,25 @@ end
 close(videoWriter);
 end
 
+function fig = generateBlobDetectionFigure()
+figDefaults = namedargs2cell(SettingsParser.getBlobDetectionFigureDefaults());
+fig = generateFigure(figDefaults{:});
+end
+function fig = generateAutothresholdFigure()
+figDefaults = namedargs2cell(SettingsParser.getAutothresholdFigureDefaults());
+fig = generateFigure(figDefaults{:});
+end
 
 
-function cm = generateImageMenu(obj, fig)
+
+function cm = generateImageGuiMenu(obj, fig)
 cm = uicontextmenu(fig);
 uimenu(cm, ...
     "Text", "Export as Image", ...
     "MenuSelectedFcn", @obj.exportImageButtonPushed ...
     );
 end
-function cm = generateRegionMenu(obj, fig)
+function cm = generateRegionGuiMenu(obj, fig)
 cm = uicontextmenu(fig);
 uimenu(cm, ...
     "Text", "Export as Image", ...

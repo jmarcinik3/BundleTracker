@@ -98,6 +98,17 @@ classdef RegionUserData < handle
             regionUserData.setDetrendMode(parser.getDetrendMode(index));
             regionUserData.setPositiveDirection(parser.getPositiveDirection(index));
         end
+        function configureByRegion(newRegion, oldRegion)
+            newUserData = RegionUserData(newRegion);
+            oldUserData = RegionUserData(oldRegion);
+
+            newUserData.setThresholds(oldUserData.getThresholds());
+            newUserData.setInvert(oldUserData.getInvert());
+            newUserData.setTrackingMode(oldUserData.getTrackingMode());
+            newUserData.setAngleMode(oldUserData.getAngleMode());
+            newUserData.setDetrendMode(oldUserData.getDetrendMode());
+            newUserData.setPositiveDirection(oldUserData.getPositiveDirection());
+        end
     end
     methods
         function setThresholds(obj, thresholds)
