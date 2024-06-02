@@ -56,17 +56,17 @@ classdef RegionVisibler < handle
 
     %% Functions to update state of GUI
     methods
-        function bringRegionToFront(obj, ~, ~)
-            obj.moveRegionZ(Inf);
+        function bringRegionToFront(obj, source, ~)
+            obj.moveRegionZ(Inf, source);
         end
-        function bringRegionForward(obj, ~, ~)
-            obj.moveRegionZ(1);
+        function bringRegionForward(obj, source, ~)
+            obj.moveRegionZ(1, source);
         end
-        function sendRegionBackward(obj, ~, ~)
-            obj.moveRegionZ(-1);
+        function sendRegionBackward(obj, source, ~)
+            obj.moveRegionZ(-1, source);
         end
-        function sendRegionToBack(obj, ~, ~)
-            obj.moveRegionZ(-Inf);
+        function sendRegionToBack(obj, source, ~)
+            obj.moveRegionZ(-Inf, source);
         end
 
         function clearRegions(obj, ~, ~)
@@ -95,16 +95,20 @@ classdef RegionVisibler < handle
                 obj.previewRegion(firstRegion);
             end
         end
-        function moveRegionZ(obj, distance)
-            if obj.regionExists()
-                activeRegion = obj.getActiveRegion();
-                regionOrderer = RegionOrderer(activeRegion);
-                switch distance
-                    case Inf, regionOrderer.bringToFront();
-                    case 1, regionOrderer.bringForward();
-                    case -1, regionOrderer.sendBackward();
-                    case -Inf, regionOrderer.sendToBack();
+        function moveRegionZ(obj, distance, region)
+            if nargin == 2
+                if ~obj.regionExists()
+                    return;
                 end
+                region = obj.getActiveRegion();
+            end
+
+            regionOrderer = RegionOrderer(region);
+            switch distance
+                case Inf, regionOrderer.bringToFront();
+                case 1, regionOrderer.bringForward();
+                case -1, regionOrderer.sendBackward();
+                case -Inf, regionOrderer.sendToBack();
             end
         end
     end

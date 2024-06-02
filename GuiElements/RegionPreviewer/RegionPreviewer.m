@@ -106,7 +106,7 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             configureRegionGui(obj, regionGui, region);
             obj.previewRegion(region);
         end
-    
+
     end
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
@@ -272,35 +272,52 @@ addlistener(regionUserData, "Direction", "PostSet", changedFcn);
 end
 
 function configureRegion(previewer, region)
+addRegionListeners(previewer, region);
+generateRegionMenu(previewer, region);
+end
+function addRegionListeners(previewer, region)
 addlistener(region, "MovingROI", @previewer.regionMoving);
 addlistener(region, "ROIMoved", @previewer.regionMoving);
 addlistener(region, "ROIClicked", @previewer.regionClicked);
 addlistener(region, "DeletingROI", @previewer.deletingRegion);
-generateRegionMenu(previewer, region);
 end
 function generateRegionMenu(previewer, region)
 if strcmpi(region.Type, "images.roi.rectangle")
-    regionShape = "Rectangle";
+    regionShape = 'Rectangle';
 elseif strcmpi(region.Type, "images.roi.ellipse")
-    regionShape = "Ellipse";
+    regionShape = 'Ellipse';
 elseif strcmpi(region.Type, "images.roi.polygon")
-    regionShape = "Polygon";
+    regionShape = 'Polygon';
 elseif strcmpi(region.Type, "images.roi.freehand")
-    regionShape = "Freehand";
+    regionShape = 'Freehand';
 end
 
 cm = region.ContextMenu;
 fixAspectMenu = cm.Children(2);
 deleteMenu = cm.Children(1);
-set(deleteMenu, "Text", "Delete " + regionShape + " (Crtl+Del)");
+set(deleteMenu, "Text", ['Delete ', regionShape, '      Crtl+Del']);
+set(cm, "Children", flip([fixAspectMenu, deleteMenu]));
 
-duplicateMenu = uimenu(cm, ...
-    "Text", "Duplicate " + regionShape + " (Ctrl+J)", ...
+uimenu(cm, ...
+    "Text", ['Duplicate ', regionShape, '     Ctrl+J'], ...
     "MenuSelectedFcn", @(src, ev) previewer.duplicateRegion(region) ...
     );
-
-m = flip([fixAspectMenu, duplicateMenu, deleteMenu]);
-set(cm, "Children", m);
+uimenu(cm, ...
+    "Text", ['Bring to Front', '       Ctrl+Shift+]'], ... "Bring to Front\t Ctrl+Shift+]", ...
+    "MenuSelectedFcn", @(src, ev) previewer.bringRegionToFront(region) ...
+    )
+uimenu(cm, ...
+    "Text", ['Send to Back', '       Ctrl+Shift+['], ...
+    "MenuSelectedFcn", @(src, ev) previewer.sendRegionToBack(region) ...
+    )
+uimenu(cm, ...
+    "Text", ['Bring Forward', '               Ctrl+]'], ...
+    "MenuSelectedFcn", @(src, ev) previewer.bringRegionForward(region) ...
+    )
+uimenu(cm, ...
+    "Text", ['Send Backward', '             Ctrl+['], ...
+    "MenuSelectedFcn", @(src, ev) previewer.sendRegionBackward(region) ...
+    )
 end
 
 function regionChanged(previewer)
