@@ -14,7 +14,7 @@ classdef TrackingAlgorithms
         function handle = handleByKeyword(keyword, ims)
             switch keyword
                 case TrackingAlgorithms.centerOfMass
-                    handle = @TrackingAlgorithms.byCenterOfMass;
+                    handle = centroidTracker(ims);
                 case TrackingAlgorithms.crossCorrelation
                     handle = crossCorrelationTracker(ims(:, :, 1));
                 case TrackingAlgorithms.gaussianFit
@@ -24,9 +24,6 @@ classdef TrackingAlgorithms
     end
 
     methods (Access = private, Static)
-        function center = byCenterOfMass(im)
-            center = Centroid(im).withError();
-        end
         function center = byGaussianFit(im)
             center = GaussianFitter(im).withError();
         end
@@ -34,7 +31,10 @@ classdef TrackingAlgorithms
 end
 
 
-
+function handle = centroidTracker(ims)
+tracker = Centroid(ims);
+handle = @tracker.centerWithError;
+end
 function handle = crossCorrelationTracker(firstFrame)
 tracker = CrossCorrelation(firstFrame);
 handle = @tracker.offsetWithError;
