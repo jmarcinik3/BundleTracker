@@ -148,10 +148,68 @@ end
 
 
 
-function xIndexMin = getClosestIndex(xyMouse, x, y)
-xyDistance = (x - xyMouse(1)).^2 + (y - xyMouse(2)).^2;
-[~, xyIndexMin] = min(xyDistance(:));
-[xIndexMin, ~] = ind2sub(size(xyDistance), xyIndexMin);
+function closestIndexY = getClosestIndex(xyMouse, x, y)
+% get nearest x-index relative to cursor
+xMouse = xyMouse(1);
+xCount = size(y, 2);
+xDifference = x(1, 2) - x(1, 1); % calculate pixels between each point in x-direction
+    function index = getIndexX(xPixels)
+        index = round(xPixels / xDifference);
+        index = min(xCount, index);
+        index = max(1, index);
+    end
+
+yMouse = xyMouse(2);
+yCount = size(y, 1);
+closestIndexX = getIndexX(xMouse);
+
+if yMouse <= y(1, closestIndexX) % bottom line is closest
+    closestIndexY = 1;
+    return;
+elseif yMouse >= y(yCount, closestIndexX) % top line is closest
+    closestIndexY = yCount;
+    return;
+end
+
+% find change in y-position relative to cursor, above x-location of cursor
+dyAtMinX = (y(:, closestIndexX) - yMouse).^2; % calculate change in y-position relative to cursor
+[dyMinAtMinX, closestIndexY] = min(dyAtMinX); % determine line closest in y-direction
+
+% calculate indices at which change in x-position is greater than
+% minimum change in y-position
+dyMinAtMinX = dyMinAtMinX + 1;
+lowerIndexX = getIndexX(xMouse - dyMinAtMinX);
+upperIndexX = getIndexX(xMouse + dyMinAtMinX);
+
+% determine whether cursor is above or below closest line
+yAtClosestX = y(closestIndexY, closestIndexX);
+mouseBelowClosestY = yMouse < yAtClosestX;
+mouseAboveClosestY = yMouse > yAtClosestX;
+
+if yMouse == yAtClosestX
+    return;
+end
+
+% get points and distances in vicinity (two nearest lines) of cursor
+xSub = x(1, lowerIndexX:upperIndexX);
+if mouseBelowClosestY
+    ySub = y(closestIndexY-1:closestIndexY, lowerIndexX:upperIndexX);
+elseif mouseAboveClosestY
+    ySub = y(closestIndexY:closestIndexY+1, lowerIndexX:upperIndexX);
+end
+dx2 = (xSub - xMouse).^2;
+dy2 = (ySub - yMouse).^2;
+xyDistanceSub =  dx2 + dy2;
+
+% set line closest to cursor as closer of two nearest lines
+[~, closestIndexYSub] = min(xyDistanceSub(:)); % determine index closest to cursor
+[closestIndexYSub, ~] = ind2sub(size(xyDistanceSub), closestIndexYSub); % reshape index
+closestIndexY = closestIndexY + closestIndexYSub;
+if mouseBelowClosestY
+    closestIndexY = closestIndexY - 2;
+elseif mouseAboveClosestY
+    closestIndexY = closestIndexY - 1;
+end
 end
 
 function arrayPixels = limitsToPixels(ax, array, axisName)
