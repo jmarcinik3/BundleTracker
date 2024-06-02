@@ -96,17 +96,11 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             multiWaitbar(taskName, 'Close');
         end
         function configureRegionToGui(obj, region)
-            regionIs1d = ~sum(region.createMask(), "all");
-            if regionIs1d
-                deleteRegions(region);
-                return;
-            end
-
             regionGui = obj.getRegionGui();
             configureRegionGui(obj, regionGui, region);
             obj.previewRegion(region);
+            deleteRegionIfLine(region);
         end
-
     end
     methods (Access = private)
         function buttonDownFcn(obj, source, event)
@@ -123,6 +117,10 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         end
         function regionMoving(obj, source, ~)
             obj.updateRegionalRawImage(source);
+        end
+        function regionMoved(obj, source, ~)
+            obj.updateRegionalRawImage(source);
+            deleteRegionIfLine(source);
         end
         function deletingRegion(obj, source, ~)
             activeRegion = obj.getActiveRegion();
@@ -277,7 +275,7 @@ generateRegionMenu(previewer, region);
 end
 function addRegionListeners(previewer, region)
 addlistener(region, "MovingROI", @previewer.regionMoving);
-addlistener(region, "ROIMoved", @previewer.regionMoving);
+addlistener(region, "ROIMoved", @previewer.regionMoved);
 addlistener(region, "ROIClicked", @previewer.regionClicked);
 addlistener(region, "DeletingROI", @previewer.deletingRegion);
 end
@@ -327,6 +325,12 @@ trackingModeParserChanged(previewer);
 angleModeParserChanged(previewer);
 detrendModeParserChanged(previewer);
 directionParserChanged(previewer);
+end
+function deleteRegionIfLine(region)
+regionIs1d = ~sum(region.createMask(), "all");
+if regionIs1d
+    deleteRegions(region);
+end
 end
 
 function thresholdParserChanged(previewer, ~, ~)

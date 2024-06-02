@@ -26,7 +26,7 @@
         },
         "PositiveDirection": "Right",
         "Region": {
-            "Color": [0, 0.4470, 0.7410],
+            "Color": [1, 1, 1],
             "FaceAlpha": 0.2,
             "LabelAlpha": 1,
             "LabelTextColor": [0, 0, 0],

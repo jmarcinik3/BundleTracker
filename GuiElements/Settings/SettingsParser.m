@@ -56,6 +56,9 @@ classdef SettingsParser
         function color = getRegionDefaults()
             color = namedargs2cell(getDefaults().Region);
         end
+        function color = getRegionDefaultColor()
+            color = getDefaults().Region.Color;
+        end
         function color = getRegionQueueColor()
             color = getAesthetics().Region.QueueColor;
         end
