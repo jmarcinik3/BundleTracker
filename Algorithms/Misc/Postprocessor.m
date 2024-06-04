@@ -203,8 +203,12 @@ y = ErrorPropagator(result.yProcessed, result.yProcessedError);
 [angle, angleError, angleInfo] = AngleAlgorithms.byKeyword(x.Value, y.Value, angleMode);
 angle = ErrorPropagator(angle, angleError);
 [x, y] = rotateXy(x, y, angle);
-extraAngle = angleIfNoiseInX(x.Value, y.Value, angle.Value);
-[x, y] = rotateXy(x, y, extraAngle);
+if ~strcmp(angleMode, "None")
+    extraAngle = angleIfNoiseInX(x.Value, y.Value, angle.Value);
+    [x, y] = rotateXy(x, y, extraAngle);
+else
+    extraAngle = 0;
+end
 newAngle = addAngle(result, angle + extraAngle);
 
 postResult = result;
