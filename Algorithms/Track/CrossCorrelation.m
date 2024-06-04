@@ -14,7 +14,7 @@ classdef CrossCorrelation
         end
 
         function center = offsetWithError(obj, im)
-            [xmean, ymean, xyerr] = dftregistration(obj.firstFft, fft2(im), obj.upsampleFactor);
+            [xmean, ymean, xyerr] = dftregistration(fft2(im), obj.firstFft, obj.upsampleFactor);
             [xerr, yerr] = calculateErrorComponents(xmean, ymean, xyerr);
             center = PointStructurer.asPoint(xmean, ymean, xerr, yerr);
         end
