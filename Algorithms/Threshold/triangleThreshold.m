@@ -13,18 +13,6 @@ function level = triangleThreshold(im)
 
 %     Use Triangle approach to compute threshold based on a 1D histogram.
 
-%     INPUTS
-%         im :   gray level image
-%     OUTPUT
-%         level   :   threshold value in the range [0, 1];
-%
-%     Dr B. Panneton, June, 2010
-%     Agriculture and Agri-Food Canada
-%     St-Jean-sur-Richelieu, Qc, Canad
-%     bernard.panneton@agr.gc.ca
-
-
-imClass = class(im);
 %   Find maximum of histogram and its location along the x axis
 binCount = imhist(im);
 binLength = numel(binCount);
