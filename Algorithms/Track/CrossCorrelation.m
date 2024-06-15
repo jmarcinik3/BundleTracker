@@ -1,22 +1,55 @@
-classdef CrossCorrelation
+classdef CrossCorrelation < handle
     properties (Access = private)
+        compareMode;
         upsampleFactor;
-        firstFft;
+        previousFft;
+        previousCenter;
     end
 
     methods
         function obj = CrossCorrelation(firstFrame, varargin)
             p = inputParser;
             addOptional(p, "UpsampleFactor", 100);
+            addOptional(p, "CompareMode", "First");
             parse(p, varargin{:});
+
+            obj.compareMode = p.Results.CompareMode;
             obj.upsampleFactor = p.Results.UpsampleFactor;
-            obj.firstFft = fft2(firstFrame);
+            obj.previousFft = fft2(firstFrame);
+            obj.previousCenter = ErrorPropagator([0, 0], [0, 0]);
         end
 
         function center = offsetWithError(obj, im)
-            [xmean, ymean, xyerr] = dftregistration(fft2(im), obj.firstFft, obj.upsampleFactor);
+            switch obj.compareMode
+                case "First"
+                    center = obj.offsetFirstMode(im);
+                case "Consecutive"
+                    center = obj.offsetConsecutiveMode(im);
+            end
+        end
+
+        function center = offsetFirstMode(obj, im)
+            [xmean, ymean, xyerr] = dftregistration(fft2(im), obj.previousFft, obj.upsampleFactor);
             [xerr, yerr] = calculateErrorComponents(xmean, ymean, xyerr);
             center = PointStructurer.asPoint(xmean, ymean, xerr, yerr);
+        end
+
+        function center = offsetConsecutiveMode(obj, im)
+            newFft = fft2(im);
+            [dx, dy, xyerr] = dftregistration(newFft, obj.previousFft, obj.upsampleFactor);
+            [xerr, yerr] = calculateErrorComponents(dx, dy, xyerr);
+            
+            dxy = ErrorPropagator([dx, dy], [xerr, yerr]);
+            xy = dxy + obj.previousCenter;
+
+            center = PointStructurer.asPoint( ...
+                xy.Value(1), ...
+                xy.Value(2), ...
+                xy.Error(1), ...
+                xy.Error(2) ...
+                );
+            obj.previousFft = newFft;
+            obj.previousCenter = xy;
         end
     end
 end
