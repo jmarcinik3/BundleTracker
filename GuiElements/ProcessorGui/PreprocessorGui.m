@@ -75,9 +75,15 @@ slider = uislider(gl, "range");
 % set major and minor tick locations
 maxIntensity = 1;
 defaults = SettingsParser.getThresholdSliderDefaults();
+
+valueIndex = find(strcmp("Value", defaults));
+normalizedValues = defaults{valueIndex + 1};
+defaults{valueIndex + 1} = normalizedValues.' * maxIntensity;
+
 minorTicks = 0:maxIntensity/32:maxIntensity;
 majorTicks = 0:maxIntensity/4:maxIntensity;
 majorTickLabels = arrayfun(@(tick) sprintf("%d", tick), majorTicks);
+
 set(slider, ...
     "Limits", [0, maxIntensity], ...
     "MinorTicks", minorTicks, ...

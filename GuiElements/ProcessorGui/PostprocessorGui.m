@@ -19,6 +19,9 @@ classdef PostprocessorGui
 
     %% Functions to retrieve GUI elements
     methods
+        function gl = getGridLayout(obj)
+            gl = obj.gridLayout;
+        end
         function gui = getDirectionGui(obj)
             gui = obj.directionGui;
         end
@@ -115,4 +118,3 @@ dropdown = uidropdown(gl, ...
     defaults{:} ...
     );
 end
-

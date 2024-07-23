@@ -27,8 +27,7 @@ classdef TrackingGui
             [obj.regionPanel, obj.regionGui] = generateRegionGui(rgl);
             obj.videoGui = VideoGui(gl, {1, [1, 2]});
 
-            obj.scaleFactorGridLayout = generateScaleFactorElement(rgl);
-
+            obj.scaleFactorGridLayout = ScaleFactorGui(rgl).getGridLayout();
             obj.gridLayout = gl;
             obj.rightGridLayout = rgl;
             obj.imagePanel = imagePanel;
@@ -172,30 +171,4 @@ panel = uipanel(parent, ...
     );
 gl = RegionGui.generateGridLayout(panel);
 regionGui = RegionGui(gl);
-end
-
-%% Function to generate scale factor input
-% Generates edit fields (with labels) allowing user to set scaling
-%
-% Arguments
-%
-% * uigridlayout |parent|: layout to add edit fields in
-%
-% Returns uigridlayout composed of [uilabel, uieditfield("numeric"),
-% uilabel, uieditfield("numeric")]
-function gl = generateScaleFactorElement(parent)
-gl = uigridlayout(parent, [1 4]);
-
-lbl1 = uilabel(gl, "Text", "length/px:");
-scaleFactorDefaults = SettingsParser.getScaleFactorDefaults();
-tb1 = uieditfield(gl, "numeric", scaleFactorDefaults{:});
-
-scaleFactorErrorDefaults = SettingsParser.getScaleFactorErrorDefaults();
-lbl2 = uilabel(gl, "Text", "±");
-tb2 = uieditfield(gl, "numeric", scaleFactorErrorDefaults{:});
-
-lbl1.Layout.Column = 1;
-tb1.Layout.Column = 2;
-lbl2.Layout.Column = 3;
-tb2.Layout.Column = 4;
 end

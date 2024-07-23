@@ -24,10 +24,9 @@ classdef DirectionGui
 
     methods
         function obj = DirectionGui(parent)
-            gl = uigridlayout(parent, [1, 2]);
-            gl.Padding = [0, 0, 0, 0];
+            gl = uigridlayout(parent, [1, 2], "Padding", 0);
 
-            obj.label = generateLabel(gl);
+            obj.label = uilabel(gl, "Text", "Positive Direction:");
             group = uibuttongroup(gl, "BorderType", "none");
             
             obj.buttons = generateButtonGroup(group);
@@ -130,11 +129,6 @@ set(gl, ...
     );
 label.Layout.Column = 1;
 group.Layout.Column = 2;
-end
-
-function label = generateLabel(gl)
-text = "Positive Direction:";
-label = uilabel(gl, "Text", text);
 end
 
 function buttons = generateButtonGroup(group)
