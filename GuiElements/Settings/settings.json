@@ -93,6 +93,11 @@
         }
     },
     "Aesthetics": {
+        "Colormap": {
+            "Dark": [0, 0, 0],
+            "Middle": "turbo",
+            "Bright": [1, 1, 1]
+        },
         "Region": {
             "TrackedColor": [0, 1, 0],
             "QueueColor": [1, 0, 0]

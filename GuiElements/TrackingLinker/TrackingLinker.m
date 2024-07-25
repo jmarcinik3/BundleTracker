@@ -170,14 +170,24 @@ classdef TrackingLinker < RegionPreviewer ...
             if isfilepath
                 activeRegion = obj.getActiveRegion();
                 ims = obj.getVideoInRegion(activeRegion);
-                profile = generateProfile(filepath);
-                videoWriter = VideoWriter(filepath, profile);
-                set(videoWriter, "FrameRate", obj.getFps());
-
-                imClass = determineImageClass(profile, class(ims));
+                imClass = class(ims);
                 ims = Preprocessor.fromRegion(activeRegion).preprocess(ims);
                 ims = imageToClass(ims, imClass);
-                export3dMatrixAsVideo(ims, videoWriter);
+
+                [~, ~, fileExtension] = fileparts(filepath);
+                if strcmp(fileExtension, ".avi")
+                    videoWriter = VideoWriter(filepath, "Motion JPEG AVI");
+                    set(videoWriter, "FrameRate", obj.getFps());
+                    ims = gray2rgb(ims, obj.getFigure());
+                    export4dMatrixAsVideo(ims, videoWriter);
+                elseif strcmp(fileExtension, ".mj2")
+                    videoWriter = VideoWriter(filepath, "Archival");
+                    set(videoWriter, "FrameRate", obj.getFps());
+                    if strcmp(imClass, "double")
+                        ims = imageToClass(ims, "uint16");
+                    end
+                    export3dMatrixAsVideo(ims, videoWriter);
+                end
             end
         end
 
@@ -274,29 +284,20 @@ switch string(videoProfile)
 end
 end
 
-function profile = generateProfile(filepath)
-[~, ~, fileExtension] = fileparts(filepath);
-switch string(fileExtension)
-    case ".avi"
-        profile = "Grayscale AVI";
-    case ".mj2"
-        profile = "Archival";
-end
-end
-function imClass = determineImageClass(profile, imClass)
-switch string(profile)
-    case "Archival"
-        if strcmp(imClass, "double")
-            imClass = "uint16";
-        end
-    case "Grayscale AVI"
-end
-end
 function export3dMatrixAsVideo(ims, videoWriter)
 frameCount = size(ims, 3);
 open(videoWriter);
 for frameIndex = 1:frameCount
     im = ims(:, :, frameIndex);
+    writeVideo(videoWriter, im);
+end
+close(videoWriter);
+end
+function export4dMatrixAsVideo(ims, videoWriter)
+frameCount = size(ims, 4);
+open(videoWriter);
+for frameIndex = 1:frameCount
+    im = ims(:, :, :, frameIndex);
     writeVideo(videoWriter, im);
 end
 close(videoWriter);

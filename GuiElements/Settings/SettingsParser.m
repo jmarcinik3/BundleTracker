@@ -66,6 +66,23 @@ classdef SettingsParser
             color = getAesthetics().Region.TrackedColor;
         end
 
+        function defaults = getColormapAesthetics()
+            defaults = { ...
+                SettingsParser.getColormapDarkColor(), ...
+                SettingsParser.getColormapName(), ...
+                SettingsParser.getColormapsBrightColor() ...
+                };
+        end
+        function rgb = getColormapDarkColor()
+            rgb = getAesthetics().Colormap.Dark;
+        end
+        function colormapName = getColormapName()
+            colormapName = getAesthetics().Colormap.Middle;
+        end
+        function rgb = getColormapBrightColor()
+            rgb = getAesthetics().Colormap.Bright.';
+        end
+
         function defaults = getTrackingFigureDefaults()
             defaults = getDefaults().TrackingFigure;
         end

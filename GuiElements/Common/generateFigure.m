@@ -1,7 +1,12 @@
 function fig = generateFigure(varargin)
 fig = uifigure(varargin{:});
-cmap = colormap(fig, "turbo");
-cmap(1, :) = 0; % set dark pixels as black
-cmap(end, :) = 1; % set saturated pixels as white
+
+darkRgb = SettingsParser.getColormapDarkColor();
+mapName = SettingsParser.getColormapName();
+brightRgb = SettingsParser.getColormapBrightColor();
+
+cmap = colormap(fig, mapName); % set common pixel colormap
+cmap(1, :) = darkRgb; % set dark pixel color
+cmap(end, :) = brightRgb; % set saturated pixel color
 colormap(fig, cmap);
 end
