@@ -120,7 +120,7 @@
     },
     "Menu": {
         "Labels": {
-            "ExportAxisImage": "Export Axi&s as Image",
+            "ExportAxisImage": "Export as Image",
             "ImportRegions": "Import &Regions",
             "ImportVideo": "&Import Video",
             "OpenDirectory": "&Open Directory",

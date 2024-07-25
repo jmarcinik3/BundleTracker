@@ -41,6 +41,14 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler & RegionLinker
 
     %% Functions to update state of GUI
     methods
+        function resetRegionButtonPushed(obj, source, ~)
+            title = SettingsParser.getResetRegionLabel();
+            if obj.regionExists(title)
+                resetKeyword = source.UserData{1};
+                region = source.UserData{2};
+                obj.resetRegionsToDefaults(region, resetKeyword);
+            end
+        end
         function resetRegionsToDefaults(obj, regions, keyword)
             if nargin == 2
                 keyword = RegionUserData.allKeyword;
@@ -304,15 +312,16 @@ end
 cm = region.ContextMenu;
 fixAspectMenu = cm.Children(2);
 deleteMenu = cm.Children(1);
+resetMenu = generateResetMenu(cm, previewer, region);
 set(deleteMenu, "Text", ['Delete ', regionShape, '      Crtl+Del']);
-set(cm, "Children", flip([fixAspectMenu, deleteMenu]));
+set(cm, "Children", flip([resetMenu, fixAspectMenu, deleteMenu]));
 
 uimenu(cm, ...
     "Text", ['Duplicate ', regionShape, '     Ctrl+J'], ...
     "MenuSelectedFcn", @(src, ev) previewer.duplicateRegion(region) ...
     );
 uimenu(cm, ...
-    "Text", ['Bring to Front', '       Ctrl+Shift+]'], ... "Bring to Front\t Ctrl+Shift+]", ...
+    "Text", ['Bring to Front', '       Ctrl+Shift+]'], ...
     "MenuSelectedFcn", @(src, ev) previewer.bringRegionToFront(region) ...
     )
 uimenu(cm, ...
@@ -327,6 +336,18 @@ uimenu(cm, ...
     "Text", ['Send Backward', '             Ctrl+['], ...
     "MenuSelectedFcn", @(src, ev) previewer.sendRegionBackward(region) ...
     )
+end
+function m = generateResetMenu(parentMenu, previewer, region)
+resetKeywords = RegionUserData.keywords;
+m = uimenu(parentMenu, "Text", SettingsParser.getResetRegionLabel());
+for index = 1:numel(resetKeywords)
+    resetKeyword = resetKeywords(index);
+    uimenu(m, ...
+        "Text", resetKeyword, ...
+        "MenuSelectedFcn", @previewer.resetRegionButtonPushed, ...
+        "UserData", {resetKeyword, region} ...
+        );
+end
 end
 
 function regionChanged(previewer)
@@ -347,10 +368,16 @@ end
 
 function thresholdParserChanged(previewer, ~, ~)
 thresholdSlider = previewer.getRegionGui().getThresholdSlider();
-
 thresholds = RegionUserData(previewer).getThresholds();
-thresholds(1) = max(thresholds(1), thresholdSlider.Limits(1));
-thresholds(2) = min(thresholds(2), thresholdSlider.Limits(2));
+
+maxThreshold = thresholds(2);
+maxIntensity = thresholdSlider.Limits(2);
+if maxThreshold <= 1
+    thresholds = thresholds.' * maxIntensity;
+else
+    thresholds(1) = max(thresholds(1), thresholdSlider.Limits(1));
+    thresholds(2) = min(maxThreshold, maxIntensity);
+end
 
 set(thresholdSlider, "Value", thresholds);
 previewer.thresholdSliderChanged(thresholdSlider, []);
