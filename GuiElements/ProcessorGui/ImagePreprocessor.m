@@ -22,8 +22,11 @@ classdef ImagePreprocessor < handle
     %% Functions to generate objects
     methods (Access = private)
         function processor = generatePreprocessor(obj, thresholds)
-            invert = obj.gui.getInvert();
-            processor = Preprocessor(thresholds, invert);
+            processor = Preprocessor( ...
+                "Smoothing", obj.gui.getSmoothing(), ...
+                "Thresholds", thresholds, ...
+                "Invert", obj.gui.getInvert() ...
+                );
         end
     end
 
@@ -44,7 +47,9 @@ classdef ImagePreprocessor < handle
         end
         function updateFromRawImage(obj, thresholds)
             if obj.imageExists()
-                im = generatePreprocessedImage(obj, thresholds);
+                im = obj.getRawImage();
+                preprocessor = obj.generatePreprocessor(thresholds);
+                im = preprocessor.preprocess(im);
                 showImage(obj, im);
             end
         end
@@ -58,12 +63,4 @@ fig = obj.gui.getFigure();
 imRgb = gray2rgb(im, fig);
 iIm = obj.gui.getInteractiveImage();
 set(iIm, "CData", imRgb);
-end
-
-function im = generatePreprocessedImage(obj, thresholds)
-im = obj.getRawImage();
-if obj.imageExists()
-    preprocessor = obj.generatePreprocessor(thresholds);
-    im = preprocessor.preprocess(im);
-end
 end

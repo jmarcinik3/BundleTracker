@@ -7,6 +7,7 @@ classdef RegionUserData < handle
             RegionUserData.detrendModeKeyword, ...
             RegionUserData.invertKeyword, ...
             RegionUserData.positiveDirectionKeyword, ...
+            RegionUserData.smoothingKeyword, ...
             RegionUserData.thresholdsKeyword, ...
             RegionUserData.trackingModeKeyword ...
             ];
@@ -16,14 +17,16 @@ classdef RegionUserData < handle
         detrendModeKeyword = "Detrend Mode";
         invertKeyword = "Invert";
         positiveDirectionKeyword = "Positive Direction";
+        smoothingKeyword = "Smoothing";
         thresholdsKeyword = "Thresholds";
         trackingModeKeyword = "Tracking Mode";
     end
 
-    properties (SetObservable, Access = private)
+    properties (SetObservable)
+        Smoothing;
         IntensityRange;
         IsInverted;
-        
+
         TrackingMode;
         AngleMode;
         DetrendMode;
@@ -40,6 +43,8 @@ classdef RegionUserData < handle
                 obj = arg.UserData;
             elseif isa(arg, "RegionPreviewer")
                 obj = RegionUserData(arg.getActiveRegion());
+            elseif isa(arg, "RegionUserData")
+                obj = arg;
             end
         end
     end
@@ -47,6 +52,7 @@ classdef RegionUserData < handle
     %% Functions to generate state information
     methods
         function result = appendMetadata(obj, result)
+            result.Smoothing = obj.Smoothing;
             result.IntensityRange = obj.IntensityRange;
             result.IsInverted = obj.IsInverted;
             result.TrackingMode = obj.TrackingMode;
@@ -58,23 +64,45 @@ classdef RegionUserData < handle
 
     %% Functions to retrieve state information
     methods
-        function thresholds = getThresholds(obj)
-            thresholds = obj.IntensityRange;
+        function value = getByKeyword(obj, keyword)
+            switch keyword
+                case RegionUserData.angleModeKeyword
+                    value = obj.getAngleMode();
+                case RegionUserData.detrendModeKeyword
+                    value = obj.getDetrendMode();
+                case RegionUserData.invertKeyword
+                    value = obj.getInvert();
+                case RegionUserData.positiveDirectionKeyword
+                    value = obj.getPositiveDirection();
+                case RegionUserData.smoothingKeyword
+                    value = obj.getSmoothing();
+                case RegionUserData.thresholdsKeyword
+                    value = obj.getThresholds();
+                case RegionUserData.trackingModeKeyword
+                    value = obj.getTrackingMode();
+            end
         end
-        function invert = getInvert(obj)
-            invert = obj.IsInverted;
-        end
-        function trackingMode = getTrackingMode(obj)
-            trackingMode = obj.TrackingMode;
-        end
+
         function angleMode = getAngleMode(obj)
             angleMode = obj.AngleMode;
         end
         function detrendMode = getDetrendMode(obj)
             detrendMode = obj.DetrendMode;
         end
+        function invert = getInvert(obj)
+            invert = obj.IsInverted;
+        end
         function positiveDirection = getPositiveDirection(obj)
             positiveDirection = obj.Direction;
+        end
+        function smoothing = getSmoothing(obj)
+            smoothing = obj.Smoothing;
+        end
+        function thresholds = getThresholds(obj)
+            thresholds = obj.IntensityRange;
+        end
+        function trackingMode = getTrackingMode(obj)
+            trackingMode = obj.TrackingMode;
         end
     end
 
@@ -91,6 +119,7 @@ classdef RegionUserData < handle
         end
         function configureByResultsParser(region, parser, index)
             regionUserData = RegionUserData(region);
+            regionUserData.setSmoothing(parser.getSmoothingWidth(index));
             regionUserData.setThresholds(parser.getIntensityRange(index));
             regionUserData.setInvert(parser.pixelsAreInverted(index));
             regionUserData.setTrackingMode(parser.getTrackingMode(index));
@@ -98,19 +127,39 @@ classdef RegionUserData < handle
             regionUserData.setDetrendMode(parser.getDetrendMode(index));
             regionUserData.setPositiveDirection(parser.getPositiveDirection(index));
         end
-        function configureByRegion(newRegion, oldRegion)
+        function newUserData = configureByRegion(newRegion, oldRegion)
             newUserData = RegionUserData(newRegion);
             oldUserData = RegionUserData(oldRegion);
+            keywords = RegionUserData.keywords(2:end);
 
-            newUserData.setThresholds(oldUserData.getThresholds());
-            newUserData.setInvert(oldUserData.getInvert());
-            newUserData.setTrackingMode(oldUserData.getTrackingMode());
-            newUserData.setAngleMode(oldUserData.getAngleMode());
-            newUserData.setDetrendMode(oldUserData.getDetrendMode());
-            newUserData.setPositiveDirection(oldUserData.getPositiveDirection());
+            for keyword = keywords
+                oldValue = oldUserData.getByKeyword(keyword);
+                if numel(oldValue) >= 1
+                    newUserData.setByKeyword(keyword, oldValue);
+                end
+            end
         end
     end
     methods
+        function setByKeyword(obj, keyword, value)
+            switch keyword
+                case RegionUserData.angleModeKeyword
+                    obj.setAngleMode(value);
+                case RegionUserData.detrendModeKeyword
+                    obj.setDetrendMode(value);
+                case RegionUserData.invertKeyword
+                    obj.setInvert(value);
+                case RegionUserData.positiveDirectionKeyword
+                    obj.setPositiveDirection(value);
+                case RegionUserData.smoothingKeyword
+                    obj.setSmoothing(value);
+                case RegionUserData.thresholdsKeyword
+                    obj.setThresholds(value);
+                case RegionUserData.trackingModeKeyword
+                    obj.setTrackingMode(value);
+            end
+        end
+
         function setThresholds(obj, thresholds)
             obj.IntensityRange = thresholds;
         end
@@ -121,6 +170,9 @@ classdef RegionUserData < handle
             obj.IntensityRange(2) = threshold;
         end
 
+        function setSmoothing(obj, smoothing)
+            obj.Smoothing = smoothing;
+        end
         function setInvert(obj, invert)
             obj.IsInverted = invert;
         end
@@ -146,30 +198,6 @@ classdef RegionUserData < handle
             end
             resetByKeyword(obj, keyword);
         end
-        function resetToDefaultAngleMode(obj)
-            defaultAngleMode = SettingsParser.getDefaultAngleMode();
-            obj.setAngleMode(defaultAngleMode);
-        end
-        function resetToDefaultDetrendMode(obj)
-            defaultDetrendMode = SettingsParser.getDefaultDetrendMode();
-            obj.setAngleMode(defaultDetrendMode);
-        end
-        function resetToDefaultInvert(obj)
-            defaultInvert = SettingsParser.getDefaultInvert();
-            obj.setInvert(defaultInvert);
-        end
-        function resetToDefaultPositiveDirection(obj)
-            defaultPositiveDirection = SettingsParser.getDefaultPositiveDirection();
-            obj.setPositiveDirection(defaultPositiveDirection);
-        end
-        function resetToDefaultThresholds(obj)
-            defaultThresholds = [0, Inf];
-            obj.setThresholds(defaultThresholds);
-        end
-        function resetToDefaultTrackingMode(obj)
-            defaultTrackingMode = SettingsParser.getDefaultTrackingMode();
-            obj.setTrackingMode(defaultTrackingMode);
-        end
     end
 end
 
@@ -183,30 +211,31 @@ for index = 1:thresholdCount
 end
 end
 
-function resetByKeyword(obj, keyword)
-switch keyword
-    case RegionUserData.angleModeKeyword
-        obj.resetToDefaultAngleMode();
-    case RegionUserData.detrendModeKeyword
-        obj.resetToDefaultDetrendMode();
-    case RegionUserData.invertKeyword
-        obj.resetToDefaultInvert();
-    case RegionUserData.positiveDirectionKeyword
-        obj.resetToDefaultPositiveDirection();
-    case RegionUserData.thresholdsKeyword
-        obj.resetToDefaultThresholds();
-    case RegionUserData.trackingModeKeyword
-        obj.resetToDefaultTrackingMode();
-    case RegionUserData.allKeyword
-        resetToDefaultAll(obj);
-end
+function resetByKeyword(obj, keywords)
+keywordCount = numel(keywords);
+if keywordCount >= 2
+    for keyword = keywords
+        resetByKeyword(obj, keyword);
+    end
+    return;
 end
 
-function resetToDefaultAll(obj)
-obj.resetToDefaultAngleMode();
-obj.resetToDefaultDetrendMode();
-obj.resetToDefaultInvert();
-obj.resetToDefaultPositiveDirection();
-obj.resetToDefaultThresholds();
-obj.resetToDefaultTrackingMode();
+switch keywords
+    case RegionUserData.angleModeKeyword
+        obj.setAngleMode(SettingsParser.getDefaultAngleMode());
+    case RegionUserData.detrendModeKeyword
+        obj.setDetrendMode(SettingsParser.getDefaultDetrendMode());
+    case RegionUserData.invertKeyword
+        obj.setInvert(SettingsParser.getDefaultInvert());
+    case RegionUserData.positiveDirectionKeyword
+        obj.setPositiveDirection(SettingsParser.getDefaultPositiveDirection());
+    case RegionUserData.smoothingKeyword
+        obj.setSmoothing(0);
+    case RegionUserData.thresholdsKeyword
+        obj.setThresholds(SettingsParser.getDefaultThresholds());
+    case RegionUserData.trackingModeKeyword
+        obj.setTrackingMode(SettingsParser.getDefaultTrackingMode());
+    case RegionUserData.allKeyword
+        resetByKeyword(obj, RegionUserData.keywords(2:end));
+end
 end

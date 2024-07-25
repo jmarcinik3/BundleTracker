@@ -1,7 +1,7 @@
 classdef RegionGui < ProcessorGui
     properties (Constant, Access = private)
-        rows = 8;
-        columns = 5;
+        rows = 4;
+        columns = 1;
         size = [RegionGui.rows, RegionGui.columns];
     end
 
@@ -15,17 +15,18 @@ classdef RegionGui < ProcessorGui
     methods
         function obj = RegionGui(gl)
             obj@ProcessorGui(gl);
-            regionMoverGui = RegionMoverGui(gl);
-            regionCompressorGui = RegionCompressorGui(gl);
-            regionExpanderGui = RegionExpanderGui(gl);
+            
+            adjusterGl = uigridlayout(gl, [1, 3]);
+            regionMoverGui = RegionMoverGui(adjusterGl);
+            regionCompressorGui = RegionCompressorGui(adjusterGl);
+            regionExpanderGui = RegionExpanderGui(adjusterGl);
+            guis = {regionMoverGui, regionCompressorGui, regionExpanderGui};
+            layoutAdjusterElements(guis);
 
             obj.gridLayout = gl;
-            layoutElements( ...
-                obj, ...
-                regionMoverGui, ...
-                regionCompressorGui, ...
-                regionExpanderGui ...
-                );
+            layoutAdjusterElements(guis);
+            layoutElements(obj, adjusterGl);
+            
 
             obj.regionMoverGui = regionMoverGui;
             obj.regionCompressorGui = regionCompressorGui;
@@ -63,71 +64,91 @@ end
 
 
 
-function layoutElements( ...
-    obj, ...
-    regionMoverGui, ...
-    regionCompressorGui, ...
-    regionExpanderGui ...
-    )
-% Set component heights in grid layout
-rowHeight = TrackingGui.rowHeight;
-rowCount = RegionGui.rows;
-columnCount = RegionGui.columns;
-adjusterLength = RegionAdjusterGui.length;
-
-% Retrieve components
+function layoutElements(obj, adjusterGl)
+% retrieve components
 gl = obj.getGridLayout();
-regionMoverElement = regionMoverGui.getGridLayout();
-regionCompressorElement = regionCompressorGui.getGridLayout();
-regionExpanderElement = regionExpanderGui.getGridLayout();
-
 ax = obj.getAxis();
-thresholdSlider = obj.getThresholdSlider();
-invertCheckbox = obj.getInvertCheckbox();
-trackingSelection = obj.getTrackingSelectionElement();
-angleSelection = obj.getAngleSelectionElement();
-detrendSelection = obj.getDetrendSelectionElement();
-directionElement = obj.getPositiveDirectionElement();
+preprocessingGl = layoutPreprocessingElements(gl, obj);
+processingGl = layoutProcessingElements(gl, obj);
 
 % lay out full-row elements across all columns
-rowElements = [ ...
+elements = [ ...
     ax, ...
+    preprocessingGl, ...
+    processingGl, ...
+    adjusterGl ...
+    ];
+for index = 1:numel(elements)
+    element = elements(index);
+    set(element, "Parent", gl);
+    element.Layout.Row = index;
+end
+
+rowHeight = TrackingGui.rowHeight;
+set(gl, ...
+    "RowSpacing", 0, ...
+    "RowHeight", {'fit', 4*rowHeight, 6*rowHeight, 3*rowHeight}, ...
+    "ColumnWidth", {'1x'} ...
+    );
+end
+
+function gl = layoutPreprocessingElements(parent, gui)
+% Retrieve components
+gl = uigridlayout(parent, [3, 1]);
+smoothingSlider = gui.getSmoothingSlider();
+thresholdSlider = gui.getThresholdSlider();
+invertCheckbox = gui.getInvertCheckbox();
+
+% lay out elements
+elements = [ ...
+    smoothingSlider, ...
     thresholdSlider, ...
-    invertCheckbox, ...
-    trackingSelection, ...
-    angleSelection, ...
-    detrendSelection ...
-    directionElement ...
+    invertCheckbox ...
     ];
-for index = 1:numel(rowElements)
-    elem = rowElements(index);
-    elem.Layout.Row = index;
-    elem.Layout.Column = [1, columnCount];
+for index = 1:numel(elements)
+    element = elements(index);
+    set(element, "Parent", gl);
+    element.Layout.Row = index;
 end
-% lay out region adjuster elements in same row
-adjustElements = [ ...
-    regionMoverElement, ...
-    regionCompressorElement, ...
-    regionExpanderElement ...
-    ];
-for index = 1:numel(adjustElements)
-    elem = adjustElements(index);
-    elem.Layout.Column = index + 1;
-    elem.Layout.Row = rowCount;
-end
-
-% Set up row heights and column widths for grid layout
-gl.RowHeight = num2cell(rowHeight * ones(1, rowCount));
-gl.RowHeight{1} = '1x';
-gl.RowHeight{rowCount-1} = DirectionGui.height;
-gl.RowHeight{rowCount} = adjusterLength;
-
-gl.ColumnWidth = num2cell(adjusterLength * ones(1, columnCount));
-gl.ColumnWidth{1} = '1x';
-gl.ColumnWidth{end} = '1x';
 
 set(gl, ...
-    "Padding", [0, 0, 0, 0], ...
-    "RowSpacing", 1 ...
+    "Padding", 0, ...
+    "RowSpacing", 0, ...
+    "RowHeight", {'1.5x', '1.5x', '1x'} ...
     );
+end
+
+function gl = layoutProcessingElements(parent, gui)
+% Retrieve components
+gl = uigridlayout(parent, [4, 1]);
+trackingSelection = gui.getTrackingSelectionElement();
+angleSelection = gui.getAngleSelectionElement();
+detrendSelection = gui.getDetrendSelectionElement();
+directionElement = gui.getPositiveDirectionElement();
+
+% lay out elements
+elements = [ ...
+    trackingSelection, ...
+    angleSelection, ...
+    detrendSelection, ...
+    directionElement ...
+    ];
+for index = 1:numel(elements)
+    element = elements(index);
+    set(element, "Parent", gl);
+    element.Layout.Row = index;
+end
+
+set(gl, ...
+    "Padding", 0, ...
+    "RowSpacing", 0, ...
+    "RowHeight", {'1x', '1x', '1x', '3x'} ...
+    );
+end
+
+function layoutAdjusterElements(guis)
+for index = 1:numel(guis)
+    element = guis{index}.getGridLayout();
+    element.Layout.Column = index;
+end
 end

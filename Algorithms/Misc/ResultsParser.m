@@ -163,6 +163,12 @@ classdef ResultsParser
                 is = is(index, :);
             end
         end
+        function intensities = getSmoothingWidth(obj, index)
+            intensities = vertcat(obj.results.Smoothing);
+            if nargin > 1
+                intensities = intensities(index, :);
+            end
+        end
         function intensities = getIntensityRange(obj, index)
             intensities = vertcat(obj.results.IntensityRange);
             if nargin > 1

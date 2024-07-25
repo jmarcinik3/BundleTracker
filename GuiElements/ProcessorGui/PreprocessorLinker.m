@@ -6,8 +6,14 @@ classdef PreprocessorLinker < ImagePreprocessor
     methods
         function obj = PreprocessorLinker(gui)
             obj@ImagePreprocessor(gui);
-            configureThresholdSlider(obj, gui);
-            configureInvertCheckbox(obj, gui);
+
+            set(gui.getSmoothingSlider(), "ValueChangedFcn", @obj.smoothingSliderChanged);
+            set(gui.getThresholdSlider(), ...
+                "ValueChangingFcn", @obj.thresholdSliderChanging, ...
+                "ValueChangedFcn", @obj.thresholdSliderChanged ...
+                );
+            set(gui.getInvertCheckbox(), "ValueChangedFcn", @obj.invertCheckboxChanged);
+
             obj.gui = gui;
         end
     end
@@ -34,7 +40,7 @@ classdef PreprocessorLinker < ImagePreprocessor
             updateThresholdSliderRange(thresholdSlider, maxIntensity)
         end
     end
-    methods (Access = ?RegionPreviewer)
+    methods (Access = protected)
         function invertCheckboxChanged(obj, ~, ~)
             thresholds = obj.gui.getThresholds();
             obj.updateFromRawImage(thresholds);
@@ -48,6 +54,12 @@ classdef PreprocessorLinker < ImagePreprocessor
             set(source, "Value", thresholds);
             obj.updateFromRawImage(thresholds);
         end
+        function smoothingSliderChanged(obj, source, ~)
+            smoothing = round(get(source, "Value"));
+            set(source, "Value", smoothing);
+            thresholds = obj.gui.getThresholds();
+            obj.updateFromRawImage(thresholds);
+        end
     end
     methods (Access = private)
         function setVisible(obj, visible)
@@ -58,19 +70,6 @@ classdef PreprocessorLinker < ImagePreprocessor
 end
 
 
-
-function configureThresholdSlider(obj, gui)
-thresholdSlider = gui.getThresholdSlider();
-set(thresholdSlider, ...
-    "ValueChangingFcn", @obj.thresholdSliderChanging, ...
-    "ValueChangedFcn", @obj.thresholdSliderChanged ...
-    );
-end
-
-function configureInvertCheckbox(obj, gui)
-invertCheckbox = gui.getInvertCheckbox();
-set(invertCheckbox, "ValueChangedFcn", @obj.invertCheckboxChanged);
-end
 
 function updateThresholdSliderRange(slider, maxIntensity)
 limits = [0, maxIntensity];

@@ -29,11 +29,6 @@ classdef RegionLinker < PreprocessorLinker & AxisExporter
 
     %% Functions to update GUI and state information
     methods
-        function changeImage(obj, im)
-            obj.fullRawImage = im;
-        end
-    end
-    methods (Access = ?RegionPreviewer)
         function updateRegionalRawImage(obj, region)
             if isa(region, "images.roi.Rectangle") ...
                     || isa(region, "images.roi.Ellipse") ...
@@ -45,6 +40,11 @@ classdef RegionLinker < PreprocessorLinker & AxisExporter
                 regionRawImage = [];
             end
             obj.setRawImage(regionRawImage);
+        end
+    end
+    methods (Access = protected)
+        function changeImage(obj, im)
+            obj.fullRawImage = im;
         end
     end
 

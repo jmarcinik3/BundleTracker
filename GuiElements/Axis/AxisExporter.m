@@ -1,6 +1,6 @@
 classdef AxisExporter < handle
     properties (Constant)
-        extensions = { ...
+        imageExtensions = { ...
             '*.png', "Portable Network Graphics (PNG)"; ...
             '*.jpg;*.jpeg', "Joint Photographic Experts Group (JPEG)"; ...
             '*.tif;*.tiff', "Tagged Image File Format (TIFF)"; ...
@@ -53,7 +53,7 @@ end
 end
 
 function [filepath, isfilepath] = fileFromDirectoryPath(startDirectory)
-extensions = AxisExporter.extensions;
+extensions = AxisExporter.imageExtensions;
 title = SettingsParser.getExportAxisLabel();
 [filepath, isfilepath] = uiputfilepath(extensions, title, startDirectory);
 end

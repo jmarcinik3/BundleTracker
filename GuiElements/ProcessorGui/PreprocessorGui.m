@@ -2,6 +2,7 @@ classdef PreprocessorGui
     properties (Access = private)
         gridLayout;
         interactiveImage;
+        smoothingSlider;
         thresholdSlider;
         invertCheckbox;
     end
@@ -10,6 +11,7 @@ classdef PreprocessorGui
         function obj = PreprocessorGui(gl)
             ax = generateEmptyAxis(gl);
             obj.interactiveImage = generateInteractiveImage(ax);
+            obj.smoothingSlider = generateSmoothingSlider(gl);
             obj.thresholdSlider = generateThresholdSlider(gl);
             obj.invertCheckbox = generateInvertCheckbox(gl);
             obj.gridLayout = gl;
@@ -29,6 +31,9 @@ classdef PreprocessorGui
             iIm = obj.getInteractiveImage();
             ax = ancestor(iIm, "axes");
         end
+        function elem = getSmoothingSlider(obj)
+            elem = obj.smoothingSlider;
+        end
         function elem = getThresholdSlider(obj)
             elem = obj.thresholdSlider;
         end
@@ -43,11 +48,17 @@ classdef PreprocessorGui
     %% Functions to retrieve state information
     methods
         function regionUserData = getRegionUserData(obj)
+            smoothing = obj.getSmoothing();
             thresholds = obj.getThresholds();
             isInverted = obj.getInvert();
+            
             regionUserData = RegionUserData();
+            regionUserData.setSmoothing(smoothing);
             regionUserData.setThresholds(thresholds);
             regionUserData.setInvert(isInverted);
+        end
+        function smoothing = getSmoothing(obj)
+            smoothing = obj.smoothingSlider.Value;
         end
         function thresholds = getThresholds(obj)
             thresholds = obj.thresholdSlider.Value;
@@ -61,6 +72,20 @@ end
 
 
 %% Function to generate intensity bound input
+% Generates slider allowing user to set width of smoothing window
+%
+% Arguments
+%
+% * uigridlayout |gl|: layout to add slider in
+%
+% Returns uislider
+function slider = generateSmoothingSlider(gl)
+slider = uislider(gl);
+defaults = SettingsParser.getSmoothingSliderDefaults();
+set(slider, defaults{:});
+end
+
+%% Function to generate intensity bound input
 % Generates two-value slider allowing user to set lower and upper bounds on
 % image intensity
 %
@@ -72,7 +97,6 @@ end
 function slider = generateThresholdSlider(gl)
 slider = uislider(gl, "range");
 
-% set major and minor tick locations
 maxIntensity = 1;
 defaults = SettingsParser.getThresholdSliderDefaults();
 
@@ -80,6 +104,7 @@ valueIndex = find(strcmp("Value", defaults));
 normalizedValues = defaults{valueIndex + 1};
 defaults{valueIndex + 1} = normalizedValues.' * maxIntensity;
 
+% set major and minor tick locations
 minorTicks = 0:maxIntensity/32:maxIntensity;
 majorTicks = 0:maxIntensity/4:maxIntensity;
 majorTickLabels = arrayfun(@(tick) sprintf("%d", tick), majorTicks);

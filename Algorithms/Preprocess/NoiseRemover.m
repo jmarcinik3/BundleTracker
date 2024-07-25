@@ -3,7 +3,7 @@ classdef NoiseRemover
         minimumIntensity;
         maximumIntensity;
     end
-    
+
     methods
         function obj = NoiseRemover(thresholds)
             obj.minimumIntensity = thresholds(1);

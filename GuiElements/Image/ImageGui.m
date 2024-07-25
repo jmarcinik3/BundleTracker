@@ -1,7 +1,7 @@
 classdef ImageGui < ProcessorGui
     properties (Constant, Access = private)
-        rows = 5;
-        columns = 6;
+        rows = 3;
+        columns = 1;
         size = [ImageGui.rows, ImageGui.columns];
     end
 
@@ -23,60 +23,101 @@ end
 
 
 function layoutElements(imageGui)
-columnCount = ImageGui.columns;
-rowCount = ImageGui.rows;
-
 % Retrieve components
 gl = imageGui.getGridLayout();
-thresholdSlider = imageGui.getThresholdSlider();
-invertCheckbox = imageGui.getInvertCheckbox();
-trackingSelection = imageGui.getTrackingSelectionElement();
-angleSelection = imageGui.getAngleSelectionElement();
-directionElement = imageGui.getPositiveDirectionElement();
-detrendSelection = imageGui.getDetrendSelectionElement();
 ax = imageGui.getAxis();
+preprocessingGl = layoutPreprocessingElements(gl, imageGui);
+processingGl = layoutProcessingElements(gl, imageGui);
+
+elements = [ ...
+    ax, ...
+    preprocessingGl, ...
+    processingGl ...
+    ];
+for index = 1:numel(elements)
+    elements(index).Layout.Row = index;
+end
+
+set(gl, ...
+    "RowSpacing", 0, ...
+    "RowHeight", {'1x', 75, DirectionGui.height} ...
+    );
+end
+
+function gl = layoutPreprocessingElements(parent, gui)
+% Retrieve components
+gl = uigridlayout(parent, [1, 5]);
+smoothingSlider = gui.getSmoothingSlider();
+thresholdSlider = gui.getThresholdSlider();
+invertCheckbox = gui.getInvertCheckbox();
+
+% generate labels for appropriate elements
+smoothingLabel = uilabel(gl, "Text", "Smoothing:");
+thresholdLabel = uilabel(gl, "Text", "Intensity:");
+
+% lay out elements
+elements = [ ...
+    smoothingLabel, ...
+    smoothingSlider, ...
+    thresholdLabel, ...
+    thresholdSlider, ...
+    invertCheckbox ...
+    ];
+for index = 1:numel(elements)
+    element = elements(index);
+    set(element, "Parent", gl);
+    element.Layout.Row = 1;
+    element.Layout.Column = index;
+end
+
+set(gl, ...
+    "Padding", 0, ...
+    "RowSpacing", 0, ...
+    "ColumnWidth", {75, '1x', 75, '1x', 75} ...
+    );
+end
+
+function gl = layoutProcessingElements(parent, gui)
+% Retrieve components
+gl = uigridlayout(parent, [3, 4]);
+trackingSelection = gui.getTrackingSelectionElement();
+angleSelection = gui.getAngleSelectionElement();
+detrendSelection = gui.getDetrendSelectionElement();
+directionElement = gui.getPositiveDirectionElement();
 
 % generate labels for appropriate elements
 trackingLabel = uilabel(gl, "Text", "Track:");
 angleLabel = uilabel(gl, "Text", "Rotate:");
 detrendLabel = uilabel(gl, "Text", "Detrend:");
 
-% lay out preprocessing elements
-thresholdSlider.Layout.Row = 2;
-invertCheckbox.Layout.Row = 2;
-thresholdSlider.Layout.Column = [1, columnCount-1];
-invertCheckbox.Layout.Column = columnCount;
+% lay out elements
+elements = [ ...
+    trackingLabel, ...
+    trackingSelection, ...
+    angleLabel, ...
+    angleSelection, ...
+    detrendLabel, ...
+    detrendSelection ...
+    ];
+for index = 1:numel(elements)
+    element = elements(index);
+    set(element, "Parent", gl);
+    element.Layout.Row = floor((index-1) / 2) + 1;
+    element.Layout.Column = mod(index+1, 2) + 1;
+end
 
-% lay out processing elements
-trackingLabel.Layout.Row = 3;
-trackingSelection.Layout.Row = 3;
-angleLabel.Layout.Row = 4;
-angleSelection.Layout.Row = 4;
-detrendLabel.Layout.Row = 5;
-detrendSelection.Layout.Row = 5;
-directionElement.Layout.Row = [3, 5];
-
-trackingLabel.Layout.Column = 1;
-trackingSelection.Layout.Column = 2;
-angleLabel.Layout.Column = 1;
-angleSelection.Layout.Column = 2;
-detrendLabel.Layout.Column = 1;
-detrendSelection.Layout.Column = 2;
+set(directionElement, "Parent", gl);
+directionElement.Layout.Row = [1, 3];
 directionElement.Layout.Column = [3, 4];
 
-% Set up axis on which bundles are displayed
-ax.Layout.Row = 1;
-ax.Layout.Column = [1, columnCount];
-
 % Set up row heights and column widths for grid layout
-rowSpacing = 1;
+rowSpacing = 0;
 rowHeight = (DirectionGui.height - rowSpacing) / 3;
-gl.RowHeight = num2cell(rowHeight * ones(1, rowCount));
-gl.RowHeight{1} = '1x';
 
 set(gl, ...
-    "Padding", [0, 0, 0, 0], ...
+    "Padding", 0, ...
     "RowSpacing", rowSpacing, ...
-    "ColumnWidth", {64, 192, 96, 96, '3x', 96} ...
+    "RowHeight", rowHeight, ...
+    "ColumnWidth", {75, '1x', 150, '1x'} ...
     );
 end

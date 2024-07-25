@@ -14,21 +14,7 @@ classdef ProcessorGui < PreprocessorGui & PostprocessorGui
         function regionUserData = getRegionUserData(obj)
             preUserData = getRegionUserData@PreprocessorGui(obj);
             postUserData = getRegionUserData@PostprocessorGui(obj);
-
-            thresholds = preUserData.getThresholds();
-            invert = preUserData.getInvert();
-            trackingMode = postUserData.getTrackingMode();
-            angleMode = postUserData.getAngleMode();
-            positiveDirection = postUserData.getPositiveDirection();
-            detrendMode = postUserData.getDetrendMode();
-
-            regionUserData = RegionUserData();
-            regionUserData.setThresholds(thresholds);
-            regionUserData.setInvert(invert);
-            regionUserData.setTrackingMode(trackingMode);
-            regionUserData.setAngleMode(angleMode);
-            regionUserData.setDetrendMode(detrendMode);
-            regionUserData.setPositiveDirection(positiveDirection);
+            regionUserData = RegionUserData.configureByRegion(preUserData, postUserData);
         end
     end
 end

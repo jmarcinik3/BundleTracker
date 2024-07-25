@@ -1,4 +1,4 @@
-classdef RegionPreviewer < RegionDrawer & RegionVisibler
+classdef RegionPreviewer < RegionDrawer & RegionVisibler & RegionLinker
     properties (Access = protected)
         axis;
         imageLinker;
@@ -11,15 +11,16 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             obj@RegionVisibler(regionGui);
             obj@RegionDrawer;
 
+            imageLinker = ImageLinker(imageGui);
+            obj@RegionLinker(regionGui, imageLinker.getRawImage());
+            set(imageGui.getInteractiveImage(), "ButtonDownFcn", @obj.buttonDownFcn);
+
             RegionMoverLinker(regionGui.getRegionMoverGui(), obj);
             RegionCompressorLinker(regionGui.getRegionCompressorGui(), obj);
             RegionExpanderLinker(regionGui.getRegionExpanderGui(), obj);
 
-            set(imageGui.getInteractiveImage(), "ButtonDownFcn", @obj.buttonDownFcn);
-
-            imageLinker = ImageLinker(imageGui);
             obj.imageLinker = imageLinker;
-            obj.regionLinker = RegionLinker(regionGui, imageLinker.getRawImage());
+            obj.regionLinker = obj;
             obj.axis = ax;
 
             obj.updateRegionalRawImage([]);
@@ -63,15 +64,17 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             RegionUserData.configureByRegion(newRegion, region);
         end
     end
-    methods (Access = protected)
+    methods
         function setMaximumIntensity(obj, maxIntensity)
             obj.imageLinker.setMaximumIntensity(maxIntensity);
-            obj.regionLinker.setMaximumIntensity(maxIntensity);
+            setMaximumIntensity@RegionLinker(obj, maxIntensity);
         end
+    end
+    methods (Access = protected)
         function changeImage(obj, im)
             obj.clearRegions();
             obj.imageLinker.changeImage(im);
-            obj.regionLinker.changeImage(im);
+            changeImage@RegionLinker(obj, im);
         end
 
         function drawRegionsByParameters(obj, parameters, blobShape)
@@ -131,6 +134,16 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
             end
         end
 
+        function smoothingChanged(obj, source, event)
+            switch event.EventName
+                case "ValueChanged"
+                    if obj.regionExists()
+                        RegionUserData(obj).setSmoothing(event.Value);
+                    end
+                case "PostSet"
+                    smoothingParserChanged(obj, source, event);
+            end
+        end
         function thresholdChanged(obj, source, event)
             switch event.EventName
                 case "ValueChanged"
@@ -144,7 +157,9 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         function invertChanged(obj, source, event)
             switch event.EventName
                 case "ValueChanged"
-                    RegionUserData(obj).setInvert(event.Value);
+                    if obj.regionExists()
+                        RegionUserData(obj).setInvert(event.Value);
+                    end
                 case "PostSet"
                     invertParserChanged(obj, source, event);
             end
@@ -192,18 +207,6 @@ classdef RegionPreviewer < RegionDrawer & RegionVisibler
         function exportRegionImage(obj, path)
             obj.regionLinker.exportImage(path);
         end
-        function gui = getRegionGui(obj)
-            gui = obj.regionLinker.getRegionGui();
-        end
-        function updateRegionalRawImage(obj, region)
-            obj.regionLinker.updateRegionalRawImage(region);
-        end
-        function thresholdSliderChanged(obj, source, event)
-            obj.regionLinker.thresholdSliderChanged(source, event);
-        end
-        function invertCheckboxChanged(obj, source, event)
-            obj.regionLinker.invertCheckboxChanged(source, event);
-        end
     end
     methods (Access = protected)
         function userData = getRegionUserData(obj)
@@ -220,12 +223,20 @@ directionGui = gui.getDirectionGui();
 regionUserData = RegionUserData(region);
 
 configureRegion(previewer, region);
+configureSmoothing(previewer, gui, regionUserData);
 configureThreshold(previewer, gui, regionUserData);
 configureInvert(previewer, gui, regionUserData);
 configureTrackingMode(previewer, gui, regionUserData);
 configureAngleMode(previewer, gui, regionUserData);
 configureDetrendMode(previewer, gui, regionUserData);
 configurePositiveDirection(previewer, directionGui, regionUserData);
+end
+function configureSmoothing(previewer, gui, regionUserData)
+set(gui.getSmoothingSlider(), ...
+    "ValueChangedFcn", @previewer.smoothingChanged, ...
+    "Value", regionUserData.getSmoothing() ...
+    );
+addlistener(regionUserData, "Smoothing", "PostSet", @previewer.smoothingChanged);
 end
 function configureThreshold(previewer, gui, regionUserData)
 set(gui.getThresholdSlider(), ...
@@ -319,6 +330,7 @@ uimenu(cm, ...
 end
 
 function regionChanged(previewer)
+smoothingParserChanged(previewer);
 thresholdParserChanged(previewer);
 invertParserChanged(previewer);
 trackingModeParserChanged(previewer);
@@ -339,15 +351,19 @@ thresholdSlider = previewer.getRegionGui().getThresholdSlider();
 thresholds = RegionUserData(previewer).getThresholds();
 thresholds(1) = max(thresholds(1), thresholdSlider.Limits(1));
 thresholds(2) = min(thresholds(2), thresholdSlider.Limits(2));
+
 set(thresholdSlider, "Value", thresholds);
 previewer.thresholdSliderChanged(thresholdSlider, []);
 end
 
+function smoothingParserChanged(previewer, ~, ~)
+smoothingSlider = previewer.getRegionGui().getSmoothingSlider();
+set(smoothingSlider, "Value", RegionUserData(previewer).getSmoothing());
+previewer.smoothingSliderChanged(smoothingSlider, [])
+end
 function invertParserChanged(previewer, ~, ~)
 invertCheckbox = previewer.getRegionGui().getInvertCheckbox();
-set(invertCheckbox, ...
-    "Value", RegionUserData(previewer).getInvert() ...
-    );
+set(invertCheckbox, "Value", RegionUserData(previewer).getInvert());
 previewer.invertCheckboxChanged(invertCheckbox, [])
 end
 function trackingModeParserChanged(previewer, ~, ~)
