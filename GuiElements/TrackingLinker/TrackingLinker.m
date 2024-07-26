@@ -225,12 +225,9 @@ classdef TrackingLinker < RegionPreviewer ...
             if numel(filepath) >= 1 && isfile(filepath)
                 videoReader = VideoReader(filepath);
                 firstFrame = read(videoReader, 1);
-                videoProfile = get(videoReader, "VideoFormat");
-                maxIntensity = getMaximumIntensity(videoProfile);
                 label = generateFrameLabel(videoReader);
 
                 obj.changeImage(firstFrame);
-                obj.setMaximumIntensity(maxIntensity);
                 obj.setFrameLabel(label);
                 obj.importVideoToRam(videoReader);
             end
@@ -300,6 +297,16 @@ end
 
 
 
+function regionalImages = generateRegionalImages(regions, im)
+regionalImages = {};
+for index = numel(regions):-1:1
+    region = regions(index);
+    regionalImage = MatrixUnpadder.byRegion2d(region, im);
+    preprocessor = Preprocessor.fromRegion(region);
+    regionalImage = preprocessor.preThreshold(regionalImage);
+    regionalImages{index} = regionalImage;
+end
+end
 function label = generateFrameLabel(videoReader)
 frameCount = get(videoReader, "NumFrames");
 fps = get(videoReader, "FrameRate");
@@ -310,14 +317,6 @@ label = sprintf( ...
     "%d Frames (%d FPS, %dx%d, %d-bit)", ...
     frameCount, fps, w, h, bitDepth ...
     );
-end
-function maxIntensity = getMaximumIntensity(videoProfile)
-switch string(videoProfile)
-    case {"Mono8 Signed", "RGB24 Signed"}, maxIntensity = 2^7;
-    case {"Mono8", "RGB24", "Grayscale"}, maxIntensity = 2^8;
-    case {"Mono16 Signed", "RGB48 Signed"}, maxIntensity = 2^15;
-    case {"Mono16", "RGB48"}, maxIntensity = 2^16;
-end
 end
 
 function export3dMatrixAsVideo(ims, videoWriter)

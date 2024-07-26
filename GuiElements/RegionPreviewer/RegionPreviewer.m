@@ -75,12 +75,6 @@ classdef RegionPreviewer < RegionDrawer ...
             RegionUserData.configureByRegion(newRegion, region);
         end
     end
-    methods
-        function setMaximumIntensity(obj, maxIntensity)
-            obj.imageLinker.setMaximumIntensity(maxIntensity);
-            setMaximumIntensity@RegionLinker(obj, maxIntensity);
-        end
-    end
     methods (Access = protected)
         function changeImage(obj, im)
             obj.clearRegions();
@@ -372,15 +366,8 @@ end
 function thresholdParserChanged(previewer, ~, ~)
 thresholdSlider = previewer.getRegionGui().getThresholdSlider();
 thresholds = RegionUserData(previewer).getThresholds();
-
-maxThreshold = thresholds(2);
-maxIntensity = thresholdSlider.Limits(2);
-if maxThreshold <= 1
-    thresholds = thresholds.' * maxIntensity;
-else
-    thresholds(1) = max(thresholds(1), thresholdSlider.Limits(1));
-    thresholds(2) = min(maxThreshold, maxIntensity);
-end
+thresholds(1) = max(thresholds(1), thresholdSlider.Limits(1));
+thresholds(2) = min(thresholds(2), thresholdSlider.Limits(2));
 
 set(thresholdSlider, "Value", thresholds);
 previewer.thresholdSliderChanged(thresholdSlider, []);

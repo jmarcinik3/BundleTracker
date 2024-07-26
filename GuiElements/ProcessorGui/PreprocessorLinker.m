@@ -34,12 +34,6 @@ classdef PreprocessorLinker < ImagePreprocessor
     end
 
     %% Functions to update state of GUI
-    methods
-        function setMaximumIntensity(obj, maxIntensity)
-            thresholdSlider = obj.gui.getThresholdSlider();
-            updateThresholdSliderRange(thresholdSlider, maxIntensity)
-        end
-    end
     methods (Access = protected)
         function invertCheckboxChanged(obj, ~, ~)
             thresholds = obj.gui.getThresholds();
@@ -50,7 +44,7 @@ classdef PreprocessorLinker < ImagePreprocessor
             obj.updateFromRawImage(thresholds);
         end
         function thresholdSliderChanged(obj, source, ~)
-            thresholds = round(get(source, "Value"));
+            thresholds = get(source, "Value");
             set(source, "Value", thresholds);
             obj.updateFromRawImage(thresholds);
         end
@@ -67,27 +61,4 @@ classdef PreprocessorLinker < ImagePreprocessor
             set(gl, "Visible", visible);
         end
     end
-end
-
-
-
-function updateThresholdSliderRange(slider, maxIntensity)
-limits = [0, maxIntensity];
-previousIntensity = slider.Limits(2);
-previousValue = get(slider, "Value");
-newValue = previousValue .* (maxIntensity / previousIntensity);
-
-minorTicks = round(0:maxIntensity/32:maxIntensity);
-majorTicks = round(0:maxIntensity/4:maxIntensity);
-majorTickLabels = arrayfun(@(tick) sprintf("%d", tick), majorTicks);
-
-set(slider, ...
-    "Limits", limits, ...
-    "Value", newValue, ...
-    "MinorTicks", minorTicks, ...
-    "MajorTicks", majorTicks, ...
-    "MajorTickLabels", majorTickLabels ...
-    );
-event = struct("Value", limits, "EventName", "ValueChanged");
-slider.ValueChangedFcn(slider, event);
 end

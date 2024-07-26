@@ -96,26 +96,14 @@ end
 % Returns uislider
 function slider = generateThresholdSlider(gl)
 slider = uislider(gl, "range");
-
-maxIntensity = 1;
 defaults = SettingsParser.getThresholdSliderDefaults();
 
-valueIndex = find(strcmp("Value", defaults));
-normalizedValues = defaults{valueIndex + 1};
-defaults{valueIndex + 1} = normalizedValues.' * maxIntensity;
+valueIndex = find(strcmp(defaults, "Value"));
+limitsIndex = find(strcmp(defaults, "Limits"));
+defaults{valueIndex + 1} = defaults{valueIndex + 1}.';
+defaults{limitsIndex + 1} = defaults{limitsIndex + 1}.';
 
-% set major and minor tick locations
-minorTicks = 0:maxIntensity/32:maxIntensity;
-majorTicks = 0:maxIntensity/4:maxIntensity;
-majorTickLabels = arrayfun(@(tick) sprintf("%d", tick), majorTicks);
-
-set(slider, ...
-    "Limits", [0, maxIntensity], ...
-    "MinorTicks", minorTicks, ...
-    "MajorTicks", majorTicks, ...
-    "MajorTickLabels", majorTickLabels, ...
-    defaults{:} ...
-    );
+set(slider, defaults{:});
 end
 
 %% Function to generate invert checkbox

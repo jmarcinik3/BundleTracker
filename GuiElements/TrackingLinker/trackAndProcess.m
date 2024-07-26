@@ -36,10 +36,19 @@ end
 end
 
 function [cancel, centers] = trackCenters(trackingLinker, region)
-ims = trackingLinker.getVideoInRegion(region);
-ims = Preprocessor.fromRegion(region).preprocess(ims);
+ims = im2double(trackingLinker.getVideoInRegion(region));
+ims = preprocessFrames(region, ims);
 trackingMode = RegionUserData(region).getTrackingMode();
 [cancel, centers] = trackVideo(ims, trackingMode);
+end
+
+function ims = preprocessFrames(region, ims)
+preprocessor = Preprocessor.fromRegion(region);
+for index = 1:size(ims, 3)
+    im = ims(:, :, index);
+    im = preprocessor.preprocess(im);
+    ims(:, :, index) = im;
+end
 end
 
 function [cancel, centers] = trackVideo(ims, trackingMode)
@@ -74,13 +83,11 @@ result = table2struct([ ...
 result = appendRegionalMetadata(region, result);
 result = postprocessResult(result);
 end
-
 function result = appendRegionalMetadata(region, result)
 result.Label = region.Label;
 result.Region = getRegionMetadata(region);
 result = RegionUserData(region).appendMetadata(result);
 end
-
 function postResult = postprocessResult(result)
 postprocessor = Postprocessor(result);
 postprocessor.process();

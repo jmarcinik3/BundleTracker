@@ -26,8 +26,13 @@ classdef Preprocessor
             obj.invertImage = @imageInverter.get;
         end
 
-        function im = preprocess(obj, im)
+        function im = preThreshold(obj, im)
             im = obj.smoothImage(im);
+            im = mat2gray(im);
+        end
+
+        function im = preprocess(obj, im)
+            im = obj.preThreshold(im);
             im = obj.removeNoise(im);
             im = obj.invertImage(im);
         end
