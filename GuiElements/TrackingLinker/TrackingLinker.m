@@ -432,8 +432,6 @@ switch keyword
         regionUserData.setThresholds(value);
     case RegionUserData.trackingModeKeyword
         regionUserData.setTrackingMode(value);
-    case RegionUserData.allKeyword
-        setByKeyword(RegionUserData.keywords(2:end), region);
 end
 end
 function value = getByKeyword(obj, keyword)
