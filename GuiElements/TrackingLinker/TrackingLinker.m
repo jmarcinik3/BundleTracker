@@ -43,6 +43,14 @@ classdef TrackingLinker < RegionPreviewer ...
 
     %% Functions to update state of GUI
     methods
+        function applyRegionsButtonPushed(obj, source, ~)
+            title = SettingsParser.getApplyRegionLabel();
+            if obj.regionExists(title)
+                applyKeyword = source.UserData;
+                regions = obj.getRegions();
+                obj.applyRegions(regions, applyKeyword);
+            end
+        end
         function resetRegionsButtonPushed(obj, source, ~)
             title = SettingsParser.getResetRegionLabel();
             if obj.regionExists(title)
@@ -113,6 +121,12 @@ classdef TrackingLinker < RegionPreviewer ...
 
     %% Functions to be called as part of API
     methods
+        function applyRegions(obj, regions, keyword)
+            for index = 1:numel(regions)
+                region = regions(index);
+                applyByKeyword(obj, keyword, region);
+            end
+        end
         function importRegions(obj, filepath)
             resultsParser = ResultsParser(filepath);
             taskName = 'Importing Regions';
@@ -250,14 +264,36 @@ classdef TrackingLinker < RegionPreviewer ...
             end
         end
     end
-    methods (Access = private)
-
-    end
 
     %% Helper functions to call methods from properties
     methods (Access = protected)
         function fig = getFigure(obj)
             fig = obj.gui.getFigure();
+        end
+        function gui = getImageGui(obj)
+            gui = obj.gui.getImageGui();
+        end
+
+        function angleMode = getAngleMode(obj)
+            angleMode = obj.getImageGui().getAngleMode();
+        end
+        function detrend = getDetrendMode(obj)
+            detrend = obj.getImageGui().getDetrendMode();
+        end
+        function invert = getInvert(obj)
+            invert = obj.getImageGui().getInvert();
+        end
+        function direction = getPositiveDirection(obj)
+            direction = obj.getImageGui().getPositiveDirection();
+        end
+        function thresholds = getThresholds(obj)
+            thresholds = obj.getImageGui().getThresholds();
+        end
+        function trackingMode = getTrackingMode(obj)
+            trackingMode = obj.getImageGui().getTrackingMode();
+        end
+        function smoothing = getSmoothing(obj)
+            smoothing = obj.getImageGui().getSmoothing();
         end
     end
 end
@@ -319,11 +355,24 @@ uimenu(cm, ...
     "MenuSelectedFcn", @obj.exportImageButtonPushed, ...
     "Accelerator", "S" ...
     );
+generateApplyMenu(cm, obj);
 generateResetMenu(cm, obj);
 uimenu(cm, ...
     "Text", "Remove All Regions     Ctrl+Shift+Del", ...
     "MenuSelectedFcn", @obj.clearRegions ...
     );
+end
+function generateApplyMenu(parentMenu, obj)
+applyKeywords = RegionUserData.keywords;
+m = uimenu(parentMenu, "Text", SettingsParser.getApplyRegionLabel());
+for index = 1:numel(applyKeywords)
+    applyKeyword = applyKeywords(index);
+    uimenu(m, ...
+        "Text", applyKeyword, ...
+        "MenuSelectedFcn", @obj.applyRegionsButtonPushed, ...
+        "UserData", applyKeyword ...
+        );
+end
 end
 function generateResetMenu(parentMenu, obj)
 resetKeywords = RegionUserData.keywords;
@@ -348,4 +397,60 @@ uimenu(cm, ...
     "Text", "Export as Video", ...
     "MenuSelectedFcn", @obj.saveRegionVideoButtonPushed ...
     );
+end
+
+function applyByKeyword(obj, keywords, region)
+if keywords == RegionUserData.allKeyword
+    applyByKeyword(obj, RegionUserData.keywords(2:end), region);
+    return;
+end
+if numel(keywords) >= 2
+    for keyword = keywords
+        applyByKeyword(obj, keyword, region);
+    end
+    return;
+end
+
+value = getByKeyword(obj, keywords);
+setByKeyword(keywords, value, region);
+end
+
+function setByKeyword(keyword, value, region)
+regionUserData = RegionUserData(region);
+switch keyword
+    case RegionUserData.angleModeKeyword
+        regionUserData.setAngleMode(value);
+    case RegionUserData.detrendModeKeyword
+        regionUserData.setDetrendMode(value);
+    case RegionUserData.invertKeyword
+        regionUserData.setInvert(value);
+    case RegionUserData.positiveDirectionKeyword
+        regionUserData.setPositiveDirection(value);
+    case RegionUserData.smoothingKeyword
+        regionUserData.setSmoothing(value);
+    case RegionUserData.thresholdsKeyword
+        regionUserData.setThresholds(value);
+    case RegionUserData.trackingModeKeyword
+        regionUserData.setTrackingMode(value);
+    case RegionUserData.allKeyword
+        setByKeyword(RegionUserData.keywords(2:end), region);
+end
+end
+function value = getByKeyword(obj, keyword)
+switch keyword
+    case RegionUserData.angleModeKeyword
+        value = obj.getAngleMode();
+    case RegionUserData.detrendModeKeyword
+        value = obj.getDetrendMode();
+    case RegionUserData.invertKeyword
+        value = obj.getInvert();
+    case RegionUserData.positiveDirectionKeyword
+        value = obj.getPositiveDirection();
+    case RegionUserData.smoothingKeyword
+        value = obj.getSmoothing();
+    case RegionUserData.thresholdsKeyword
+        value = obj.getThresholds();
+    case RegionUserData.trackingModeKeyword
+        value = obj.getTrackingMode();
+end
 end

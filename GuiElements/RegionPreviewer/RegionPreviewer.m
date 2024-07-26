@@ -1,4 +1,7 @@
-classdef RegionPreviewer < RegionDrawer & RegionVisibler & RegionLinker
+classdef RegionPreviewer < RegionDrawer ...
+        & RegionVisibler ...
+        & RegionLinker
+
     properties (Access = protected)
         axis;
         imageLinker;

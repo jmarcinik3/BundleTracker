@@ -12,7 +12,7 @@ classdef RegionUserData < handle
             RegionUserData.trackingModeKeyword ...
             ];
     end
-    properties (Constant, Access = private)
+    properties (Constant, Access = ?TrackingLinker)
         angleModeKeyword = "Angle Mode";
         detrendModeKeyword = "Detrend Mode";
         invertKeyword = "Invert";

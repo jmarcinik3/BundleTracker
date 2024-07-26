@@ -102,6 +102,9 @@ classdef SettingsParser
             defaults = getDefaults().AutothresholdFigure;
         end
 
+        function label = getApplyRegionLabel()
+            label = getMenuLabels().ApplyRegion;
+        end
         function label = getExportAxisLabel()
             label = getMenuLabels().ExportAxisImage;
         end

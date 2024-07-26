@@ -54,7 +54,7 @@ classdef PostprocessorGui
             regionUserData.setPositiveDirection(direction);
         end
     end
-    methods (Access = private)
+    methods
         function trackingMode = getTrackingMode(obj)
             trackingMode = obj.trackingSelection.Value;
         end
