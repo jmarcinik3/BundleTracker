@@ -11,7 +11,7 @@ classdef ImageSmoother
         function im = get(obj, im)
             width = obj.width;
             if width > 0
-                im = smoothdata2(im, "movmean", width);
+                im = smoothdata2(im, "gaussian", width);
             end
         end
     end
