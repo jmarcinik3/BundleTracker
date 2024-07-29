@@ -1,4 +1,4 @@
-Installating
+Installing
 1. Download and install MATLAB 2023b (only this specific version, not MATLAB 2024a or newer).
 2. Download and unzip the content from this repository. You may place this content anywhere on your computer.
 
