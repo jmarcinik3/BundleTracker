@@ -1,17 +1,23 @@
 classdef ResultsParser
     properties (Access = private)
         results;
+        metadata;
     end
 
     methods
         function obj = ResultsParser(results)
             if isstring(results) || ischar(results)
                 obj.results = load(results, "results").results;
+                obj.metadata = load(results, "metadata").metadata;
             elseif isstruct(results)
                 obj.results = results;
             elseif isa(results, "ResultsParser")
                 obj = results;
             end
+        end
+
+        function frame = getFirstFrame(obj)
+            frame = obj.metadata.FirstFrame;
         end
 
         function result = getResult(obj, index)

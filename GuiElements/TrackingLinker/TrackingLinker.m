@@ -105,10 +105,26 @@ classdef TrackingLinker < RegionPreviewer ...
             end
         end
 
+        function openRoiPlotPushed(obj, ~, ~)
+            startingDirectory = obj.gui.getDirectoryPath();
+            filepath = uigetfilepath( ...
+                TrackingLinker.extensions, ...
+                "Create ROI Plot", ...
+                startingDirectory ...
+                );
+            if isfile(filepath)
+                resultsParser = ResultsParser(filepath);
+                fig = uifigure("Name", "ROI Plot");
+                RoiPlotGui(fig, resultsParser);
+            end
+        end
         function openWaterfallPlotPushed(obj, ~, ~)
             startingDirectory = obj.gui.getDirectoryPath();
-            extensions = TrackingLinker.extensions;
-            filepath = uigetfilepath(extensions, "Create Waterfall Plot", startingDirectory);
+            filepath = uigetfilepath( ...
+                TrackingLinker.extensions, ...
+                "Create Waterfall Plot", ...
+                startingDirectory ...
+                );
             if isfile(filepath)
                 resultsParser = ResultsParser(filepath);
                 WaterfallLinker.openFigure( ...
@@ -212,10 +228,11 @@ classdef TrackingLinker < RegionPreviewer ...
                 return;
             end
 
+            metadata = struct("FirstFrame", obj.getFirstFrame());
             if nargin == 1
-                trackingCompleted(obj, results);
+                trackingCompleted(obj, results, metadata);
             elseif nargin == 2
-                save(filepath, "results");
+                save(filepath, "results", "metadata");
             end
         end
     end

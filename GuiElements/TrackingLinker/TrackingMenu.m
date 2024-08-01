@@ -54,7 +54,14 @@ end
 
 function generatePlottingMenu(fig, trackingLinker)
 m = uimenu(fig, "Text", "Plotting");
+generateOpenRoiMenu(m, trackingLinker);
 generateOpenWaterfallMenu(m, trackingLinker);
+end
+function generateOpenRoiMenu(parentMenu, trackingLinker)
+uimenu(parentMenu, ...
+    "Text", "Open ROI", ...
+    "MenuSelectedFcn", @trackingLinker.openRoiPlotPushed ...
+    );
 end
 function generateOpenWaterfallMenu(parentMenu, trackingLinker)
 uimenu(parentMenu, ...

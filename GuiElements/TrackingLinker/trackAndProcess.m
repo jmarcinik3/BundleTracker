@@ -21,7 +21,7 @@ end
 
 activeRegion = obj.getActiveRegion();
 RegionUpdater.selected(activeRegion);
-multiWaitbar(taskName,'Close');
+multiWaitbar(taskName, 'Close');
 set(regions, "Color", SettingsParser.getRegionDefaultColor());
 end
 

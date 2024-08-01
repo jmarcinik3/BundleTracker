@@ -1,4 +1,4 @@
-function trackingCompleted(obj, results)
+function trackingCompleted(obj, results, metadata)
 fig = generateTrackingCompletedFigure(results);
 resultsFilepath = generateResultsFilepath(obj);
 imageFilepath = generateImageFilepath(obj);
@@ -12,7 +12,7 @@ uiwait(fig);
 resultsFilepath = trackingCompleteGui.resultsFilepath;
 imageFilepath = trackingCompleteGui.imageFilepath;
 
-saveResults(results, resultsFilepath);
+saveResults(resultsFilepath, results, metadata);
 if ischar(imageFilepath) || isstring(imageFilepath)
     obj.exportImage(imageFilepath);
 end
@@ -45,8 +45,8 @@ filepath = sprintf( ...
     );
 end
 
-function saveResults(results, resultsFilepath)
+function saveResults(resultsFilepath, results, metadata)
 if ischar(resultsFilepath) || isstring(resultsFilepath)
-    save(resultsFilepath, "results");
+    save(resultsFilepath, "results", "metadata");
 end
 end
