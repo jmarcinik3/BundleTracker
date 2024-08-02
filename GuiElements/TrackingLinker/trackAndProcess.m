@@ -37,18 +37,9 @@ end
 
 function [cancel, centers] = trackCenters(trackingLinker, region)
 ims = im2double(trackingLinker.getVideoInRegion(region));
-ims = preprocessFrames(region, ims);
+ims = Preprocessor.fromRegion(region).preprocess(ims);
 trackingMode = RegionUserData(region).getTrackingMode();
 [cancel, centers] = trackVideo(ims, trackingMode);
-end
-
-function ims = preprocessFrames(region, ims)
-preprocessor = Preprocessor.fromRegion(region);
-for index = 1:size(ims, 3)
-    im = ims(:, :, index);
-    im = preprocessor.preprocess(im);
-    ims(:, :, index) = im;
-end
 end
 
 function [cancel, centers] = trackVideo(ims, trackingMode)
