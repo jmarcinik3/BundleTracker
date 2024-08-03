@@ -7,8 +7,11 @@ classdef ResultsParser
     methods
         function obj = ResultsParser(results)
             if isstring(results) || ischar(results)
-                obj.results = load(results, "results").results;
-                obj.metadata = load(results, "metadata").metadata;
+                results = load(results);
+                obj.results = results.results;
+                if isfield(results, "metadata")
+                    obj.metadata = results.metadata;
+                end
             elseif isstruct(results)
                 obj.results = results;
             elseif isa(results, "ResultsParser")
