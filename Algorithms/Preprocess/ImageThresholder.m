@@ -15,6 +15,7 @@ classdef ImageThresholder
             maxIntensity = obj.maximumIntensity;
             ims(ims < minIntensity) = minIntensity;
             ims(ims > maxIntensity) = maxIntensity;
+            ims = normalizeImage(ims);
         end
     end
 end

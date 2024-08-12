@@ -61,7 +61,7 @@ classdef AutoThresholder < handle
         function im = rethresholdRegion(obj, regionIndex, levels, levelCount)
             im = obj.getRegionalImage(regionIndex);
             thresholdRange = obj.generateThresholdRange(regionIndex, levels, levelCount);
-            noiseRemover = NoiseRemover(thresholdRange);
+            noiseRemover = ImageThresholder(thresholdRange);
             im = noiseRemover.get(im);
         end
     end
