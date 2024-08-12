@@ -3,7 +3,6 @@ classdef ImageFilepather
         directoryPath = '';
         filenames = [''];
         stringFormat = '';
-        allMatch = false;
         extension = ".tif";
     end
 
@@ -13,7 +12,16 @@ classdef ImageFilepather
                 extension = ".tif";
             end
 
-            [obj.filenames, obj.stringFormat, allMatch] = getFilePattern(dirpath, extension);
+            [filenames, obj.stringFormat, allMatch] = getFilePattern(dirpath, extension);
+            
+            if numel(filenames) == 0
+                error([
+                    'No valid files found.', ...
+                    ' Check whether there exists a file with extension ', ...
+                    char(extension), ...
+                    '.' ...
+                    ]);
+            end
             if ~allMatch
                 error([ ...
                     'No valid file format found.', ...
@@ -21,8 +29,8 @@ classdef ImageFilepather
                     ' Files are sorted according to natural alphanumeric ordering.' ...
                     ]);
             end
-
-            obj.allMatch = allMatch;
+            
+            obj.filenames = filenames;
             obj.directoryPath = dirpath;
             obj.extension = extension;
         end
@@ -48,6 +56,12 @@ function [filenames, formatGuess, allMatch] = getFilePattern(dirpath, extension)
 fileInfos = dir(strcat(dirpath, '\*', extension));
 filenames = getFilenamesFromStruct(fileInfos);
 [filenames, ~, expressions] = natsort(filenames);
+
+if numel(filenames) == 0
+    formatGuess = "";
+    allMatch = true;
+    return;
+end
 
 constantIndices = getConstantIndices(expressions);
 firstDynamicIndex = find(~constantIndices, 1);

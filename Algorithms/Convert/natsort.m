@@ -49,6 +49,8 @@ if numel(nbr)
     assert(numel(vec)==numel(V),...
         'SC:natsort:sscanf:TooManyValues',...
         'The "%s" format must return one value for each input number.',fmt)
+else
+    vec = [];
 end
 
 
@@ -78,7 +80,7 @@ if nargout > 2
         dbg(k,1:numel(V)) = V;
     end
 end
-%
+
 %% Sort Matrices %%
 if ~any(tcm) % ignorecase
     ars = lower(ars);
@@ -102,5 +104,5 @@ else
     ndx = reshape(ndx,size(A));
     B = A(ndx);
 end
-%
+
 end
