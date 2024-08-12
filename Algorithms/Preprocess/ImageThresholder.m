@@ -1,22 +1,20 @@
-classdef NoiseRemover
+classdef ImageThresholder
     properties
         minimumIntensity;
         maximumIntensity;
     end
 
     methods
-        function obj = NoiseRemover(thresholds)
+        function obj = ImageThresholder(thresholds)
             obj.minimumIntensity = thresholds(1);
             obj.maximumIntensity = thresholds(2);
         end
 
-        function im = get(obj, im)
+        function ims = get(obj, ims)
             minIntensity = obj.minimumIntensity;
             maxIntensity = obj.maximumIntensity;
-            im(im < minIntensity) = minIntensity;
-            im(im > maxIntensity) = maxIntensity;
-            im = mat2gray(im);
+            ims(ims < minIntensity) = minIntensity;
+            ims(ims > maxIntensity) = maxIntensity;
         end
-
     end
 end

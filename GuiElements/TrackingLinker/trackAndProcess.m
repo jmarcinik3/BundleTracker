@@ -1,15 +1,28 @@
-function [cancel, results] = trackAndProcess(obj)
-taskName = 'Tracking Regions';
-regions = obj.getRegions();
-
-multiWaitbar(taskName, 0, 'CanCancel', 'on');
-regionCount = numel(regions);
-results = [];
+function [cancel, results] = trackAndProcess(trackingLinker)
+regions = trackingLinker.getRegions();
 set(regions, "Color", SettingsParser.getRegionQueueColor());
+[cancel, results] = trackAndProcessMultiple(trackingLinker, regions);
+
+activeRegion = trackingLinker.getActiveRegion();
+RegionUpdater.selected(activeRegion);
+set(regions, "Color", SettingsParser.getRegionDefaultColor());
+end
+
+function [cancel, results] = trackAndProcessMultiple(trackingLinker, regions)
+regionCount = numel(regions);
+cancel = false;
+if regionCount == 1
+    [cancel, results] = trackAndProcessRegion(trackingLinker, regions);
+    return;
+end
+
+taskName = 'Tracking Regions';
+multiWaitbar(taskName, 0, 'CanCancel', 'on');
+results = [];
 
 for index = 1:regionCount
     region = regions(index);
-    [cancel, result] = trackAndProcessRegion(obj, region);
+    [cancel, result] = trackAndProcessRegion(trackingLinker, region);
     results = [results, result];
 
     proportionComplete = index / regionCount;
@@ -19,15 +32,19 @@ for index = 1:regionCount
     end
 end
 
-activeRegion = obj.getActiveRegion();
-RegionUpdater.selected(activeRegion);
 multiWaitbar(taskName, 'Close');
-set(regions, "Color", SettingsParser.getRegionDefaultColor());
 end
+
+
 
 function [cancel, result] = trackAndProcessRegion(trackingLinker, region)
 trackingLinker.previewRegion(region);
 [cancel, centers] = trackCenters(trackingLinker, region);
+if cancel
+    result = [];
+    return;
+end
+
 initialResult = trackingLinker.generateInitialResult();
 result = processResult(region, centers, initialResult);
 if ~cancel
@@ -36,10 +53,37 @@ end
 end
 
 function [cancel, centers] = trackCenters(trackingLinker, region)
-ims = im2double(trackingLinker.getVideoInRegion(region));
-ims = Preprocessor.fromRegion(region).preprocess(ims);
+[cancel, ims] = preprocessRegion(trackingLinker, region);
+if cancel
+    centers = [];
+    return;
+end
+
 trackingMode = RegionUserData(region).getTrackingMode();
 [cancel, centers] = trackVideo(ims, trackingMode);
+end
+
+function [cancel, ims] = preprocessRegion(trackingLinker, region)
+taskName = 'Preprocessing Region';
+multiWaitbar(taskName, 0, 'CanCancel', 'on');
+ims = im2double(trackingLinker.getVideoInRegion(region));
+frameCount = size(ims, 3);
+preprocessor = Preprocessor.fromRegion(region);
+
+cancel = false;
+proportionDelta = 1 / frameCount;
+for index = 1:frameCount
+    ims(:, :, index) = preprocessor.preprocess(ims(:, :, index));
+    proportionComplete = index / frameCount;
+    if mod(proportionComplete, 0.01) < proportionDelta
+        cancel = multiWaitbar(taskName, proportionComplete);
+    end
+    if cancel
+        break;
+    end
+end
+
+multiWaitbar(taskName, 'Close');
 end
 
 function [cancel, centers] = trackVideo(ims, trackingMode)
@@ -65,6 +109,8 @@ end
 centers = PointStructurer.mergePoints(centers);
 multiWaitbar(taskName, 'Close');
 end
+
+
 
 function result = processResult(region, centers, initialResult)
 result = table2struct([ ...

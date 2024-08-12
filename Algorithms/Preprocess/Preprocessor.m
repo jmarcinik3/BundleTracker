@@ -1,7 +1,7 @@
 classdef Preprocessor
     properties (Access = private)
         smoothImage;
-        removeNoise;
+        thresholdImage;
         invertImage;
     end
 
@@ -18,23 +18,24 @@ classdef Preprocessor
             invert = p.Results.Invert;
 
             imageSmoother = ImageSmoother(smoothing);
-            noiseRemover = NoiseRemover(thresholds);
+            imageThresholder = ImageThresholder(thresholds);
             imageInverter = ImageInverter(invert);
 
             obj.smoothImage = @imageSmoother.get;
-            obj.removeNoise = @noiseRemover.get;
+            obj.thresholdImage = @imageThresholder.get;
             obj.invertImage = @imageInverter.get;
         end
 
-        function im = preThreshold(obj, im)
-            im = obj.smoothImage(im);
-            im = mat2gray(im);
+        function ims = preThreshold(obj, ims)
+            ims = obj.smoothImage(ims);
+            ims = normalizeImage(ims);
         end
 
-        function im = preprocess(obj, im)
-            im = obj.preThreshold(im);
-            im = obj.removeNoise(im);
-            im = obj.invertImage(im);
+        function ims = preprocess(obj, ims)
+            ims = obj.preThreshold(ims);
+            ims = obj.thresholdImage(ims);
+            ims = normalizeImage(ims);
+            ims = obj.invertImage(ims);
         end
     end
 
@@ -48,4 +49,17 @@ classdef Preprocessor
                 );
         end
     end
+end
+
+
+
+function ims = normalizeImage(ims)
+if ismatrix(ims)
+    ims = mat2gray(ims);
+    return;
+end
+
+for index = 1:size(ims, 3)
+    ims(:, :, index) = mat2gray(ims(:, :, index));
+end
 end
