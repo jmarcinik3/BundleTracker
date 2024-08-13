@@ -222,6 +222,14 @@ classdef TrackingLinker < RegionPreviewer ...
         end
 
         function trackAndExportRegions(obj, filepath)
+            if ~obj.videoIsImported()
+                obj.throwAlertMessage( ...
+                    "Video is still importing!", ...
+                    "Start Tracking" ...
+                    );
+                return;
+            end
+
             [cancel, results] = trackAndProcess(obj);
             if cancel
                 obj.throwAlertMessage("Tracking Canceled!", "Start Tracking");
