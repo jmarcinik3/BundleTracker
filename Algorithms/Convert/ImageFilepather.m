@@ -13,7 +13,7 @@ classdef ImageFilepather
             end
 
             [filenames, obj.stringFormat, allMatch] = getFilePattern(dirpath, extension);
-            
+
             if numel(filenames) == 0
                 error([
                     'No valid files found.', ...
@@ -29,7 +29,7 @@ classdef ImageFilepather
                     ' Files are sorted according to natural alphanumeric ordering.' ...
                     ]);
             end
-            
+
             obj.filenames = filenames;
             obj.directoryPath = dirpath;
             obj.extension = extension;
@@ -106,7 +106,11 @@ function constantIndices = getConstantIndices(expressions)
 constantIndices = false(size(expressions, 2), 1);
 for index = 1:size(expressions, 2)
     expression = cell2mat(expressions(:, index));
-    if numel(unique(expression)) == size(expression, 2)
+
+    isChar = ischar(expression);
+    isConstantInt = isa(expression, "double") & ...
+        numel(unique(expression)) == size(expression, 2);
+    if isChar || isConstantInt
         constantIndices(index) = true;
     end
 end
@@ -118,8 +122,10 @@ function [stringFormatGuess, allMatch] = guessFormat(filenames, stringFormat, st
 if nargin < 3
     startIndex = 1;
 end
-fileCount = numel(filenames);
-maxLeadingZeros = ceil(log10(fileCount));
+
+constantCharacterCount = strlength(stringFormat) - 3; % -3 to account for %xx
+maxFilenameLength = max(strlength(filenames));
+maxLeadingZeros = maxFilenameLength - constantCharacterCount;
 
 for leadingZeros = 1:maxLeadingZeros
     integerSpecifier = sprintf("%%0%dd", leadingZeros);
