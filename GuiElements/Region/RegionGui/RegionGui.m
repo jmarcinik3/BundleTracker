@@ -26,7 +26,6 @@ classdef RegionGui < ProcessorGui
             obj.gridLayout = gl;
             layoutAdjusterElements(guis);
             layoutElements(obj, adjusterGl);
-            
 
             obj.regionMoverGui = regionMoverGui;
             obj.regionCompressorGui = regionCompressorGui;
