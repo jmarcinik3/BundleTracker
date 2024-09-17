@@ -1,4 +1,8 @@
 classdef ProbeCalibratorGui
+    properties (Constant)
+        title = "Probe Calibrator";
+    end
+
     properties (Access = private)
         gridLayout;
         axPsd;
@@ -9,8 +13,8 @@ classdef ProbeCalibratorGui
     end
 
     methods
-        function obj = ProbeCalibratorGui()
-            fig = uifigure;
+        function obj = ProbeCalibratorGui(fig)
+            set(fig, "Name", ProbeCalibratorGui.title);
             gl = uigridlayout(fig, [4, 2]);
 
             obj.axPsd = uiaxes(gl);
@@ -91,7 +95,7 @@ dragLabel.Layout.Row = 4;
 dragLabel.Layout.Column = 1;
 
 set(gl, ...
-    "ColumnWidth", {'1x', '1x'}, ...
+    "ColumnWidth", {'2x', '1x'}, ...
     "RowHeight", {'fit', 25, 25} ...
     );
 end

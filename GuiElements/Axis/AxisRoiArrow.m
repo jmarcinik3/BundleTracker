@@ -1,4 +1,4 @@
-classdef RoiPlotGui < handle
+classdef AxisRoiArrow < handle
     properties (Constant)
         errorColor = [0.8, 0.8, 0.8];
     end
@@ -11,13 +11,17 @@ classdef RoiPlotGui < handle
     end
 
     methods
-        function obj = RoiPlotGui(fig, resultsParser)
+        function obj = AxisRoiArrow(fig, resultsParser)
+            if isgraphics(fig, "axes")
+                ax = fig;
+            elseif isgraphics(fig, "figure")
+                gl = uigridlayout(fig, [1, 1]);
+                ax = uiaxes(gl);
+                colormap(fig, "gray");
+            end
+
             resultsParser = ResultsParser(resultsParser);
             firstFrame = resultsParser.getFirstFrame();
-
-            gl = uigridlayout(fig, [1, 1]);
-            ax = uiaxes(gl);
-            colormap(fig, "gray");
 
             hold(ax, "on");
             imshow(firstFrame, "Parent", ax);
@@ -65,6 +69,52 @@ end
 
 
 
+function [regionsCenter, dataPoints] = plotRoiArrow(ax, resultsParser, varargin)
+p = inputParser;
+addOptional(p, "ArrowLength", 25);
+addOptional(p, "IncludePoints", true);
+parse(p, varargin{:});
+arrowLength = p.Results.ArrowLength;
+includePoints = p.Results.IncludePoints;
+
+angles = resultsParser.getAngleRadians();
+regionCount = resultsParser.getRegionCount();
+regionsCenter = zeros(regionCount, 2);
+dataPoints = matlab.graphics.chart.primitive.Scatter.empty(regionCount, 0);
+
+for index = 1:regionCount
+    region = resultsParser.getRegion(index);
+    regionPosition = region.Position;
+    regionCenter = regionPosition(1:2) + 0.5 * regionPosition(3:4);
+
+    angle = -angles(index);
+    quiver(ax, ...
+        regionCenter(1), ...
+        regionCenter(2), ...
+        arrowLength * cos(angle), ...
+        arrowLength * sin(angle), ...
+        "AutoScale", 0, ...
+        "Color", "red", ...
+        "LineWidth", 1, ...
+        "MaxHeadSize", 1 ...
+        );
+
+    if includePoints
+        dataPoints(index) = scatter(ax, ...
+            regionCenter(1), ...
+            regionCenter(2), ...
+            288, ...
+            "filled", ...
+            "red", ...
+            "MarkerFaceAlpha", 0, ...
+            "MarkerEdgeAlpha", 0 ...
+            );
+    end
+
+    regionsCenter(index, :) = regionCenter;
+end
+end
+
 function plotTraceX(ax, resultsParser, index)
 plotTrace(ax, ...
     resultsParser.getTime(), ...
@@ -87,7 +137,7 @@ function plotTrace(ax, t, x, xerr)
 hold on;
 errorbar(ax, ...
     t, x, xerr, ...
-    "Color", RoiPlotGui.errorColor, ...
+    "Color", AxisRoiArrow.errorColor, ...
     "CapSize", 0 ...
     );
 plot(ax, t, x, "black");

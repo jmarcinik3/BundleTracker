@@ -104,7 +104,27 @@ classdef TrackingLinker < RegionPreviewer ...
                 RegionUserData.setRegionsThresholds(obj, newThresholds);
             end
         end
-
+        
+        function openProbeCalibratorPushed(obj, ~, ~)
+            startingDirectory = obj.gui.getDirectoryPath();
+            filepath = uigetfilepath( ...
+                TrackingLinker.extensions, ...
+                "Calibrate Probe", ...
+                startingDirectory ...
+                );
+            if isfile(filepath)
+                resultsParser = ResultsParser(filepath);
+                regionCount = resultsParser.getRegionCount();
+                if regionCount ~= 1
+                    obj.throwAlertMessage( ...
+                        "Please select a file with exactly one ROI!", ...
+                        "Probe Calibrator" ...
+                        );
+                    return;
+                end
+                ProbeCalibratorLinker.openFigure(resultsParser);
+            end
+        end
         function openRoiPlotPushed(obj, ~, ~)
             startingDirectory = obj.gui.getDirectoryPath();
             filepath = uigetfilepath( ...
@@ -115,7 +135,7 @@ classdef TrackingLinker < RegionPreviewer ...
             if isfile(filepath)
                 resultsParser = ResultsParser(filepath);
                 fig = uifigure("Name", "ROI Plot");
-                RoiPlotGui(fig, resultsParser);
+                AxisRoiArrow(fig, resultsParser);
             end
         end
         function openWaterfallPlotPushed(obj, ~, ~)
@@ -223,10 +243,7 @@ classdef TrackingLinker < RegionPreviewer ...
 
         function trackAndExportRegions(obj, filepath)
             if ~obj.videoIsImported()
-                obj.throwAlertMessage( ...
-                    "Video is still importing!", ...
-                    "Start Tracking" ...
-                    );
+                obj.throwAlertMessage("Video is still importing!", "Start Tracking");
                 return;
             end
 

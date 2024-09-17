@@ -23,12 +23,9 @@ classdef ProbeCalibratorLinker < handle
             validationCount = p.Results.ValidationCount;
             peakCount = p.Results.PeakCount;
 
-            set(gui.getResonanceElement(), "ValueChangingFcn", @obj.resonanceElementChanged);
-
             resultsParser = ResultsParser(resultsParser);
             x = resultsParser.getProcessedTrace();
             fps = resultsParser.getFps();
-            firstFrame = resultsParser.getFirstFrame();
 
             [psd, freq] = calculatePsd(x, fps);
             psdValid = psd;
@@ -43,16 +40,14 @@ classdef ProbeCalibratorLinker < handle
 
             [parameters, parameterErrors] = parameterEstimates(omegaLog, psdLog, validationCount);
 
+            set(gui.getResonanceElement(), "ValueChangingFcn", @obj.resonanceElementChanged);
             obj.psdPlot = generatePsdPlot( ...
                 gui.getAxisPsd(), ...
                 freqValid, ...
                 psdValid, ...
                 parameters ...
                 );
-            generateRoiPlot( ...
-                gui.getAxisRoi(), ...
-                resultsParser ...
-                )
+            AxisRoiArrow(gui.getAxisRoi(), resultsParser);
 
             obj.psdLog = psdLog;
             obj.freqLog = freqLog;
@@ -65,6 +60,15 @@ classdef ProbeCalibratorLinker < handle
             obj.gui = gui;
 
             obj.updatePsdFit(); % must come after instantiating properties
+        end
+    end
+
+    %% Functions to generate GUI
+    methods (Static)
+        function openFigure(resultsParser)
+            fig = uifigure();
+            gui = ProbeCalibratorGui(fig);
+            ProbeCalibratorLinker(gui, resultsParser);
         end
     end
 
@@ -200,20 +204,9 @@ label = formatNumberWithUncertainty( ...
     x, ...
     xerr, ...
     "Precision", 2, ...
-    "Format", 's', ...
+    "Format", 'e', ...
     "UseTex", true ...
     );
-end
-
-function generateRoiPlot(ax, resultsParser)
-firstFrame = resultsParser.getFirstFrame();
-hold(ax, "on");
-imshow(firstFrame, "Parent", ax);
-plotRoiArrow(ax, ...
-    resultsParser, ...
-    "IncludePoints", false ...
-    );
-hold(ax, "off");
 end
 
 function plotLines = generatePsdPlot(ax, freq, psd, parameters)
