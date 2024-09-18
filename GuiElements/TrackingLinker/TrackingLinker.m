@@ -70,7 +70,7 @@ classdef TrackingLinker < RegionPreviewer ...
             end
         end
         function exportImageButtonPushed(obj, ~, ~)
-            obj.exportImage();
+            obj.exportFullImage();
         end
         function exportRegionImageButtonPushed(obj, ~, ~)
             obj.exportRegionImage();
@@ -195,11 +195,11 @@ classdef TrackingLinker < RegionPreviewer ...
             multiWaitbar(taskName, 'Close');
         end
 
-        function exportImage(obj, path)
+        function exportFullImage(obj, path)
             if nargin < 2
                 path = obj.gui.getDirectoryPath();
             end
-            exportImage@RegionPreviewer(obj, path);
+            exportFullImage@RegionPreviewer(obj, path);
         end
         function exportRegionImage(obj, path)
             if nargin < 2

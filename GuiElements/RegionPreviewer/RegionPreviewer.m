@@ -206,7 +206,7 @@ classdef RegionPreviewer < RegionDrawer ...
 
     %% Helper functions to call methods from properties
     methods
-        function exportImage(obj, path)
+        function exportFullImage(obj, path)
             obj.imageLinker.exportImage(path);
         end
         function exportRegionImage(obj, path)
