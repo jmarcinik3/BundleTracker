@@ -21,7 +21,7 @@ classdef AxisRoiArrow < handle
             end
 
             resultsParser = ResultsParser(resultsParser);
-            firstFrame = resultsParser.getFirstFrame();
+            firstFrame = mat2gray(resultsParser.getFirstFrame());
 
             hold(ax, "on");
             imshow(firstFrame, "Parent", ax);
