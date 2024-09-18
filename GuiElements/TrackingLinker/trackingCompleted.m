@@ -14,7 +14,7 @@ imageFilepath = trackingCompleteGui.imageFilepath;
 
 saveResults(resultsFilepath, results, metadata);
 if ischar(imageFilepath) || isstring(imageFilepath)
-    obj.exportImage(imageFilepath);
+    obj.exportFullImage(imageFilepath);
 end
 end
 
