@@ -8,8 +8,8 @@ classdef Centroid
         function obj = Centroid(ims)
             obj.intensity2error = calculateIntensityToError(ims);
             [rows, columns] = size(ims, [1, 2]);
-            x = ones(rows, 1) * (1:columns); % 2D matrix of x indicies
-            y = (1:rows)' * ones(1, columns); % 2D matrix of y indicies
+            x = ones(rows, 1) * (1:columns); % 2D matrix of x indices
+            y = (1:rows)' * ones(1, columns); % 2D matrix of y indices
             obj.xy = cat(3, x, y);
         end
 

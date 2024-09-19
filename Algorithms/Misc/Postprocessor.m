@@ -5,8 +5,18 @@ classdef Postprocessor < handle
     end
 
     methods
-        function obj = Postprocessor(result)
-            parser = ResultsParser(result);
+        function obj = Postprocessor(result, varargin)
+            p = inputParser;
+            addOptional(p, "Metadata", []);
+            parse(p, varargin{:});
+            metadata = p.Results.Metadata;
+
+            parser = struct( ...
+                "results", result, ...
+                "metadata", metadata ...
+                );
+            parser = ResultsParser(parser);
+
             obj.results = instantiatePostResult(parser);
             obj.parser = parser;
         end
@@ -197,10 +207,11 @@ addOptional(p, "AngleMode", parser.getAngleMode(index));
 parse(p, varargin{:});
 angleMode = p.Results.AngleMode;
 
+firstFrame = parser.getFirstFrame(index);
 x = ErrorPropagator(result.xProcessed, result.xProcessedError);
 y = ErrorPropagator(result.yProcessed, result.yProcessedError);
 
-[angle, angleError, angleInfo] = AngleAlgorithms.byKeyword(x.Value, y.Value, angleMode);
+[angle, angleError, angleInfo] = AngleAlgorithms.byKeyword(angleMode, firstFrame, x.Value, y.Value);
 angle = ErrorPropagator(angle, angleError);
 [x, y] = rotateXy(x, y, angle);
 if ~strcmp(angleMode, "None")

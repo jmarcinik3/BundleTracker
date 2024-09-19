@@ -51,14 +51,23 @@ classdef RegionUserData < handle
 
     %% Functions to generate state information
     methods
+        function metadata = getMetadata(obj)
+            metadata = struct( ...
+                "Smoothing", obj.Smoothing, ...
+                "IntensityRange", obj.IntensityRange, ...
+                "IsInverted", obj.IsInverted, ...
+                "TrackingMode", obj.TrackingMode, ...
+                "AngleMode", obj.AngleMode, ...
+                "DetrendMode", obj.DetrendMode, ...
+                "Direction", obj.Direction ...
+                );
+        end
         function result = appendMetadata(obj, result)
-            result.Smoothing = obj.Smoothing;
-            result.IntensityRange = obj.IntensityRange;
-            result.IsInverted = obj.IsInverted;
-            result.TrackingMode = obj.TrackingMode;
-            result.AngleMode = obj.AngleMode;
-            result.DetrendMode = obj.DetrendMode;
-            result.Direction = obj.Direction;
+            metadata = obj.getMetadata();
+            names = string(fieldnames(metadata));
+            for name = names.'
+                result.(name) = obj.(name); 
+            end
         end
     end
 
@@ -200,6 +209,7 @@ classdef RegionUserData < handle
         end
     end
 end
+
 
 
 function setRegionsThresholds(regions, thresholds)

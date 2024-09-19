@@ -4,6 +4,7 @@ classdef AngleAlgorithms
             AngleAlgorithms.noneKeyword, ...
             sort([ ...
             AngleAlgorithms.ellipseKeyword, ...
+            AngleAlgorithms.gaussianFitKeyword, ...
             AngleAlgorithms.gaussianMixtureKeyword, ...
             AngleAlgorithms.kmeansKeyword, ...
             AngleAlgorithms.linearKeyword, ...
@@ -14,6 +15,7 @@ classdef AngleAlgorithms
     properties (Constant, Access = private)
         noneKeyword = "None";
         ellipseKeyword = "Elliptical Regression";
+        gaussianFitKeyword = "2D Gaussian";
         gaussianMixtureKeyword = "Two Gaussian Mixtures";
         kmeansKeyword = "2-Means Clustering";
         linearKeyword = "Linear Regression";
@@ -22,12 +24,14 @@ classdef AngleAlgorithms
 
 
     methods (Static)
-        function [angle, angleError, angleInfo] = byKeyword(x, y, keyword)
+        function [angle, angleError, angleInfo] = byKeyword(keyword, im, x, y)
             switch keyword
                 case AngleAlgorithms.noneKeyword
                     [angle, angleError, angleInfo] = AngleAlgorithms.byNone(x, y);
                 case AngleAlgorithms.ellipseKeyword
                     [angle, angleError, angleInfo] = AngleAlgorithms.byEllipseFit(x, y);
+                case AngleAlgorithms.gaussianFitKeyword
+                    [angle, angleError, angleInfo] = AngleAlgorithms.byGaussianFit(im);
                 case AngleAlgorithms.gaussianMixtureKeyword
                     [angle, angleError, angleInfo] = AngleAlgorithms.byGaussianMixture(x, y);
                 case AngleAlgorithms.kmeansKeyword
@@ -46,6 +50,9 @@ classdef AngleAlgorithms
         end
         function [angle, angleError, fitInfo] = byEllipseFit(x, y)
             [angle, angleError, fitInfo] = byEllipseFit(x, y);
+        end
+        function [angle, angleError, fitInfo] = byGaussianFit(im)
+            [angle, angleError, fitInfo] = GaussianFitter(im).angleWithError();
         end
         function [angle, angleError, fitInfo] = byGaussianMixture(x, y)
             [angle, angleError, fitInfo] = GaussianMixture(x, y, 2).angleWithError();

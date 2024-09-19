@@ -13,14 +13,31 @@ classdef ResultsParser
                     obj.metadata = results.metadata;
                 end
             elseif isstruct(results)
+                if isfield(results, "metadata")
+                    obj.results = results.results;
+                    obj.metadata = results.metadata;
+                    return;
+                end
                 obj.results = results;
             elseif isa(results, "ResultsParser")
                 obj = results;
             end
         end
 
-        function frame = getFirstFrame(obj)
+        function frame = getFirstFrame(obj, index)
             frame = obj.metadata.FirstFrame;
+            if nargin > 1
+                regionInfo = obj.getRegion(index);
+                
+                ax = gca;
+                region = drawRegionByInfo(ax, regionInfo);
+                region.UserData = RegionUserData();
+                RegionUserData.configureByResultsParser(region, obj, index);
+                regionalImage = generateRegionalImages(region, frame);
+                close(ancestor(ax, "figure"));
+                
+                frame = regionalImage{1};
+            end
         end
 
         function result = getResult(obj, index)
@@ -192,4 +209,21 @@ classdef ResultsParser
             scaleFactor = obj.results.ScaleFactorError;
         end
     end
+end
+
+
+
+function region = drawRegionByInfo(ax, regionInfo)
+regionInfo = getRegionMetadata(regionInfo);
+regionType = regionInfo.Type;
+varargin = namedargs2cell(rmfield(regionInfo, "Type"));
+if strcmpi(regionType, "images.roi.rectangle")
+    region = images.roi.Rectangle(ax, varargin{:});
+elseif strcmpi(regionType, "images.roi.ellipse")
+    region = images.roi.Ellipse(ax, varargin{:});
+elseif strcmpi(regionType, "images.roi.polygon")
+    region = images.roi.Polygon(ax, varargin{:});
+elseif strcmpi(regionType, "images.roi.freehand")
+    region = images.roi.Freehand(ax, varargin{:});
+end
 end

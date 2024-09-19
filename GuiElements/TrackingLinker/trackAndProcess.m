@@ -39,28 +39,23 @@ end
 
 function [cancel, result] = trackAndProcessRegion(trackingLinker, region)
 trackingLinker.previewRegion(region);
-[cancel, centers] = trackCenters(trackingLinker, region);
+[cancel, ims] = preprocessRegion(trackingLinker, region);
 if cancel
     result = [];
     return;
 end
 
-initialResult = trackingLinker.generateInitialResult();
-result = processResult(region, centers, initialResult);
-if ~cancel
-    set(region, "Color", SettingsParser.getRegionTrackedColor());
-end
-end
-
-function [cancel, centers] = trackCenters(trackingLinker, region)
-[cancel, ims] = preprocessRegion(trackingLinker, region);
+trackingMode = RegionUserData(region).getTrackingMode();
+[cancel, centers] = trackVideo(ims, trackingMode);
 if cancel
-    centers = [];
+    result = [];
     return;
 end
 
-trackingMode = RegionUserData(region).getTrackingMode();
-[cancel, centers] = trackVideo(ims, trackingMode);
+result = processResult(region, centers, trackingLinker);
+if ~cancel
+    set(region, "Color", SettingsParser.getRegionTrackedColor());
+end
 end
 
 function [cancel, ims] = preprocessRegion(trackingLinker, region)
@@ -112,21 +107,18 @@ end
 
 
 
-function result = processResult(region, centers, initialResult)
+function result = processResult(region, centers, trackingLinker)
+initialResult = trackingLinker.generateInitialResult();
 result = table2struct([ ...
     struct2table(centers), ...
     struct2table(initialResult) ...
     ]);
-result = appendRegionalMetadata(region, result);
-result = postprocessResult(result);
-end
-function result = appendRegionalMetadata(region, result)
 result.Label = region.Label;
 result.Region = getRegionMetadata(region);
 result = RegionUserData(region).appendMetadata(result);
-end
-function postResult = postprocessResult(result)
-postprocessor = Postprocessor(result);
+
+metadata = trackingLinker.generateMetadata();
+postprocessor = Postprocessor(result, "Metadata", metadata);
 postprocessor.process();
-postResult = postprocessor.getPostprocessedResult();
+result = postprocessor.getPostprocessedResult();
 end

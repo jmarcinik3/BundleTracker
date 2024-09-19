@@ -253,7 +253,7 @@ classdef TrackingLinker < RegionPreviewer ...
                 return;
             end
 
-            metadata = struct("FirstFrame", obj.getFirstFrame());
+            metadata = obj.generateMetadata();
             if nargin == 1
                 trackingCompleted(obj, results, metadata);
             elseif nargin == 2
@@ -288,11 +288,13 @@ classdef TrackingLinker < RegionPreviewer ...
         function result = generateInitialResult(obj)
             gui = obj.gui;
             result = struct( ...
-                "DirectoryPath", gui.getDirectoryPath(), ...
                 "ScaleFactor", gui.getScaleFactor(), ...
                 "ScaleFactorError", gui.getScaleFactorError(), ...
                 "Fps", obj.getFps() ...
                 );
+        end
+        function result = generateMetadata(obj)
+            result = struct("FirstFrame", obj.getFirstFrame());
         end
     end
     methods (Access = protected)
@@ -339,16 +341,6 @@ end
 
 
 
-function regionalImages = generateRegionalImages(regions, im)
-regionalImages = {};
-for index = numel(regions):-1:1
-    region = regions(index);
-    regionalImage = MatrixUnpadder.byRegion2d(region, im);
-    preprocessor = Preprocessor.fromRegion(region);
-    regionalImage = preprocessor.preThreshold(regionalImage);
-    regionalImages{index} = regionalImage;
-end
-end
 function label = generateFrameLabel(videoReader)
 frameCount = get(videoReader, "NumFrames");
 fps = get(videoReader, "FrameRate");
