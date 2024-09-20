@@ -128,13 +128,26 @@ classdef RegionUserData < handle
         end
         function configureByResultsParser(region, parser, index)
             regionUserData = RegionUserData(region);
-            regionUserData.setSmoothing(parser.getSmoothingWidth(index));
-            regionUserData.setThresholds(parser.getIntensityRange(index));
-            regionUserData.setInvert(parser.pixelsAreInverted(index));
-            regionUserData.setTrackingMode(parser.getTrackingMode(index));
-            regionUserData.setAngleMode(parser.getAngleMode(index));
-            regionUserData.setDetrendMode(parser.getDetrendMode(index));
-            regionUserData.setPositiveDirection(parser.getPositiveDirection(index));
+            configureFunctions = { ...
+                @() regionUserData.setSmoothing(parser.getSmoothingWidth(index)), ...
+                @() regionUserData.setThresholds(parser.getIntensityRange(index)), ...
+                @() regionUserData.setInvert(parser.pixelsAreInverted(index)), ...
+                @() regionUserData.setTrackingMode(parser.getTrackingMode(index)), ...
+                @() regionUserData.setAngleMode(parser.getAngleMode(index)), ...
+                @() regionUserData.setDetrendMode(parser.getDetrendMode(index)), ...
+                @() regionUserData.setPositiveDirection(parser.getPositiveDirection(index)) ...
+            };
+
+            for configureIndex = 1:numel(configureFunctions)
+                configureFunction = configureFunctions{configureIndex};
+                try
+                    configureFunction();
+                catch ME
+                    if ~strcmp(ME.identifier, "MATLAB:nonExistentField")
+                        rethrow(ME);
+                    end
+                end
+            end
         end
         function newUserData = configureByRegion(newRegion, oldRegion)
             newUserData = RegionUserData(newRegion);
