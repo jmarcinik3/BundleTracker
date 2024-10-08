@@ -40,19 +40,23 @@ classdef AxisRoiArrow < handle
                 "Name", sprintf("Region %d", index), ...
                 "WindowStyle", "docked" ...
                 );
-            layout = tiledlayout(fig, 2, 2);
+            layout = tiledlayout(fig, 2, 3);
             title(layout, sprintf("Region %d", index));
 
             axTrace = nexttile;
             plotTraceX(axTrace, resultsParser, index);
+            axHist = nexttile;
+            plotHistX(axHist, resultsParser, index);
             axFft = nexttile;
             plotFftX(axFft, resultsParser, index);
 
             plotTraceY(nexttile, resultsParser, index);
+            plotHistY(nexttile, resultsParser, index);
             plotFftY(nexttile, resultsParser, index);
 
             title(axTrace, "Trace");
             title(axFft, "Fourier Transform");
+            title(axHist, "Distribution");
 
             obj.displayedIndex = index;
             obj.tabbedIndices = sort(unique([obj.tabbedIndices, index]));
@@ -122,7 +126,7 @@ plotTrace(ax, ...
     resultsParser.getProcessedTraceError(index) ...
     );
 xlabel(ax, "Time [t]");
-ylabel(ax, "Processed Position [x]");
+ylabel(ax, "Position [x]");
 end
 function plotTraceY(ax, resultsParser, index)
 plotTrace(ax, ...
@@ -131,7 +135,7 @@ plotTrace(ax, ...
     resultsParser.getProcessedTraceError2(index) ...
     );
 xlabel(ax, "Time [t]");
-ylabel(ax, "Processed Position [y]");
+ylabel(ax, "Position [y]");
 end
 function plotTrace(ax, t, x, xerr)
 hold on;
@@ -142,6 +146,44 @@ errorbar(ax, ...
     );
 plot(ax, t, x, "black");
 hold off;
+set(ax, ...
+    "XLim", [t(1), t(end)], ...
+    "YLim", calculateTraceLimits(x, xerr) ...
+    );
+end
+function ylim = calculateTraceLimits(x, xerr)
+ymin = min(x - xerr);
+ymax = max(x + xerr);
+ylim = [ymin, ymax];
+end
+
+function plotHistX(ax, resultsParser, index)
+plotHist(ax, ...
+    resultsParser.getProcessedTrace(index), ...
+    resultsParser.getProcessedTraceError(index) ...
+    );
+end
+function plotHistY(ax, resultsParser, index)
+plotHist(ax, ...
+    resultsParser.getProcessedTrace2(index), ...
+    resultsParser.getProcessedTraceError2(index) ...
+    );
+end
+function plotHist(ax, x, xerr)
+hold on;
+histogram(ax, ...
+    x, ...
+    "EdgeColor", "black", ...
+    "FaceColor", "black" ...
+    );
+hold off;
+
+pbaspect(ax, [1, 1, 1]);
+set(ax, ...
+    "View", [90, -90], ...
+    "XLim", calculateTraceLimits(x, xerr) ...
+    );
+ylabel(ax, "Count");
 end
 
 function plotFftX(ax, resultsParser, index)
