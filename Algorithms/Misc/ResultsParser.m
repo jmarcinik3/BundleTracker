@@ -181,7 +181,7 @@ classdef ResultsParser
                 obj.getScaleFactor(), ...
                 obj.getScaleFactorError() ...
                 );
-            areaWithError = areaPixels * scaleFactor.^2;
+            areaWithError = areaPixels .* scaleFactor.^2;
             area = areaWithError.Value;
         end
         function error = getAreaError(obj, index)
@@ -197,7 +197,7 @@ classdef ResultsParser
                 obj.getScaleFactor(), ...
                 obj.getScaleFactorError() ...
                 );
-            areaWithError = areaPixels * scaleFactor.^2;
+            areaWithError = areaPixels .* scaleFactor.^2;
             error = areaWithError.Error;
         end
 
