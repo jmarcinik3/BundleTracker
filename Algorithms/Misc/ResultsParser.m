@@ -28,14 +28,14 @@ classdef ResultsParser
             frame = obj.metadata.FirstFrame;
             if nargin > 1
                 regionInfo = obj.getRegion(index);
-                
+
                 ax = gca;
                 region = drawRegionByInfo(ax, regionInfo);
                 region.UserData = RegionUserData();
                 RegionUserData.configureByResultsParser(region, obj, index);
                 regionalImage = generateRegionalImages(region, frame);
                 close(ancestor(ax, "figure"));
-                
+
                 frame = regionalImage{1};
             end
         end
@@ -154,6 +154,51 @@ classdef ResultsParser
             if nargin > 1
                 info = info(index, :);
             end
+        end
+
+        function area = getAreaPixels(obj, index)
+            area = vertcat(obj.results.Area);
+            if nargin > 1
+                area = area(index, :);
+            end
+        end
+        function error = getAreaErrorPixels(obj, index)
+            error = vertcat(obj.results.AreaError);
+            if nargin > 1
+                error = error(index, :);
+            end
+        end
+        function area = getArea(obj, index)
+            if nargin < 2
+                index = 1:obj.getRegionCount();
+            end
+
+            areaPixels = ErrorPropagator( ...
+                obj.getAreaPixels(index), ...
+                obj.getAreaErrorPixels(index) ...
+                );
+            scaleFactor = ErrorPropagator( ...
+                obj.getScaleFactor(), ...
+                obj.getScaleFactorError() ...
+                );
+            areaWithError = areaPixels * scaleFactor.^2;
+            area = areaWithError.Value;
+        end
+        function error = getAreaError(obj, index)
+            if nargin < 2
+                index = 1:obj.getRegionCount();
+            end
+
+            areaPixels = ErrorPropagator( ...
+                obj.getAreaPixels(index), ...
+                obj.getAreaErrorPixels(index) ...
+                );
+            scaleFactor = ErrorPropagator( ...
+                obj.getScaleFactor(), ...
+                obj.getScaleFactorError() ...
+                );
+            areaWithError = areaPixels * scaleFactor.^2;
+            error = areaWithError.Error;
         end
 
         function trackingMode = getTrackingMode(obj, index)

@@ -52,10 +52,11 @@ if cancel
     return;
 end
 
-result = processResult(region, centers, trackingLinker);
+result = processResult(region, centers, ims, trackingLinker);
 if ~cancel
     set(region, "Color", SettingsParser.getRegionTrackedColor());
 end
+disp(result)
 end
 
 function [cancel, ims] = preprocessRegion(trackingLinker, region)
@@ -105,9 +106,16 @@ centers = PointStructurer.mergePoints(centers);
 multiWaitbar(taskName, 'Close');
 end
 
+function [area, areaError] = calculateRegionArea(ims)
+im = imbinarize(ims);
+objectAreas = squeeze(sum(im, [1, 2]));
+area = mean(objectAreas);
+areaError = std(objectAreas);
+end
 
 
-function result = processResult(region, centers, trackingLinker)
+
+function result = processResult(region, centers, ims, trackingLinker)
 initialResult = trackingLinker.generateInitialResult();
 result = table2struct([ ...
     struct2table(centers), ...
@@ -121,4 +129,8 @@ metadata = trackingLinker.generateMetadata();
 postprocessor = Postprocessor(result, "Metadata", metadata);
 postprocessor.process();
 result = postprocessor.getPostprocessedResult();
+
+[area, areaError] = calculateRegionArea(ims);
+result.Area = area;
+result.AreaError = areaError;
 end
