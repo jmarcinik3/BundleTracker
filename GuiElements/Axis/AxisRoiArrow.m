@@ -152,6 +152,9 @@ set(ax, ...
     );
 end
 function ylim = calculateTraceLimits(x, xerr)
+if any(isnan(xerr))
+    xerr = 0;
+end
 ymin = min(x - xerr);
 ymax = max(x + xerr);
 ylim = [ymin, ymax];
