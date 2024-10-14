@@ -39,7 +39,10 @@ end
 
 function [cancel, result] = trackAndProcessRegion(trackingLinker, region)
 trackingLinker.previewRegion(region);
-[cancel, ims] = preprocessRegion(trackingLinker, region);
+[cancel, ims] = preprocessRegion( ...
+    im2double(trackingLinker.getVideoInRegion(region)), ...
+    Preprocessor.fromRegion(region) ...
+    );
 if cancel
     result = [];
     return;
@@ -56,29 +59,6 @@ result = processResult(region, centers, ims, trackingLinker);
 if ~cancel
     set(region, "Color", SettingsParser.getRegionTrackedColor());
 end
-end
-
-function [cancel, ims] = preprocessRegion(trackingLinker, region)
-taskName = 'Preprocessing Region';
-multiWaitbar(taskName, 0, 'CanCancel', 'on');
-ims = im2double(trackingLinker.getVideoInRegion(region));
-frameCount = size(ims, 3);
-preprocessor = Preprocessor.fromRegion(region);
-
-cancel = false;
-proportionDelta = 1 / frameCount;
-for index = 1:frameCount
-    ims(:, :, index) = preprocessor.preprocess(ims(:, :, index));
-    proportionComplete = index / frameCount;
-    if mod(proportionComplete, 0.01) < proportionDelta
-        cancel = multiWaitbar(taskName, proportionComplete);
-    end
-    if cancel
-        break;
-    end
-end
-
-multiWaitbar(taskName, 'Close');
 end
 
 function [cancel, centers] = trackVideo(ims, trackingMode)

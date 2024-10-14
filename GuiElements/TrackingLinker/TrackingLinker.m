@@ -218,11 +218,13 @@ classdef TrackingLinker < RegionPreviewer ...
                 );
 
             if isfilepath
-                activeRegion = obj.getActiveRegion();
-                ims = obj.getVideoInRegion(activeRegion);
-                imClass = class(ims);
-                ims = Preprocessor.fromRegion(activeRegion).preprocess(ims);
-                ims = imageToClass(ims, imClass);
+                [cancel, ims] = generatePreprocessedRegion( ...
+                    obj, ...
+                    obj.getActiveRegion() ...
+                    );
+                if cancel
+                    return;
+                end
 
                 [~, ~, fileExtension] = fileparts(filepath);
                 if strcmp(fileExtension, ".avi")
@@ -233,9 +235,6 @@ classdef TrackingLinker < RegionPreviewer ...
                 elseif strcmp(fileExtension, ".mj2")
                     videoWriter = VideoWriter(filepath, "Archival");
                     set(videoWriter, "FrameRate", obj.getFps());
-                    if strcmp(imClass, "double")
-                        ims = imageToClass(ims, "uint16");
-                    end
                     export3dMatrixAsVideo(ims, videoWriter);
                 end
             end
@@ -352,24 +351,66 @@ label = sprintf( ...
     frameCount, fps, w, h, bitDepth ...
     );
 end
+function [cancel, ims] = generatePreprocessedRegion(obj, region)
+ims = obj.getVideoInRegion(region);
+imClass = class(ims);
+[cancel, ims] = preprocessRegion( ...
+    im2double(ims), ...
+    Preprocessor.fromRegion(region) ...
+    );
+ims = imageToClass(ims, imClass);
+end
+
 
 function export3dMatrixAsVideo(ims, videoWriter)
+if strcmp(class(ims), "double")
+    ims = imageToClass(ims, "uint16");
+end
+
 frameCount = size(ims, 3);
+taskName = 'Exporting Video';
+multiWaitbar(taskName, 0, 'CanCancel', 'on');
 open(videoWriter);
+
+cancel = false;
+proportionDelta = 1 / frameCount;
 for frameIndex = 1:frameCount
     im = ims(:, :, frameIndex);
     writeVideo(videoWriter, im);
+    proportionComplete = frameIndex / frameCount;
+    if mod(proportionComplete, 0.01) < proportionDelta
+        cancel = multiWaitbar(taskName, proportionComplete);
+    end
+    if cancel
+        break;
+    end
 end
+
 close(videoWriter);
+multiWaitbar(taskName, 'Close');
 end
 function export4dMatrixAsVideo(ims, videoWriter)
 frameCount = size(ims, 4);
+taskName = 'Exporting Video';
+multiWaitbar(taskName, 0, 'CanCancel', 'on');
 open(videoWriter);
+
+cancel = false;
+proportionDelta = 1 / frameCount;
 for frameIndex = 1:frameCount
     im = ims(:, :, :, frameIndex);
     writeVideo(videoWriter, im);
+    proportionComplete = frameIndex / frameCount;
+    if mod(proportionComplete, 0.01) < proportionDelta
+        cancel = multiWaitbar(taskName, proportionComplete);
+    end
+    if cancel
+        break;
+    end
 end
+
 close(videoWriter);
+multiWaitbar(taskName, 'Close');
 end
 
 function fig = generateBlobDetectionFigure()
