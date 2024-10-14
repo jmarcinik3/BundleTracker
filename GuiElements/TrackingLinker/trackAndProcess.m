@@ -56,7 +56,6 @@ result = processResult(region, centers, ims, trackingLinker);
 if ~cancel
     set(region, "Color", SettingsParser.getRegionTrackedColor());
 end
-disp(result)
 end
 
 function [cancel, ims] = preprocessRegion(trackingLinker, region)
