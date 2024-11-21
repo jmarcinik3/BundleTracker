@@ -76,6 +76,7 @@ classdef AutoThresholder < handle
     methods (Access = private)
         function paddedThresholds = calculateRegionThresholds(obj, regionIndex, levelCount)
             im = obj.getRegionalImage(regionIndex);
+            im = im(im > 0);
             if obj.isSingleThreshold
                 thresholds = obj.calculateThresholds(im);
             else
