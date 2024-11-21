@@ -104,8 +104,11 @@ result.Label = region.Label;
 result.Region = getRegionMetadata(region);
 result = RegionUserData(region).appendMetadata(result);
 
-metadata = trackingLinker.generateMetadata();
-postprocessor = Postprocessor(result, "Metadata", metadata);
+parser = struct( ...
+    "results", result, ...
+    "metadata", trackingLinker.generateMetadata() ...
+    );
+postprocessor = Postprocessor(parser);
 postprocessor.process();
 result = postprocessor.getPostprocessedResult();
 

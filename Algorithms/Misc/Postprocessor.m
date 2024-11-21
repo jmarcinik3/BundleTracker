@@ -5,18 +5,8 @@ classdef Postprocessor < handle
     end
 
     methods
-        function obj = Postprocessor(result, varargin)
-            p = inputParser;
-            addOptional(p, "Metadata", []);
-            parse(p, varargin{:});
-            metadata = p.Results.Metadata;
-
-            parser = struct( ...
-                "results", result, ...
-                "metadata", metadata ...
-                );
-            parser = ResultsParser(parser);
-
+        function obj = Postprocessor(result)
+            parser = ResultsParser(result);
             obj.results = instantiatePostResult(parser);
             obj.parser = parser;
         end
