@@ -237,7 +237,8 @@ newAngle = wrapToPi(oldAngle + angle);
 end
 function extraAngle = angleIfNoiseInX(x, y, angle)
 extraAngle = 0;
-if std(x) < std(y)
+signalInY = std(abs(fft(x))) < std(abs(fft(y)));
+if signalInY
     if angle <= 0
         extraAngle = pi/2;
     elseif angle > 0
