@@ -72,7 +72,8 @@ if isa(region, "images.roi.Rectangle")
     rectangleUp(region);
 elseif isa(region, "images.roi.Ellipse")
     ellipseUp(region);
-elseif isa(region, "images.roi.Polygon")
+elseif isa(region, "images.roi.Polygon") ...
+        || isa(region, "images.roi.Freehand")
     vertexUp(region);
 end
 end
