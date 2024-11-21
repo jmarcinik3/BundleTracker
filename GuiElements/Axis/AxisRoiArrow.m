@@ -88,8 +88,7 @@ dataPoints = matlab.graphics.chart.primitive.Scatter.empty(regionCount, 0);
 
 for index = 1:regionCount
     region = resultsParser.getRegion(index);
-    regionPosition = region.Position;
-    regionCenter = regionPosition(1:2) + 0.5 * regionPosition(3:4);
+    regionCenter = getRegionCenter(region);
 
     angle = -angles(index);
     quiver(ax, ...
@@ -215,6 +214,19 @@ xFftFrequency = (0:(xCount/2)) * fps / xCount;
 plot(ax, xFftFrequency, xFftAmplitude, "black");
 end
 
+function center = getRegionCenter(region)
+regionType = region.Type;
+if strcmpi(regionType, "images.roi.Rectangle")
+    position = region.Position;
+    center = position(1:2) + 0.5 * position(3:4);
+elseif strcmpi(regionType, "images.roi.Ellipse")
+    center = region.Center;
+elseif strcmpi(regionType, "images.roi.Polygon") ...
+        || strcmpi(regionType, "images.roi.Freehand")
+    position = region.Position;
+    center = mean(position, 1);
+end
+end
 function index = getClosestRegionIndex(xyClicked, regionsCenter)
 dxy = regionsCenter - xyClicked;
 dr = sqrt(sum(dxy.^2, 2));
