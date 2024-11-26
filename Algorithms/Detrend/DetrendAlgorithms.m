@@ -4,6 +4,7 @@ classdef DetrendAlgorithms
             DetrendAlgorithms.noneKeyword, ...
             DetrendAlgorithms.autoKeyword, ...
             sort([ ...
+            DetrendAlgorithms.highPassKeyword, ...
             DetrendAlgorithms.movingAverageKeyword, ...
             DetrendAlgorithms.polyKeyword ...
             ]) ...
@@ -12,6 +13,7 @@ classdef DetrendAlgorithms
     properties (Constant, Access = private)
         noneKeyword = "None";
         autoKeyword = "Auto";
+        highPassKeyword = "High-Pass Filter";
         movingAverageKeyword = "Moving Average";
         polyKeyword = "Polynomial Regression";
     end
@@ -24,6 +26,8 @@ classdef DetrendAlgorithms
                     [x, y, detrendInfo] = DetrendAlgorithms.byNone(x, y);
                 case DetrendAlgorithms.autoKeyword
                     [x, y, detrendInfo] = DetrendAlgorithms.byAuto(x, y);
+                    case DetrendAlgorithms.highPassKeyword
+                    [x, y, detrendInfo] = DetrendAlgorithms.byHighPassFilter(x, y);
                 case DetrendAlgorithms.movingAverageKeyword
                     [x, y, detrendInfo] = DetrendAlgorithms.byMovingAverage(x, y);
                 case DetrendAlgorithms.polyKeyword
@@ -36,6 +40,9 @@ classdef DetrendAlgorithms
         end
         function [x, y, detrendInfo] = byAuto(x, y)
             [x, y, detrendInfo] = byAuto(x, y);
+        end
+        function [x, y, detrendInfo] = byHighPassFilter(x, y)
+            [x, y, detrendInfo] = byHighPassFilter(x, y);
         end
         function [x, y, detrendInfo] = byMovingAverage(x, y)
             [x, y, detrendInfo] = byMovingAverage(x, y);
@@ -98,6 +105,3 @@ info = struct( ...
     "y", yDetrender.getInfo() ...
     );
 end
-
-
-
