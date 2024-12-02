@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/753794151.svg)](https://doi.org/10.5281/zenodo.14262468)
+
 Installing
 1. Download and install MATLAB 2023b (only this specific version, not MATLAB 2024a or newer).
 2. Download and unzip the content from this repository. You may place this content anywhere on your computer.
