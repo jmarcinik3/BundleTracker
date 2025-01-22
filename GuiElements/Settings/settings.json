@@ -89,6 +89,17 @@
             "BackgroundColor": [0.96, 0.96, 0.96],
             "Tooltip": "Postprocess: Choose method to track center of region"
         },
+        "WindowShapeDropdown": {
+            "Value": "Hann",
+            "Tooltip": "Choose shape of moving-average window"
+        },
+        "WindowWidthSlider": {
+            "FontSize": 8,
+            "FontWeight": "normal",
+            "FontAngle": "normal",
+            "FontColor": [0, 0, 0],
+            "Tooltip": "Set width of moving-average window"
+        },
         "AutothresholdFigure": {
             "Name": "Automatic Threshold",
             "WindowStyle": "modal",
@@ -97,6 +108,12 @@
         },
         "BlobDetectionFigure": {
             "Name": "Blob Detection",
+            "WindowStyle": "modal",
+            "WindowState": "normal",
+            "Resize": "on"
+        },
+        "DetrendFigure": {
+            "Name": "Detrend",
             "WindowStyle": "modal",
             "WindowState": "normal",
             "Resize": "on"

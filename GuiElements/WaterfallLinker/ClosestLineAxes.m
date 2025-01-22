@@ -22,11 +22,11 @@ classdef ClosestLineAxes < handle
                 x = 1:linePointCount;
             end
 
-            lineObjs = waterfallOnAxis(ax, y, x);
+            lineObjs = Waterfall.plotOnAxis(ax, y, x);
 
             configureAxis(obj, ax);
-            x = dataFromLines(lineObjs, "x");
-            y = dataFromLines(lineObjs, "y");
+            x = Waterfall.dataFromLines(lineObjs, "x");
+            y = Waterfall.dataFromLines(lineObjs, "y");
 
             obj.x = x;
             obj.y = y;
@@ -71,20 +71,6 @@ classdef ClosestLineAxes < handle
             closestLine = obj.ClosestLine;
             is = numel(closestLine) == 0 ...
                 || ~strcmp(closestLine.Tag, lineObj.Tag);
-        end
-    end
-
-    %% Functions to retrieve/update state of GUI
-    methods (Static)
-        function reOffsetLines(ax)
-            lineObjs = findobj(ax.Children, "Type", "Line");
-            reOffsetLines(lineObjs);
-        end
-        function xLines = dataFromLines(lineObjs, axisName)
-            if nargin < 2
-                axisName = 'y';
-            end
-            xLines = dataFromLines(lineObjs, axisName);
         end
     end
 
@@ -223,87 +209,4 @@ switch upper(axisName)
         axLength = axPosition(4);
 end
 arrayPixels = axLength * (array - axLim(1)) / (axLim(2) - axLim(1));
-end
-
-
-
-function lineObjs = waterfallOnAxis(ax, y, x)
-yCount = size(y, 2);
-if nargin < 3
-    x = 1:yCount;
-end
-yOffsets = calculateOffsets(y);
-lineObjs = plotWaterfall(ax, x, y, yOffsets);
-rerangeY(ax, 0.05 / yCount);
-end
-
-function lineObjs = plotWaterfall(ax, x, y, yOffsets)
-yCount = size(y, 1);
-lineObjs = matlab.graphics.chart.primitive.Line.empty(0, yCount);
-
-hold(ax, "on");
-for index = 1:yCount
-    yWithOffset = y(index, :) + yOffsets(index);
-    lineObj = plot(ax, ...
-        x, yWithOffset, ...
-        "Tag", num2str(index) ...
-        );
-    lineObjs(index) = lineObj;
-end
-hold(ax, "off");
-end
-
-function reOffsetLines(lineObjs)
-yDatas = dataFromLines(lineObjs, 'y');
-yOffsets = calculateOffsets(yDatas);
-
-yCount = size(yDatas, 1);
-for index = 1:yCount
-    lineObj = lineObjs(index);
-    yData = yDatas(index, :) + yOffsets(index);
-    set(lineObj, "YData", yData)
-end
-end
-
-function yOffsets = calculateOffsets(y, padding)
-y = y';
-yCount = size(y, 2);
-
-yMins = min(y, [], 1);
-% yMaxs = max(y, [], 1);
-% yMinCumSum = cumsum(yMins);
-% yMaxCumSum = cumsum(yMaxs);
-% % (top of lower y) - (bottom of current y)
-% yRangeShifted = yMaxCumSum(1:end-1) - yMinCumSum(2:end);
-% yOffsets = [-yMins(1), yRangeShifted];
-
-yDelta = y(:, 2:yCount) - y(:, 1:yCount-1);
-yDeltaMinimum = min(yDelta, [], 1);
-yOffsetsSingle = [yMins(1), yDeltaMinimum];
-yOffsets = -cumsum(yOffsetsSingle);
-
-if nargin < 2
-    padding = 0.02 * mean(yOffsets);
-end
-yPaddings = (0:(yCount-1)) * padding;
-yOffsets = yOffsets + yPaddings;
-end
-
-function rerangeY(ax, padding)
-lineObjs = findobj(ax.Children, "Type", "Line");
-yDatas = dataFromLines(lineObjs, 'y');
-yDatas = yDatas(:);
-
-yMin = min(yDatas);
-yMax = max(yDatas);
-yDiff = yMax - yMin;
-yPadding = padding * yDiff;
-yLimit = [yMin - yPadding, yMax + yPadding];
-set(ax, "YLim", yLimit);
-end
-
-function xLines = dataFromLines(lineObjs, axisName)
-axisName = upper(char(axisName));
-fieldname = [axisName, 'Data'];
-xLines = vertcat(lineObjs.(fieldname));
 end

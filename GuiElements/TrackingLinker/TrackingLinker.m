@@ -153,6 +153,23 @@ classdef TrackingLinker < RegionPreviewer ...
                     );
             end
         end
+        function openDetrenderButtonPushed(obj, ~, ~)
+            startingDirectory = obj.gui.getDirectoryPath();
+            title = SettingsParser.getDetrendFigureDefaults().Name;
+            filepath = uigetfilepath( ...
+                TrackingLinker.extensions, ...
+                title, ...
+                startingDirectory ...
+                );
+            if isfile(filepath)
+                resultsParser = ResultsParser(filepath);
+                DetrenderOpener.openFigure( ...
+                    generateDetrendFigure(), ...
+                    resultsParser.getProcessedTrace(), ...
+                    resultsParser.getTime() ...
+                    );
+            end
+        end
     end
 
     %% Functions to be called as part of API
@@ -419,6 +436,10 @@ fig = generateFigure(figDefaults{:});
 end
 function fig = generateAutothresholdFigure()
 figDefaults = namedargs2cell(SettingsParser.getAutothresholdFigureDefaults());
+fig = generateFigure(figDefaults{:});
+end
+function fig = generateDetrendFigure()
+figDefaults = namedargs2cell(SettingsParser.getDetrendFigureDefaults());
 fig = generateFigure(figDefaults{:});
 end
 

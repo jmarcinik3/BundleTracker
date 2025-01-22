@@ -114,7 +114,7 @@ classdef LinePreviewer < handle
         function updatePreviewLines(obj)
             if obj.existsPreviewLine()
                 ax = obj.getPreviewAxis();
-                ClosestLineAxes.reOffsetLines(ax);
+                Waterfall.reOffsetLines(ax);
                 relabelWaterfall(ax);
             end
         end
@@ -148,7 +148,7 @@ function newLabels = relabelWaterfall(ax)
 lineObjs = findobj(ax.Children, "Type", "Line");
 lineCount = numel(lineObjs);
 axXlim = get(ax, "Xlim");
-yDatas = ClosestLineAxes.dataFromLines(lineObjs, 'y');
+yDatas = Waterfall.dataFromLines(lineObjs, 'y');
 
 xText = interp1([0, 1], axXlim, 0.02) * ones(1, lineCount);
 yText = mean(yDatas, 2);

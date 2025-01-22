@@ -26,6 +26,14 @@ classdef SettingsParser
             defaults = namedargs2cell(getDefaults().TrackingDropdown);
         end
 
+        function defaults = getWindowShapeDropdownDefaults()
+            defaults = namedargs2cell(getDefaults().WindowShapeDropdown);
+        end
+        function defaults = getWindowWidthSliderDefaults()
+            defaults = namedargs2cell(getDefaults().WindowWidthSlider);
+        end
+
+
         function defaults = getScaleFactorDefaults()
             defaults = namedargs2cell(getDefaults().ScaleFactorField);
         end
@@ -100,6 +108,9 @@ classdef SettingsParser
         end
         function defaults = getAutothresholdFigureDefaults()
             defaults = getDefaults().AutothresholdFigure;
+        end
+        function defaults = getDetrendFigureDefaults()
+            defaults = getDefaults().DetrendFigure;
         end
 
         function label = getApplyRegionLabel()
