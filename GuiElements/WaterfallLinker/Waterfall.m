@@ -47,6 +47,12 @@ function yOffsets = calculateOffsets(y, paddings)
 % No adjacent traces intersect, but they can share a y-limit
 
 yCount = size(y, 1);
+
+if yCount == 1
+    yOffsets = min(y(1, :));
+    return;
+end
+
 yOffsets = -cumsum([ ...
     min(y(1, :)); ... % set bottom of first trace at zero
     min(diff(y, 1), [], 2) ... % ensure that no adjacent traces intersect
@@ -62,13 +68,7 @@ end
 function reOffsetLines(lineObjs)
 yDatas = Waterfall.dataFromLines(lineObjs, 'y');
 yWithOffsets = yDatas + calculateOffsets(yDatas);
-
-yCount = size(yDatas, 1);
-for index = 1:yCount
-    lineObj = lineObjs(index);
-    yWithOffset = yWithOffsets(index, :);
-    set(lineObj, "YData", yWithOffset);
-end
+set(lineObjs, {"YData"}, num2cell(yWithOffsets, 2));
 end
 
 function rerangeY(ax, padding)

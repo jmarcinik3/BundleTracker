@@ -24,9 +24,8 @@ classdef ClosestLineAxes < handle
 
             lineObjs = Waterfall.plotOnAxis(ax, y, x);
             lineCount = numel(lineObjs);
-            for lineIndex = 1:lineCount
-                set(lineObjs(lineIndex), "Tag", num2str(lineIndex));
-            end
+            tags = strsplit(num2str(1:lineCount)).';
+            set(lineObjs, {"Tag"}, tags);
 
             configureAxis(obj, ax);
             x = Waterfall.dataFromLines(lineObjs, "x");

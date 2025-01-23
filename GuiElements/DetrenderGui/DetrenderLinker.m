@@ -40,12 +40,7 @@ classdef DetrenderLinker < handle
         function updateDisplay(obj)
             lineObjs = obj.lineObjs;
             tracesDetrended = obj.getDetrendedTraces();
-            
-            for lineIndex = 1:numel(lineObjs)
-                lineObj = lineObjs(lineIndex);
-                trace = tracesDetrended(lineIndex, :);
-                set(lineObj, "YData", trace);
-            end
+            set(lineObjs, {"YData"}, num2cell(tracesDetrended, 2));
             Waterfall.reOffsetLines(lineObjs);
         end
 
