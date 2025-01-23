@@ -45,7 +45,7 @@ classdef DetrenderLinker < handle
         end
 
         function sliderChanging(obj, ~, event)
-            newWindowWidth = 10 * round(event.Value / 10);
+            newWindowWidth = round(event.Value);
             if newWindowWidth ~= obj.windowWidth
                 obj.windowWidth = newWindowWidth;
                 obj.updateDisplay();
