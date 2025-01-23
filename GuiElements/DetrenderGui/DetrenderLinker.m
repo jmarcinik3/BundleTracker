@@ -6,6 +6,7 @@ classdef DetrenderLinker < handle
         windowWidth;
         windowShape;
         gui;
+        lineObjs;
         traces;
         time;
     end
@@ -29,6 +30,7 @@ classdef DetrenderLinker < handle
             obj.traces = traces;
             obj.time = time;
 
+            obj.lineObjs = Waterfall.plotOnAxis(gui.getAxis(), traces, time);
             obj.updateDisplay();
         end
     end
@@ -36,16 +38,19 @@ classdef DetrenderLinker < handle
     %% Function to update display of GUI
     methods (Access = private)
         function updateDisplay(obj)
-            ax = obj.getAxis();
-            time = obj.getTime();
-
+            lineObjs = obj.lineObjs;
             tracesDetrended = obj.getDetrendedTraces();
-            cla(ax);
-            Waterfall.plotOnAxis(ax, tracesDetrended, time);
+            
+            for lineIndex = 1:numel(lineObjs)
+                lineObj = lineObjs(lineIndex);
+                trace = tracesDetrended(lineIndex, :);
+                set(lineObj, "YData", trace);
+            end
+            Waterfall.reOffsetLines(lineObjs);
         end
 
         function sliderChanging(obj, ~, event)
-            newWindowWidth = round(event.Value);
+            newWindowWidth = 10 * round(event.Value / 10);
             if newWindowWidth ~= obj.windowWidth
                 obj.windowWidth = newWindowWidth;
                 obj.updateDisplay();

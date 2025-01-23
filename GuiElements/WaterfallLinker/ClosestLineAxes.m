@@ -23,6 +23,10 @@ classdef ClosestLineAxes < handle
             end
 
             lineObjs = Waterfall.plotOnAxis(ax, y, x);
+            lineCount = numel(lineObjs);
+            for lineIndex = 1:lineCount
+                set(lineObjs(lineIndex), "Tag", num2str(lineIndex));
+            end
 
             configureAxis(obj, ax);
             x = Waterfall.dataFromLines(lineObjs, "x");
@@ -32,7 +36,7 @@ classdef ClosestLineAxes < handle
             obj.y = y;
             obj.xPixels = limitsToPixels(ax, x, "x");
             obj.yPixels = limitsToPixels(ax, y, "y");
-            obj.lineCount = numel(lineObjs);
+            obj.lineCount = lineCount;
             obj.linePointCount = linePointCount;
 
             obj.lineObjs = lineObjs;
@@ -70,7 +74,7 @@ classdef ClosestLineAxes < handle
         function is = isNewClosestLine(obj, lineObj)
             closestLine = obj.ClosestLine;
             is = numel(closestLine) == 0 ...
-                || ~strcmp(closestLine.Tag, lineObj.Tag);
+                || ~strcmp(get(closestLine, "Tag"), get(lineObj, "Tag"));
         end
     end
 

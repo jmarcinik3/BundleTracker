@@ -67,7 +67,7 @@ end
 function lineLabel = getLineLabel(lineObj)
 lineLabel = "";
 if numel(lineObj) == 1
-    lineLabel = lineObj.Tag;
+    lineLabel = get(lineObj, "Tag");
 end
 end
 
