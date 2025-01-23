@@ -98,17 +98,8 @@ end
 
 
 
-function xCorrected = detrendTraces(x, windowWidth, windowShape)
-xCorrected = zeros(size(x));
-traceCount = size(x, 1);
-
-for xIndex = 1:traceCount
-    xi = x(xIndex, :);
-    xCorrected(xIndex, :) = detrendTrace(xi, windowWidth, windowShape);
-end
-end
-function xCorrected = detrendTrace(x, windowWidth, windowShape)
-x = detrend(x, 1);
-ma = MovingAverage.averageByKeyword(x, windowWidth, windowShape);
-xCorrected = x - ma;
+function x = detrendTraces(x, windowWidth, windowShape)
+x = detrend(x.', 1);
+x = x - MovingAverage.averageByKeyword2(x, windowWidth, windowShape);
+x = x.';
 end

@@ -42,6 +42,10 @@ classdef MovingAverage
             window = MovingAverage.windowByKeyword(windowSize, keyword);
             ma = conv(x, window, "same") / sum(window);
         end
+        function ma = averageByKeyword2(x, windowSize, keyword)
+            window = MovingAverage.windowByKeyword(windowSize, keyword);
+            ma = conv2(x, window, "same") / sum(window);
+        end
 
         function window = windowByKeyword(windowSize, keyword)
             switch (keyword)
