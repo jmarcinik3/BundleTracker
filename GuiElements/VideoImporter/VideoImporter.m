@@ -3,7 +3,7 @@ classdef VideoImporter < handle
         ims = []; % stored 3D matrix of grayscale video
         firstFrame = [];
         fps = 0;
-        videoReader;
+        duration = 1;
         isImporting = false;
     end
 
@@ -28,17 +28,21 @@ classdef VideoImporter < handle
         function fps = getFps(obj)
             fps = obj.fps;
         end
+        function duration = getDuration(obj)
+            duration = obj.duration;
+        end
         function is = videoIsImported(obj)
             is = ~obj.isImporting;
         end
     end
 
     %% Functions to set state information
-    methods (Access = protected)
+    methods (Access = public)
         function importVideoToRam(obj, videoReader)
             obj.isImporting = true;
             obj.ims = [];
             obj.fps = get(videoReader, "FrameRate");
+            obj.duration = get(videoReader, "Duration");
             obj.firstFrame = read(videoReader, 1);
             obj.ims = readVideo(videoReader);
             obj.isImporting = false;

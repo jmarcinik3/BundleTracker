@@ -6,6 +6,7 @@ classdef TrackingLinker < RegionPreviewer ...
     properties (Constant)
         extensions = {'*.mat', "MATLAB Structure"};
         videoExtensions = { ...
+            '*.gif', "Graphic Interchange Format"; ...
             '*.avi', "Audio Video Interleave"; ...
             '*.mj2', "Motion JPEG 2000"; ...
             };
@@ -224,37 +225,29 @@ classdef TrackingLinker < RegionPreviewer ...
             end
             exportRegionImage@RegionPreviewer(obj, path);
         end
-        function exportRegionVideo(obj, path)
-            if nargin < 2
-                path = obj.gui.getDirectoryPath();
-            end
-            [filepath, isfilepath] = uiputfilepath( ...
-                obj.videoExtensions, ...
-                "Export as Video", ...
-                path ...
+        function exportRegionVideo(obj)            
+            [cancel, ims] = generatePreprocessedRegion( ...
+                obj, ...
+                obj.getActiveRegion() ...
                 );
-
-            if isfilepath
-                [cancel, ims] = generatePreprocessedRegion( ...
-                    obj, ...
-                    obj.getActiveRegion() ...
-                    );
-                if cancel
-                    return;
-                end
-
-                [~, ~, fileExtension] = fileparts(filepath);
-                if strcmp(fileExtension, ".avi")
-                    videoWriter = VideoWriter(filepath, "Motion JPEG AVI");
-                    set(videoWriter, "FrameRate", obj.getFps());
-                    ims = gray2rgb(ims, obj.getFigure());
-                    export4dMatrixAsVideo(ims, videoWriter);
-                elseif strcmp(fileExtension, ".mj2")
-                    videoWriter = VideoWriter(filepath, "Archival");
-                    set(videoWriter, "FrameRate", obj.getFps());
-                    export3dMatrixAsVideo(ims, videoWriter);
-                end
+            if cancel
+                return;
             end
+
+            fig = obj.getFigure();
+            ax = generateAnimatorAxis("Export as Video");
+
+            delayTime = 1 / obj.getFps();
+            duration = obj.getDuration();
+            t = 0:delayTime:duration-delayTime;
+
+            ims = gray2rgb(ims, fig);
+            AxisVideoAnimator( ...
+                ax, ...
+                t, ...
+                ims, ...
+                "PlaybackFps", obj.getFps() ...
+                );
         end
 
         function trackAndExportRegions(obj, filepath)
@@ -378,56 +371,10 @@ imClass = class(ims);
 ims = imageToClass(ims, imClass);
 end
 
-
-function export3dMatrixAsVideo(ims, videoWriter)
-if strcmp(class(ims), "double")
-    ims = imageToClass(ims, "uint16");
-end
-
-frameCount = size(ims, 3);
-taskName = 'Exporting Video';
-multiWaitbar(taskName, 0, 'CanCancel', 'on');
-open(videoWriter);
-
-cancel = false;
-proportionDelta = 1 / frameCount;
-for frameIndex = 1:frameCount
-    im = ims(:, :, frameIndex);
-    writeVideo(videoWriter, im);
-    proportionComplete = frameIndex / frameCount;
-    if mod(proportionComplete, 0.01) < proportionDelta
-        cancel = multiWaitbar(taskName, proportionComplete);
-    end
-    if cancel
-        break;
-    end
-end
-
-close(videoWriter);
-multiWaitbar(taskName, 'Close');
-end
-function export4dMatrixAsVideo(ims, videoWriter)
-frameCount = size(ims, 4);
-taskName = 'Exporting Video';
-multiWaitbar(taskName, 0, 'CanCancel', 'on');
-open(videoWriter);
-
-cancel = false;
-proportionDelta = 1 / frameCount;
-for frameIndex = 1:frameCount
-    im = ims(:, :, :, frameIndex);
-    writeVideo(videoWriter, im);
-    proportionComplete = frameIndex / frameCount;
-    if mod(proportionComplete, 0.01) < proportionDelta
-        cancel = multiWaitbar(taskName, proportionComplete);
-    end
-    if cancel
-        break;
-    end
-end
-
-close(videoWriter);
-multiWaitbar(taskName, 'Close');
+function ax = generateAnimatorAxis(title)
+    fig = generateFigure("Name", title);
+    gl = uigridlayout(fig, [1, 1]);
+    ax = uiaxes(gl);
 end
 
 function fig = generateBlobDetectionFigure()
