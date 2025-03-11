@@ -10,6 +10,10 @@ classdef AxisTraceAnimator < AxisAnimator
 
             line = animatedline(ax, "MaximumNumPoints", Inf);
             set(line, "ContextMenu", obj.getContextMenu());
+            set(ax, ...
+                "XLim", [min(t), max(t)], ...
+                "YLim", [min(x), max(x)] ...
+                );
 
             obj.trace = x;
             obj.animatedLine = line;
