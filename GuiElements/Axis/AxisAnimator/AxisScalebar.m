@@ -412,6 +412,20 @@ classdef AxisScalebar < handle
     end
 
     %% Functions to retrieve GUI elements
+    methods
+        function text = getHorizontalText(obj)
+            text = obj.horizontalText;
+        end
+        function text = getVerticalText(obj)
+            text = obj.verticalText;
+        end
+        function line = getHorizontalLine(obj)
+            line = obj.horizontalLine;
+        end
+        function line = getVerticalLine(obj)
+            line = obj.verticalLine;
+        end
+    end
     methods (Access = private)
         function fig = getFigure(obj)
             ax = obj.getAxis();
