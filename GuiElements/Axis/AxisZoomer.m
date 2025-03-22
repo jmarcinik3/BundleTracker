@@ -14,6 +14,11 @@ classdef AxisZoomer < AxisAdjuster
 
     methods (Access = private)
         function windowScrollWheelFcn(obj, ~, event)
+            ax = obj.getAxis();
+            if ~mouseIsOverAxis(ax)
+                return;
+            end
+
             scrollDirection = event.VerticalScrollCount;
             scrollAmount = event.VerticalScrollAmount;
             factor = obj.magnificationFactor^scrollAmount;
@@ -108,4 +113,20 @@ elseif startIsValid && ~endIsValid % limEnd is after limPadEnd
     limNewStart = limNewEnd - limPadRange;
 end
 limNew = [limNewStart, limNewEnd];
+end
+
+function point = getAxisPoint(ax)
+point = get(ax, "CurrentPoint");
+point = point(1, 1:3);
+end
+function is = mouseIsOverAxis(ax)
+point = getAxisPoint(ax);
+pointX = point(1);
+pointY = point(2);
+
+xlim = get(ax, "XLim");
+ylim = get(ax, "YLim");
+inX = xlim(1) <=pointX && pointX <= xlim(2);
+inY = ylim(1) <= pointY && pointY <= ylim(2);
+is = inX && inY;
 end
