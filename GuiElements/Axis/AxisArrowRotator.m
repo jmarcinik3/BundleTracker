@@ -6,7 +6,11 @@ classdef AxisArrowRotator < handle
     methods
         function obj = AxisArrowRotator(varargin)
             arrow = quiver(varargin{:});
-            AxisDraggable(arrow, "ButtonMotionFcn", @obj.buttonMotion);
+            AxisDraggable( ...
+                arrow, ...
+                "ButtonDownFcn", @obj.buttonDown, ...
+                "ButtonMotionFcn", @obj.buttonMotion ...
+                );
             obj.arrow = arrow;
         end
     end
@@ -28,20 +32,23 @@ classdef AxisArrowRotator < handle
             arrow = obj.getArrow();
             xLength = get(arrow, "UData");
             yLength = get(arrow, "VData");
-            length = sum(sqrt(xLength^2 + yLength^2));
+            length = sqrt(xLength^2 + yLength^2);
         end
     end
 
     %% Functions to handle interactive click events
     methods (Access = private)
+        function buttonDown(obj)
+            arrow = obj.getArrow();
+            set(arrow, "UData", get(arrow, "UData"));
+            set(arrow, "VData", get(arrow, "VData"));
+        end
         function buttonMotion(obj, ~, currentPoint)
             arrow = obj.getArrow();
             arrowLength = obj.getArrowLength();
-
-            arrowPoint = [get(arrow, "XData"), get(arrow, "YData"), 0];
+            arrowPoint = [obj.getArrowTailPosition(), 0];
             positionDifference = currentPoint - arrowPoint;
-            [theta, ~] = cart2pol(positionDifference(1), positionDifference(2));
-
+            theta = atan2(positionDifference(2), positionDifference(1));
             set( ...
                 arrow, ...
                 "UData", arrowLength * cos(theta), ...

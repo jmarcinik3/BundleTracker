@@ -76,6 +76,26 @@ classdef ResultsParser < handle
         end
     end
 
+    %% Functions to append postprocessing
+    methods
+        function rerotateTrace(obj, newAngle, index)
+            x = obj.getProcessedTrace(index);
+            y = obj.getProcessedTrace2(index);
+            initialAngle = obj.getAngleRadians(index);
+            if abs(newAngle - initialAngle) <= 1e-9
+                return;
+            end
+
+            [xRotated, yRotated] = TraceRotator.rotate2d(x, y, newAngle - initialAngle);
+            obj.setProcessedTrace(xRotated, index);
+            obj.setProcessedTrace2(yRotated, index);
+            obj.setAngleRadians(newAngle, index);
+            obj.setAngleErrorRadians(0, index);
+            obj.setAngleMode("Custom", index);
+            obj.setAngleInfo([], index);
+        end
+    end
+
     %% Functions to retrieve state information
     methods
         function frame = getFirstFrame(obj, index)
