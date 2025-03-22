@@ -48,6 +48,7 @@ end
 
 function saveResults(resultsFilepath, results, metadata)
 if ischar(resultsFilepath) || isstring(resultsFilepath)
-    save(resultsFilepath, "results", "metadata");
+    resultsParser = ResultsParser.fromSeparate(results, metadata);
+    resultsParser.export(resultsFilepath);
 end
 end

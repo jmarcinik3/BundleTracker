@@ -266,7 +266,8 @@ classdef TrackingLinker < RegionPreviewer ...
             if nargin == 1
                 trackingCompleted(obj, results, metadata);
             elseif nargin == 2
-                save(filepath, "results", "metadata");
+                resultsParser = ResultsParser.fromSeparate(results, metadata);
+                resultsParser.export(filepath);
             end
         end
     end

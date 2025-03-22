@@ -1,4 +1,4 @@
-classdef ResultsParser
+classdef ResultsParser < handle
     properties (Access = private)
         results;
         metadata;
@@ -23,7 +23,61 @@ classdef ResultsParser
                 obj = results;
             end
         end
+    end
 
+    %% Functions to generate parser inputs
+    methods (Static)
+        function resultsParser = fromSeparate(results, metadata)
+            resultsStruct = struct( ...
+                "results", results, ...
+                "metadata", metadata ...
+                );
+            resultsParser = ResultsParser(resultsStruct);
+        end
+    end
+
+    %% Functions to set state information
+    methods
+        function export(obj, filepath)
+            results = obj.results;
+            metadata = obj.metadata;
+            save(filepath, "results", "metadata");
+            fprintf( ...
+                "Results saved to %s (%d traces)\n", ...
+                filepath, ...
+                obj.getRegionCount() ...
+                );
+        end
+
+        function setProcessedTrace(obj, trace, index)
+            obj.results(index).xProcessed = trace;
+        end
+        function setProcessedTraceError(obj, error, index)
+            obj.results(index).xProcessedError = error;
+        end
+        function setProcessedTrace2(obj, trace, index)
+            obj.results(index).yProcessed = trace;
+        end
+        function setProcessedTraceError2(obj, error, index)
+            obj.results(index).yProcessedError = error;
+        end
+
+        function setAngleRadians(obj, angle, index)
+            obj.results(index).angle = angle;
+        end
+        function setAngleErrorRadians(obj, error, index)
+            obj.results(index).angleError = error;
+        end
+        function setAngleMode(obj, angleMode, index)
+            obj.results(index).AngleMode = angleMode;
+        end
+        function setAngleInfo(obj, info, index)
+            obj.results(index).angleInfo = info;
+        end
+    end
+
+    %% Functions to retrieve state information
+    methods
         function frame = getFirstFrame(obj, index)
             frame = obj.metadata.FirstFrame;
             if nargin > 1

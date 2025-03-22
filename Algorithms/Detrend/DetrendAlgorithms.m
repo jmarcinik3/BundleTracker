@@ -34,6 +34,9 @@ classdef DetrendAlgorithms
                     [x, y, detrendInfo] = DetrendAlgorithms.byPolyFit(x, y);
             end
         end
+        function is = isIdentity(keyword)
+            is = strcmp(DetrendAlgorithms.noneKeyword, keyword);
+        end
 
         function [x, y, detrendInfo] = byNone(x, y)
             detrendInfo = [];
