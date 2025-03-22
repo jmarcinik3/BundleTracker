@@ -25,8 +25,11 @@ classdef AxisRoiArrow < handle
 
             hold(ax, "on");
             iIm = imshow(firstFrame, "Parent", ax);
-            regionsCenter = plotRoiArrow(ax, resultsParser);
-            set(iIm, "ButtonDownFcn", @obj.plotRoi);
+            [regionsCenter, arrows] = plotRoiArrow(ax, resultsParser);
+            set( ...
+                [iIm, arrows], ...
+                "ButtonDownFcn", @obj.plotRoi ...
+                );
             hold(ax, "off");
 
             obj.resultsParser = resultsParser;
@@ -73,7 +76,7 @@ end
 
 
 
-function regionsCenter = plotRoiArrow(ax, resultsParser, varargin)
+function [regionsCenter, arrows] = plotRoiArrow(ax, resultsParser, varargin)
 p = inputParser;
 addOptional(p, "ArrowLength", 25);
 parse(p, varargin{:});
@@ -82,13 +85,14 @@ arrowLength = p.Results.ArrowLength;
 angles = resultsParser.getAngleRadians();
 regionCount = resultsParser.getRegionCount();
 regionsCenter = zeros(regionCount, 2);
+arrows = matlab.graphics.chart.primitive.Quiver.empty(regionCount, 0);
 
 for index = 1:regionCount
     region = resultsParser.getRegion(index);
     regionCenter = getRegionCenter(region);
 
     angle = -angles(index);
-    quiver(ax, ...
+    arrows(index) = quiver(ax, ...
         regionCenter(1), ...
         regionCenter(2), ...
         arrowLength * cos(angle), ...
