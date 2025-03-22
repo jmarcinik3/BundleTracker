@@ -4,8 +4,6 @@ classdef AxisScalebarText < handle
         text;
         unit = '';
         multiplier = 1;
-
-        buttonDownPoint = [];
         dragStartValue = [];
     end
 
@@ -16,8 +14,14 @@ classdef AxisScalebarText < handle
     methods
         function obj = AxisScalebarText(ax, text, name)
             if nargin < 3
-                name = 'default';
+                name = "default";
             end
+
+            AxisDraggable( ...
+                text, ...
+                "ButtonDownFcn", @obj.buttonDown, ...
+                "ButtonMotionFcn", @obj.buttonMotion ...
+                );
 
             menu = uicontextmenu();
             uimenu(menu, ...
@@ -36,10 +40,7 @@ classdef AxisScalebarText < handle
                 "Label", sprintf("Rotate Text [%s]", name),...
                 "Callback", @obj.uiRotate ...
                 );
-            set(text, ...
-                "ContextMenu", menu, ...
-                "ButtonDownFcn", @obj.buttonDown ...
-                );
+            set(text, "ContextMenu", menu);
 
             obj.text = text;
             obj.axis = ax;
@@ -154,39 +155,13 @@ classdef AxisScalebarText < handle
     end
 
     %% Functions to handle interactive click events
-    methods (Access = public)
+    methods (Access = private)
         function buttonDown(obj, ~, ~)
-            fig = obj.getFigure();
-            ax = obj.getAxis();
-
-            saveWindowFcn.Motion = get(fig, "WindowButtonMotionFcn");
-            saveWindowFcn.Up = get(fig, "WindowButtonUpFcn");
-            obj.buttonDownPoint = getAxisPoint(ax);
             obj.dragStartValue = get(obj.getText(), "Position");
-
-            set(fig, ...
-                "WindowButtonMotionFcn", @obj.buttonMotion, ...
-                "WindowButtonUpFcn", @(src,ev) obj.buttonUp(src, ev, saveWindowFcn) ...
-                );
         end
-        function buttonMotion(obj, ~, ~)
-            ax = obj.getAxis();
-            currentPoint = getAxisPoint(ax);
-            previousPoint = obj.buttonDownPoint;
+        function buttonMotion(obj, previousPoint, currentPoint)
             newPoint = obj.dragStartValue + (currentPoint - previousPoint);
             obj.setPosition(newPoint);
         end
-        function buttonUp(obj, ~, ~, previousWindowFcn)
-            fig = obj.getFigure();
-            set(fig, "pointer", "arrow");
-            set(fig, "WindowButtonMotionFcn", previousWindowFcn.Motion);
-            set(fig, "WindowButtonUpFcn", previousWindowFcn.Up);
-        end
     end
-end
-
-
-function point = getAxisPoint(ax)
-point = get(ax, "CurrentPoint");
-point = point(1, 1:3);
 end

@@ -16,8 +16,8 @@ classdef AxisScalebar < handle
             horizontalText = text(ax, scalebarX, scalebarY, '', "Rotation", 0);
             verticalText = text(ax, scalebarX, scalebarY, '', "Rotation", 90);
 
-            horizontalTextObj = AxisScalebarText(ax, horizontalText);
-            verticalTextObj = AxisScalebarText(ax, verticalText);
+            horizontalTextObj = AxisScalebarText(ax, horizontalText, 'x');
+            verticalTextObj = AxisScalebarText(ax, verticalText, 'y');
 
             addlistener(scalebar, "Position", "PreSet", @obj.scalebarPreSet);
             addlistener(scalebar, "Position", "PostSet", @obj.scalebarPostSet);

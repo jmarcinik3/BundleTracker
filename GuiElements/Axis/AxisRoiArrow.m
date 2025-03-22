@@ -24,9 +24,9 @@ classdef AxisRoiArrow < handle
             firstFrame = mat2gray(resultsParser.getFirstFrame());
 
             hold(ax, "on");
-            imshow(firstFrame, "Parent", ax);
-            [regionsCenter, data] = plotRoiArrow(ax, resultsParser);
-            set(data, "ButtonDownFcn", @obj.plotRoi);
+            iIm = imshow(firstFrame, "Parent", ax);
+            regionsCenter = plotRoiArrow(ax, resultsParser);
+            set(iIm, "ButtonDownFcn", @obj.plotRoi);
             hold(ax, "off");
 
             obj.resultsParser = resultsParser;
@@ -43,16 +43,16 @@ classdef AxisRoiArrow < handle
             layout = tiledlayout(fig, 2, 3);
             title(layout, sprintf("Region %d", index));
 
-            axTrace = nexttile;
+            axTrace = nexttile(1);
             plotTraceX(axTrace, resultsParser, index);
-            axHist = nexttile;
+            axHist = nexttile(2);
             plotHistX(axHist, resultsParser, index);
-            axFft = nexttile;
+            axFft = nexttile(3);
             plotFftX(axFft, resultsParser, index);
 
-            plotTraceY(nexttile, resultsParser, index);
-            plotHistY(nexttile, resultsParser, index);
-            plotFftY(nexttile, resultsParser, index);
+            plotTraceY(nexttile(4), resultsParser, index);
+            plotHistY(nexttile(5), resultsParser, index);
+            plotFftY(nexttile(6), resultsParser, index);
 
             title(axTrace, "Trace");
             title(axFft, "Fourier Transform");
@@ -73,18 +73,15 @@ end
 
 
 
-function [regionsCenter, dataPoints] = plotRoiArrow(ax, resultsParser, varargin)
+function regionsCenter = plotRoiArrow(ax, resultsParser, varargin)
 p = inputParser;
 addOptional(p, "ArrowLength", 25);
-addOptional(p, "IncludePoints", true);
 parse(p, varargin{:});
 arrowLength = p.Results.ArrowLength;
-includePoints = p.Results.IncludePoints;
 
 angles = resultsParser.getAngleRadians();
 regionCount = resultsParser.getRegionCount();
 regionsCenter = zeros(regionCount, 2);
-dataPoints = matlab.graphics.chart.primitive.Scatter.empty(regionCount, 0);
 
 for index = 1:regionCount
     region = resultsParser.getRegion(index);
@@ -101,19 +98,6 @@ for index = 1:regionCount
         "LineWidth", 1, ...
         "MaxHeadSize", 1 ...
         );
-
-    if includePoints
-        dataPoints(index) = scatter(ax, ...
-            regionCenter(1), ...
-            regionCenter(2), ...
-            288, ...
-            "filled", ...
-            "red", ...
-            "MarkerFaceAlpha", 0, ...
-            "MarkerEdgeAlpha", 0 ...
-            );
-    end
-
     regionsCenter(index, :) = regionCenter;
 end
 end
@@ -150,13 +134,13 @@ set(ax, ...
     "YLim", calculateTraceLimits(x, xerr) ...
     );
 end
-function ylim = calculateTraceLimits(x, xerr)
+function xlim = calculateTraceLimits(x, xerr)
 if any(isnan(xerr))
     xerr = 0;
 end
-ymin = min(x - xerr);
-ymax = max(x + xerr);
-ylim = [ymin, ymax];
+xmin = min(x - xerr);
+xmax = max(x + xerr);
+xlim = [xmin, xmax];
 end
 
 function plotHistX(ax, resultsParser, index)
