@@ -171,6 +171,21 @@ classdef TrackingLinker < RegionPreviewer ...
                     );
             end
         end
+        function openRotatorButtonPushed(obj, ~, ~)
+            startingDirectory = obj.gui.getDirectoryPath();
+            title = SettingsParser.getRotateFigureDefaults().Name;
+            filepath = uigetfilepath( ...
+                TrackingLinker.extensions, ...
+                title, ...
+                startingDirectory ...
+                );
+            if isfile(filepath)
+                Rotator2dOpener.openFigure( ...
+                    generateRotateFigure(), ...
+                    filepath ...
+                    );
+            end
+        end
     end
 
     %% Functions to be called as part of API
@@ -388,6 +403,10 @@ fig = generateFigure(figDefaults{:});
 end
 function fig = generateDetrendFigure()
 figDefaults = namedargs2cell(SettingsParser.getDetrendFigureDefaults());
+fig = generateFigure(figDefaults{:});
+end
+function fig = generateRotateFigure()
+figDefaults = namedargs2cell(SettingsParser.getRotateFigureDefaults());
 fig = generateFigure(figDefaults{:});
 end
 

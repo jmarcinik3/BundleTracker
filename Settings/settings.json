@@ -118,6 +118,12 @@
             "WindowState": "normal",
             "Resize": "on"
         },
+        "RotateFigure": {
+            "Name": "Rotate",
+            "WindowStyle": "normal",
+            "WindowState": "normal",
+            "Resize": "on"
+        },
         "TrackingCompletedFigure": {
             "Name": "Tracking Completed",
             "WindowStyle": "modal",

@@ -55,6 +55,7 @@ function generatePlottingMenu(fig, trackingLinker)
 m = uimenu(fig, "Text", "Analysis");
 generateOpenDetrenderMenu(m, trackingLinker);
 generateOpenRoiMenu(m, trackingLinker);
+generateOpenRotatorMenu(m, trackingLinker);
 generateOpenWaterfallMenu(m, trackingLinker);
 generateProbeCalibratorMenu(m, trackingLinker);
 end
@@ -80,5 +81,11 @@ function generateOpenDetrenderMenu(parentMenu, trackingLinker)
 uimenu(parentMenu, ...
     "Text", "Open Detrender Plot", ...
     "MenuSelectedFcn", @trackingLinker.openDetrenderButtonPushed ...
+    );
+end
+function generateOpenRotatorMenu(parentMenu, trackingLinker)
+uimenu(parentMenu, ...
+    "Text", "Open Rotator Plot", ...
+    "MenuSelectedFcn", @trackingLinker.openRotatorButtonPushed ...
     );
 end

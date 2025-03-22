@@ -112,6 +112,9 @@ classdef SettingsParser
         function defaults = getDetrendFigureDefaults()
             defaults = getDefaults().DetrendFigure;
         end
+        function defaults = getRotateFigureDefaults()
+            defaults = getDefaults().RotateFigure;
+        end
 
         function label = getApplyRegionLabel()
             label = getMenuLabels().ApplyRegion;
