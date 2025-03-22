@@ -474,28 +474,9 @@ if numel(keywords) >= 2
 end
 
 value = getByKeyword(obj, keywords);
-setByKeyword(keywords, value, region);
+RegionUserData(region).setByKeyword(keywords, value);
 end
 
-function setByKeyword(keyword, value, region)
-regionUserData = RegionUserData(region);
-switch keyword
-    case RegionUserData.angleModeKeyword
-        regionUserData.setAngleMode(value);
-    case RegionUserData.detrendModeKeyword
-        regionUserData.setDetrendMode(value);
-    case RegionUserData.invertKeyword
-        regionUserData.setInvert(value);
-    case RegionUserData.positiveDirectionKeyword
-        regionUserData.setPositiveDirection(value);
-    case RegionUserData.smoothingKeyword
-        regionUserData.setSmoothing(value);
-    case RegionUserData.thresholdsKeyword
-        regionUserData.setThresholds(value);
-    case RegionUserData.trackingModeKeyword
-        regionUserData.setTrackingMode(value);
-end
-end
 function value = getByKeyword(obj, keyword)
 switch keyword
     case RegionUserData.angleModeKeyword

@@ -368,6 +368,9 @@ thresholdSlider = previewer.getRegionGui().getThresholdSlider();
 thresholds = RegionUserData(previewer).getThresholds();
 thresholds(1) = max(thresholds(1), thresholdSlider.Limits(1));
 thresholds(2) = min(thresholds(2), thresholdSlider.Limits(2));
+if size(thresholds, 1) > size(thresholds, 2)
+    thresholds = thresholds.';
+end
 
 set(thresholdSlider, "Value", thresholds);
 previewer.thresholdSliderChanged(thresholdSlider, []);
