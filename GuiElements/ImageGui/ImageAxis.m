@@ -1,9 +1,9 @@
-classdef ImageAxis < AxisExporter & AxisPanZoomer
+classdef ImageAxis < AxisExporter & AxisZoomer
     methods
         function obj = ImageAxis(iIm)      
             ax = ancestor(iIm, "axes");
             obj@AxisExporter(ax);
-            obj@AxisPanZoomer(ax);
+            obj@AxisZoomer(ax);
             AxisResizer(iIm);
         end
     end
@@ -11,10 +11,10 @@ classdef ImageAxis < AxisExporter & AxisPanZoomer
     %% Functions to update state of GUI
     methods (Access = protected)
         function fig = getFigure(obj)
-            fig = getFigure@AxisPanZoomer(obj);
+            fig = getFigure@AxisZoomer(obj);
         end
         function ax = getAxis(obj)
-            ax = getAxis@AxisPanZoomer(obj);
+            ax = getAxis@AxisZoomer(obj);
         end
     end
 end
