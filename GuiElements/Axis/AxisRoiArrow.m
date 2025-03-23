@@ -6,8 +6,6 @@ classdef AxisRoiArrow < handle
     properties (Access = private)
         resultsParser;
         regionsCenter;
-        tabbedIndices = [];
-        displayedIndex = 0;
     end
 
     methods
@@ -60,9 +58,6 @@ classdef AxisRoiArrow < handle
             title(axTrace, "Trace");
             title(axFft, "Fourier Transform");
             title(axHist, "Distribution");
-
-            obj.displayedIndex = index;
-            obj.tabbedIndices = sort(unique([obj.tabbedIndices, index]));
         end
 
         function plotRoi(obj, ~, event)

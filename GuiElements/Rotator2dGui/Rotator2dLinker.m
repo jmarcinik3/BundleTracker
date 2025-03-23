@@ -128,7 +128,7 @@ classdef Rotator2dLinker < handle
             end
         end
         function updateTraces(obj, index, arrowAngle)
-            resultsParser = obj.resultsParser;
+            resultsParser = obj.getResultsParser();
             if nargin < 3
                 arrowAngle = resultsParser.getAngleRadians(index);
             end

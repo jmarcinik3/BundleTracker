@@ -43,7 +43,7 @@ classdef AxisDraggable
 
             saveWindowFcn.Motion = get(fig, "WindowButtonMotionFcn");
             saveWindowFcn.Up = get(fig, "WindowButtonUpFcn");
-            obj.buttonDownPoint = getAxisPoint(ax);
+            obj.buttonDownPoint = AxisPoint.get(ax);
             obj.buttonDownFunction();
 
             set(fig, ...
@@ -54,7 +54,7 @@ classdef AxisDraggable
         function buttonMotion(obj, ~, ~)
             ax = obj.getAxis();
             previousPoint = obj.buttonDownPoint;
-            currentPoint = getAxisPoint(ax);
+            currentPoint = AxisPoint.get(ax);
             obj.buttonMotionFunction(previousPoint, currentPoint);
         end
         function buttonUp(obj, ~, ~, previousWindowFcn)
@@ -65,10 +65,4 @@ classdef AxisDraggable
             obj.buttonUpFunction();
         end
     end
-end
-
-
-function point = getAxisPoint(ax)
-point = get(ax, "CurrentPoint");
-point = point(1, 1:3);
 end

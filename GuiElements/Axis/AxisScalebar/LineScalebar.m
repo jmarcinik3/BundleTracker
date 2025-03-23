@@ -185,10 +185,10 @@ classdef LineScalebar < handle
         function isCloser = isCloserToCorner(obj, event)
             ax = obj.getAxis();
 
-            cornerPosition = limitsToPixels(ax, obj.getCornerPosition());
-            prePosition = limitsToPixels(ax, obj.getPreCornerPosition());
-            postPosition = limitsToPixels(ax, obj.getPostCornerPosition());
-            eventPosition = limitsToPixels(ax, event.IntersectionPoint(1, 1:2));
+            cornerPosition = AxisPoint.toPixel(ax, obj.getCornerPosition());
+            prePosition = AxisPoint.toPixel(ax, obj.getPreCornerPosition());
+            postPosition = AxisPoint.toPixel(ax, obj.getPostCornerPosition());
+            eventPosition = AxisPoint.toPixel(ax, event.IntersectionPoint(1, 1:2));
 
             cornerDistance = sqrt(sum((eventPosition - cornerPosition).^2));
             preDistance = sqrt(sum((eventPosition - prePosition).^2));
@@ -223,9 +223,9 @@ classdef LineScalebar < handle
         function is = isCloserToHorizontalLine(obj, event)
             ax = obj.getAxis();
 
-            verticalLineX = limitsToPixelsX(ax, obj.getVerticalLineX());
-            horizontalLineY = limitsToPixelsY(ax, obj.getHorizontalLineY());
-            eventPosition = limitsToPixels(ax, event.IntersectionPoint(1, 1:2));
+            verticalLineX = AxisPoint.toPixelX(ax, obj.getVerticalLineX());
+            horizontalLineY = AxisPoint.toPixelY(ax, obj.getHorizontalLineY());
+            eventPosition = AxisPoint.toPixel(ax, event.IntersectionPoint(1, 1:2));
 
             distanceToVertical = abs(eventPosition(1) - verticalLineX);
             distanceToHorizontal = abs(eventPosition(2) - horizontalLineY);
@@ -254,7 +254,7 @@ classdef LineScalebar < handle
 
             previousWindowFcn.Motion = get(fig, "WindowButtonMotionFcn");
             previousWindowFcn.Up = get(fig, "WindowButtonUpFcn");
-            obj.buttonDownPoint = getAxisPoint(ax);
+            obj.buttonDownPoint = AxisPoint.getXy(ax);
 
             if obj.isCloserToCorner(event)
                 obj.dragStartValue = obj.getPositionXy();
@@ -275,14 +275,14 @@ classdef LineScalebar < handle
 
         function moveScalebar(obj, ~, ~)
             ax = obj.getAxis();
-            currentPoint = getAxisPoint(ax);
+            currentPoint = AxisPoint.getXy(ax);
             previousPoint = obj.buttonDownPoint;
             position = obj.dragStartValue + (currentPoint - previousPoint);
             obj.setPosition(position);
         end
         function stretchScalebar(obj, ~, event)
             ax = obj.getAxis();
-            currentPoint = getAxisPoint(ax);
+            currentPoint = AxisPoint.getXy(ax);
             previousPoint = obj.buttonDownPoint;
             dxyPoint = currentPoint - previousPoint;
 
@@ -317,41 +317,4 @@ order = 10.^floor(log10(x));
 xDiff = abs(scale - x/order);
 [~, ind] = min(xDiff);
 xNear = scale(ind) * order;
-end
-
-function point = getAxisPoint(ax)
-point = get(ax, "CurrentPoint");
-point = point(1, 1:2);
-end
-
-function pointPixels = limitsToPixels(ax, point)
-xPixels = limitsToPixelsX(ax, point(1));
-yPixels = limitsToPixelsY(ax, point(2));
-pointPixels = [xPixels, yPixels];
-end
-function pointPixels = limitsToPixelsX(ax, x)
-axUnits = get(ax, "Units");
-set(ax, "Units", "pixels");
-
-axPosition = get(ax, "InnerPosition");
-xLim = get(ax, "XLim");
-xMin = xLim(1);
-xMax = xLim(2);
-axLength = axPosition(3);
-
-pointPixels = axLength .* (x - xMin) ./ (xMax - xMin);
-set(ax, "Units", axUnits);
-end
-function pointPixels = limitsToPixelsY(ax, y)
-axUnits = get(ax, "Units");
-set(ax, "Units", "pixels");
-
-axPosition = get(ax, "InnerPosition");
-yLim = get(ax, "YLim");
-yMin = yLim(1);
-yMax = yLim(2);
-axLength = axPosition(4);
-
-pointPixels = axLength .* (y - yMin) ./ (yMax - yMin);
-set(ax, "Units", axUnits);
 end
