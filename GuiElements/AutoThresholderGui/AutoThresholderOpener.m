@@ -1,8 +1,8 @@
-classdef AutoThresholdOpener
+classdef AutoThresholderOpener
     methods (Static)
         function thresholdRanges = openFigure(fig, regionalImages)
-            linker = AutoThresholdOpener.generateLinker(fig, regionalImages, 1);
-            thresholdRanges = AutoThresholdOpener.getThresholdRanges(linker);
+            linker = AutoThresholderOpener.generateLinker(fig, regionalImages, 1);
+            thresholdRanges = AutoThresholderOpener.getThresholdRanges(linker);
         end
     end
 
@@ -15,8 +15,8 @@ classdef AutoThresholdOpener
             thresholdRanges = linker.thresholdRanges;
         end
         function linker = generateLinker(fig, regionalImages, maxLevelCount)
-            gui = AutoThresholdsGui(fig, numel(regionalImages), maxLevelCount);
-            linker = AutoThresholdsLinker(gui, regionalImages);
+            gui = AutoThresholderGui(fig, numel(regionalImages), maxLevelCount);
+            linker = AutoThresholderLinker(gui, regionalImages);
         end
     end
 end

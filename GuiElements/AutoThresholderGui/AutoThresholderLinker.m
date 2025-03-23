@@ -1,6 +1,6 @@
-classdef AutoThresholdsLinker < AutoThresholdLinker
+classdef AutoThresholderLinker < AutoThresholdLinker
     methods
-        function obj = AutoThresholdsLinker(gui, regionalImages)
+        function obj = AutoThresholderLinker(gui, regionalImages)
             obj@AutoThresholdLinker(gui, regionalImages);
 
             levelsSlider = gui.getLevelsSlider();

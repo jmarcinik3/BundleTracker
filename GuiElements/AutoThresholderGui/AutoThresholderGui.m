@@ -1,8 +1,8 @@
-classdef AutoThresholdsGui
+classdef AutoThresholderGui
     properties (Constant, Access = private)
         rows = 4;
         columns = 4;
-        size = [AutoThresholdsGui.rows, AutoThresholdsGui.columns];
+        size = [AutoThresholderGui.rows, AutoThresholderGui.columns];
     end
 
     properties (Access = private)
@@ -17,8 +17,8 @@ classdef AutoThresholdsGui
     end
 
     methods
-        function obj = AutoThresholdsGui(fig, regionCount, maxLevelCount)
-            gl = uigridlayout(fig, AutoThresholdsGui.size);
+        function obj = AutoThresholderGui(fig, regionCount, maxLevelCount)
+            gl = uigridlayout(fig, AutoThresholderGui.size);
 
             obj.maxLevelCount = maxLevelCount;
 
@@ -94,7 +94,7 @@ end
 function layoutElements(gui)
 % set default row height for GUI elements
 rowHeight = TrackingGui.rowHeight;
-columns = AutoThresholdsGui.columns;
+columns = AutoThresholderGui.columns;
 
 % retrieve GUI elements
 gl = gui.getGridLayout();

@@ -1,5 +1,5 @@
 classdef AutoThresholdLinker < AutoThresholder
-    properties (Access = ?AutoThresholdOpener)
+    properties (Access = ?AutoThresholderOpener)
         thresholdRanges = [];
     end
 
