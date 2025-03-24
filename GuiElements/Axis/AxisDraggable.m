@@ -1,6 +1,6 @@
 classdef AxisDraggable
     properties (Access = private)
-        element;
+        axis;
         buttonDownPoint;
         buttonDownFunction;
         buttonMotionFunction;
@@ -8,18 +8,26 @@ classdef AxisDraggable
     end
 
     methods
-        function obj = AxisDraggable(element, varargin)
+        function obj = AxisDraggable(elements, varargin)
             p = inputParser();
             p.addOptional("ButtonDownFcn", @() 0);
             p.addOptional("ButtonMotionFcn", @(startPoint, currentPoint) 0);
             p.addOptional("ButtonUpFcn", @() 0);
             p.parse(varargin{:});
 
-            obj.element = element;
+            ax = ancestor(elements(1), "axes");
+            for element = elements
+                if isgraphics(element, "axes")
+                    ax = element;
+                    break;
+                end
+            end
+
+            obj.axis = ax;
             obj.buttonDownFunction = p.Results.ButtonDownFcn;
             obj.buttonMotionFunction = p.Results.ButtonMotionFcn;
             obj.buttonUpFunction = p.Results.ButtonUpFcn;
-            set(element, "ButtonDownFcn", @obj.buttonDown);
+            set(elements, "ButtonDownFcn", @obj.buttonDown);
         end
     end
 
@@ -30,8 +38,7 @@ classdef AxisDraggable
             fig = ancestor(ax, "figure");
         end
         function ax = getAxis(obj)
-            element = obj.element;
-            ax = ancestor(element, "axes");
+            ax = obj.axis;
         end
     end
 

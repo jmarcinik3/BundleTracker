@@ -61,11 +61,11 @@ classdef Rotator2dGui < handle
         function iIm = getRoiImage(obj)
             iIm = obj.roiImage;
         end
-        function line = getLineX(obj)
-            line = obj.lineX;
+        function lineX = getLineX(obj)
+            lineX = obj.lineX;
         end
-        function line = getLineY(obj)
-            line = obj.lineY;
+        function lineY = getLineY(obj)
+            lineY = obj.lineY;
         end
         function heatmap = getHeatmap(obj)
             heatmap = obj.heatmapC;

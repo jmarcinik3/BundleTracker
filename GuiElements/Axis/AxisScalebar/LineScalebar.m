@@ -2,7 +2,7 @@ classdef LineScalebar < handle
     properties (Access = private)
         border = 'LL'; % 'LL', 'LR', 'UL', 'UR'
         axis;
-        line;
+        scalebarLine;
         hitRectangle;
         buttonDownPoint = [0, 0];
         dragStartValue = [];
@@ -14,7 +14,7 @@ classdef LineScalebar < handle
 
     methods
         function obj = LineScalebar(ax)
-            line = plot(ax, [0, 0, 1], [1, 0, 0]);
+            scalebarLine = plot(ax, [0, 0, 1], [1, 0, 0]);
             hitRectangle = rectangle("PickableParts", "all", "Visible", "off");
             menu = uicontextmenu();
             uimenu(menu, ...
@@ -26,7 +26,7 @@ classdef LineScalebar < handle
                 "Callback", @(src,ev) obj.uiToggleAxisVisibility() ...
                 );
             set( ...
-                [line, hitRectangle], ...
+                [scalebarLine, hitRectangle], ...
                 "Parent", ax, ...
                 "ContextMenu", menu, ...
                 "ButtonDownFcn", @obj.buttonDownLine ...
@@ -42,7 +42,7 @@ classdef LineScalebar < handle
                 ];
 
             obj.axis = ax;
-            obj.line = line;
+            obj.scalebarLine = scalebarLine;
             obj.hitRectangle = hitRectangle;
             obj.refreshPosition();
         end
@@ -56,8 +56,8 @@ classdef LineScalebar < handle
         function ax = getAxis(obj)
             ax = obj.axis;
         end
-        function line = getLine(obj)
-            line = obj.line;
+        function scalebarLine = getLine(obj)
+            scalebarLine = obj.scalebarLine;
         end
         function color = getColor(obj)
             color = get(obj.getLine(), "Color");
@@ -118,7 +118,7 @@ classdef LineScalebar < handle
     %% Functiosn to update aesthetics of scalebar
     methods (Access = private)
         function refreshPosition(obj)
-            line = obj.getLine();
+            scalebarLine = obj.getLine();
             border = obj.getBorder();
 
             switch upper(border)
@@ -140,7 +140,7 @@ classdef LineScalebar < handle
             y = obj.getPositionY();
             w = obj.getWidth();
             h = obj.getHeight();
-            set(line, ...
+            set(scalebarLine, ...
                 "XData", x + w * dx, ...
                 "YData", y + h * dy ...
                 );
@@ -196,27 +196,27 @@ classdef LineScalebar < handle
             isCloser = cornerDistance <= preDistance && cornerDistance <= postDistance;
         end
         function point = getCornerPosition(obj)
-            line = obj.getLine();
-            x = get(line, "XData");
-            y = get(line, "YData");
+            scalebarLine = obj.getLine();
+            x = get(scalebarLine, "XData");
+            y = get(scalebarLine, "YData");
             point = [x(2), y(2)];
         end
         function point = getPreCornerPosition(obj)
-            line = obj.getLine();
-            x = get(line, "XData");
-            y = get(line, "YData");
+            scalebarLine = obj.getLine();
+            x = get(scalebarLine, "XData");
+            y = get(scalebarLine, "YData");
             point = [x(1), y(1)];
         end
         function point = getPostCornerPosition(obj)
-            line = obj.getLine();
-            x = get(line, "XData");
-            y = get(line, "YData");
+            scalebarLine = obj.getLine();
+            x = get(scalebarLine, "XData");
+            y = get(scalebarLine, "YData");
             point = [x(3), y(3)];
         end
         function point = getAntiCornerPosition(obj)
-            line = obj.getLine();
-            x = get(line, "XData");
-            y = get(line, "YData");
+            scalebarLine = obj.getLine();
+            x = get(scalebarLine, "XData");
+            y = get(scalebarLine, "YData");
             point = [x(3), y(1)];
         end
 
@@ -235,13 +235,13 @@ classdef LineScalebar < handle
             is = ~obj.isCloserToHorizontalLine(event);
         end
         function x = getVerticalLineX(obj)
-            line = obj.getLine();
-            xLine = get(line, "XData");
+            scalebarLine = obj.getLine();
+            xLine = get(scalebarLine, "XData");
             x = xLine(2);
         end
         function y = getHorizontalLineY(obj)
-            line = obj.getLine();
-            yLine = get(line, "YData");
+            scalebarLine = obj.getLine();
+            yLine = get(scalebarLine, "YData");
             y = yLine(2);
         end
     end

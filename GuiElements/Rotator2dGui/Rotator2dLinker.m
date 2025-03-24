@@ -175,11 +175,11 @@ classdef Rotator2dLinker < handle
         function ax = getAxis(obj)
             ax = obj.getGui().getAxis();
         end
-        function line = getLineX(obj)
-            line = obj.getGui().getLineX();
+        function lineX = getLineX(obj)
+            lineX = obj.getGui().getLineX();
         end
-        function line = getLineY(obj)
-            line = obj.getGui().getLineY();
+        function lineY = getLineY(obj)
+            lineY = obj.getGui().getLineY();
         end
         function heatmap = getHeatmap(obj)
             heatmap = obj.getGui().getHeatmap();

@@ -8,15 +8,15 @@ classdef AxisTraceAnimator < AxisAnimator
         function obj = AxisTraceAnimator(ax, t, x, varargin)
             obj@AxisAnimator(ax, t, varargin{:});
 
-            line = animatedline(ax, "MaximumNumPoints", Inf);
-            set(line, "ContextMenu", obj.getContextMenu());
+            animatedLine = animatedline(ax, "MaximumNumPoints", Inf);
+            set(animatedLine, "ContextMenu", obj.getContextMenu());
             set(ax, ...
                 "XLim", [min(t), max(t)], ...
                 "YLim", [min(x), max(x)] ...
                 );
 
             obj.trace = x;
-            obj.animatedLine = line;
+            obj.animatedLine = animatedLine;
         end
     end
 
@@ -43,8 +43,8 @@ classdef AxisTraceAnimator < AxisAnimator
 
     %% Functions to retrieve GUI elements
     methods
-        function line = getAnimatedLine(obj)
-            line = obj.animatedLine;
+        function animatedLine = getAnimatedLine(obj)
+            animatedLine = obj.animatedLine;
         end
     end
 end

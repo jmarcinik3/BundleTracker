@@ -6,9 +6,9 @@ classdef AxisZoomer < AxisAdjuster
     methods
         function obj = AxisZoomer(ax)
             obj@AxisAdjuster(ax);
-            
+
             fig = ancestor(ax, "figure");
-            prepareFigure(obj, fig);
+            set(fig, "WindowScrollWheelFcn", @obj.windowScrollWheelFcn);
         end
     end
 
@@ -74,14 +74,6 @@ classdef AxisZoomer < AxisAdjuster
 end
 
 
-
-%% Functions to prepare GUI for zooming
-function prepareFigure(obj, fig)
-set(fig, ...
-    "Units", "pixels", ...
-    "WindowScrollWheelFcn", @obj.windowScrollWheelFcn ...
-    );
-end
 
 function limNew = magnifyLimit(factor, mouseLocation, lim)
 limNew = (lim - mouseLocation) / factor + mouseLocation;

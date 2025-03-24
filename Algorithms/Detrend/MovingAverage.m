@@ -17,9 +17,9 @@ classdef MovingAverage
         tukey = "Tukey";
         triangular = "Triangular";
 
-        keywords = [
-            MovingAverage.bartlettHann, ...
+        keywords = sort([
             MovingAverage.bartlett, ...
+            MovingAverage.bartlettHann, ...
             MovingAverage.blackman, ...
             MovingAverage.blackmanHarris, ...
             MovingAverage.blackmanNuttall, ...
@@ -34,54 +34,73 @@ classdef MovingAverage
             MovingAverage.rectangular, ...
             MovingAverage.triangular ...
             MovingAverage.tukey, ...
-            ]
+            ]);
     end
 
     methods (Static)
         function ma = averageByKeyword(x, windowSize, keyword)
-            window = MovingAverage.windowByKeyword(windowSize, keyword);
-            ma = conv(x, window, "same") / sum(window);
+            windowArray = MovingAverage.windowByKeyword(windowSize, keyword);
+            ma = conv(x, windowArray, "same") / sum(windowArray);
         end
         function ma = averageByKeyword2(x, windowSize, keyword)
             window = MovingAverage.windowByKeyword(windowSize, keyword);
             ma = conv2(x, window, "same") / sum(window);
         end
 
-        function window = windowByKeyword(windowSize, keyword)
-            switch (keyword)
+        function windowArray = windowByKeyword(windowSize, keyword)
+            switch keyword
                 case MovingAverage.bartlettHann
-                    window = barthannwin(windowSize);
+                    windowArray = barthannwin(windowSize);
                 case MovingAverage.bartlett
-                    window = bartlett(windowSize);
+                    windowArray = bartlett(windowSize);
                 case MovingAverage.blackman
-                    window = blackman(windowSize);
+                    windowArray = blackman(windowSize);
                 case MovingAverage.blackmanHarris
-                    window = blackmanharris(windowSize);
+                    windowArray = blackmanharris(windowSize);
                 case MovingAverage.bohman
-                    window = bohmanwin(windowSize);
+                    windowArray = bohmanwin(windowSize);
                 case MovingAverage.chebyshev
-                    window = chebwin(windowSize);
+                    windowArray = chebwin(windowSize);
                 case MovingAverage.flatTop
-                    window = flattopwin(windowSize);
+                    windowArray = flattopwin(windowSize);
                 case MovingAverage.gaussian
-                    window = gausswin(windowSize);
+                    windowArray = gausswin(windowSize);
                 case MovingAverage.hamming
-                    window = hamming(windowSize);
+                    windowArray = hamming(windowSize);
                 case MovingAverage.hann
-                    window = hann(windowSize);
+                    windowArray = hann(windowSize);
                 case MovingAverage.kaiser
-                    window = kaiser(windowSize);
+                    windowArray = kaiser(windowSize);
                 case MovingAverage.blackmanNuttall
-                    window = nuttallwin(windowSize);
+                    windowArray = nuttallwin(windowSize);
                 case MovingAverage.parzen
-                    window = parzenwin(windowSize);
+                    windowArray = parzenwin(windowSize);
                 case MovingAverage.rectangular
-                    window = rectwin(windowSize);
+                    windowArray = rectwin(windowSize);
                 case MovingAverage.tukey
-                    window = tukeywin(windowSize);
+                    windowArray = tukeywin(windowSize);
                 case MovingAverage.triangular
-                    window = triang(windowSize);
+                    windowArray = triang(windowSize);
             end
+        end
+        
+        function adjacentName = getAdjacentName(windowName, distance)
+            windowNames = MovingAverage.keywords;
+            windowNameCount = numel(windowNames);
+
+            nextWindowIndex = find(windowNames == windowName, 1, "first") + distance;
+            nextWindowIndex  = mod(nextWindowIndex, windowNameCount);
+            if nextWindowIndex == 0
+                nextWindowIndex = windowNameCount;
+            end
+
+            adjacentName = windowNames(nextWindowIndex);
+        end
+        function nextWindowName = getNextName(windowName)
+            nextWindowName = MovingAverage.getAdjacentName(windowName, 1);
+        end
+        function previousWindowName = getPreviousName(windowName)
+            previousWindowName = MovingAverage.getAdjacentName(windowName, -1);
         end
     end
 end
