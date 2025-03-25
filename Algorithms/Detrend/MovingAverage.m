@@ -87,13 +87,8 @@ classdef MovingAverage
         function adjacentName = getAdjacentName(windowName, distance)
             windowNames = MovingAverage.keywords;
             windowNameCount = numel(windowNames);
-
-            nextWindowIndex = find(windowNames == windowName, 1, "first") + distance;
-            nextWindowIndex  = mod(nextWindowIndex, windowNameCount);
-            if nextWindowIndex == 0
-                nextWindowIndex = windowNameCount;
-            end
-
+            windowIndex = find(windowNames == windowName, 1, "first");
+            nextWindowIndex = AdjacentFloat.cyclic(1:windowNameCount, windowIndex, distance);
             adjacentName = windowNames(nextWindowIndex);
         end
         function nextWindowName = getNextName(windowName)
