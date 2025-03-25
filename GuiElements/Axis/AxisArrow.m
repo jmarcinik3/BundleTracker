@@ -5,10 +5,17 @@ classdef AxisArrow
             set(arrow, "XData", xy(1), "YData", xy(2));
         end
         function setAngle(arrow, angle)
+            length = AxisArrow.getLength(arrow);
+            AxisArrow.setVelocity(arrow, length, angle);
+        end
+        function setLength(arrow, length)
+            angle = AxisArrow.getAngle(arrow);
+            AxisArrow.setVelocity(arrow, length, angle)
+        end
+        function setVelocity(arrow, length, angle)
             if AxisArrow.isInverted(arrow)
                 angle = -angle;
             end
-            length = AxisArrow.getLength(arrow);
             set( ...
                 arrow, ...
                 "UData", length * cos(angle), ...

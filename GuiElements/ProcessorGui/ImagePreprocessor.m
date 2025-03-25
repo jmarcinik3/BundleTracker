@@ -48,9 +48,14 @@ classdef ImagePreprocessor < handle
         end
         function setHistogramIntensity(obj, im)
             slider = obj.gui.getThresholdSlider();
-            [imIntensities, imEdges] = histcounts(im(:));
-            imEdges = 0.5 * (imEdges(1:end-1) + imEdges(2:end));
-            set(slider, "XData", imEdges, "YData", imIntensities);
+            binCount = max(round(sqrt(numel(im))), 1);
+            [intensities, binEdges] = histcounts(im(:), binCount);
+            binCenters = 0.5 * (binEdges(1:end-1) + binEdges(2:end));
+            set( ...
+                slider, ...
+                "XData", mat2gray(binCenters), ...
+                "YData", intensities ...
+                );
         end
         function updateFromRawImage(obj, thresholds)
             if obj.imageExists()

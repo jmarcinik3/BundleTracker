@@ -2,6 +2,7 @@ classdef RegionLinker < PreprocessorLinker & AxisExporter
     properties (Access = private)
         fullRawImage;
         regionGui;
+        arrowLength = 0.75;
     end
 
     methods
@@ -63,7 +64,11 @@ classdef RegionLinker < PreprocessorLinker & AxisExporter
 
             xMid = mean(get(ax, "XLim"));
             yMid = mean(get(ax, "YLim"));
-            arrow.setPosition([xMid, yMid]);
+            xyMid = [xMid, yMid];
+
+            newLength = obj.arrowLength * min(xyMid);
+            arrow.setPosition(xyMid);
+            arrow.setLength(newLength);
         end
     end
 

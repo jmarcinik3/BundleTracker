@@ -49,6 +49,10 @@ classdef ArrowRotator < handle
             AxisArrow.setAngle(arrow, angle);
             obj.Angle = angle;
         end
+        function setLength(obj, length)
+            arrow = obj.getArrow();
+            AxisArrow.setLength(arrow, length);
+        end
     end
 
     %% Functions to handle interactive click events
