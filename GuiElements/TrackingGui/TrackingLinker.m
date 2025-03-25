@@ -136,7 +136,7 @@ classdef TrackingLinker < RegionPreviewer ...
             if isfile(filepath)
                 resultsParser = ResultsParser(filepath);
                 fig = uifigure("Name", "ROI Plot");
-                AxisRoiArrow(fig, resultsParser);
+                RoiArrowPlot(fig, resultsParser);
             end
         end
         function openWaterfallPlotPushed(obj, ~, ~)

@@ -47,7 +47,7 @@ classdef ProbeCalibratorLinker < handle
                 psdValid, ...
                 parameters ...
                 );
-            AxisRoiArrow(gui.getAxisRoi(), resultsParser);
+            RoiArrowPlot(gui.getAxisRoi(), resultsParser);
 
             obj.psdLog = psdLog;
             obj.freqLog = freqLog;
