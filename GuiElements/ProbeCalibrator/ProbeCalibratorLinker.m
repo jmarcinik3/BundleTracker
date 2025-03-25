@@ -341,8 +341,8 @@ confidenceInterval = nlparci( ...
 confidenceInterval = diag(confidenceInterval).';
 end
 function [psd, freq] = calculatePsd(x, fps)
-n = numel(x);
-[psd, freq] = periodogram(x, rectwin(n), n, fps);
+n = round(numel(x) / 2);
+[psd, freq] = pwelch(x, hann(n), 0, n, fps);
 end
 function psdLog = psdFittingFunction(p, omegaLog)
 psdLog = psdModel(omegaLog, p(1), p(2));

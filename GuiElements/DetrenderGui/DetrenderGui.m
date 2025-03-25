@@ -1,93 +1,86 @@
-classdef DetrenderGui
+classdef DetrenderGui < handle
     properties (Access = private)
-        figure;
-        axis;
-        slider;
-        dropdown;
-        actionButtons;
+        gridLayout;
+        axTrace;
+        axTrend;
+        axWindow;
+        axTrace2d;
     end
 
     methods
-        function obj = DetrenderGui(fig, windowWidthMax)
-            gl = uigridlayout(fig, ...
-                [2, 2], ...
-                "RowHeight", {'1x', 50}, ...
-                "ColumnWidth", {'1x', 150, 50, 50} ...
-                );
+        function obj = DetrenderGui(fig)
+            gl = uigridlayout(fig, [3, 2]);
+            axTrace = uiaxes(gl, "Toolbar", []);
+            axTrend = uiaxes(gl, "Toolbar", []);
+            axWindow = AxisWindow.generateAxis(gl);
+            axTrace2d = uiaxes(gl, "Toolbar", []);
 
-            axis = generateAxis(gl);
-            slider = generateWindowWidthSlider(gl, windowWidthMax);
-            dropdown = generateWindowShapeDropdown(gl);
-            
-            actionButtons = generateActionButtons(gl);
-            applyButton = actionButtons(1);
-            cancelButton = actionButtons(2);
-
-            axis.Layout.Row = 1;
-            axis.Layout.Column = [1, 4];
-            slider.Layout.Row = 2;
-            slider.Layout.Column = 1;
-            dropdown.Layout.Row = 2;
-            dropdown.Layout.Column = 2;
-            applyButton.Layout.Row = 2;
-            applyButton.Layout.Column = 3;
-            cancelButton.Layout.Row = 2;
-            cancelButton.Layout.Column = 4;
-
-            obj.figure = fig;
-            obj.axis = axis;
-            obj.slider = slider;
-            obj.dropdown = dropdown;
-            obj.actionButtons = actionButtons;
+            obj.gridLayout = gl;
+            obj.axTrace = axTrace;
+            obj.axTrend = axTrend;
+            obj.axWindow = axWindow;
+            obj.axTrace2d = axTrace2d;
+            layoutElements(obj);
         end
     end
 
     %% Functions to retrieve GUI elements and state information
-    methods
+    methods (Access = ?DetrenderLinker)
         function fig = getFigure(obj)
-            fig = obj.figure;
+            gl = obj.getGridLayout();
+            fig = ancestor(gl, "figure");
         end
-        function ax = getAxis(obj)
-            ax = obj.axis;
+        function gl = getGridLayout(obj)
+            gl = obj.gridLayout;
         end
-        function slider = getWindowWidthSlider(obj)
-            slider = obj.slider;
+
+        function ax = getTraceAxis(obj)
+            ax = obj.axTrace;
         end
-        function dropdown = getWindowShapeDropdown(obj)
-            dropdown = obj.dropdown;
+        function ax = getTrendAxis(obj)
+            ax = obj.axTrend;
         end
-        function buttons = getActionButtons(obj)
-            buttons = obj.actionButtons;
+        function ax = getWindowAxis(obj)
+            ax = obj.axWindow;
         end
-        function button = getApplyButton(obj)
-            button = obj.actionButtons(1);
-        end
-        function button = getCancelButton(obj)
-            button = obj.actionButtons(2);
+        function s = getTraceAxis2d(obj)
+            s = obj.axTrace2d;
         end
     end
 end
 
 
-function ax = generateAxis(gl)
-ax = uiaxes(gl);
-ax.XLabel.String = "Time";
-ax.YLabel.String = "Position";
-end
-function slider = generateWindowWidthSlider(gl, windowWidthMax)
-defaults = SettingsParser.getWindowWidthSliderDefaults();
-slider = uislider(gl, ...
-    defaults{:}, ...
-    "Value", windowWidthMax, ...
-    "Limits", [100, windowWidthMax], ...
-    "MinorTicks", 100:100:windowWidthMax, ...
-    "MajorTicks", 500:500:windowWidthMax ...
-    );
-end
-function dropdown = generateWindowShapeDropdown(gl)
-defaults = SettingsParser.getWindowShapeDropdownDefaults();
-dropdown = uidropdown(gl, ...
-    defaults{:}, ...
-    "Items", MovingAverage.keywords ...
+function layoutElements(gui)
+gl = gui.getGridLayout();
+axWindow = gui.getWindowAxis();
+axTrace = gui.getTraceAxis();
+axTrend = gui.getTrendAxis();
+axTrace2d = gui.getTraceAxis2d();
+
+axWindow.Layout.Row = 1;
+axWindow.Layout.Column = [1, 2];
+
+axTrace.Layout.Row = 2;
+axTrace.Layout.Column = 1;
+xlabel(axTrace, " ");
+ylabel(axTrace, "Detrended [x]");
+set(axTrace, "XColor", "none");
+
+axTrend.Layout.Row = 3;
+axTrend.Layout.Column = 1;
+xlabel(axTrend, "Time");
+ylabel(axTrend, "Trend [x]");
+set(axTrend, "XAxisLocation", "origin");
+
+axTrace2d.Layout.Row = 2;
+axTrace2d.Layout.Column = 2;
+axTrace2d.YAxis.Visible = "off";
+xlabel(axTrace2d, "Detrended [y]");
+
+set(gl, ...
+    "RowHeight", {'1x', '3x', '1x'}, ...
+    "RowSpacing", 0, ...
+    "ColumnWidth", {'2x', '1x'}, ...
+    "ColumnSpacing", 0 ...
     );
 end

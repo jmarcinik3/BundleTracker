@@ -1,4 +1,8 @@
 classdef ResultsParser < handle
+    properties (Constant)
+        extensions = {'*.mat', "MATLAB Structure"};
+    end
+
     properties (Access = private)
         results;
         metadata;
@@ -74,6 +78,13 @@ classdef ResultsParser < handle
         function setAngleInfo(obj, info, index)
             obj.results(index).angleInfo = info;
         end
+
+        function setDetrendMode(obj, detrendMode, index)
+            obj.results(index).DetrendMode = detrendMode;
+        end
+        function setDetrendInfo(obj, info, index)
+            obj.results(index).detrendInfo = info;
+        end
     end
 
     %% Functions to append postprocessing
@@ -102,6 +113,34 @@ classdef ResultsParser < handle
             obj.setAngleErrorRadians(0, index);
             obj.setAngleMode("Manual", index);
             obj.setAngleInfo([], index);
+        end
+        function redetrendTrace(obj, windowSize, windowName, index)
+            x = obj.getProcessedTrace(index);
+            y = obj.getProcessedTrace2(index);
+
+            function trace = detrendTrace(trace)
+                trace = detrend(trace, 1);
+                ma = MovingAverage.averageByKeyword(trace, windowSize, windowName);
+                trace = trace - ma;
+            end
+            
+            xDetrend = detrendTrace(x);
+            yDetrend = detrendTrace(y);
+
+            detrendInfo = struct( ...
+                "PolynomialPower", 1, ...
+                "WindowSize", windowSize, ...
+                "WindowShape", windowName ...
+                );
+            detrendMode = [ ...
+                DetrendAlgorithms.polyKeyword, ...
+                DetrendAlgorithms.movingAverageKeyword ...
+                ];
+
+            obj.setProcessedTrace(xDetrend, index);
+            obj.setProcessedTrace2(yDetrend, index);
+            obj.setDetrendMode(detrendMode, index);
+            obj.setDetrendInfo(detrendInfo, index);
         end
     end
 

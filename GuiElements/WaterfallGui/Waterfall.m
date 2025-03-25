@@ -17,7 +17,12 @@ classdef Waterfall
             elseif isgraphics(obj, "line")
                 lineObjs = obj;
                 ax = ancestor(lineObjs(1), "axes");
+            elseif isgraphics(obj, "scatter")
+                lineObjs = obj;
+                ax = ancestor(lineObjs(1), "axes");
             end
+
+            
 
             reOffsetLines(lineObjs);
             rerangeY(ax, 0.05 / numel(lineObjs));
@@ -66,7 +71,7 @@ set(lineObjs, {"YData"}, num2cell(yWithOffsets, 2));
 end
 
 function rerangeY(ax, padding)
-lineObjs = findobj(ax.Children, "Type", "Line");
+lineObjs = ax.Children;
 yDatas = AxisPoint.fromLinesY(lineObjs);
 
 yMin = min(yDatas, [], "all");
@@ -74,5 +79,7 @@ yMax = max(yDatas, [], "all");
 yDiff = yMax - yMin;
 yPadding = padding * yDiff;
 yLimit = [yMin - yPadding, yMax + yPadding];
-set(ax, "YLim", yLimit);
+if range(yLimit) > 0
+    set(ax, "YLim", yLimit);
+end
 end

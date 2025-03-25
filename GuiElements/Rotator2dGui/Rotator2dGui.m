@@ -23,9 +23,7 @@ classdef Rotator2dGui < handle
             axTraceX = uiaxes(gl);
             axTraceY = uiaxes(gl);
 
-            hold(axRoi, "on");
             obj.roiImage = imshow([], "Parent", axRoi);
-            hold(axRoi, "off");
 
             obj.lineX = plot(axTraceX, 0, 0, 'k');
             obj.lineY = plot(axTraceY, 0, 0, 'k');

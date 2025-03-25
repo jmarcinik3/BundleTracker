@@ -114,7 +114,7 @@
         },
         "DetrendFigure": {
             "Name": "Detrend",
-            "WindowStyle": "modal",
+            "WindowStyle": "normal",
             "WindowState": "normal",
             "Resize": "on"
         },

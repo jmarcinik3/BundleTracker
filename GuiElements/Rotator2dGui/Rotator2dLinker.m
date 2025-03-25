@@ -1,14 +1,10 @@
 classdef Rotator2dLinker < handle
-    properties (Constant, Access = private)
-        extensions = {'*.mat', "MATLAB Structure"};
-    end
-
     properties (Access = private)
         gui;
         resultsParser;
         regionsCenter;
         arrows;
-        binCount;
+        binCount = 0;
 
         resultsDirectory = "";
         activeIndex = 0;
@@ -87,7 +83,7 @@ classdef Rotator2dLinker < handle
     methods
         function exportButtonPushed(obj, ~, ~)
             resultsParser = obj.getResultsParser();
-            extensions = Rotator2dLinker.extensions;
+            extensions = ResultsParser.extensions;
             title = "Export Rotated Traces";
             startDirectory = obj.resultsDirectory;
             [filepath, isfilepath] = uiputfilepath(extensions, title, startDirectory);
@@ -210,8 +206,6 @@ end
 function [xRotated, yRotated] = rerotateTrace(resultsParser, index, newAngle)
 x = resultsParser.getProcessedTrace(index);
 y = resultsParser.getProcessedTrace2(index);
-% x = detrend(x, 1);
-% y = detrend(y, 1);
 initialAngle = resultsParser.getAngleRadians(index);
 [xRotated, yRotated] = TraceRotator.rotate2d(x, y, newAngle - initialAngle);
 end
