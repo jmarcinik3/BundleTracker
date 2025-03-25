@@ -154,7 +154,7 @@ classdef RegionPreviewer < RegionDrawer ...
             switch event.EventName
                 case "ValueChanged"
                     if obj.regionExists()
-                        RegionUserData(obj).setThresholds(event.Value);
+                        RegionUserData(obj).setThresholds(source.Value);
                     end
                 case "PostSet"
                     thresholdParserChanged(obj, source, event);
@@ -350,6 +350,8 @@ end
 
 set(thresholdSlider, "Value", thresholds);
 previewer.thresholdSliderChanged(thresholdSlider, []);
+
+
 end
 function smoothingParserChanged(previewer, ~, ~)
 smoothingSlider = previewer.getRegionGui().getSmoothingSlider();

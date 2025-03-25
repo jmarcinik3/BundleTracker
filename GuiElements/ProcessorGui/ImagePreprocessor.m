@@ -43,7 +43,14 @@ classdef ImagePreprocessor < handle
             iIm = obj.gui.getInteractiveImage();
             iIm.UserData.rawImage = im;
             thresholds = obj.gui.getThresholds();
+            obj.setHistogramIntensity(im);
             obj.updateFromRawImage(thresholds);
+        end
+        function setHistogramIntensity(obj, im)
+            slider = obj.gui.getThresholdSlider();
+            [imIntensities, imEdges] = histcounts(im(:));
+            imEdges = 0.5 * (imEdges(1:end-1) + imEdges(2:end));
+            set(slider, "XData", imEdges, "YData", imIntensities);
         end
         function updateFromRawImage(obj, thresholds)
             if obj.imageExists()

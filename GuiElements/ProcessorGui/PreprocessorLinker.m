@@ -8,7 +8,8 @@ classdef PreprocessorLinker < ImagePreprocessor
             obj@ImagePreprocessor(gui);
 
             set(gui.getSmoothingSlider(), "ValueChangedFcn", @obj.smoothingSliderChanged);
-            set(gui.getThresholdSlider(), ...
+            set( ...
+                gui.getThresholdSlider(), ...
                 "ValueChangingFcn", @obj.thresholdSliderChanging, ...
                 "ValueChangedFcn", @obj.thresholdSliderChanged ...
                 );
@@ -39,13 +40,12 @@ classdef PreprocessorLinker < ImagePreprocessor
             thresholds = obj.gui.getThresholds();
             obj.updateFromRawImage(thresholds);
         end
-        function thresholdSliderChanging(obj, ~, event)
-            thresholds = event.Value;
+        function thresholdSliderChanging(obj, source, ~)
+            thresholds = get(source, "Value");
             obj.updateFromRawImage(thresholds);
         end
         function thresholdSliderChanged(obj, source, ~)
             thresholds = get(source, "Value");
-            set(source, "Value", thresholds);
             obj.updateFromRawImage(thresholds);
         end
         function smoothingSliderChanged(obj, source, ~)

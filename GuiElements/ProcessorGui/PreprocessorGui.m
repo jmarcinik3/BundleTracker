@@ -95,14 +95,8 @@ end
 %
 % Returns uislider
 function slider = generateThresholdSlider(gl)
-slider = uislider(gl, "range");
 defaults = SettingsParser.getThresholdSliderDefaults();
-
-valueIndex = find(strcmp(defaults, "Value"));
-limitsIndex = find(strcmp(defaults, "Limits"));
-defaults{valueIndex + 1} = defaults{valueIndex + 1}.';
-defaults{limitsIndex + 1} = defaults{limitsIndex + 1}.';
-
+slider = RangePlotSlider(gl);
 set(slider, defaults{:});
 end
 

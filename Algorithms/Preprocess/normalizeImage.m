@@ -1,6 +1,10 @@
 function ims = normalizeImage(ims, thresholds)
 normalize = @(ims) mat2gray(ims);
-if nargin == 2
+if nargin > 1
+    if range(thresholds) == 0
+        ims = zeros(size(ims));
+        return;
+    end
     normalize = @(ims) mat2gray(ims, thresholds);
 end
 
