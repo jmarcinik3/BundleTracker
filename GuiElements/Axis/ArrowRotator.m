@@ -1,11 +1,10 @@
-classdef AxisArrowRotator < handle
+classdef ArrowRotator < handle
     properties (Access = private)
         arrow;
     end
 
     methods
-        function obj = AxisArrowRotator(varargin)
-            arrow = quiver(varargin{:});
+        function obj = ArrowRotator(arrow)
             AxisDraggable( ...
                 arrow, ...
                 "ButtonDownFcn", @obj.buttonDown, ...

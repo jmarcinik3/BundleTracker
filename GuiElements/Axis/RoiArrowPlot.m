@@ -1,4 +1,4 @@
-classdef AxisRoiArrow < handle
+classdef RoiArrowPlot < handle
     properties (Constant)
         errorColor = [0.8, 0.8, 0.8];
     end
@@ -9,7 +9,7 @@ classdef AxisRoiArrow < handle
     end
 
     methods
-        function obj = AxisRoiArrow(fig, resultsParser)
+        function obj = RoiArrowPlot(fig, resultsParser)
             if isgraphics(fig, "axes")
                 ax = fig;
             elseif isgraphics(fig, "figure")
@@ -123,7 +123,7 @@ function plotTrace(ax, t, x, xerr)
 hold on;
 errorbar(ax, ...
     t, x, xerr, ...
-    "Color", AxisRoiArrow.errorColor, ...
+    "Color", RoiArrowPlot.errorColor, ...
     "CapSize", 0 ...
     );
 plot(ax, t, x, "black");
