@@ -66,7 +66,7 @@ classdef RegionUserData < handle
             metadata = obj.getMetadata();
             names = string(fieldnames(metadata));
             for name = names.'
-                result.(name) = obj.(name); 
+                result.(name) = obj.(name);
             end
         end
     end
@@ -135,8 +135,8 @@ classdef RegionUserData < handle
                 @() regionUserData.setTrackingMode(parser.getTrackingMode(index)), ...
                 @() regionUserData.setAngleMode(parser.getAngleMode(index)), ...
                 @() regionUserData.setDetrendMode(parser.getDetrendMode(index)), ...
-                @() regionUserData.setPositiveDirection(parser.getPositiveDirection(index)) ...
-            };
+                @() regionUserData.setPositiveDirection(parser.getAngleRadians(index)) ...
+                };
 
             for configureIndex = 1:numel(configureFunctions)
                 configureFunction = configureFunctions{configureIndex};
@@ -208,7 +208,11 @@ classdef RegionUserData < handle
             obj.DetrendMode = string(detrendMode);
         end
         function setPositiveDirection(obj, positiveDirection)
-            obj.Direction = string(positiveDirection);
+            if ischar(positiveDirection) || isstring(positiveDirection)
+                obj.Direction = directionToAngle(positiveDirection);
+            elseif isnumeric(positiveDirection)
+                obj.Direction = double(positiveDirection);
+            end
         end
     end
 

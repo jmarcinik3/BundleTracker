@@ -112,29 +112,8 @@ postResult.xProcessed = x;
 postResult.yProcessed = y;
 end
 function [x, y, angle] = orientXy(x, y, positiveDirection)
-angle = angleFromDirection(positiveDirection);
+angle = directionToAngle(positiveDirection);
 [x, y] = TraceRotator.rotate2d(x, -y, angle);
-end
-function angle = angleFromDirection(direction)
-switch string(direction)
-    case "Right"
-        angle = 0;
-    case "Upper Right"
-        angle = 45;
-    case "Upper"
-        angle = 90;
-    case "Upper Left"
-        angle = 135;
-    case "Left"
-        angle = 180;
-    case "Lower Left"
-        angle = 225;
-    case "Lower"
-        angle = 270;
-    case "Lower Right"
-        angle = 315;
-end
-angle = deg2rad(angle);
 end
 
 function postResult = scaleSingle(result, parser, ~, varargin)

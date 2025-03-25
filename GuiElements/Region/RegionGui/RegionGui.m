@@ -7,6 +7,7 @@ classdef RegionGui < ProcessorGui
 
     properties (Access = private)
         gridLayout;
+        directionArrow;
         regionMoverGui;
         regionCompressorGui;
         regionExpanderGui;
@@ -15,13 +16,27 @@ classdef RegionGui < ProcessorGui
     methods
         function obj = RegionGui(gl)
             obj@ProcessorGui(gl);
-            
+
             adjusterGl = uigridlayout(gl, [1, 3]);
             regionMoverGui = RegionMoverGui(adjusterGl);
             regionCompressorGui = RegionCompressorGui(adjusterGl);
             regionExpanderGui = RegionExpanderGui(adjusterGl);
             guis = {regionMoverGui, regionCompressorGui, regionExpanderGui};
-            layoutAdjusterElements(guis);
+
+            ax = obj.getAxis();
+            hold(ax, "on");
+            arrow = quiver( ...
+                ax, ...
+                0, ...
+                0, ...
+                10, ...
+                0, ...
+                "AutoScale", 0, ...
+                "Color", "red", ...
+                "LineWidth", 2.5, ...
+                "MaxHeadSize", 1 ...
+                );
+            hold(ax, "off");
 
             obj.gridLayout = gl;
             layoutAdjusterElements(guis);
@@ -30,6 +45,9 @@ classdef RegionGui < ProcessorGui
             obj.regionMoverGui = regionMoverGui;
             obj.regionCompressorGui = regionCompressorGui;
             obj.regionExpanderGui = regionExpanderGui;
+            obj.directionArrow = ArrowRotator(arrow);
+
+            delete(obj.getPositiveDirectionElement());
         end
 
         function delete(obj)
@@ -57,6 +75,9 @@ classdef RegionGui < ProcessorGui
         end
         function gui = getRegionExpanderGui(obj)
             gui = obj.regionExpanderGui;
+        end
+        function arrow = getPositiveDirectionArrow(obj)
+            arrow = obj.directionArrow;
         end
     end
 end
@@ -123,14 +144,12 @@ gl = uigridlayout(parent, [4, 1]);
 trackingSelection = gui.getTrackingSelectionElement();
 angleSelection = gui.getAngleSelectionElement();
 detrendSelection = gui.getDetrendSelectionElement();
-directionElement = gui.getPositiveDirectionElement();
 
 % lay out elements
 elements = [ ...
     trackingSelection, ...
     angleSelection, ...
-    detrendSelection, ...
-    directionElement ...
+    detrendSelection ...
     ];
 for index = 1:numel(elements)
     element = elements(index);
@@ -141,7 +160,7 @@ end
 set(gl, ...
     "Padding", 0, ...
     "RowSpacing", 0, ...
-    "RowHeight", {'1x', '1x', '1x', '3x'} ...
+    "RowHeight", {'1x', '1x', '1x'} ...
     );
 end
 

@@ -105,7 +105,7 @@ classdef TrackingLinker < RegionPreviewer ...
                 RegionUserData.setRegionsThresholds(obj, newThresholds);
             end
         end
-        
+
         function openProbeCalibratorPushed(obj, ~, ~)
             startingDirectory = obj.gui.getDirectoryPath();
             filepath = uigetfilepath( ...
@@ -204,8 +204,8 @@ classdef TrackingLinker < RegionPreviewer ...
             for index = 1:regionCount
                 regionInfo = resultsParser.getRegion(index);
                 region = obj.importRegion(regionInfo);
-                obj.configureRegionToGui(region);
                 RegionUserData.configureByResultsParser(region, resultsParser, index);
+                obj.configureNewRegionToGui(region);
                 regions(index) = region;
 
                 proportionComplete = index / regionCount;
@@ -238,7 +238,7 @@ classdef TrackingLinker < RegionPreviewer ...
             end
             exportRegionImage@RegionPreviewer(obj, path);
         end
-        function exportRegionVideo(obj)            
+        function exportRegionVideo(obj)
             [cancel, ims] = generatePreprocessedRegion( ...
                 obj, ...
                 obj.getActiveRegion() ...
@@ -386,9 +386,9 @@ ims = imageToClass(ims, imClass);
 end
 
 function ax = generateAnimatorAxis(title)
-    fig = generateFigure("Name", title);
-    gl = uigridlayout(fig, [1, 1]);
-    ax = uiaxes(gl);
+fig = generateFigure("Name", title);
+gl = uigridlayout(fig, [1, 1]);
+ax = uiaxes(gl);
 end
 
 function fig = generateBlobDetectionFigure()

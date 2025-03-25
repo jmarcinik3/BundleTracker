@@ -27,6 +27,7 @@ classdef RegionPreviewer < RegionDrawer ...
             obj.axis = ax;
 
             obj.updateRegionalRawImage([]);
+            prepareRegionGui(obj, regionGui);
         end
     end
 
@@ -71,7 +72,7 @@ classdef RegionPreviewer < RegionDrawer ...
         function duplicateRegion(obj, region)
             regionMeta = getRegionMetadata(region);
             newRegion = obj.importRegion(regionMeta);
-            obj.configureRegionToGui(newRegion);
+            obj.configureNewRegionToGui(newRegion);
             RegionUserData.configureByRegion(newRegion, region);
         end
     end
@@ -91,7 +92,7 @@ classdef RegionPreviewer < RegionDrawer ...
             for index = 1:regionCount
                 parameter = parameters(index, :);
                 region = obj.drawRegionByParameters(parameter, blobShape);
-                obj.configureRegionToGui(region);
+                obj.configureNewRegionToGui(region);
                 regions(index) = region;
 
                 proportionComplete = index / regionCount;
@@ -103,10 +104,10 @@ classdef RegionPreviewer < RegionDrawer ...
 
             multiWaitbar(taskName, 'Close');
         end
-        function configureRegionToGui(obj, region)
+        function configureNewRegionToGui(obj, region)
             regionGui = obj.getRegionGui();
-            configureRegionGui(obj, regionGui, region);
             obj.previewRegion(region);
+            prepareNewRegion(obj, regionGui, region);
             deleteRegionIfLine(region);
         end
     end
@@ -114,7 +115,7 @@ classdef RegionPreviewer < RegionDrawer ...
         function buttonDownFcn(obj, source, event)
             if event.Button == 1 % is left click
                 region = obj.drawRegionOnClick(source, event);
-                obj.configureRegionToGui(region);
+                obj.configureNewRegionToGui(region);
             end
         end
         function regionClicked(obj, source, event)
@@ -194,12 +195,12 @@ classdef RegionPreviewer < RegionDrawer ...
             end
         end
         function positiveDirectionChanged(obj, source, event)
-            switch event.EventName
-                case "SelectionChanged"
-                    direction = DirectionGui.buttonToLocation(get(source, "SelectedObject"));
-                    RegionUserData(obj).setPositiveDirection(direction);
-                case "PostSet"
-                    directionParserChanged(obj, source, event);
+            if strcmpi(source.Name, "Angle")
+                arrow = event.AffectedObject;
+                angle = arrow.getAngle();
+                RegionUserData(obj).setPositiveDirection(angle);
+            elseif strcmpi(source.Name, "Direction")
+                directionParserChanged(obj, source, event);
             end
         end
     end
@@ -223,78 +224,53 @@ end
 
 
 
-function configureRegionGui(previewer, gui, region)
-directionGui = gui.getDirectionGui();
+function prepareRegionGui(previewer, gui)
+directionArrow = gui.getPositiveDirectionArrow();
+
+set(gui.getSmoothingSlider(), "ValueChangedFcn", @previewer.smoothingChanged);
+set(gui.getThresholdSlider(), "ValueChangedFcn", @previewer.thresholdChanged);
+set(gui.getInvertCheckbox(), "ValueChangedFcn", @previewer.invertChanged);
+set(gui.getTrackingSelectionElement(), "ValueChangedFcn", @previewer.trackingModeChanged);
+set(gui.getAngleSelectionElement(), "ValueChangedFcn", @previewer.angleModeChanged);
+set(gui.getDetrendSelectionElement(), "ValueChangedFcn", @previewer.detrendModeChanged);
+addlistener(directionArrow, "Angle", "PostSet", @previewer.positiveDirectionChanged);
+end
+function prepareNewRegion(previewer, gui, region)
 regionUserData = RegionUserData(region);
-
-configureRegion(previewer, region);
-configureSmoothing(previewer, gui, regionUserData);
-configureThreshold(previewer, gui, regionUserData);
-configureInvert(previewer, gui, regionUserData);
-configureTrackingMode(previewer, gui, regionUserData);
-configureAngleMode(previewer, gui, regionUserData);
-configureDetrendMode(previewer, gui, regionUserData);
-configurePositiveDirection(previewer, directionGui, regionUserData);
-end
-function configureSmoothing(previewer, gui, regionUserData)
-set(gui.getSmoothingSlider(), ...
-    "ValueChangedFcn", @previewer.smoothingChanged, ...
-    "Value", regionUserData.getSmoothing() ...
-    );
-addlistener(regionUserData, "Smoothing", "PostSet", @previewer.smoothingChanged);
-end
-function configureThreshold(previewer, gui, regionUserData)
-set(gui.getThresholdSlider(), ...
-    "ValueChangedFcn", @previewer.thresholdChanged, ...
-    "Value", regionUserData.getThresholds() ...
-    );
-addlistener(regionUserData, "IntensityRange", "PostSet", @previewer.thresholdChanged);
-end
-function configureInvert(previewer, gui, regionUserData)
-set(gui.getInvertCheckbox(), ...
-    "ValueChangedFcn", @previewer.invertChanged, ...
-    "Value", regionUserData.getInvert() ...
-    );
-addlistener(regionUserData, "IsInverted", "PostSet", @previewer.invertChanged);
-end
-function configureTrackingMode(previewer, gui, regionUserData)
-set(gui.getTrackingSelectionElement(), ...
-    "ValueChangedFcn", @previewer.trackingModeChanged, ...
-    "Value", regionUserData.getTrackingMode() ...
-    );
-addlistener(regionUserData, "TrackingMode", "PostSet", @previewer.trackingModeChanged);
-end
-function configureAngleMode(previewer, gui, regionUserData)
-set(gui.getAngleSelectionElement(), ...
-    "ValueChangedFcn", @previewer.angleModeChanged, ...
-    "Value", regionUserData.getAngleMode() ...
-    );
-addlistener(regionUserData, "AngleMode", "PostSet", @previewer.angleModeChanged);
-end
-function configureDetrendMode(previewer, gui, regionUserData)
-set(gui.getDetrendSelectionElement(), ...
-    "ValueChangedFcn", @previewer.detrendModeChanged, ...
-    "Value", regionUserData.getDetrendMode() ...
-    );
-addlistener(regionUserData, "DetrendMode", "PostSet", @previewer.detrendModeChanged);
-end
-function configurePositiveDirection(previewer, directionGui, regionUserData)
-changedFcn = @previewer.positiveDirectionChanged;
-set(directionGui.getRadioGroup(), "SelectionChangedFcn", changedFcn);
-directionGui.setLocation(regionUserData.getPositiveDirection());
-addlistener(regionUserData, "Direction", "PostSet", changedFcn);
-end
-
-function configureRegion(previewer, region)
 addRegionListeners(previewer, region);
+addRegionDataListeners(previewer, regionUserData)
+setRegionDataValues(gui, regionUserData);
 generateRegionMenu(previewer, region);
 end
+
 function addRegionListeners(previewer, region)
 addlistener(region, "MovingROI", @previewer.regionMoving);
 addlistener(region, "ROIMoved", @previewer.regionMoved);
 addlistener(region, "ROIClicked", @previewer.regionClicked);
 addlistener(region, "DeletingROI", @previewer.deletingRegion);
 end
+function addRegionDataListeners(previewer, regionUserData)
+addlistener(regionUserData, "Smoothing", "PostSet", @previewer.smoothingChanged);
+addlistener(regionUserData, "IntensityRange", "PostSet", @previewer.thresholdChanged);
+addlistener(regionUserData, "IsInverted", "PostSet", @previewer.invertChanged);
+addlistener(regionUserData, "TrackingMode", "PostSet", @previewer.trackingModeChanged);
+addlistener(regionUserData, "AngleMode", "PostSet", @previewer.angleModeChanged);
+addlistener(regionUserData, "DetrendMode", "PostSet", @previewer.detrendModeChanged);
+addlistener(regionUserData, "Direction", "PostSet", @previewer.positiveDirectionChanged);
+end
+function setRegionDataValues(gui, regionUserData)
+set(gui.getSmoothingSlider(), "Value", regionUserData.getSmoothing());
+set(gui.getThresholdSlider(), "Value", regionUserData.getThresholds());
+set(gui.getInvertCheckbox(), "Value", regionUserData.getInvert());
+set(gui.getTrackingSelectionElement(), "Value", regionUserData.getTrackingMode());
+set(gui.getAngleSelectionElement(), "Value", regionUserData.getAngleMode());
+set(gui.getDetrendSelectionElement(), "Value", regionUserData.getDetrendMode());
+
+directionArrow = gui.getPositiveDirectionArrow();
+angle = regionUserData.getPositiveDirection();
+directionArrow.setAngle(angle);
+end
+
 function generateRegionMenu(previewer, region)
 if strcmpi(region.Type, "images.roi.rectangle")
     regionShape = 'Rectangle';
@@ -375,7 +351,6 @@ end
 set(thresholdSlider, "Value", thresholds);
 previewer.thresholdSliderChanged(thresholdSlider, []);
 end
-
 function smoothingParserChanged(previewer, ~, ~)
 smoothingSlider = previewer.getRegionGui().getSmoothingSlider();
 set(smoothingSlider, "Value", RegionUserData(previewer).getSmoothing());
@@ -387,22 +362,25 @@ set(invertCheckbox, "Value", RegionUserData(previewer).getInvert());
 previewer.invertCheckboxChanged(invertCheckbox, [])
 end
 function trackingModeParserChanged(previewer, ~, ~)
-set(previewer.getRegionGui().getTrackingSelectionElement(), ...
+set( ...
+    previewer.getRegionGui().getTrackingSelectionElement(), ...
     "Value", RegionUserData(previewer).getTrackingMode() ...
     );
 end
 function angleModeParserChanged(previewer, ~, ~)
-set(previewer.getRegionGui().getAngleSelectionElement(), ...
+set( ...
+    previewer.getRegionGui().getAngleSelectionElement(), ...
     "Value", RegionUserData(previewer).getAngleMode() ...
     );
 end
 function detrendModeParserChanged(previewer, ~, ~)
-set(previewer.getRegionGui().getDetrendSelectionElement(), ...
+set( ...
+    previewer.getRegionGui().getDetrendSelectionElement(), ...
     "Value", RegionUserData(previewer).getDetrendMode() ...
     );
 end
 function directionParserChanged(previewer, ~, ~)
-direction = RegionUserData(previewer).getPositiveDirection();
-directionGui = previewer.getRegionGui().getDirectionGui();
-directionGui.setLocation(direction);
+arrow = previewer.getRegionGui().getPositiveDirectionArrow();
+angle = RegionUserData(previewer).getPositiveDirection();
+arrow.setAngle(angle);
 end

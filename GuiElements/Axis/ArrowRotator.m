@@ -2,6 +2,9 @@ classdef ArrowRotator < handle
     properties (Access = private)
         arrow;
     end
+    properties (SetObservable = true)
+        Angle;
+    end
 
     methods
         function obj = ArrowRotator(arrow)
@@ -20,18 +23,31 @@ classdef ArrowRotator < handle
             arrow = obj.arrow;
         end
     end
-    methods (Access = private)
-        function position = getArrowTailPosition(obj)
+    methods
+        function position = getTailPosition(obj)
             arrow = obj.getArrow();
-            xPosition = get(arrow, "XData");
-            yPosition = get(arrow, "YData");
-            position = [xPosition, yPosition];
+            position = AxisArrow.getTailPosition(arrow);
         end
-        function length = getArrowLength(obj)
+        function length = getLength(obj)
             arrow = obj.getArrow();
-            xLength = get(arrow, "UData");
-            yLength = get(arrow, "VData");
-            length = sqrt(xLength^2 + yLength^2);
+            length = AxisArrow.getLength(arrow);
+        end
+        function angle = getAngle(obj)
+            arrow = obj.getArrow();
+            angle = AxisArrow.getAngle(arrow);
+        end
+    end
+
+    %% Functions to set aesthetics
+    methods
+        function setPosition(obj, xy)
+            arrow = obj.getArrow();
+            AxisArrow.setPosition(arrow, xy);
+        end
+        function setAngle(obj, angle)
+            arrow = obj.getArrow();
+            AxisArrow.setAngle(arrow, angle);
+            obj.Angle = angle;
         end
     end
 
@@ -44,15 +60,15 @@ classdef ArrowRotator < handle
         end
         function buttonMotion(obj, ~, currentPoint)
             arrow = obj.getArrow();
-            arrowLength = obj.getArrowLength();
-            arrowPoint = [obj.getArrowTailPosition(), 0];
+            arrowPoint = [obj.getTailPosition(), 0];
+            
             positionDifference = currentPoint - arrowPoint;
+            if AxisArrow.isInverted(arrow)
+                positionDifference(2) = -positionDifference(2);
+            end
+
             theta = atan2(positionDifference(2), positionDifference(1));
-            set( ...
-                arrow, ...
-                "UData", arrowLength * cos(theta), ...
-                "VData", arrowLength * sin(theta) ...
-                );
+            obj.setAngle(theta);
         end
     end
 end

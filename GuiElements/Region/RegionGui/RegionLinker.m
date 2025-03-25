@@ -26,6 +26,14 @@ classdef RegionLinker < PreprocessorLinker & AxisExporter
             gui = obj.regionGui;
         end
     end
+    methods (Access = private)
+        function arrow = getPositiveDirectionArrow(obj)
+            arrow = obj.getRegionGui().getPositiveDirectionArrow();
+        end
+        function arrow = getArrow(obj)
+            arrow = obj.getPositiveDirectionArrow().getArrow();
+        end
+    end
 
     %% Functions to update GUI and state information
     methods
@@ -40,11 +48,22 @@ classdef RegionLinker < PreprocessorLinker & AxisExporter
                 regionRawImage = [];
             end
             obj.setRawImage(regionRawImage);
+            obj.refreshArrow();
         end
     end
     methods (Access = protected)
         function changeImage(obj, im)
             obj.fullRawImage = im;
+        end
+    end
+    methods (Access = private)
+        function refreshArrow(obj)
+            ax = obj.getAxis();
+            arrow = obj.getPositiveDirectionArrow();
+
+            xMid = mean(get(ax, "XLim"));
+            yMid = mean(get(ax, "YLim"));
+            arrow.setPosition([xMid, yMid]);
         end
     end
 

@@ -111,7 +111,7 @@ classdef ResultsParser < handle
             obj.setProcessedTraceError2(yRotated.Error, index);
             obj.setAngleRadians(newAngle, index);
             obj.setAngleErrorRadians(0, index);
-            obj.setAngleMode("Manual", index);
+            obj.setAngleMode("None", index);
             obj.setAngleInfo([], index);
         end
         function redetrendTrace(obj, windowSize, windowName, index)
