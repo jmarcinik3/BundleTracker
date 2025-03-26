@@ -13,8 +13,8 @@ classdef SettingsParser
         function defaults = getInvertCheckboxDefaults()
             defaults = namedargs2cell(getDefaults().InvertCheckbox);
         end
-        function defaults = getSmoothingSliderDefaults()
-            defaults = namedargs2cell(getDefaults().SmoothingSlider);
+        function defaults = getSmoothingShaperDefaults()
+            defaults = namedargs2cell(getDefaults().SmoothingShaper);
         end
         function defaults = getThresholdModeDropdownDefaults()
             defaults = namedargs2cell(getDefaults().ThresholdModeDropdown);

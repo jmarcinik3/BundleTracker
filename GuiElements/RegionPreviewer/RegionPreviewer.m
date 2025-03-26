@@ -144,7 +144,7 @@ classdef RegionPreviewer < RegionDrawer ...
             switch event.EventName
                 case "ValueChanged"
                     if obj.regionExists()
-                        RegionUserData(obj).setSmoothing(event.Value);
+                        RegionUserData(obj).setSmoothing(source.WindowSize);
                     end
                 case "PostSet"
                     smoothingParserChanged(obj, source, event);
@@ -227,7 +227,7 @@ end
 function prepareRegionGui(previewer, gui)
 directionArrow = gui.getPositiveDirectionArrow();
 
-set(gui.getSmoothingSlider(), "ValueChangedFcn", @previewer.smoothingChanged);
+set(gui.getSmoothingShaper(), "ValueChangedFcn", @previewer.smoothingChanged);
 set(gui.getThresholdSlider(), "ValueChangedFcn", @previewer.thresholdChanged);
 set(gui.getInvertCheckbox(), "ValueChangedFcn", @previewer.invertChanged);
 set(gui.getTrackingSelectionElement(), "ValueChangedFcn", @previewer.trackingModeChanged);
@@ -259,7 +259,7 @@ addlistener(regionUserData, "DetrendMode", "PostSet", @previewer.detrendModeChan
 addlistener(regionUserData, "Direction", "PostSet", @previewer.positiveDirectionChanged);
 end
 function setRegionDataValues(gui, regionUserData)
-set(gui.getSmoothingSlider(), "Value", regionUserData.getSmoothing());
+set(gui.getSmoothingShaper(), "WindowSize", regionUserData.getSmoothing());
 set(gui.getThresholdSlider(), "Value", regionUserData.getThresholds());
 set(gui.getInvertCheckbox(), "Value", regionUserData.getInvert());
 set(gui.getTrackingSelectionElement(), "Value", regionUserData.getTrackingMode());
@@ -350,13 +350,11 @@ end
 
 set(thresholdSlider, "Value", thresholds);
 previewer.thresholdSliderChanged(thresholdSlider, []);
-
-
 end
 function smoothingParserChanged(previewer, ~, ~)
-smoothingSlider = previewer.getRegionGui().getSmoothingSlider();
-set(smoothingSlider, "Value", RegionUserData(previewer).getSmoothing());
-previewer.smoothingSliderChanged(smoothingSlider, [])
+smoothingShaper = previewer.getRegionGui().getSmoothingShaper();
+set(smoothingShaper, "WindowSize", RegionUserData(previewer).getSmoothing());
+previewer.smoothingShaperChanged(smoothingShaper, []);
 end
 function invertParserChanged(previewer, ~, ~)
 invertCheckbox = previewer.getRegionGui().getInvertCheckbox();

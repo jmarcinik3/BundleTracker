@@ -2,7 +2,7 @@ classdef PreprocessorGui
     properties (Access = private)
         gridLayout;
         interactiveImage;
-        smoothingSlider;
+        smoothingShaper;
         thresholdSlider;
         invertCheckbox;
     end
@@ -11,7 +11,7 @@ classdef PreprocessorGui
         function obj = PreprocessorGui(gl)
             ax = generateEmptyAxis(gl);
             obj.interactiveImage = generateInteractiveImage(ax);
-            obj.smoothingSlider = generateSmoothingSlider(gl);
+            obj.smoothingShaper = generateSmoothingShaper(gl);
             obj.thresholdSlider = generateThresholdSlider(gl);
             obj.invertCheckbox = generateInvertCheckbox(gl);
             obj.gridLayout = gl;
@@ -31,8 +31,8 @@ classdef PreprocessorGui
             iIm = obj.getInteractiveImage();
             ax = ancestor(iIm, "axes");
         end
-        function elem = getSmoothingSlider(obj)
-            elem = obj.smoothingSlider;
+        function elem = getSmoothingShaper(obj)
+            elem = obj.smoothingShaper;
         end
         function elem = getThresholdSlider(obj)
             elem = obj.thresholdSlider;
@@ -58,7 +58,7 @@ classdef PreprocessorGui
             regionUserData.setInvert(isInverted);
         end
         function smoothing = getSmoothing(obj)
-            smoothing = obj.smoothingSlider.Value;
+            smoothing = get(obj.smoothingShaper, "WindowSize");
         end
         function thresholds = getThresholds(obj)
             thresholds = obj.thresholdSlider.Value;
@@ -72,17 +72,17 @@ end
 
 
 %% Function to generate intensity bound input
-% Generates slider allowing user to set width of smoothing window
+% Generates element allowing user to set width of smoothing window
 %
 % Arguments
 %
 % * uigridlayout |gl|: layout to add slider in
 %
 % Returns uislider
-function slider = generateSmoothingSlider(gl)
-slider = uislider(gl);
-defaults = SettingsParser.getSmoothingSliderDefaults();
-set(slider, defaults{:});
+function shaper = generateSmoothingShaper(gl)
+defaults = SettingsParser.getSmoothingShaperDefaults();
+shaper = WindowShaper(gl);
+set(shaper, defaults{:}, "IncludeTitle", false);
 end
 
 %% Function to generate intensity bound input

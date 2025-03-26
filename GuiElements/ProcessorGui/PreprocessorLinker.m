@@ -7,10 +7,14 @@ classdef PreprocessorLinker < ImagePreprocessor
         function obj = PreprocessorLinker(gui)
             obj@ImagePreprocessor(gui);
 
-            set(gui.getSmoothingSlider(), "ValueChangedFcn", @obj.smoothingSliderChanged);
+            set( ...
+                gui.getSmoothingShaper(), ...
+                "ValueChangedFcn", @obj.smoothingShaperChanged, ...
+                "ValueChangingFcn", @obj.smoothingShaperChanged ...
+                );
             set( ...
                 gui.getThresholdSlider(), ...
-                "ValueChangingFcn", @obj.thresholdSliderChanging, ...
+                "ValueChangingFcn", @obj.thresholdSliderChanged, ...
                 "ValueChangedFcn", @obj.thresholdSliderChanged ...
                 );
             set(gui.getInvertCheckbox(), "ValueChangedFcn", @obj.invertCheckboxChanged);
@@ -40,17 +44,11 @@ classdef PreprocessorLinker < ImagePreprocessor
             thresholds = obj.gui.getThresholds();
             obj.updateFromRawImage(thresholds);
         end
-        function thresholdSliderChanging(obj, source, ~)
-            thresholds = get(source, "Value");
-            obj.updateFromRawImage(thresholds);
-        end
         function thresholdSliderChanged(obj, source, ~)
             thresholds = get(source, "Value");
             obj.updateFromRawImage(thresholds);
         end
-        function smoothingSliderChanged(obj, source, ~)
-            smoothing = round(get(source, "Value"));
-            set(source, "Value", smoothing);
+        function smoothingShaperChanged(obj, ~, ~)
             thresholds = obj.gui.getThresholds();
             obj.updateFromRawImage(thresholds);
         end
