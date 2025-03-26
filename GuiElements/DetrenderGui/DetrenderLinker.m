@@ -16,7 +16,12 @@ classdef DetrenderLinker < handle
             t = resultsParser.getTime();
             x = resultsParser.getProcessedTrace();
 
-            axWindow = AxisWindow(gui.getWindowAxis(), 2*numel(t));
+            axWindow = gui.getWindowAxis();
+            set( ...
+                axWindow, ...
+                "MaxWindowSize", 2*numel(t), ...
+                "WindowSize", 2*numel(t) ...
+                );
             addlistener(axWindow, "WindowSize", "PostSet", @obj.updateDisplay);
             addlistener(axWindow, "WindowName", "PostSet", @obj.updateDisplay);
 
@@ -126,10 +131,10 @@ classdef DetrenderLinker < handle
             ax = obj.axWindow;
         end
         function windowSize = getWindowSize(obj)
-            windowSize = obj.getWindowAxis().getWindowSize();
+            windowSize = get(obj.getWindowAxis(), "WindowSize");
         end
         function windowName = getWindowName(obj)
-            windowName = obj.getWindowAxis().getWindowName();
+            windowName = get(obj.getWindowAxis(), "WindowName");
         end
     end
 end

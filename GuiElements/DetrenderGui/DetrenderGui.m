@@ -12,7 +12,7 @@ classdef DetrenderGui < handle
             gl = uigridlayout(fig, [3, 2]);
             axTrace = uiaxes(gl, "Toolbar", []);
             axTrend = uiaxes(gl, "Toolbar", []);
-            axWindow = AxisWindow.generateAxis(gl);
+            axWindow = uiwindowselector(gl);
             axTrace2d = uiaxes(gl, "Toolbar", []);
 
             obj.gridLayout = gl;
