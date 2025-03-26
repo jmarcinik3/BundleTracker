@@ -1,4 +1,4 @@
-classdef uiwindowselector < matlab.ui.componentcontainer.ComponentContainer
+classdef WindowShaper < matlab.ui.componentcontainer.ComponentContainer
     properties
         MinWindowSize double = 5;
         MaxWindowSize double = 512;

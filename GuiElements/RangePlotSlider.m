@@ -14,7 +14,6 @@ classdef RangePlotSlider < matlab.ui.componentcontainer.ComponentContainer
     properties (Access = private, Transient, NonCopyable)
         UIAxes matlab.ui.control.UIAxes;
         Line (1, 3);
-        GridLayout matlab.ui.container.GridLayout;
     end
 
     methods (Access = protected)
@@ -39,6 +38,7 @@ classdef RangePlotSlider < matlab.ui.componentcontainer.ComponentContainer
                 "ButtonMotionFcn", @obj.lowerLineMotion, ...
                 "ButtonUpFcn", @obj.lowerLineUp ...
                 );
+            
             AxisDraggable( ...
                 upperLine, ...
                 "ButtonMotionFcn", @obj.upperLineMotion, ...
@@ -47,7 +47,6 @@ classdef RangePlotSlider < matlab.ui.componentcontainer.ComponentContainer
 
             obj.UIAxes = ax;
             obj.Line = [lowerLine, upperLine, primaryLine];
-            obj.GridLayout = gl;
         end
 
         function update(obj)
@@ -65,20 +64,20 @@ classdef RangePlotSlider < matlab.ui.componentcontainer.ComponentContainer
     %% Functions to handle interactive click events
     methods (Access = private)
         function lowerLineMotion(obj, ~, currentPoint)
-            notify(obj, "ValueChanging");
             xCurrent = max(currentPoint(1), obj.Limits(1));
             obj.Value(1) = xCurrent;
             if xCurrent > obj.Value(2)
                 obj.Value(2) = xCurrent;
             end
+            notify(obj, "ValueChanging");
         end
         function upperLineMotion(obj, ~, currentPoint)
-            notify(obj, "ValueChanging");
             xCurrent = min(currentPoint(1), obj.Limits(2));
             obj.Value(2) = xCurrent;
             if xCurrent < obj.Value(1)
                 obj.Value(1) = xCurrent;
             end
+            notify(obj, "ValueChanging");
         end
         function lowerLineUp(obj)
             notify(obj, "ValueChanged");
