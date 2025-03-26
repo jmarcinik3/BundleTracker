@@ -46,17 +46,6 @@ classdef ImagePreprocessor < handle
             obj.setHistogramIntensity(im);
             obj.updateFromRawImage(thresholds);
         end
-        function setHistogramIntensity(obj, im)
-            slider = obj.gui.getThresholdSlider();
-            binCount = max(round(sqrt(numel(im))), 1);
-            [intensities, binEdges] = histcounts(im(:), binCount);
-            binCenters = 0.5 * (binEdges(1:end-1) + binEdges(2:end));
-            set( ...
-                slider, ...
-                "XData", mat2gray(binCenters), ...
-                "YData", intensities ...
-                );
-        end
         function updateFromRawImage(obj, thresholds)
             if obj.imageExists()
                 im = obj.getRawImage();
@@ -64,6 +53,18 @@ classdef ImagePreprocessor < handle
                 im = preprocessor.preprocess(im);
                 showImage(obj, im);
             end
+        end
+    end
+    methods (Access = private)
+        function setHistogramIntensity(obj, im)
+            slider = obj.gui.getThresholdSlider();
+            [intensities, binEdges] = histcounts(im(:));
+            binCenters = 0.5 * (binEdges(1:end-1) + binEdges(2:end));
+            set( ...
+                slider, ...
+                "XData", mat2gray(binCenters), ...
+                "YData", intensities ...
+                );
         end
     end
 end

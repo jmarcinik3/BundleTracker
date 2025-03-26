@@ -44,7 +44,15 @@ classdef BlobDetectorLinker < handle
             areaSlider = gui.getAreaSlider();
             areaLimits = [0, maximumArea];
 
-            set(thresholdSlider, "ValueChangingFcn", @obj.thresholdsChanging);
+            [intensities, binEdges] = histcounts(im);
+            binCenters = 0.5 * (binEdges(1:end-1) + binEdges(2:end));
+            set( ...
+                thresholdSlider, ...
+                "ValueChangingFcn", @obj.thresholdsChanging, ...
+                "XData", mat2gray(binCenters), ...
+                "YData", intensities ...
+                );
+
             set(areaSlider, ...
                 "Limits", areaLimits, ...
                 "Value", areaLimits, ...
@@ -185,8 +193,8 @@ classdef BlobDetectorLinker < handle
             obj.applyRegions = source == gui.getApplyButton();
             close(fig);
         end
-        function thresholdsChanging(obj, ~, event)
-            thresholds = event.Value;
+        function thresholdsChanging(obj, source, ~)
+            thresholds = source.Value;
             obj.redetectBlobs(thresholds);
         end
         function blobAreaChanging(obj, ~, event)
