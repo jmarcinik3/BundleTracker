@@ -71,7 +71,11 @@ set(lineObjs, {"YData"}, num2cell(yWithOffsets, 2));
 end
 
 function rerangeY(ax, padding)
-lineObjs = ax.Children;
+axChildren = ax.Children;
+lineObjs = [ ...
+    findobj(axChildren, "Type", "Line"),  ...
+    findobj(axChildren, "Type", "Scatter") ...
+    ];
 yDatas = AxisPoint.fromLinesY(lineObjs);
 
 yMin = min(yDatas, [], "all");
