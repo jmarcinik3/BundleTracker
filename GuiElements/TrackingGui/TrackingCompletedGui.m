@@ -126,7 +126,7 @@ set(fig, "Position", [fig.Position(1:2), 480, 190]);
 end
 
 function selector = generateResultsSelector(gl, filepath)
-extensions = {'*.mat', "MATLAB Structure"};
+extensions = ResultsParser.extensions;
 title = "Results Filepath";
 selector = FileSelectorGui(gl, ...
     "Extensions", extensions, ...
