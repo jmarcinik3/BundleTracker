@@ -73,7 +73,7 @@ xerr = xErrorProportion * xyerr;
 yerr = (1 - xErrorProportion) * xyerr;
 end
 
-function [rowShift, columnShift, shiftError] = dftregistration(frameFft1, frameFft2, upsampleFactor)
+function [columnShift, rowShift, shiftError] = dftregistration(frameFft1, frameFft2, upsampleFactor)
 % Modified by Joseph Marcinik (2024)
 % Citation for this algorithm:
 % Manuel Guizar-Sicairos, Samuel T. Thurman, and James R. Fienup,
