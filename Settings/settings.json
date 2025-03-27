@@ -45,7 +45,7 @@
         "SmoothingShaper": {
             "WindowSize": 0,
             "MinWindowSize": 0,
-            "MaxWindowSize": 16,
+            "MaxWindowSize": 32,
             "WindowName": "Gaussian"
         },
         "ThresholdModeDropdown": {
