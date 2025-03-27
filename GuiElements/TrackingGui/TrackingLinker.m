@@ -204,8 +204,8 @@ classdef TrackingLinker < RegionPreviewer ...
             for index = 1:regionCount
                 regionInfo = resultsParser.getRegion(index);
                 region = obj.importRegion(regionInfo);
-                RegionUserData.configureByResultsParser(region, resultsParser, index);
                 obj.configureNewRegionToGui(region);
+                RegionUserData.configureByResultsParser(region, resultsParser, index);
                 regions(index) = region;
 
                 proportionComplete = index / regionCount;
