@@ -196,11 +196,9 @@ end
 
 function hasDetrend = checkForPostprocessing(resultsParser)
 detrendModes = resultsParser.getDetrendMode();
-hasDetrend = ~DetrendAlgorithms.isIdentity(detrendModes);
-detrendCount = sum(hasDetrend);
-hasDetrend = detrendCount >= 1;
+hasDetrend = any(~DetrendAlgorithms.isIdentity(detrendModes));
 if hasDetrend
-    warning("%d traces have been detrended already", detrendCount);
+    warning("Traces have been detrended already");
 end
 end
 function [xRotated, yRotated] = rerotateTrace(resultsParser, index, newAngle)
