@@ -159,7 +159,7 @@ classdef ProbeCalibratorLinker < handle
             cutoffFreq = obj.getCutoffFrequency();
             psdFit = 10 .^ psdFittingFunction(parameters, omegaLog);
             cutoffPsd = interp1(freq, psdFit, cutoffFreq, "linear");
-            referenceVolume = 10 * log10(psdFit(1));
+            referenceVolume = 20 * log10(psdFit(1));
 
             set(psdPlot.PsdLine, ...
                 "XData", freqValid, ...
@@ -226,7 +226,7 @@ psdFit = 10 .^ psdFittingFunction(parameters, omegaLog);
 cutoffFreq = cutoffFrequency(drag, stiffness);
 cutoffPsd = interp1(freq, psdFit, cutoffFreq, "linear");
 
-referenceVolume = 10 * log10(psdFit(1));
+referenceVolume = 20 * log10(psdFit(1));
 psdVolume = intensityToVolume(psd, referenceVolume);
 psdFitVolume = intensityToVolume(psdFit, referenceVolume);
 cutoffPsdVolume = intensityToVolume(cutoffPsd, referenceVolume);
@@ -274,7 +274,7 @@ function cutoffFreq = cutoffFrequency(drag, stiffness)
 cutoffFreq = stiffness / (2 * pi * drag);
 end
 function volume = intensityToVolume(x, referenceVolume)
-volume = 10 * log10(x) - referenceVolume;
+volume = 20 * log10(x) - referenceVolume;
 end
 
 function removeIndices = peakUnmaskIndices(psd, varargin)
