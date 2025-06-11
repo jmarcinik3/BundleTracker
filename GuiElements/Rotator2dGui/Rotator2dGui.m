@@ -47,7 +47,7 @@ classdef Rotator2dGui < handle
     end
 
     %% Functions to retrieve GUI elements and state information
-    methods (Access = ?Rotator2dLinker)
+    methods 
         function fig = getFigure(obj)
             gl = obj.getGridLayout();
             fig = ancestor(gl, "figure");

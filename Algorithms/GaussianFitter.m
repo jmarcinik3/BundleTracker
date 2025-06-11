@@ -127,8 +127,8 @@ end
 
 function z = gaussian2d(p, xy)
 % compute 2D gaussian
-b1 = 1 / p(3)^2;
-b2 = 1 / p(4)^2;
+b1 = 1 / (2 * p(3)^2);
+b2 = 1 / (2 * p(4)^2);
 b3 = cos(p(2));
 b4 = sin(p(2));
 

@@ -150,8 +150,9 @@ classdef ResultsParser < handle
             frame = obj.metadata.FirstFrame;
             if nargin > 1
                 regionInfo = obj.getRegion(index);
-
-                ax = gca;
+                
+                fig = figure();
+                ax = axes(fig);
                 region = drawRegionByInfo(ax, regionInfo);
                 region.UserData = RegionUserData();
                 RegionUserData.configureByResultsParser(region, obj, index);
