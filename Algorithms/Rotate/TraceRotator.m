@@ -3,7 +3,7 @@ classdef TraceRotator
         function [xRotated, yRotated] = rotate2d(x, y, angle)
             xy = [x; y].';
             matrix = rotationMatrix(angle);
-            xyRotated = (xy * matrix).'; % rotate xy about origin
+            xyRotated = (xy * matrix).'; % rotate xy CW about origin
             xRotated = xyRotated(1, :);
             yRotated = xyRotated(2, :);
         end

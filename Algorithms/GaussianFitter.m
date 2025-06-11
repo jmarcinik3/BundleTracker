@@ -67,7 +67,7 @@ classdef GaussianFitter < handle
             amplitudeError = obj.parameterErrors(1);
         end
         function [angleRadians, angleRadiansError] = getAngleRadians(obj)
-            angleRadians = wrapToPi(pi/2 - obj.parameters(2));
+            angleRadians = obj.parameters(2);
             angleRadiansError = obj.parameterErrors(2);
         end
         function [xyStd, xyStdError] = getStandardDeviation(obj)
@@ -84,7 +84,6 @@ end
 
 
 function [fitParameters, fitParameterErrors] = fmgaussfit(xInput, yInput, zzInput)
-
 %% Condition the data
 [xData, yData, zData] = prepareSurfaceData(xInput, yInput, zzInput);
 xyData = {xData, yData};
@@ -126,16 +125,15 @@ fitParameterErrors = gaussian2dErrors(fitParameters, residuals, xyData);
 end
 
 function z = gaussian2d(p, xy)
-% compute 2D gaussian
-b1 = 1 / (2 * p(3)^2);
-b2 = 1 / (2 * p(4)^2);
+b1 = 0.5 / p(3)^2;
+b2 = 0.5 / p(4)^2;
 b3 = cos(p(2));
 b4 = sin(p(2));
 
 c1 = xy{1} - p(5);
 c2 = xy{2} - p(6);
 
-z = p(7) + p(1)*exp(-b1*(b3*c1 + b4*c2).^2 - b2*(-b4*c1 + b3*c2).^2);
+z = p(7) + p(1)*exp(-b1*(b3*c1 - b4*c2).^2 - b2*(b4*c1 + b3*c2).^2);
 end
 
 function deltaParameters = gaussian2dErrors(p, residuals, xy)
