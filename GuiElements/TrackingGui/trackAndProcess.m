@@ -11,10 +11,6 @@ end
 function [cancel, results] = trackAndProcessMultiple(trackingLinker, regions)
 regionCount = numel(regions);
 cancel = false;
-if regionCount == 1
-    [cancel, results] = trackAndProcessRegion(trackingLinker, regions);
-    return;
-end
 
 taskName = 'Tracking Regions';
 multiWaitbar(taskName, 0, 'CanCancel', 'on');
@@ -22,7 +18,7 @@ results = [];
 
 for index = 1:regionCount
     region = regions(index);
-    [cancel, result] = trackAndProcessRegion(trackingLinker, region);
+    result = trackAndProcessRegion(trackingLinker, region);
     results = [results, result];
 
     proportionComplete = index / regionCount;
@@ -37,52 +33,30 @@ end
 
 
 
-function [cancel, result] = trackAndProcessRegion(trackingLinker, region)
+function result = trackAndProcessRegion(trackingLinker, region)
 trackingLinker.previewRegion(region);
-[cancel, ims] = preprocessRegion( ...
+ims = preprocessRegion( ...
     im2double(trackingLinker.getVideoInRegion(region)), ...
     Preprocessor.fromRegion(region) ...
     );
-if cancel
-    result = [];
-    return;
-end
 
 trackingMode = RegionUserData(region).getTrackingMode();
-[cancel, centers] = trackVideo(ims, trackingMode);
-if cancel
-    result = [];
-    return;
-end
+centers = trackVideo(ims, trackingMode);
 
 result = processResult(region, centers, ims, trackingLinker);
-if ~cancel
-    set(region, "Color", SettingsParser.getRegionTrackedColor());
-end
+set(region, "Color", SettingsParser.getRegionTrackedColor());
 end
 
-function [cancel, centers] = trackVideo(ims, trackingMode)
-taskName = 'Tracking Region';
-multiWaitbar(taskName, 0, 'CanCancel', 'on');
+function centers = trackVideo(ims, trackingMode)
 frameCount = size(ims, 3);
 centers = PointStructurer.preallocate(frameCount);
 trackFrame = TrackingAlgorithms.handleByKeyword(trackingMode, ims);
 
-cancel = false;
-proportionDelta = 1 / frameCount;
-for index = 1:frameCount
+parfor index = 1:frameCount
     centers(index) = trackFrame(ims(:, :, index));
-    proportionComplete = index / frameCount;
-    if mod(proportionComplete, 0.01) < proportionDelta
-        cancel = multiWaitbar(taskName, proportionComplete);
-    end
-    if cancel
-        break;
-    end
 end
 
 centers = PointStructurer.mergePoints(centers);
-multiWaitbar(taskName, 'Close');
 end
 
 function [area, areaError] = calculateRegionArea(ims)
